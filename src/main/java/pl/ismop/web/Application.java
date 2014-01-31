@@ -10,7 +10,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @EnableAutoConfiguration
@@ -18,11 +17,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class Application extends WebMvcConfigurerAdapter {
     public static void main(String[] args) {
         new SpringApplicationBuilder(Application.class).run(args);
-    }
-    
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-    	registry.addViewController("/login").setViewName("login");
     }
     
     @Bean
@@ -34,8 +28,7 @@ public class Application extends WebMvcConfigurerAdapter {
     protected static class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     	@Autowired
         public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-            auth.inMemoryAuthentication()
-                    .withUser("user").password("password").roles("USER");
+            auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
         }
     	
         @Override
@@ -46,6 +39,7 @@ public class Application extends WebMvcConfigurerAdapter {
                 .and()
             .formLogin()
             	.loginPage("/login")
+            	.failureUrl("/login?error")
             	.permitAll();
         }
     }

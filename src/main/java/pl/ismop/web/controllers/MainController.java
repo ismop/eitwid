@@ -21,4 +21,9 @@ public class MainController {
 	public String foo() {
 		throw new RuntimeException("Expected exception in controller");
 	}
+	
+	@RequestMapping("/login")
+	public String login() {
+		return "login";
+	}
 }

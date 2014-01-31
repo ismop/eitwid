@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html 	xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  		layout:decorator="layout">
 <head>
-	<title th:text="${title}">Title</title>
-	<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet"/>
-	<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet"/>
-	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+	<title>Main page</title>
 </head>
 <body>
-	<div class="container">
+	<div layout:fragment="content">
 		<div class="navbar">
 			<div class="navbar-inner">
 				<a class="brand" href="http://www.thymeleaf.org"> Thymeleaf - Plain </a>
