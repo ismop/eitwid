@@ -54,6 +54,19 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<!-- Bean validation -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jasper-el</artifactId>
+			<version>7.0.50</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<properties>
