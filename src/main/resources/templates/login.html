@@ -25,7 +25,8 @@
 				</form>
 			</div>
 		</div>
-		<div th:if="${param.logout}" class="alert alert-success">You have been logged out</div>
-		<div th:if="${param.error}" class="alert alert-danger">There was an error, please try again</div>
+		<div th:if="${param.logout}" class="alert alert-success">You have been logged out.</div>
+		<div th:if="${param.error}" class="alert alert-danger">There was an error. Please try again.</div>
+		<div th:if="${param.registrationSuccessful}" class="alert alert-info">You have been successfully registered and can now use your new credentials to log in.</div>
 	</div>
 </div>

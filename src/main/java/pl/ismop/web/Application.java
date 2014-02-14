@@ -10,6 +10,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @EnableAutoConfiguration
@@ -26,18 +29,27 @@ public class Application extends WebMvcConfigurerAdapter {
     public ApplicationSecurity applicationSecurity() {
             return new ApplicationSecurity();
     }
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+    	return new BCryptPasswordEncoder();
+    }
 
     protected static class ApplicationSecurity extends WebSecurityConfigurerAdapter {
+    	@Autowired private UserDetailsService userDetailsService;
+		@Autowired private PasswordEncoder passwordEncoder;
+    	
     	@Autowired
         public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-            auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
+            auth.userDetailsService(userDetailsService)
+            		.passwordEncoder(passwordEncoder);
         }
     	
         @Override
         protected void configure(HttpSecurity http) throws Exception {
         	http
             .authorizeRequests()
-            	.antMatchers("/register").permitAll()
+            	.antMatchers("/register", "/login**").permitAll()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
