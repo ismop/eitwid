@@ -8,7 +8,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @ControllerAdvice
 public class ErrorController {
-	@ExceptionHandler(Exception.class)
+	@ExceptionHandler(Throwable.class)
 	public ModelAndView handleErrorsGlobally() {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject("timestamp", new Date());

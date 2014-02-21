@@ -1,24 +1,49 @@
-<!DOCTYPE html>
-<html 	xmlns:th="http://www.thymeleaf.org"
-		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  		layout:decorator="layout">
-<head>
-	<title>Main page</title>
-</head>
-<body>
-	<div layout:fragment="content">
-		<div class="navbar">
-			<div class="navbar-inner">
-				<a class="brand" href="http://www.thymeleaf.org"> Thymeleaf - Plain </a>
-				<ul class="nav">
-					<li><a th:href="@{/}" href="home.html"> Home </a></li>
-					<li><a th:href="@{/logout}" href="logout"> Logout </a></li>
-				</ul>
-			</div>
+<div id="wrapper" layout:fragment="content" layout:decorator="layout"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	<nav style="margin-bottom: 0" role="navigation" class="navbar navbar-default navbar-static-top">
+		<div class="navbar-header">
+			<button data-target=".sidebar-collapse" data-toggle="collapse" class="navbar-toggle" type="button">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a href="index.html" class="navbar-brand">IMOP Dashboard</a>
 		</div>
-		<h1 th:text="#{message}">Title</h1>
-		<div th:text="${message}">Fake content</div>
-		<div id="created" th:text="${#dates.format(date)}">July 11, 2012 2:17:16 PM CDT</div>
+		<ul class="nav navbar-top-links navbar-right">
+			<li class="dropdown">
+				<a href="#" data-toggle="dropdown" class="dropdown-toggle">
+					<i class="fa fa-user fa-fw"></i>
+					<i class="fa fa-caret-down"></i>
+				</a>
+				<ul class="dropdown-menu dropdown-user">
+					<li>
+						<a th:href="@{/logout}">
+							<i class="fa fa-sign-out fa-fw"></i> Logout
+						</a>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</nav>
+	<nav role="navigation" class="navbar-default navbar-static-side">
+		<div class="sidebar-collapse">
+			<ul id="side-menu" class="nav">
+				<li>
+					<a th:href="@{/}">
+						<i class="fa fa-dashboard fa-fw"></i> Levee
+					</a>
+				</li>
+				<li>
+					<a th:href="@{/status}">
+						<i class="fa fa-bar-chart-o fa-fw"></i> Status
+					</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+	<div id="page-wrapper">
+		<section layout:fragment="home-content"></section>
 	</div>
-</body>
-</html>
+</div>

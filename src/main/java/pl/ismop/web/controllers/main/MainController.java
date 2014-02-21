@@ -26,7 +26,7 @@ public class MainController {
 	
 	@RequestMapping("/")
 	public String home() {
-		return "home";
+		return "levee";
 	}
 	
 	@RequestMapping("/login")
@@ -68,5 +68,10 @@ public class MainController {
 				return "redirect:/login?registrationSuccessful";
 			}
 		}
+	}
+	
+	@RequestMapping("/status")
+	public String status() {
+		return "status";
 	}
 }
