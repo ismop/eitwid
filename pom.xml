@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.0.0.BUILD-SNAPSHOT</version>
+		<version>1.0.0.RC4</version>
 	</parent>
 
 	<dependencies>
@@ -76,7 +76,8 @@
 
 	<properties>
 		<start-class>pl.ismop.web.Application</start-class>
-		<java.version>1.7</java.version>
+		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<build>

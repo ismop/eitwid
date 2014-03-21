@@ -1,9 +1,17 @@
-<div id="wrapper" layout:fragment="home-content" layout:decorator="home"
+<html xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:th="http://www.thymeleaf.org"
-		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorator="home">
+<head>
+	<title>#{summary.page.title}</title>
+</head>
+<body>
+<div id="wrapper" layout:fragment="home-content">
 	<div class="row">
 		<div class="col-lg-12">
-			<h1 class="page-header">Levee</h1>
+			<h1 class="page-header" th:text="#{summary.label}"></h1>
 		</div>
 	</div>
 </div>
+</body>
+</html>

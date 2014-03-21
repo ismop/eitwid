@@ -1,7 +1,10 @@
-<div id="wrapper" layout:fragment="content" layout:decorator="layout"
+<html xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:th="http://www.thymeleaf.org"
-		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-	<nav style="margin-bottom: 0" role="navigation" class="navbar navbar-default navbar-static-top">
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorator="layout">
+<body>
+<div id="wrapper" layout:fragment="content">
+	<nav style="margin-bottom: 0" class="navbar navbar-default navbar-static-top">
 		<div class="navbar-header">
 			<button data-target=".sidebar-collapse" data-toggle="collapse" class="navbar-toggle" type="button">
 				<span class="sr-only">Toggle navigation</span>
@@ -9,7 +12,7 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a href="index.html" class="navbar-brand">IMOP Dashboard</a>
+			<a th:href="@{/}" class="navbar-brand" th:text="#{navbar.header}"></a>
 		</div>
 		<ul class="nav navbar-top-links navbar-right">
 			<li class="dropdown">
@@ -20,24 +23,19 @@
 				<ul class="dropdown-menu dropdown-user">
 					<li>
 						<a th:href="@{/logout}">
-							<i class="fa fa-sign-out fa-fw"></i> Logout
+							<i class="fa fa-sign-out fa-fw"></i> <span th:text="#{logout.label}"></span>
 						</a>
 					</li>
 				</ul>
 			</li>
 		</ul>
 	</nav>
-	<nav role="navigation" class="navbar-default navbar-static-side">
+	<nav class="navbar-default navbar-static-side">
 		<div class="sidebar-collapse">
 			<ul id="side-menu" class="nav">
 				<li>
 					<a th:href="@{/}">
-						<i class="fa fa-dashboard fa-fw"></i> Levee
-					</a>
-				</li>
-				<li>
-					<a th:href="@{/status}">
-						<i class="fa fa-bar-chart-o fa-fw"></i> Status
+						<i class="fa fa-dashboard fa-fw"></i> <span th:text="#{summary.label}"></span>
 					</a>
 				</li>
 			</ul>
@@ -47,3 +45,5 @@
 		<section layout:fragment="home-content"></section>
 	</div>
 </div>
+</body>
+</html>

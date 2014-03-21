@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-	<title th:text="${title}">Title</title>
+	<title layout:title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">ISMOP</title>
 	
 	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet"/>

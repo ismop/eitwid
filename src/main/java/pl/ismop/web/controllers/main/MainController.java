@@ -1,10 +1,12 @@
 package pl.ismop.web.controllers.main;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ public class MainController {
 	
 	@Autowired private UserRepository userReposiotory;
 	@Autowired private PasswordEncoder passwordEncoder;
+	@Autowired private MessageSource messages;
 	
 	@RequestMapping("/")
 	public String home() {
@@ -43,12 +46,12 @@ public class MainController {
 	
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	@Transactional
-	public String processRegistration(@Valid Registration registration, BindingResult errors) {
+	public String processRegistration(@Valid Registration registration, BindingResult errors, HttpServletRequest request) {
 		if (errors.hasErrors()) {
 			return "register";
 		} else {
 			if (!registration.getPassword().equals(registration.getConfirmPassword())) {
-				errors.addError(new FieldError("registration", "password", "Passwords do not match"));
+				errors.addError(new FieldError("registration", "password", messages.getMessage("passwords.mismatch", null, request.getLocale())));
 				
 				return "register";
 			} else {
@@ -68,10 +71,5 @@ public class MainController {
 				return "redirect:/login?registrationSuccessful";
 			}
 		}
-	}
-	
-	@RequestMapping("/status")
-	public String status() {
-		return "status";
 	}
 }
