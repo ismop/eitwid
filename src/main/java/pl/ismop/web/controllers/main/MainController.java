@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -28,8 +29,17 @@ public class MainController {
 	@Autowired private MessageSource messages;
 	
 	@RequestMapping("/")
-	public String home() {
-		return "levee";
+	public String home(Model model, HttpServletRequest request) {
+		String mode = (String) request.getSession().getAttribute("mode");
+		
+		if(mode == null) {
+			request.getSession().setAttribute("mode", "monitoring");
+			mode = "monitoring";
+		}
+		
+		model.addAttribute("mode", mode);
+		
+		return "summary";
 	}
 	
 	@RequestMapping("/login")
@@ -71,5 +81,13 @@ public class MainController {
 				return "redirect:/login?registrationSuccessful";
 			}
 		}
+	}
+	
+	@RequestMapping("/changeMode/{mode}")
+	public String changeMode(@PathVariable("mode") String mode, Model model, HttpServletRequest request) {
+		log.info("Changing mode to {}", mode);
+		request.getSession().setAttribute("mode", mode);
+		
+		return home(model, request);
 	}
 }
