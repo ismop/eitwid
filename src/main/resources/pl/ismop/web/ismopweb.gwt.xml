@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.6.0//EN"
+	"http://google-web-toolkit.googlecode.com/svn/tags/2.6.0/distro-source/core/src/gwt-module.dtd">
+<module rename-to="ismopweb">
+	<inherits name='com.google.gwt.user.User'/>
+	<inherits name='com.mvp4g.Mvp4gModule'/>
+	<inherits name='org.fusesource.restygwt.RestyGWT'/>
+	
+	<entry-point class='pl.ismop.web.client.IsmopWebEntryPoint'/>
+	<source path="client"/>
+	
+	<!-- locale setup -->
+	<extend-property name="locale" values="en,pl"/>
+	<set-property-fallback name="locale" value="pl"/>
+</module>

@@ -12,6 +12,7 @@ public class Registration {
 	@Length(min = 5)
 	private String password;
 	private String confirmPassword;
+	private String secretToken;
 	
 	public String getEmail() {
 		return email;
@@ -30,5 +31,11 @@ public class Registration {
 	}
 	public void setConfirmPassword(String confirmPassword) {
 		this.confirmPassword = confirmPassword;
+	}
+	public String getSecretToken() {
+		return secretToken;
+	}
+	public void setSecretToken(String secretToken) {
+		this.secretToken = secretToken;
 	}
 }

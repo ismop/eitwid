@@ -6,6 +6,7 @@
 	<groupId>pl.ismop</groupId>
 	<artifactId>web</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
+	<packaging>war</packaging>
 
 	<name>ismop-web</name>
 	<description>ISMOP Visualization Platform</description>
@@ -13,13 +14,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.0.0.RELEASE</version>
+		<version>1.0.2.RELEASE</version>
 	</parent>
-	
+
 	<properties>
 		<start-class>pl.ismop.web.Application</start-class>
-		<java.version>1.8</java.version>
+		<java.version>1.7</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<gwt.version>2.6.0</gwt.version>
 	</properties>
 
 	<dependencies>
@@ -78,6 +80,40 @@
 			<artifactId>hsqldb</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- GWT dependencies -->
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>${gwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.benediktmeurer.gwt-slf4j</groupId>
+			<artifactId>gwt-slf4j</artifactId>
+			<version>0.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.mvp4g</groupId>
+			<artifactId>mvp4g</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.fusesource.restygwt</groupId>
+			<artifactId>restygwt</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -85,6 +121,35 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>${gwt.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>exploded</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<!-- web.xml is a dummy making the GWT plugin happy -->
+					<warSourceExcludes>WEB-INF/web.xml</warSourceExcludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

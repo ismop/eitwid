@@ -26,6 +26,10 @@
 						<div class="form-group">
 							<input class="form-control" th:placeholder="#{confirm.password.placeholder}" type="password" th:field="*{confirmPassword}"></input>
 						</div>
+						<div class="form-group" th:class="${#fields.hasErrors('secretToken')}? 'form-group has-error':'form-group'">
+							<input class="form-control" th:placeholder="#{secret.token.placeholder}" type="password" th:field="*{secretToken}"></input>
+							<p th:if="${#fields.hasErrors('secretToken')}" th:errors="*{secretToken}"></p>
+						</div>
 						<button type="submit" class="btn btn-lg btn-success btn-block" th:text="#{register.label}"></button>
 					</fieldset>
 				</form>

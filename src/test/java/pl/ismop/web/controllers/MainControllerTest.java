@@ -34,6 +34,6 @@ public class MainControllerTest {
     public void shouldRedirectToLogin() throws Exception {
         this.mockMvc.perform(get("/"))
             .andExpect(status().isOk())
-            .andExpect(content().string(containsString("Main page")));
+            .andExpect(content().string(containsString("ISMOP - Summary")));
     }
 }

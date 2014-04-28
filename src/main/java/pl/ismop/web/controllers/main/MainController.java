@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import pl.ismop.web.domain.User;
 import pl.ismop.web.repository.UserRepository;
@@ -28,6 +30,10 @@ public class MainController {
 	@Autowired private PasswordEncoder passwordEncoder;
 	@Autowired private MessageSource messages;
 	
+	@Value("${secret.token}") private String secretToken;
+	@Value("${dap.token}") private String dapToken;
+	@Value("${dap.endpoint}") private String dapEndpoint;
+	
 	@RequestMapping("/")
 	public String home(Model model, HttpServletRequest request) {
 		String mode = (String) request.getSession().getAttribute("mode");
@@ -38,6 +44,7 @@ public class MainController {
 		}
 		
 		model.addAttribute("mode", mode);
+		model.addAttribute("dapEndpoint", dapEndpoint);
 		
 		return "summary";
 	}
@@ -62,6 +69,10 @@ public class MainController {
 		} else {
 			if (!registration.getPassword().equals(registration.getConfirmPassword())) {
 				errors.addError(new FieldError("registration", "password", messages.getMessage("passwords.mismatch", null, request.getLocale())));
+				
+				return "register";
+			} else if(!secretToken.equals(registration.getSecretToken())) {
+				errors.addError(new FieldError("registration", "secretToken", messages.getMessage("secret.token.mismatch", null, request.getLocale())));
 				
 				return "register";
 			} else {
@@ -89,5 +100,11 @@ public class MainController {
 		request.getSession().setAttribute("mode", mode);
 		
 		return home(model, request);
+	}
+	
+	@RequestMapping("/retrieveDapToken")
+	@ResponseBody
+	public String retrieveDapToken() {
+		return dapToken;
 	}
 }

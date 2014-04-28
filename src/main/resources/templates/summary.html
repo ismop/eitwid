@@ -12,56 +12,12 @@
 				<h1 class="page-header" th:text="#{summary.label}"></h1>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-lg-6">
-				<div class="panel" th:classappend="${mode == 'monitoring' ? 'panel-success' : (mode == 'alarm' ? 'panel-warning' : 'panel-danger')}">
-					<div class="panel-heading">
-						<div class="row">
-							<div class="col-xs-6">
-								<i class="fa fa-comments fa-5x"></i>
-							</div>
-							<div class="col-xs-6 text-right">
-								<p class="announcement-heading"><strong th:text="#{system.mode}"></strong></p>
-								<p class="announcement-text" th:text="#{'mode.' + ${mode}}"></p>
-							</div>
-						</div>
-					</div>
-					<div class="panel-footer announcement-bottom">
-						<div class="dropdown">
-							<a data-toggle="dropdown" href="#" th:text="#{change.system.mode}"></a>
-							<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-								<li>
-									<a th:href="@{/changeMode/monitoring}">Monitorowanie</a>
-								</li>
-								<li>
-									<a th:href="@{/changeMode/alarm}">Stan alarmowy</a>
-								</li>
-								<li>
-									<a th:href="@{/changeMode/threat}">Stan zagrożenia</a>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-6">
-				<div class="panel panel-danger">
-					<div class="panel-heading">
-						<div class="row">
-							<div class="col-xs-6">
-								<i class="fa fa-tasks fa-5x"></i>
-							</div>
-							<div class="col-xs-6 text-right">
-								<p class="announcement-heading"><strong th:text="#{threat.level}"></strong></p>
-								<p class="announcement-text">18%</p>
-							</div>
-						</div>
-					</div>
-					<div class="panel-footer announcement-bottom" th:text="#{last.threat.update(10)}">
-					</div>
-				</div>
-			</div>
-		</div>
+		<div id="leveesContainer"></div>
+	</div>
+	<div layout:fragment="javascripts">
+		<script type="text/javascript" th:utext="'var baseUrl = \'' + ${#httpServletRequest.requestURL} + @{retrieveDapToken} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var dapUrl = \'' + ${dapEndpoint} + '\';'"></script>
+		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
 	</div>
 </body>
 </html>
