@@ -4,12 +4,13 @@ import java.util.Date;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.LeveeModeChangedCallback;
+import pl.ismop.web.client.dap.DapController.LeveeCallback;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.widgets.summary.ILeveeSummaryView.ILeveeSummaryPresenter;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
@@ -19,6 +20,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, MainEventBus> implements ILeveeSummaryPresenter {
 	private Levee levee;
 	private DapController dapController;
+	private Timer threatTimer;
 	
 	@Inject
 	public LeveeSummaryPresenter(DapController dapController) {
@@ -32,7 +34,7 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 	
 	@Override
 	public void changeMode(String mode) {
-		dapController.changeLeveeMode(levee.getId(), mode, new LeveeModeChangedCallback() {
+		dapController.changeLeveeMode(levee.getId(), mode, new LeveeCallback() {
 			@Override
 			public void onError(int code, String message) {
 				Window.alert(message);
@@ -41,14 +43,17 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 			@Override
 			public void processLevee(Levee levee) {
 				LeveeSummaryPresenter.this.levee = levee;
-				view.setMode(levee.getEmergencyLevel());
-				view.addModePanelStyle(getPanelStyle(levee.getEmergencyLevel()));
+				updateMode();
 			}});
 	}
 
 	private void showLeveeDetails() {
 		view.setHeader(levee.getName());
-		view.setMode(levee.getEmergencyLevel());
+		updateMode();
+		updateThreat();
+	}
+
+	private void updateThreat() {
 		view.setThreat(levee.getThreatLevel());
 		
 		String timestamp = levee.getThreatLevelLastUpdate();
@@ -56,8 +61,34 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 		Date date = format.parse(timestamp);
 		String formattedDate = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
 		view.setThreatLastUpdated(formattedDate);
-		view.addModePanelStyle(getPanelStyle(levee.getEmergencyLevel()));
 		view.addThreatPanelStyle(getPanelStyle(levee.getThreatLevel()));
+		
+		if(threatTimer == null) {
+			threatTimer = new Timer() {
+				@Override
+				public void run() {
+					threatTimer = null;
+					dapController.getLevee(levee.getId(), new LeveeCallback() {
+						@Override
+						public void onError(int code, String message) {
+							Window.alert("Could not update threat level: " + message);
+						}
+
+						@Override
+						public void processLevee(Levee levee) {
+							LeveeSummaryPresenter.this.levee = levee;
+							updateMode();
+							updateThreat();
+						}});
+				}
+			};
+			threatTimer.schedule(10000);
+		}
+	}
+
+	private void updateMode() {
+		view.setMode(levee.getEmergencyLevel());
+		view.addModePanelStyle(getPanelStyle(levee.getEmergencyLevel()));
 	}
 
 	private String getPanelStyle(String level) {

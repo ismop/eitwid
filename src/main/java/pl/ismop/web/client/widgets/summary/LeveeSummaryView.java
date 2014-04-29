@@ -77,6 +77,8 @@ public class LeveeSummaryView extends Composite implements ILeveeSummaryView, Re
 
 	@Override
 	public void addThreatPanelStyle(String style) {
+		threatPanel.removeAttribute("class");
+		threatPanel.addClassName("panel");
 		threatPanel.addClassName(style);
 	}
 

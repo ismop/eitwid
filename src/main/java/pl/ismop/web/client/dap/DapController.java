@@ -5,6 +5,7 @@ import java.util.List;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
+import pl.ismop.web.client.dap.DapController.LeveeCallback;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.LeveeResponse;
 import pl.ismop.web.client.dap.levee.LeveeService;
@@ -27,7 +28,7 @@ public class DapController {
 		void processLevees(List<Levee> levees);
 	}
 	
-	public interface LeveeModeChangedCallback extends ErrorCallback {
+	public interface LeveeCallback extends ErrorCallback {
 		void processLevee(Levee levee);
 	}
 
@@ -50,13 +51,26 @@ public class DapController {
 		});
 	}
 
-	public void changeLeveeMode(String leveeId, String mode, final LeveeModeChangedCallback callback) {
+	public void changeLeveeMode(String leveeId, String mode, final LeveeCallback callback) {
 		ModeChange modeChange = new ModeChange();
 		modeChange.setMode(mode);
 		
 		ModeChangeRequest request = new ModeChangeRequest();
 		request.setModeChange(modeChange);
 		leveeService.changeMode(leveeId, request, new MethodCallback<LeveeResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, LeveeResponse response) {
+				callback.processLevee(response.getLevee());
+			}});
+	}
+
+	public void getLevee(String leveeId, final LeveeCallback callback) {
+		leveeService.getLevee(leveeId, new MethodCallback<LeveeResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(0, exception.getMessage());

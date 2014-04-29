@@ -20,4 +20,8 @@ public interface LeveeService extends RestService {
 	@PUT
 	@Path("levees/{id}")
 	void changeMode(@PathParam("id") String leveeId, ModeChangeRequest request, MethodCallback<LeveeResponse> methodCallback);
+
+	@GET
+	@Path("levees/{id}")
+	void getLevee(@PathParam("id") String leveeId, MethodCallback<LeveeResponse> methodCallback);
 }

@@ -7,9 +7,13 @@ import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.Mvp4gModule;
 
 public class IsmopWebEntryPoint implements EntryPoint {
+	public static IsmopProperties properties;
+
 	@Override
 	public void onModuleLoad() {
-		Defaults.setServiceRoot("https://atmo.moc.ismop.edu.pl/api/v1");
+		properties = GWT.create(IsmopProperties.class);
+		Defaults.setServiceRoot(properties.dapEndpoint());
+		
 		Mvp4gModule module = (Mvp4gModule)GWT.create(Mvp4gModule.class);
 		module.createAndStartModule();
 	}
