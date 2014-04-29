@@ -23,6 +23,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gwt.version>2.6.0</gwt.version>
 	</properties>
+	
+	<scm>
+		<connection>scm:git:ssh://git@dev.cyfronet.pl:ismop/eitwid.git</connection>
+		<developerConnection>scm:git:ssh://git@dev.cyfronet.pl:ismop/eitwid.git</developerConnection>
+		<url>https://gitlab.dev.cyfronet.pl/ismop/eitwid</url>
+		<tag>HEAD</tag>
+	</scm>
 
 	<dependencies>
 		<dependency>

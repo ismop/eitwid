@@ -12,4 +12,5 @@
 	<!-- locale setup -->
 	<extend-property name="locale" values="en,pl"/>
 	<set-property-fallback name="locale" value="pl"/>
+	<set-property name="locale" value="en,pl"/>
 </module>
