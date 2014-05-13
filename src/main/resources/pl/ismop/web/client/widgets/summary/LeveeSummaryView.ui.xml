@@ -10,10 +10,10 @@
 			<div ui:field="modePanel" class="panel">
 				<div class="panel-heading">
 					<div class="row">
-						<div class="col-xs-6">
+						<div class="col-xs-4">
 							<i class="fa fa-desktop fa-5x"></i>
 						</div>
-						<div class="col-xs-6 text-right">
+						<div class="col-xs-8 text-right">
 							<p class="announcement-heading"><strong><ui:text from="{messages.modeLabel}"/></strong></p>
 							<p ui:field="mode" class="announcement-text"></p>
 						</div>
@@ -41,10 +41,10 @@
 			<div ui:field="threatPanel" class="panel">
 				<div class="panel-heading">
 					<div class="row">
-						<div class="col-xs-6">
+						<div class="col-xs-4">
 							<i class="fa fa-tasks fa-5x"></i>
 						</div>
-						<div class="col-xs-6 text-right">
+						<div class="col-xs-8 text-right">
 							<p class="announcement-heading"><strong><ui:text from="{messages.threatLabel}"/></strong></p>
 							<p ui:field="threat" class="announcement-text"></p>
 						</div>

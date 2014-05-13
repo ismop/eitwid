@@ -10,4 +10,9 @@ public interface LeveeSummaryViewMessages extends Messages {
 	String stantbyModeLabel();
 	String alertModeLabel();
 	String threatModeLabel();
+	String threatLevelUnknown();
+	String threatLevelSevere();
+	String threatLevelElevated();
+	String threatLevelNone();
+	String modeUnknown(String mode);
 }

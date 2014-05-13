@@ -10,7 +10,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
@@ -62,7 +61,7 @@ public class LeveeSummaryView extends Composite implements ILeveeSummaryView, Re
 
 	@Override
 	public void setMode(String mode) {
-		this.mode.setInnerText(mode);
+		this.mode.setInnerText(translateSystemMode(mode));
 	}
 
 	@Override
@@ -72,7 +71,7 @@ public class LeveeSummaryView extends Composite implements ILeveeSummaryView, Re
 
 	@Override
 	public void setThreat(String threat) {
-		this.threat.setInnerText(threat);
+		this.threat.setInnerText(translateThreatLevel(threat));
 	}
 
 	@Override
@@ -91,5 +90,31 @@ public class LeveeSummaryView extends Composite implements ILeveeSummaryView, Re
 	@Override
 	public ILeveeSummaryPresenter getPresenter() {
 		return presenter;
+	}
+	
+	private String translateSystemMode(String mode) {
+		switch(mode) {
+			case "none":
+				return messages.stantbyModeLabel();
+			case "heightened":
+				return messages.alertModeLabel();
+			case "severe":
+				return messages.threatModeLabel();
+			default:
+				return messages.modeUnknown(mode);
+		}
+	}
+	
+	private String translateThreatLevel(String threatLevel) {
+		switch(threatLevel) {
+			case "none":
+				return messages.threatLevelNone();
+			case "heightened":
+				return messages.threatLevelElevated();
+			case "severe":
+				return messages.threatLevelSevere();
+			default:
+				return messages.threatLevelUnknown();
+		}
 	}
 }
