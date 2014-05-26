@@ -33,17 +33,10 @@ public class MainController {
 	@Value("${secret.token}") private String secretToken;
 	@Value("${dap.token}") private String dapToken;
 	@Value("${dap.endpoint}") private String dapEndpoint;
+	@Value("${maps.google.key}") private String googleMapApiKey;
 	
 	@RequestMapping("/")
 	public String home(Model model, HttpServletRequest request) {
-		String mode = (String) request.getSession().getAttribute("mode");
-		
-		if(mode == null) {
-			request.getSession().setAttribute("mode", "monitoring");
-			mode = "monitoring";
-		}
-		
-		model.addAttribute("mode", mode);
 		model.addAttribute("dapEndpoint", dapEndpoint);
 		
 		return "summary";
@@ -94,17 +87,16 @@ public class MainController {
 		}
 	}
 	
-	@RequestMapping("/changeMode/{mode}")
-	public String changeMode(@PathVariable("mode") String mode, Model model, HttpServletRequest request) {
-		log.info("Changing mode to {}", mode);
-		request.getSession().setAttribute("mode", mode);
-		
-		return home(model, request);
-	}
-	
 	@RequestMapping("/retrieveDapToken")
 	@ResponseBody
 	public String retrieveDapToken() {
 		return dapToken;
+	}
+	
+	@RequestMapping("/levees")
+	public String levees(Model model) {
+		model.addAttribute("googleMapApiKey", googleMapApiKey);
+		
+		return "levees";
 	}
 }

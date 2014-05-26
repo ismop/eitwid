@@ -1,5 +1,6 @@
 package pl.ismop.web.client;
 
+import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
 import com.mvp4g.client.annotation.Event;
@@ -13,4 +14,7 @@ public interface MainEventBus extends EventBus {
 	@Start
 	@Event(handlers = RootPresenter.class)
 	void start();
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void drawGoogleMap(String elementId);
 }

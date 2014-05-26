@@ -1,17 +1,22 @@
 package pl.ismop.web.client.dap.levee;
 
+import javax.xml.bind.annotation.XmlElement;
+
 import org.fusesource.restygwt.client.Json;
 
 public class Levee {
 	private String id;
 	private String name;
 	@Json(name = "emergency_level")
+	@XmlElement(name = "emergency_level")
 	private String emergencyLevel;
 	@Json(name = "threat_level")
+	@XmlElement(name = "threat_level")
 	private String threatLevel;
 	@Json(name = "threat_level_updated_at")
+	@XmlElement(name = "threat_level_updated_at")
 	private String threatLevelLastUpdate;
-//	private String shape;
+	private Shape shape;
 	
 	public String getId() {
 		return id;
@@ -43,10 +48,17 @@ public class Levee {
 	public void setThreatLevelLastUpdate(String threatLevelLastUpdate) {
 		this.threatLevelLastUpdate = threatLevelLastUpdate;
 	}
-//	public String getShape() {
-//		return shape;
-//	}
-//	public void setShape(String shape) {
-//		this.shape = shape;
-//	}
+	public Shape getShape() {
+		return shape;
+	}
+	public void setShape(Shape shape) {
+		this.shape = shape;
+	}
+	@Override
+	public String toString() {
+		return "Levee [id=" + id + ", name=" + name + ", emergencyLevel="
+				+ emergencyLevel + ", threatLevel=" + threatLevel
+				+ ", threatLevelLastUpdate=" + threatLevelLastUpdate
+				+ ", shape=" + shape + "]";
+	}
 }

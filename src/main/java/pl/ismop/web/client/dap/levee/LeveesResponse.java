@@ -12,4 +12,9 @@ public class LeveesResponse {
 	public void setLevees(List<Levee> levees) {
 		this.levees = levees;
 	}
+
+	@Override
+	public String toString() {
+		return "LeveesResponse [levees=" + levees + "]";
+	}
 }

@@ -16,6 +16,9 @@ import com.mvp4g.client.event.BaseEventHandler;
 
 @EventHandler
 public class RootPresenter extends BaseEventHandler<MainEventBus> {
+	private static final String SUMMARY_CONTAINER_ID = "leveesContainer";
+	private static final String MAP_CONTAINER_ID = "mapContainer";
+	
 	private DapController dapController;
 
 	@Inject
@@ -24,24 +27,24 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	public void onStart() {
-		dapController.getLevees(new LeveesCallback() {
-			@Override
-			public void onError(int code, String message) {
-				Window.alert("Error: " + message);
-			}
-			
-			@Override
-			public void processLevees(List<Levee> levees) {
-				RootPanel leveesPanel = RootPanel.get("leveesContainer");
+		if(RootPanel.get(SUMMARY_CONTAINER_ID) != null) {
+			dapController.getLevees(new LeveesCallback() {
+				@Override
+				public void onError(int code, String message) {
+					Window.alert("Error: " + message);
+				}
 				
-				if(leveesPanel != null) {
+				@Override
+				public void processLevees(List<Levee> levees) {
 					for(Levee levee : levees) {
 						LeveeSummaryPresenter presenter = eventBus.addHandler(LeveeSummaryPresenter.class);
 						presenter.setLevee(levee);
-						leveesPanel.add(presenter.getView());
+						RootPanel.get(SUMMARY_CONTAINER_ID).add(presenter.getView());
 					}
 				}
-			}
-		});
+			});
+		} else if(RootPanel.get(MAP_CONTAINER_ID) != null) {
+			eventBus.drawGoogleMap(MAP_CONTAINER_ID);
+		}
 	}
 }
