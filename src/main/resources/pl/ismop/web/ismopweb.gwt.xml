@@ -5,9 +5,14 @@
 	<inherits name='com.google.gwt.user.User'/>
 	<inherits name='com.mvp4g.Mvp4gModule'/>
 	<inherits name='org.fusesource.restygwt.RestyGWT'/>
+	<inherits name="de.benediktmeurer.gwt.slf4j.jul.JUL"/>
 	
 	<entry-point class='pl.ismop.web.client.IsmopWebEntryPoint'/>
 	<source path="client"/>
+	
+	<!-- Logging configuration -->
+	<set-property name="gwt.logging.popupHandler" value="DISABLED"/>
+	<set-property name="gwt.logging.logLevel" value="FINE"/>
 	
 	<!-- locale setup -->
 	<extend-property name="locale" values="en,pl"/>

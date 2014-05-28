@@ -16,6 +16,7 @@ import com.mvp4g.client.event.BaseEventHandler;
 
 @EventHandler
 public class RootPresenter extends BaseEventHandler<MainEventBus> {
+	private static final String DETAILS_CONTAINER_ID = "detailsContainer";
 	private static final String SUMMARY_CONTAINER_ID = "leveesContainer";
 	private static final String MAP_CONTAINER_ID = "mapContainer";
 	
@@ -44,7 +45,7 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 				}
 			});
 		} else if(RootPanel.get(MAP_CONTAINER_ID) != null) {
-			eventBus.drawGoogleMap(MAP_CONTAINER_ID);
+			eventBus.drawGoogleMap(MAP_CONTAINER_ID, DETAILS_CONTAINER_ID);
 		}
 	}
 }

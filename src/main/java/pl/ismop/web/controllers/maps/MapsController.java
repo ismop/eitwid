@@ -1,13 +1,16 @@
 package pl.ismop.web.controllers.maps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 
 import pl.ismop.web.services.DapService;
 
@@ -23,8 +26,10 @@ public class MapsController {
 				.stream()
 				.map(levee -> {
 					GeoJsonFeature geoJsonFeature = new GeoJsonFeature();
-					PolygonGeometry geometry = new PolygonGeometry();
+					geoJsonFeature.setProperties(new HashMap<>());
+					geoJsonFeature.getProperties().put("name", levee.getName());
 					
+					PolygonGeometry geometry = new PolygonGeometry();
 					ArrayList<List<List<Double>>> polygons = new ArrayList<List<List<Double>>>();
 					polygons.add(reverseCoordinates(levee.getShape().getCoordinates()));
 					

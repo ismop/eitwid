@@ -12,7 +12,8 @@
 				<h1 class="page-header" th:text="#{levees.label}"></h1>
 			</div>
 		</div>
-		<div id="mapContainer" style="height: 600px;"></div>
+		<div id="mapContainer" style="height: 400px;"></div>
+		<div id="detailsContainer" style="margin-top: 20px;"></div>
 	</div>
 	<div layout:fragment="javascripts">
 		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false'}"></script>

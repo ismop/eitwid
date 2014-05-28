@@ -46,6 +46,10 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 				updateMode();
 			}});
 	}
+	
+	public Levee getLevee() {
+		return levee;
+	}
 
 	private void showLeveeDetails() {
 		view.setHeader(levee.getName());

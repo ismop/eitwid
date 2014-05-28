@@ -1,11 +1,13 @@
 package pl.ismop.web.controllers.maps;
 
+import java.util.Map;
+
 
 public class GeoJsonFeature {
 	private String type;
 	private String id;
 	private Geometry geometry;
-	private String properties;
+	private Map<String, String> properties;
 	
 	public GeoJsonFeature() {
 		setType("Feature");
@@ -16,12 +18,6 @@ public class GeoJsonFeature {
 	}
 	public void setId(String id) {
 		this.id = id;
-	}
-	public String getProperties() {
-		return properties;
-	}
-	public void setProperties(String properties) {
-		this.properties = properties;
 	}
 	public Geometry getGeometry() {
 		return geometry;
@@ -36,5 +32,11 @@ public class GeoJsonFeature {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	public void setProperties(Map<String, String> properties) {
+		this.properties = properties;
 	}
 }
