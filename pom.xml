@@ -6,7 +6,7 @@
 	<groupId>pl.ismop</groupId>
 	<artifactId>web</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>ismop-web</name>
 	<description>ISMOP Visualization Platform</description>
@@ -20,6 +20,7 @@
 	<properties>
 		<start-class>pl.ismop.web.Application</start-class>
 		<java.version>1.8</java.version>
+		<tomcat.version>8.0.8</tomcat.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gwt.version>2.6.1</gwt.version>
 	</properties>
@@ -83,33 +84,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-jasper</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
 		<!-- Bean validation -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<version>4.1.0.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jasper-el</artifactId>
-			<version>7.0.50</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jdbc</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- Database implementation -->
@@ -188,22 +168,8 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>exploded</goal>
-						</goals>
-					</execution>
-				</executions>
 				<configuration>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
-					<!-- web.xml is a dummy making the GWT plugin happy -->
-					<warSourceExcludes>WEB-INF/web.xml</warSourceExcludes>
+					<webappDirectory>${project.build.outputDirectory}/static</webappDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
