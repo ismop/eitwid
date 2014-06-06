@@ -26,6 +26,7 @@ public class MapsController {
 				.stream()
 				.map(levee -> {
 					GeoJsonFeature geoJsonFeature = new GeoJsonFeature();
+					geoJsonFeature.setId(levee.getId());
 					geoJsonFeature.setProperties(new HashMap<>());
 					geoJsonFeature.getProperties().put("name", levee.getName());
 					

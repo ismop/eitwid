@@ -35,12 +35,17 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private String detailsElementId;
 	private LeveeSummaryPresenter selectedLevee;
 	private Object map;
+	private Map<String, String> leveeColors;
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
 		this.dapController = dapController;
 		this.messages = messages;
 		levees = new HashMap<>();
+		leveeColors = new HashMap<>();
+		leveeColors.put("none", "#D9EDF7");
+		leveeColors.put("heightened", "#FAEBCC");
+		leveeColors.put("severe", "#EBCCD1");
 	}
 	
 	public void onDrawGoogleMap(String mapElementId, String detailsElementId) {
@@ -84,6 +89,13 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		});
 	}
 	
+	public void onLeveeUpdated(Levee newLevee) {
+		if(levees.get(newLevee.getName()) != null) {
+			levees.put(newLevee.getName(), newLevee);
+			updateLeveeOnMap(newLevee.getId());
+		}
+	}
+
 	private void setNoLeveeSelectedLabel() {
 		Element element = DOM.getElementById(detailsElementId);
 		
@@ -147,6 +159,29 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		}
 	}
 	
+	private String getLeveeColor(String id) {
+		for(Levee levee : levees.values()) {
+			if(levee.getId().equals(id)) {
+				return leveeColors.get(levee.getEmergencyLevel());
+			}
+		}
+		
+		return "white";
+	}
+	
+	private native void updateLeveeOnMap(String id) /*-{
+		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+		var feature = geoJsonMap.data.getFeatureById(id);
+		var thisObject = this;
+		
+		if(feature) {
+			var color = thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getLeveeColor(Ljava/lang/String;)(id);
+			geoJsonMap.data.overrideStyle(feature, {
+				fillColor: color
+			});
+		}
+	}-*/;
+	
 	private native void selectLevee(String leveeName, boolean show) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
 		var foundFeature = null;
@@ -182,18 +217,24 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		var thisObject = this;
 		map.fitBounds(bounds);
 		map.data.loadGeoJson($wnd.geojsonUrl);
-		map.data.setStyle({
-			fillColor: 'blue',
-			strokeWeight: 1
+		map.data.setStyle(function(feature) {
+			return {
+				fillOpacity: 0.9,
+				strokeOpacity: 1.0,
+				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getLeveeColor(Ljava/lang/String;)(feature.getId()),
+				strokeWeight: 1
+			};
 		});
 		map.data.addListener('mouseover', function(event) {
 			map.data.overrideStyle(event.feature, {
-				fillColor: 'yellow'
+				fillOpacity: 0.6,
+				strokeOpacity: 0.5
 			});
 		});
 		map.data.addListener('mouseout', function(event) {
 			map.data.overrideStyle(event.feature, {
-				fillColor: 'blue'
+				fillOpacity: 0.9,
+				strokeOpacity: 1.0
 			});
 		});
 		map.data.addListener('click', function(event) {

@@ -1,5 +1,6 @@
 package pl.ismop.web.client;
 
+import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
@@ -17,4 +18,7 @@ public interface MainEventBus extends EventBus {
 
 	@Event(handlers = GoogleMapsPresenter.class)
 	void drawGoogleMap(String elementId, String detailsElementId);
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void leveeUpdated(Levee levee);
 }

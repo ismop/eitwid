@@ -44,6 +44,7 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 			public void processLevee(Levee levee) {
 				LeveeSummaryPresenter.this.levee = levee;
 				updateMode();
+				eventBus.leveeUpdated(levee);
 			}});
 	}
 	
@@ -83,6 +84,7 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 							LeveeSummaryPresenter.this.levee = levee;
 							updateMode();
 							updateThreat();
+							eventBus.leveeUpdated(levee);
 						}});
 				}
 			};
