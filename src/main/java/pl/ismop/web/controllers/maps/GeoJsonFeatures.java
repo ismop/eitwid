@@ -5,6 +5,7 @@ import java.util.List;
 public class GeoJsonFeatures {
 	private String type;
 	private List<GeoJsonFeature> features;
+	private Crs crs;
 
 	public GeoJsonFeatures() {
 		setType("FeatureCollection");
@@ -26,5 +27,13 @@ public class GeoJsonFeatures {
 	}
 	public void setFeatures(List<GeoJsonFeature> features) {
 		this.features = features;
+	}
+
+	public Crs getCrs() {
+		return crs;
+	}
+
+	public void setCrs(Crs crs) {
+		this.crs = crs;
 	}
 }

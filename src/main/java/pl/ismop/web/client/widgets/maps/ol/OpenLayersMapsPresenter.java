@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.maps.google;
+package pl.ismop.web.client.widgets.maps.ol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +25,8 @@ import com.mvp4g.client.annotation.EventHandler;
 import com.mvp4g.client.event.BaseEventHandler;
 
 @EventHandler
-public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
-	private static final Logger log = LoggerFactory.getLogger(GoogleMapsPresenter.class);
+public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
+	private static final Logger log = LoggerFactory.getLogger(OpenLayersMapsPresenter.class);
 	
 	private DapController dapController;
 	private String elementId;
@@ -38,7 +38,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private Map<String, String> leveeColors;
 
 	@Inject
-	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
+	public OpenLayersMapsPresenter(DapController dapController, MapMessages messages) {
 		this.dapController = dapController;
 		this.messages = messages;
 		levees = new HashMap<>();
@@ -48,7 +48,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		leveeColors.put("severe", "#EBCCD1");
 	}
 	
-	public void onDrawGoogleMap(String mapElementId, String detailsElementId) {
+	public void onDrawOpenLayersMap(String mapElementId, String detailsElementId) {
 		this.elementId = mapElementId;
 		this.detailsElementId = detailsElementId;
 		showProgressIndicator(true);
@@ -66,7 +66,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				List<List<Double>> allPoints = new ArrayList<List<Double>>();
 
 				for(Levee levee : levees) {
-					GoogleMapsPresenter.this.levees.put(levee.getName(), levee);
+					OpenLayersMapsPresenter.this.levees.put(levee.getName(), levee);
 					allPoints.addAll(levee.getShape().getCoordinates());
 				}
 				
@@ -77,7 +77,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 						extend(bounds, point.get(0), point.get(1));
 					}
 					
-					Element element = DOM.getElementById(GoogleMapsPresenter.this.elementId);
+					Element element = DOM.getElementById(OpenLayersMapsPresenter.this.elementId);
 					
 					if(element != null) {
 						map = showMap(bounds);
@@ -170,12 +170,12 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	private native void updateLeveeOnMap(String id) /*-{
-		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::map;
 		var feature = geoJsonMap.data.getFeatureById(id);
 		var thisObject = this;
 		
 		if(feature) {
-			var color = thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getLeveeColor(Ljava/lang/String;)(id);
+			var color = thisObject.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::getLeveeColor(Ljava/lang/String;)(id);
 			geoJsonMap.data.overrideStyle(feature, {
 				fillColor: color
 			});
@@ -183,64 +183,87 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}-*/;
 	
 	private native void selectLevee(String leveeName, boolean show) /*-{
-		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::map;
 		var foundFeature = null;
-		geoJsonMap.data.forEach(function(feature) {
-			if(leveeName == feature.getProperty('name')) {
+		geoJsonMap.getLayersByName('GeoJSON')[0].features.forEach(function(feature) {
+			if(leveeName == feature.attributes('name')) {
 				foundFeature = feature;
 			}
 		});
 		
-		
 		if(show) {
-			geoJsonMap.data.overrideStyle(foundFeature, {
-				strokeWeight: 3
-			});
+			geoJsonMap.getLayersByName('GeoJSON')[0].drawFeature(foundFeature, new $wnd.OpenLayers.Style({
+				strokeWidth: 3
+			}));
 		} else {
-			geoJsonMap.data.overrideStyle(foundFeature, {
-				strokeWeight: 1
-			});
+			geoJsonMap.getLayersByName('GeoJSON')[0].drawFeature(foundFeature, new $wnd.OpenLayers.Style({
+				strokeWidth: 1
+			}));
 		}
 	}-*/;
 
 	private native Object createLatLngBounds() /*-{
-		return new $wnd.google.maps.LatLngBounds();
+		return new $wnd.OpenLayers.Bounds();
 	}-*/;
 	
 	private native void extend(Object bounds, Double lat, Double lng) /*-{
-		bounds.extend(new $wnd.google.maps.LatLng(lat, lng));
+		bounds.extend(new $wnd.OpenLayers.LonLat(lng, lat));
 	}-*/;
 	
 	private native Object showMap(Object bounds) /*-{
-		var map = new $wnd.google.maps.Map(
-			$doc.getElementById(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::elementId));
+		var map = new $wnd.OpenLayers.Map(this.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::elementId, {
+			maxScale: 1000
+		});
+		var wms = new $wnd.OpenLayers.Layer.WMS('OpenLayers WMS', 'http://vmap0.tiles.osgeo.org/wms/vmap0', {
+			layers:'basic'
+		});
+		map.addLayer(wms);
+		map.zoomToExtent(bounds);
+		
 		var thisObject = this;
-		map.fitBounds(bounds);
-		map.data.loadGeoJson($wnd.geojsonUrl);
-		map.data.setStyle(function(feature) {
-			return {
-				strokeColor: 'black',
-				fillOpacity: 0.9,
-				strokeOpacity: 1.0,
-				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getLeveeColor(Ljava/lang/String;)(feature.getId()),
-				strokeWeight: 1
-			};
+		var defaultStyle = new $wnd.OpenLayers.Style({
+			fillOpacity: 0.9,
+			strokeOpacity: 1.0,
+			strokeWidth: 1,
+			strokeColor: 'black',
+			fillColor: "${getColor}"
+		}, {
+			context: {
+				getColor: function(feature) {
+					var color = thisObject.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::getLeveeColor(Ljava/lang/String;)(feature.fid);
+					return color;
+				}
+			}
 		});
-		map.data.addListener('mouseover', function(event) {
-			map.data.overrideStyle(event.feature, {
-				fillOpacity: 0.6,
-				strokeOpacity: 0.5
-			});
+		var selectStyle = new $wnd.OpenLayers.Style({
+			fillOpacity: 0.6,
+			strokeOpacity: 0.5
 		});
-		map.data.addListener('mouseout', function(event) {
-			map.data.overrideStyle(event.feature, {
-				fillOpacity: 0.9,
-				strokeOpacity: 1.0
-			});
+		var styleMap = new $wnd.OpenLayers.StyleMap({
+			'default': defaultStyle,
+			'select': selectStyle
+        });
+		var listeners = {
+			featureclick: function(feature) {
+				thisObject.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::showLeveeDetails(Ljava/lang/String;)(feature.fid);
+			},
+		};
+		var geojsonLayer = new $wnd.OpenLayers.Layer.Vector("GeoJSON", {
+            strategies: [new $wnd.OpenLayers.Strategy.Fixed()],
+            protocol: new $wnd.OpenLayers.Protocol.HTTP({
+                url: $wnd.geojsonUrl,
+                format: new $wnd.OpenLayers.Format.GeoJSON()
+            }),
+            styleMap: styleMap,
+            eventListeners: listeners
+        });
+        map.addLayer(geojsonLayer);
+        
+		var hoverControl = new $wnd.OpenLayers.Control.SelectFeature(geojsonLayer, {
+			hover: true
 		});
-		map.data.addListener('click', function(event) {
-			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::showLeveeDetails(Ljava/lang/String;)(event.feature.getProperty('name'));
-		});
+		map.addControl(hoverControl);
+		hoverControl.activate();
 		
 		return map;
 	}-*/;

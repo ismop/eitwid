@@ -22,6 +22,7 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 	private static final String DETAILS_CONTAINER_ID = "detailsContainer";
 	private static final String SUMMARY_CONTAINER_ID = "leveesContainer";
 	private static final String MAP_CONTAINER_ID = "mapContainer";
+	private static final String MAP_OL_CONTAINER_ID = "mapOlContainer";
 	
 	private DapController dapController;
 
@@ -53,6 +54,8 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 			});
 		} else if(RootPanel.get(MAP_CONTAINER_ID) != null) {
 			eventBus.drawGoogleMap(MAP_CONTAINER_ID, DETAILS_CONTAINER_ID);
+		} else if(RootPanel.get(MAP_OL_CONTAINER_ID) != null) {
+			eventBus.drawOpenLayersMap(MAP_OL_CONTAINER_ID, DETAILS_CONTAINER_ID);
 		}
 	}
 

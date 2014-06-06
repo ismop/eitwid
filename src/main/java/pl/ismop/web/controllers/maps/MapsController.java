@@ -43,7 +43,9 @@ public class MapsController {
 				})
 				.collect(Collectors.toList());
 		
-		return new GeoJsonFeatures(shapes);
+		GeoJsonFeatures result = new GeoJsonFeatures(shapes);
+		
+		return result;
 	}
 
 	private List<List<Double>> reverseCoordinates(List<List<Double>> coordinates) {
@@ -53,7 +55,8 @@ public class MapsController {
 			Double third = point.remove(0);
 			point.add(second);
 			point.add(first);
-			point.add(third);
+			//third coordinate breaks OpenLayers
+//			point.add(third);
 		}
 		
 		return coordinates;

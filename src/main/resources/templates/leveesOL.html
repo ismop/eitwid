@@ -1,0 +1,26 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="home">
+<head>
+<title>#{levees.page.title}</title>
+</head>
+<body>
+	<div id="wrapper" layout:fragment="home-content">
+		<div class="row">
+			<div class="col-lg-12">
+				<h1 class="page-header" th:text="#{levees.ol.label}"></h1>
+			</div>
+		</div>
+		<div id="mapOlContainer" style="height: 400px;"></div>
+		<div id="detailsContainer" style="margin-top: 20px;"></div>
+	</div>
+	<div layout:fragment="javascripts">
+		<script type="text/javascript" th:src="@{'http://openlayers.org/api/OpenLayers.js'}"></script>
+		<script type="text/javascript" th:utext="'var baseUrl = \'' + ${#httpServletRequest.requestURL} + @{retrieveDapToken} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var dapUrl = \'' + ${dapEndpoint} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var geojsonUrl = \'' + @{/maps/geojson} + '\';'"></script>
+		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
+	</div>
+</body>
+</html>

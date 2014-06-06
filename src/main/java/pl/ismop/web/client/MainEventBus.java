@@ -2,6 +2,7 @@ package pl.ismop.web.client;
 
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
+import pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
 import com.mvp4g.client.annotation.Event;
@@ -21,4 +22,7 @@ public interface MainEventBus extends EventBus {
 
 	@Event(handlers = GoogleMapsPresenter.class)
 	void leveeUpdated(Levee levee);
+
+	@Event(handlers = OpenLayersMapsPresenter.class)
+	void drawOpenLayersMap(String mapContainerId, String detailsContainerId);
 }
