@@ -169,6 +169,16 @@ public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
 		return "white";
 	}
 	
+	private String getLeveeWidth(String id) {
+		if(selectedLevee != null) {
+			if(selectedLevee.getLevee().getId().equals(id)) {
+				return "3";
+			}
+		}
+		
+		return "1";
+	}
+	
 	private native void updateLeveeOnMap(String id) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::map;
 		var feature = geoJsonMap.data.getFeatureById(id);
@@ -236,34 +246,52 @@ public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
 			}
 		});
 		var selectStyle = new $wnd.OpenLayers.Style({
+			strokeWidth: 3
+		});
+		var hoverStyle = new $wnd.OpenLayers.Style({
 			fillOpacity: 0.6,
-			strokeOpacity: 0.5
+			strokeOpacity: 0.5,
+			strokeWidth: '${getWidth}'
+		}, {
+			context: {
+				getWidth: function(feature) {
+					var width = thisObject.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::getLeveeWidth(Ljava/lang/String;)(feature.fid);
+					return width;
+				}
+			}
 		});
 		var styleMap = new $wnd.OpenLayers.StyleMap({
 			'default': defaultStyle,
-			'select': selectStyle
+			'select': selectStyle,
+			'temporary': hoverStyle
         });
-		var listeners = {
-			featureclick: function(feature) {
-				thisObject.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::showLeveeDetails(Ljava/lang/String;)(feature.fid);
-			},
-		};
+		
 		var geojsonLayer = new $wnd.OpenLayers.Layer.Vector("GeoJSON", {
             strategies: [new $wnd.OpenLayers.Strategy.Fixed()],
             protocol: new $wnd.OpenLayers.Protocol.HTTP({
                 url: $wnd.geojsonUrl,
                 format: new $wnd.OpenLayers.Format.GeoJSON()
             }),
-            styleMap: styleMap,
-            eventListeners: listeners
+            styleMap: styleMap
         });
         map.addLayer(geojsonLayer);
         
-		var hoverControl = new $wnd.OpenLayers.Control.SelectFeature(geojsonLayer, {
-			hover: true
+        var hoverControl = new $wnd.OpenLayers.Control.SelectFeature(geojsonLayer, {
+			hover: true,
+			highlightOnly: true,
+			renderIntent: 'temporary'
 		});
 		map.addControl(hoverControl);
 		hoverControl.activate();
+        
+        var clickControl = new $wnd.OpenLayers.Control.SelectFeature(geojsonLayer, {
+        	clickout: true,
+			onSelect: function(feature) {
+				thisObject.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::showLeveeDetails(Ljava/lang/String;)(feature.attributes['name']);
+			}
+		});
+		map.addControl(clickControl);
+		clickControl.activate();
 		
 		return map;
 	}-*/;
