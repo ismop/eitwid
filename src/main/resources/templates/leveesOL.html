@@ -17,9 +17,10 @@
 	</div>
 	<div layout:fragment="javascripts">
 		<script type="text/javascript" th:src="@{'/js/OpenLayers-2.13.1-min.js'}"></script>
-		<script type="text/javascript" th:utext="'var baseUrl = \'' + ${#httpServletRequest.requestURL} + @{retrieveDapToken} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var baseUrl = \'' + ${#httpServletRequest.requestURL} + @{/retrieveDapToken} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var dapUrl = \'' + ${dapEndpoint} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var geojsonUrl = \'' + @{/maps/geojson} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var mapServerBaseUrl = \'' + ${#httpServletRequest.requestURL} + '/..' + @{~/wmsproxy/wms/vmap0} + '\';'"></script>
 		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
 	</div>
 </body>

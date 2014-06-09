@@ -196,7 +196,7 @@ public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
 		var map = new $wnd.OpenLayers.Map(this.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::elementId, {
 			maxScale: 1000
 		});
-		var wms = new $wnd.OpenLayers.Layer.WMS('OpenLayers WMS', 'http://vmap0.tiles.osgeo.org/wms/vmap0', {
+		var wms = new $wnd.OpenLayers.Layer.WMS('OpenLayers WMS', $wnd.mapServerBaseUrl, {
 			layers:'basic'
 		});
 		map.addLayer(wms);
