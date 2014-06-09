@@ -135,10 +135,7 @@ public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
 		Levee levee = levees.get(leveeName);
 		
 		if(levee != null && RootPanel.get(detailsElementId) != null) {
-			String previousLeveeName = null;
-			
 			if(selectedLevee != null) {
-				previousLeveeName = selectedLevee.getLevee().getName();
 				eventBus.removeHandler(selectedLevee);
 				selectedLevee = null;
 			}
@@ -150,12 +147,6 @@ public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
 			selectedLevee = presenter;
 			presenter.setLevee(levee);
 			RootPanel.get(detailsElementId).add(presenter.getView());
-			
-			if(previousLeveeName != null) {
-				selectLevee(previousLeveeName, false);
-			}
-			
-			selectLevee(levee.getName(), true);
 		}
 	}
 	
@@ -181,34 +172,15 @@ public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
 	
 	private native void updateLeveeOnMap(String id) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::map;
-		var feature = geoJsonMap.data.getFeatureById(id);
+		var feature = geoJsonMap.getLayersByName('GeoJSON')[0].getFeatureByFid(id);
 		var thisObject = this;
 		
 		if(feature) {
 			var color = thisObject.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::getLeveeColor(Ljava/lang/String;)(id);
-			geoJsonMap.data.overrideStyle(feature, {
-				fillColor: color
+			geoJsonMap.getLayersByName('GeoJSON')[0].drawFeature(feature, {
+				fillColor: color,
+				strokeWidth: thisObject.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::getLeveeWidth(Ljava/lang/String;)(id)
 			});
-		}
-	}-*/;
-	
-	private native void selectLevee(String leveeName, boolean show) /*-{
-		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.ol.OpenLayersMapsPresenter::map;
-		var foundFeature = null;
-		geoJsonMap.getLayersByName('GeoJSON')[0].features.forEach(function(feature) {
-			if(leveeName == feature.attributes('name')) {
-				foundFeature = feature;
-			}
-		});
-		
-		if(show) {
-			geoJsonMap.getLayersByName('GeoJSON')[0].drawFeature(foundFeature, new $wnd.OpenLayers.Style({
-				strokeWidth: 3
-			}));
-		} else {
-			geoJsonMap.getLayersByName('GeoJSON')[0].drawFeature(foundFeature, new $wnd.OpenLayers.Style({
-				strokeWidth: 1
-			}));
 		}
 	}-*/;
 
@@ -266,7 +238,7 @@ public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
 			'temporary': hoverStyle
         });
 		
-		var geojsonLayer = new $wnd.OpenLayers.Layer.Vector("GeoJSON", {
+		var geojsonLayer = new $wnd.OpenLayers.Layer.Vector('GeoJSON', {
             strategies: [new $wnd.OpenLayers.Strategy.Fixed()],
             protocol: new $wnd.OpenLayers.Protocol.HTTP({
                 url: $wnd.geojsonUrl,
