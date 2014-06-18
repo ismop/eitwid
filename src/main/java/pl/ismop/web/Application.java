@@ -16,6 +16,9 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
 
+import org.apache.catalina.Context;
+import org.apache.catalina.session.FileStore;
+import org.apache.catalina.session.PersistentManager;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
@@ -25,7 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.boot.context.embedded.tomcat.TomcatContextCustomizer;
+import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -47,6 +53,7 @@ public class Application extends WebMvcConfigurerAdapter {
 	@Value("${dap.token}") private String dapToken;
 	@Value("${dap.endpoint}") private String dapEndpoint;
 	@Value("${public.maps.server.url}") private String mapsServerUrl;
+	@Value("${session.store.path}") private String sessionStorePath;
 	
 	class AuthFilter implements ClientRequestFilter {
 		@Override
@@ -138,5 +145,23 @@ public class Application extends WebMvcConfigurerAdapter {
 		registration.addUrlMappings("/wmsproxy/*");
 		
 		return registration;
+	}
+	
+	@Bean
+	public EmbeddedServletContainerFactory servletContainer() {
+		TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
+		factory.addContextCustomizers(new TomcatContextCustomizer() {
+			@Override
+			public void customize(Context context) {
+				FileStore store = new FileStore();
+				store.setDirectory(sessionStorePath);
+				
+				PersistentManager manager = new PersistentManager();
+				manager.setStore(store);
+				context.setManager(manager);
+			}
+		});
+		
+	    return factory;
 	}
 }
