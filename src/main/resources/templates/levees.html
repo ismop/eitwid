@@ -17,9 +17,8 @@
 	</div>
 	<div layout:fragment="javascripts">
 		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false'}"></script>
-		<script type="text/javascript" th:utext="'var baseUrl = \'' + ${#httpServletRequest.requestURL} + @{retrieveDapToken} + '\';'"></script>
-		<script type="text/javascript" th:utext="'var dapUrl = \'' + ${dapEndpoint} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var geojsonUrl = \'' + @{/maps/geojson} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var properties = {dapEndpoint: \'' + ${dapEndpoint} + '\', dapToken: \'' + ${dapToken} + '\'};'"></script>
 		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
 	</div>
 </body>

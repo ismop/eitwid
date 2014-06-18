@@ -15,18 +15,18 @@ import javax.ws.rs.Produces;
  */
 public interface LeveeServiceSync {
 	@GET
-	@Path("")
+	@Path("levees")
 	@Produces("application/json")
 	LeveesResponse getLevees();
 
 	@PUT
-	@Path("{id}")
+	@Path("levees/{id}")
 	@Produces("application/json")
 	@Consumes("application/json")
 	LeveeResponse changeMode(@PathParam("id") String leveeId, ModeChangeRequest request);
 
 	@GET
-	@Path("{id}")
+	@Path("levees/{id}")
 	@Produces("application/json")
 	LeveeResponse getLevee(@PathParam("id") String leveeId);
 }

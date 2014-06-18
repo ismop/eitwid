@@ -14,7 +14,7 @@ public class DapDispatcher implements Dispatcher {
 	
 	@Override
 	public Request send(Method method, RequestBuilder builder) throws RequestException {
-		builder.setHeader("PRIVATE-TOKEN", IsmopWebEntryPoint.properties.dapToken());
+		builder.setHeader("PRIVATE-TOKEN", IsmopWebEntryPoint.properties.get("dapToken"));
 		
 		return builder.send();
 	}

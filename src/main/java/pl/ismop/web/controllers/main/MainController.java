@@ -16,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import pl.ismop.web.domain.User;
 import pl.ismop.web.repository.UserRepository;
@@ -37,6 +36,7 @@ public class MainController {
 	@RequestMapping("/")
 	public String home(Model model, HttpServletRequest request) {
 		model.addAttribute("dapEndpoint", dapEndpoint);
+		model.addAttribute("dapToken", dapToken);
 		
 		return "summary";
 	}
@@ -86,21 +86,20 @@ public class MainController {
 		}
 	}
 	
-	@RequestMapping("/retrieveDapToken")
-	@ResponseBody
-	public String retrieveDapToken() {
-		return dapToken;
-	}
-	
 	@RequestMapping("/levees")
 	public String levees(Model model) {
 		model.addAttribute("googleMapApiKey", googleMapApiKey);
+		model.addAttribute("dapToken", dapToken);
+		model.addAttribute("dapEndpoint", dapEndpoint);
 		
 		return "levees";
 	}
 	
 	@RequestMapping("/leveesOL")
-	public String leveesOl() {
+	public String leveesOl(Model model) {
+		model.addAttribute("dapToken", dapToken);
+		model.addAttribute("dapEndpoint", dapEndpoint);
+		
 		return "leveesOL";
 	}
 }
