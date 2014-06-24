@@ -100,7 +100,7 @@ public class OpenLayersMapsPresenter extends BaseEventHandler<MainEventBus> {
 		Element element = DOM.getElementById(detailsElementId);
 		
 		if(element != null) {
-			element.setInnerText(messages.noLeveeSelected());
+			element.setInnerText(messages.noFeatureSelected());
 		}
 	}
 

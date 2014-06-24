@@ -13,10 +13,11 @@ public class ErrorController {
 	private static final Logger log = LoggerFactory.getLogger(ErrorController.class);
 	
 	@ExceptionHandler(Throwable.class)
-	public ModelAndView handleErrorsGlobally() {
-		log.error("Global error occurred");
+	public ModelAndView handleErrorsGlobally(Throwable t) {
+		log.error("Global error occurred", t);
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject("timestamp", new Date());
+		modelAndView.addObject("messages", t.getMessage());
 		modelAndView.setViewName("error");
 		
 		return modelAndView;

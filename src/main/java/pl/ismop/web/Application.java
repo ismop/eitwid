@@ -43,6 +43,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import pl.ismop.web.client.dap.levee.LeveeServiceSync;
+import pl.ismop.web.client.dap.sensor.SensorServiceSync;
 import pl.ismop.web.services.DapService;
 
 @EnableAutoConfiguration
@@ -102,12 +103,27 @@ public class Application extends WebMvcConfigurerAdapter {
 	}
 	
 	@Bean
-	public DapService dapService(LeveeServiceSync leveeService) {
-		return new DapService(leveeService);
+	public DapService dapService(LeveeServiceSync leveeService, SensorServiceSync sensorService) {
+		return new DapService(leveeService, sensorService);
 	}
 	
 	@Bean
-	public LeveeServiceSync leveeServiceSync() throws KeyManagementException, NoSuchAlgorithmException {
+	public LeveeServiceSync leveeServiceSync(WebTarget target) throws KeyManagementException, NoSuchAlgorithmException {
+		LeveeServiceSync leveeService = WebResourceFactory.newResource(LeveeServiceSync.class, target);
+		
+		return leveeService;
+	}
+	
+	@Bean
+	public SensorServiceSync sensorServiceSync(WebTarget target) throws KeyManagementException, NoSuchAlgorithmException {
+		SensorServiceSync serviceService = WebResourceFactory.newResource(SensorServiceSync.class, target);
+		
+		return serviceService;
+	}
+
+	@Bean
+	public WebTarget webTarget() throws NoSuchAlgorithmException,
+			KeyManagementException {
 		SSLContext sslContext = SSLContext.getInstance("SSL");
 		sslContext.init(null, new TrustManager[] { new X509TrustManager() {
 			public X509Certificate[] getAcceptedIssuers() {
@@ -130,9 +146,8 @@ public class Application extends WebMvcConfigurerAdapter {
 		client.register(JacksonFeature.class);
 		
 		WebTarget target = client.target(dapEndpoint);
-		LeveeServiceSync leveeService = WebResourceFactory.newResource(LeveeServiceSync.class, target);
 		
-		return leveeService;
+		return target;
 	}
 	
 	@Bean

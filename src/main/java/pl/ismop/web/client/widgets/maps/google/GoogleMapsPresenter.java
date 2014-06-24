@@ -11,12 +11,19 @@ import org.slf4j.LoggerFactory;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
+import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
+import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.TextAlign;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -52,7 +59,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		this.elementId = mapElementId;
 		this.detailsElementId = detailsElementId;
 		showProgressIndicator(true);
-		setNoLeveeSelectedLabel();
+		setNoFeatureSelectedLabel();
 		dapController.getLevees(new LeveesCallback() {
 			@Override
 			public void onError(int code, String message) {
@@ -66,7 +73,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				List<List<Double>> allPoints = new ArrayList<List<Double>>();
 
 				for(Levee levee : levees) {
-					GoogleMapsPresenter.this.levees.put(levee.getName(), levee);
+					GoogleMapsPresenter.this.levees.put(levee.getId(), levee);
 					allPoints.addAll(levee.getShape().getCoordinates());
 				}
 				
@@ -90,17 +97,25 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	public void onLeveeUpdated(Levee newLevee) {
-		if(levees.get(newLevee.getName()) != null) {
-			levees.put(newLevee.getName(), newLevee);
+		if(levees.get(newLevee.getId()) != null) {
+			levees.put(newLevee.getId(), newLevee);
 			updateLeveeOnMap(newLevee.getId());
 		}
 	}
 
-	private void setNoLeveeSelectedLabel() {
+	private void setNoFeatureSelectedLabel() {
 		Element element = DOM.getElementById(detailsElementId);
 		
 		if(element != null) {
-			element.setInnerText(messages.noLeveeSelected());
+			element.setInnerText(messages.noFeatureSelected());
+		}
+	}
+	
+	private void setNoMeasurementsLabel() {
+		Element element = DOM.getElementById(detailsElementId);
+		
+		if(element != null) {
+			element.setInnerText(messages.noMeasurements());
 		}
 	}
 
@@ -129,40 +144,118 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		}
 	}
 	
-	private  void showLeveeDetails(String leveeName) {
-		log.info("Showing levee details for name {}", leveeName);
+	private  void onFeatureClicked(String featureId) {
+		log.info("Feature with id {} clicked", featureId);
 		
-		Levee levee = levees.get(leveeName);
-		
-		if(levee != null && RootPanel.get(detailsElementId) != null) {
-			String previousLeveeName = null;
-			
-			if(selectedLevee != null) {
-				previousLeveeName = selectedLevee.getLevee().getName();
-				eventBus.removeHandler(selectedLevee);
-				selectedLevee = null;
+		if(RootPanel.get(detailsElementId) != null) {
+			if(getLeveeId(featureId) != null) {
+				Levee levee = levees.get(getLeveeId(featureId));
+				showLeveeDetails(levee);
+			} else if(getSensorId(featureId) != null) {
+				showSensorDetails(getSensorId(featureId));
 			}
-			
-			Element element = DOM.getElementById(detailsElementId);
-			element.setInnerHTML("");
-			
-			LeveeSummaryPresenter presenter = eventBus.addHandler(LeveeSummaryPresenter.class);
-			selectedLevee = presenter;
-			presenter.setLevee(levee);
-			RootPanel.get(detailsElementId).add(presenter.getView());
-			
-			if(previousLeveeName != null) {
-				selectLevee(previousLeveeName, false);
-			}
-			
-			selectLevee(levee.getName(), true);
 		}
 	}
+
+	private void showSensorDetails(String sensorId) {
+		dapController.getSensor(sensorId, new SensorCallback() {
+			@Override
+			public void onError(int code, String message) {
+				setNoFeatureSelectedLabel();
+				Window.alert("Error: " + message);
+			}
+
+			@Override
+			public void processSensor(final Sensor sensor) {
+				if(selectedLevee != null) {
+					String previousLeveeId = selectedLevee.getLevee().getId();
+					eventBus.removeHandler(selectedLevee);
+					selectedLevee = null;
+					selectLevee(previousLeveeId, false);
+				}
+				
+				dapController.getMeasurements(sensor.getId(), new MeasurementsCallback() {
+					@Override
+					public void onError(int code, String message) {
+						setNoFeatureSelectedLabel();
+						Window.alert("Error: " + message);
+					}
+
+					@Override
+					public void processMeasurements(List<Measurement> measurements) {
+						if(measurements.size() == 0) {
+							setNoMeasurementsLabel();
+						} else {
+							JavaScriptObject values = JavaScriptObject.createArray();
+							double min = Double.MAX_VALUE;
+							double max = Double.MIN_VALUE;
+							
+							for(Measurement measurement : measurements) {
+								push(measurement.getValue(), measurement.getTimestamp(), values);
+								
+								if(measurement.getValue() < min) {
+									min = measurement.getValue();
+								}
+								
+								if(measurement.getValue() > max) {
+									max = measurement.getValue();
+								}
+							}
+							
+							double diff = max- min;
+							min = min - 0.1 * diff;
+							max = max + 0.1 * diff;
+							
+							Element element = DOM.getElementById(detailsElementId);
+							element.setInnerHTML("");
+							
+							Element header = DOM.createElement("h4");
+							header.setInnerText(sensor.getUnitLabel() + " (" + sensor.getCustomId() + ")");
+							RootPanel.get(detailsElementId).getElement().appendChild(header);
+							
+							Element chart = DOM.createDiv();
+							chart.setId("measurements");
+							chart.getStyle().setHeight(250, Unit.PX);
+							RootPanel.get(detailsElementId).getElement().appendChild(chart);
+							showChart(values, sensor.getUnit(), min, max, sensor.getUnitLabel());
+						}
+					}});
+			}
+		});
+	}
+
+	private void showLeveeDetails(Levee levee) {
+		String previousLeveeId = null;
+		
+		if(selectedLevee != null) {
+			previousLeveeId = selectedLevee.getLevee().getId();
+			eventBus.removeHandler(selectedLevee);
+			selectedLevee = null;
+		}
+		
+		Element element = DOM.getElementById(detailsElementId);
+		element.setInnerHTML("");
+		
+		LeveeSummaryPresenter presenter = eventBus.addHandler(LeveeSummaryPresenter.class);
+		selectedLevee = presenter;
+		presenter.setLevee(levee);
+		RootPanel.get(detailsElementId).add(presenter.getView());
+		
+		if(previousLeveeId != null) {
+			selectLevee(previousLeveeId, false);
+		}
+		
+		selectLevee(levee.getId(), true);
+	}
 	
-	private String getLeveeColor(String id) {
-		for(Levee levee : levees.values()) {
-			if(levee.getId().equals(id)) {
-				return leveeColors.get(levee.getEmergencyLevel());
+	private String getFeatureColor(String featureId) {
+		String leveeId = getLeveeId(featureId);
+		
+		if(leveeId != null) {
+			for(Levee levee : levees.values()) {
+				if(levee.getId().equals(leveeId)) {
+					return leveeColors.get(levee.getEmergencyLevel());
+				}
 			}
 		}
 		
@@ -175,22 +268,21 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		var thisObject = this;
 		
 		if(feature) {
-			var color = thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getLeveeColor(Ljava/lang/String;)(id);
+			var color = thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(id);
 			geoJsonMap.data.overrideStyle(feature, {
 				fillColor: color
 			});
 		}
 	}-*/;
 	
-	private native void selectLevee(String leveeName, boolean show) /*-{
+	private native void selectLevee(String leveeId, boolean show) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
 		var foundFeature = null;
 		geoJsonMap.data.forEach(function(feature) {
-			if(leveeName == feature.getProperty('name')) {
+			if(feature.getProperty('type') == 'levee' && leveeId == feature.getProperty('id')) {
 				foundFeature = feature;
 			}
 		});
-		
 		
 		if(show) {
 			geoJsonMap.data.overrideStyle(foundFeature, {
@@ -217,12 +309,13 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		var thisObject = this;
 		map.fitBounds(bounds);
 		map.data.loadGeoJson($wnd.geojsonUrl);
+		map.data.loadGeoJson($wnd.sensorUrl);
 		map.data.setStyle(function(feature) {
 			return {
 				strokeColor: 'black',
 				fillOpacity: 0.9,
 				strokeOpacity: 1.0,
-				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getLeveeColor(Ljava/lang/String;)(feature.getId()),
+				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(feature.getId()),
 				strokeWeight: 1
 			};
 		});
@@ -239,9 +332,65 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			});
 		});
 		map.data.addListener('click', function(event) {
-			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::showLeveeDetails(Ljava/lang/String;)(event.feature.getProperty('name'));
+			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::onFeatureClicked(Ljava/lang/String;)(event.feature.getId());
 		});
 		
 		return map;
+	}-*/;
+	
+	private native String getFeatureType(String featureId) /*-{
+		if(featureId) {
+			var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+			var feature = geoJsonMap.data.getFeatureById(id);
+			
+			if(feature) {
+				return feature.getProperty('type');
+			}
+		} else {
+			return null;
+		}
+	}-*/;
+	
+	private native String getLeveeId(String featureId) /*-{
+		if(featureId) {
+			var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+			var feature = geoJsonMap.data.getFeatureById(featureId);
+			
+			if(feature && feature.getProperty('type') == 'levee') {
+				return feature.getProperty('id');
+			}
+		}
+	
+		return null;
+	}-*/;
+	
+	private native String getSensorId(String featureId) /*-{
+		if(featureId) {
+			var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+			var feature = geoJsonMap.data.getFeatureById(featureId);
+			
+			if(feature && feature.getProperty('type') == 'sensor') {
+				return feature.getProperty('id');
+			}
+		}
+	
+		return null;
+	}-*/;
+	
+	private native void push(double value, String timestamp, JavaScriptObject values) /*-{
+		values.push({value: value, timestamp: timestamp});
+	}-*/;
+	
+	private native void showChart(JavaScriptObject values, String unit, double min, double max, String label) /*-{
+		new $wnd.Morris.Area({
+			element: 'measurements',
+			data: values,
+			xkey: 'timestamp',
+			ykeys: ['value'],
+			labels: [label],
+			ymin: min,
+			ymax: max,
+			postUnits: ' ' + unit
+		});
 	}-*/;
 }
