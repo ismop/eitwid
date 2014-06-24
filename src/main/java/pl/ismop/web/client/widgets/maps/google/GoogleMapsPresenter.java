@@ -396,7 +396,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			labels: [label],
 			ymin: min,
 			ymax: max,
-			postUnits: ' ' + unit
+			yLabelFormat: function(value) {
+				return value.toFixed(3) + ' ' + unit;
+			}
 		});
 	}-*/;
 }
