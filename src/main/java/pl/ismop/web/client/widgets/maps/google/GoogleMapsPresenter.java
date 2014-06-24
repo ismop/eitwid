@@ -262,14 +262,19 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		return "white";
 	}
 	
-	private native void updateLeveeOnMap(String id) /*-{
+	private native void updateLeveeOnMap(String leveeId) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
-		var feature = geoJsonMap.data.getFeatureById(id);
+		var foundFeature = null;
+		geoJsonMap.data.forEach(function(feature) {
+			if(feature.getProperty('type') == 'levee' && leveeId == feature.getProperty('id')) {
+				foundFeature = feature;
+			}
+		});
 		var thisObject = this;
 		
-		if(feature) {
-			var color = thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(id);
-			geoJsonMap.data.overrideStyle(feature, {
+		if(foundFeature) {
+			var color = thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(foundFeature.getId());
+			geoJsonMap.data.overrideStyle(foundFeature, {
 				fillColor: color
 			});
 		}
