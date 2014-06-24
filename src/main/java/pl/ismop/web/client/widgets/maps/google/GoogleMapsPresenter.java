@@ -321,7 +321,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				fillOpacity: 0.9,
 				strokeOpacity: 1.0,
 				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(feature.getId()),
-				strokeWeight: 1
+				strokeWeight: 1,
+				icon: $wnd.iconBaseUrl + '/sensor.png'
 			};
 		});
 		map.data.addListener('mouseover', function(event) {
