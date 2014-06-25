@@ -51,6 +51,13 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 	public Levee getLevee() {
 		return levee;
 	}
+	
+	public void stopUpdate() {
+		if(threatTimer != null) {
+			threatTimer.cancel();
+			threatTimer = null;
+		}
+	}
 
 	private void showLeveeDetails() {
 		view.setHeader(levee.getName());

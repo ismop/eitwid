@@ -20,11 +20,11 @@ import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
@@ -41,8 +41,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private Map<String, Levee> levees;
 	private String detailsElementId;
 	private LeveeSummaryPresenter selectedLevee;
-	private Object map;
+	private JavaScriptObject map;
 	private Map<String, String> leveeColors;
+	private Sensor selectedSensor;
+	private JavaScriptObject currentGraph;
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
@@ -170,6 +172,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				if(selectedLevee != null) {
 					String previousLeveeId = selectedLevee.getLevee().getId();
 					eventBus.removeHandler(selectedLevee);
+					selectedLevee.stopUpdate();
 					selectedLevee = null;
 					selectLevee(previousLeveeId, false);
 				}
@@ -186,6 +189,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 						if(measurements.size() == 0) {
 							setNoMeasurementsLabel();
 						} else {
+							selectedSensor = sensor;
+							
 							JavaScriptObject values = JavaScriptObject.createArray();
 							double min = Double.MAX_VALUE;
 							double max = Double.MIN_VALUE;
@@ -214,12 +219,42 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							chart.getStyle().setHeight(250, Unit.PX);
 							RootPanel.get(detailsElementId).getElement().appendChild(chart);
 //							showMorrisChart(values, sensor.getUnit(), min, max, sensor.getUnitLabel());
-							showDygraphChart(getDygraphValues(measurements, sensor.getUnitLabel()), sensor.getUnitLabel() + ", " + sensor.getUnit(),
+							currentGraph = showDygraphChart(getDygraphValues(measurements, sensor.getUnitLabel()), sensor.getUnitLabel() + ", " + sensor.getUnit(),
 									sensor.getUnitLabel() + " (" + sensor.getCustomId() + ")");
+							new Timer() {
+								@Override
+								public void run() {
+									updateSensorDetails(sensor.getId());
+								}
+							}.schedule(10000);
 						}
 					}});
 			}
 		});
+	}
+	
+	private void updateSensorDetails(String sensorId) {
+		if(selectedSensor != null && selectedSensor.getId().equals(sensorId)) {
+			dapController.getMeasurements(selectedSensor.getId(), new MeasurementsCallback() {
+				@Override
+				public void onError(int code, String message) {
+					Window.alert("Error: " + message);
+				}
+
+				@Override
+				public void processMeasurements(List<Measurement> measurements) {
+					String data = getDygraphValues(measurements, selectedSensor.getUnitLabel());
+					updateDygraphData(data);
+					new Timer() {
+						@Override
+						public void run() {
+							updateSensorDetails(selectedSensor.getId());
+						}
+					}.schedule(10000);
+				}});
+			
+			return;
+		}
 	}
 	
 	private String getDygraphValues(List<Measurement> measurements, String yLabel) {
@@ -237,11 +272,15 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 
 	private void showLeveeDetails(Levee levee) {
+		selectedSensor = null;
+		currentGraph = null;
+		
 		String previousLeveeId = null;
 		
 		if(selectedLevee != null) {
 			previousLeveeId = selectedLevee.getLevee().getId();
 			eventBus.removeHandler(selectedLevee);
+			selectedLevee.stopUpdate();
 			selectedLevee = null;
 		}
 		
@@ -320,7 +359,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		bounds.extend(new $wnd.google.maps.LatLng(lat, lng));
 	}-*/;
 	
-	private native Object showMap(Object bounds) /*-{
+	private native JavaScriptObject showMap(Object bounds) /*-{
 		var map = new $wnd.google.maps.Map(
 			$doc.getElementById(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::elementId));
 		var thisObject = this;
@@ -414,8 +453,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		});
 	}-*/;
 	
-	private native void showDygraphChart(String values, String yLabel, String title) /*-{
-		new $wnd.Dygraph($doc.getElementById('measurements'), values, {
+	private native JavaScriptObject showDygraphChart(String values, String yLabel, String title) /*-{
+		return new $wnd.Dygraph($doc.getElementById('measurements'), values, {
 			showRangeSelector: true,
 			ylabel: yLabel,
 			labelsDivStyles: {
@@ -425,5 +464,15 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			title: title,
 			digitsAfterDecimal: 1
 		});
+	}-*/;
+	
+	private native void updateDygraphData(String data) /*-{
+		var graph = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::currentGraph;
+		
+		if(graph) {
+			this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::currentGraph.updateOptions({
+				file: data
+			});
+		}
 	}-*/;
 }
