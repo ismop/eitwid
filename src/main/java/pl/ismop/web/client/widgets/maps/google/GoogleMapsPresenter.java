@@ -209,19 +209,31 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							Element element = DOM.getElementById(detailsElementId);
 							element.setInnerHTML("");
 							
-							Element header = DOM.createElement("h4");
-							header.setInnerText(sensor.getUnitLabel() + " (" + sensor.getCustomId() + ")");
-							RootPanel.get(detailsElementId).getElement().appendChild(header);
-							
 							Element chart = DOM.createDiv();
 							chart.setId("measurements");
 							chart.getStyle().setHeight(250, Unit.PX);
 							RootPanel.get(detailsElementId).getElement().appendChild(chart);
-							showChart(values, sensor.getUnit(), min, max, sensor.getUnitLabel());
+//							showMorrisChart(values, sensor.getUnit(), min, max, sensor.getUnitLabel());
+							showDygraphChart(getDygraphValues(measurements, sensor.getUnitLabel()), sensor.getUnitLabel() + ", " + sensor.getUnit(),
+									sensor.getUnitLabel() + " (" + sensor.getCustomId() + ")");
 						}
 					}});
 			}
 		});
+	}
+	
+	private String getDygraphValues(List<Measurement> measurements, String yLabel) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("aa,").append(yLabel).append("\n");
+		
+		for(Measurement measurement : measurements) {
+			builder.append(measurement.getTimestamp())
+					.append(",")
+					.append(measurement.getValue())
+					.append("\n");
+		}
+		
+		return builder.toString();
 	}
 
 	private void showLeveeDetails(Levee levee) {
@@ -387,7 +399,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		values.push({value: value, timestamp: timestamp});
 	}-*/;
 	
-	private native void showChart(JavaScriptObject values, String unit, double min, double max, String label) /*-{
+	private native void showMorrisChart(JavaScriptObject values, String unit, double min, double max, String label) /*-{
 		new $wnd.Morris.Area({
 			element: 'measurements',
 			data: values,
@@ -399,6 +411,19 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			yLabelFormat: function(value) {
 				return value.toFixed(3) + ' ' + unit;
 			}
+		});
+	}-*/;
+	
+	private native void showDygraphChart(String values, String yLabel, String title) /*-{
+		new $wnd.Dygraph($doc.getElementById('measurements'), values, {
+			showRangeSelector: true,
+			ylabel: yLabel,
+			labelsDivStyles: {
+				textAlign: 'right'
+			},
+			axisLabelWidth: 100,
+			title: title,
+			digitsAfterDecimal: 1
 		});
 	}-*/;
 }
