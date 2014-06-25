@@ -1,6 +1,7 @@
 package pl.ismop.web.client.widgets.maps.google;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,8 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -262,7 +265,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		builder.append("aa,").append(yLabel).append("\n");
 		
 		for(Measurement measurement : measurements) {
-			builder.append(measurement.getTimestamp())
+			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
+			Date date = format.parse(measurement.getTimestamp());
+			date = new Date(date.getTime() - 7200000);
+			builder.append(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date))
 					.append(",")
 					.append(measurement.getValue())
 					.append("\n");
