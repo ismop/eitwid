@@ -48,6 +48,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private Map<String, String> leveeColors;
 	private Sensor selectedSensor;
 	private JavaScriptObject currentGraph;
+	private Timer sensorTimer;
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
@@ -163,6 +164,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 
 	private void showSensorDetails(String sensorId) {
+		if(sensorTimer != null) {
+			sensorTimer.cancel();
+			sensorTimer = null;
+		}
+		
 		dapController.getSensor(sensorId, new SensorCallback() {
 			@Override
 			public void onError(int code, String message) {
@@ -224,40 +230,38 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 //							showMorrisChart(values, sensor.getUnit(), min, max, sensor.getUnitLabel());
 							currentGraph = showDygraphChart(getDygraphValues(measurements, sensor.getUnitLabel()), sensor.getUnitLabel() + ", " + sensor.getUnit(),
 									sensor.getUnitLabel() + " (" + sensor.getCustomId() + ")");
-							new Timer() {
+							sensorTimer = new Timer() {
 								@Override
 								public void run() {
 									updateSensorDetails(sensor.getId());
 								}
-							}.schedule(10000);
+							};
+							sensorTimer.schedule(10000);
 						}
 					}});
 			}
 		});
 	}
 	
-	private void updateSensorDetails(String sensorId) {
-		if(selectedSensor != null && selectedSensor.getId().equals(sensorId)) {
-			dapController.getMeasurements(selectedSensor.getId(), new MeasurementsCallback() {
-				@Override
-				public void onError(int code, String message) {
-					Window.alert("Error: " + message);
-				}
+	private void updateSensorDetails(final String sensorId) {
+		dapController.getMeasurements(sensorId, new MeasurementsCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert("Error: " + message);
+			}
 
-				@Override
-				public void processMeasurements(List<Measurement> measurements) {
-					String data = getDygraphValues(measurements, selectedSensor.getUnitLabel());
-					updateDygraphData(data);
-					new Timer() {
-						@Override
-						public void run() {
-							updateSensorDetails(selectedSensor.getId());
-						}
-					}.schedule(10000);
-				}});
-			
-			return;
-		}
+			@Override
+			public void processMeasurements(List<Measurement> measurements) {
+				String data = getDygraphValues(measurements, selectedSensor.getUnitLabel());
+				updateDygraphData(data);
+				sensorTimer = new Timer() {
+					@Override
+					public void run() {
+						updateSensorDetails(sensorId);
+					}
+				};
+				sensorTimer.schedule(10000);
+			}});
 	}
 	
 	private String getDygraphValues(List<Measurement> measurements, String yLabel) {
@@ -278,6 +282,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 
 	private void showLeveeDetails(Levee levee) {
+		if(sensorTimer != null) {
+			sensorTimer.cancel();
+			sensorTimer = null;
+		}
+		
 		selectedSensor = null;
 		currentGraph = null;
 		
