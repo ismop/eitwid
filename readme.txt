@@ -8,3 +8,11 @@ mvn gwt:run-codeserver
 mvn spring-boot:run -Dstart-class=pl.ismop.web.Development
 
 ... and go to http://localhost:8080
+
+To build and deploy an instance do the following:
+
+mvn clean package
+
+... to produce the final jar with all the dependencies and run it like that:
+
+java -jar {jar-file-path}
