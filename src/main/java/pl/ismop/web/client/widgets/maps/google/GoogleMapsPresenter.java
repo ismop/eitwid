@@ -163,7 +163,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		}
 	}
 
-	private void showSensorDetails(String sensorId) {
+	private void showSensorDetails(final String sensorId) {
 		if(sensorTimer != null) {
 			sensorTimer.cancel();
 			sensorTimer = null;
@@ -173,6 +173,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			@Override
 			public void onError(int code, String message) {
 				setNoFeatureSelectedLabel();
+				selectSensor(sensorId, false);
 				Window.alert("Error: " + message);
 			}
 
@@ -198,7 +199,12 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 						if(measurements.size() == 0) {
 							setNoMeasurementsLabel();
 						} else {
+							if(selectedSensor != null) {
+								selectSensor(selectedSensor.getId(), false);
+							}
+							
 							selectedSensor = sensor;
+							selectSensor(selectedSensor.getId(), true);
 							
 							JavaScriptObject values = JavaScriptObject.createArray();
 							double min = Double.MAX_VALUE;
@@ -287,6 +293,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			sensorTimer = null;
 		}
 		
+		if(selectedSensor != null) {
+			selectSensor(selectedSensor.getId(), false);
+		}
+		
 		selectedSensor = null;
 		currentGraph = null;
 		
@@ -362,6 +372,26 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		} else {
 			geoJsonMap.data.overrideStyle(foundFeature, {
 				strokeWeight: 1
+			});
+		}
+	}-*/;
+	
+	private native void selectSensor(String sensorId, boolean show) /*-{
+		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+		var foundFeature = null;
+		geoJsonMap.data.forEach(function(feature) {
+			if(feature.getProperty('type') == 'sensor' && sensorId == feature.getProperty('id')) {
+				foundFeature = feature;
+			}
+		});
+		
+		if(show) {
+			geoJsonMap.data.overrideStyle(foundFeature, {
+				icon: $wnd.iconBaseUrl + '/sensor-selected.png'
+			});
+		} else {
+			geoJsonMap.data.overrideStyle(foundFeature, {
+				icon: $wnd.iconBaseUrl + '/sensor.png'
 			});
 		}
 	}-*/;
