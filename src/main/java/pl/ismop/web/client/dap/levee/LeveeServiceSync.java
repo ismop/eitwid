@@ -9,9 +9,6 @@ import javax.ws.rs.Produces;
 
 /**
  * This synchronous version is used by the server-side communication with DAP.
- * 
- * @author daniel
- *
  */
 public interface LeveeServiceSync {
 	@GET

@@ -2,20 +2,11 @@ package pl.ismop.web.controllers.maps;
 
 import java.util.List;
 
-public class PointGeometry implements Geometry {
-	private String type;
+public class PointGeometry extends Geometry {
 	private List<Double> coordinates;
 	
 	public PointGeometry() {
-		setType("Point");
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
+		super("Point");
 	}
 
 	public List<Double> getCoordinates() {

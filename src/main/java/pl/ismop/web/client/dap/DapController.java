@@ -14,6 +14,9 @@ import pl.ismop.web.client.dap.levee.ModeChangeRequest;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.measurement.MeasurementService;
 import pl.ismop.web.client.dap.measurement.MeasurementsResponse;
+import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.profile.ProfileService;
+import pl.ismop.web.client.dap.profile.ProfilesResponse;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.dap.sensor.SensorResponse;
 import pl.ismop.web.client.dap.sensor.SensorService;
@@ -26,6 +29,7 @@ public class DapController {
 	private LeveeService leveeService;
 	private SensorService sensorService;
 	private MeasurementService measurementService;
+	private ProfileService profileService;
 	
 	public interface ErrorCallback {
 		void onError(int code, String message);
@@ -46,13 +50,18 @@ public class DapController {
 	public interface MeasurementsCallback extends ErrorCallback {
 		void processMeasurements(List<Measurement> measurements);
 	}
+	
+	public interface ProfilesCallback extends ErrorCallback {
+		void processProfiles(List<Profile> profiles);
+	}
 
 	@Inject
 	public DapController(LeveeService leveeService, SensorService sensorService,
-			MeasurementService measurementService) {
+			MeasurementService measurementService, ProfileService profileService) {
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
+		this.profileService = profileService;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -126,5 +135,32 @@ public class DapController {
 				callback.processMeasurements(response.getMeasurements());
 			}
 		});
+	}
+	
+	public void getProfiles(float top, float left, float bottom, float right, final ProfilesCallback callback) {
+		profileService.getProfiles(createSelectionQuery(top, left, bottom, right), new MethodCallback<ProfilesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, ProfilesResponse response) {
+				callback.processProfiles(response.getProfiles());
+			}
+		});
+	}
+
+	private String createSelectionQuery(double top, double left, double bottom, double right) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("POLYGON ((")
+				.append(top).append(" ").append(left).append(", ")
+				.append(top).append(" ").append(right).append(", ")
+				.append(bottom).append(" ").append(right).append(", ")
+				.append(bottom).append(" ").append(left).append(", ")
+				.append(top).append(" ").append(left)
+				.append("))");
+		
+		return builder.toString();
 	}
 }

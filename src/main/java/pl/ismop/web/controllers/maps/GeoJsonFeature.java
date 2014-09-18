@@ -2,7 +2,6 @@ package pl.ismop.web.controllers.maps;
 
 import java.util.Map;
 
-
 public class GeoJsonFeature {
 	private String type;
 	private String id;

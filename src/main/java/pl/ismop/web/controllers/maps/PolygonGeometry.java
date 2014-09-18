@@ -2,20 +2,13 @@ package pl.ismop.web.controllers.maps;
 
 import java.util.List;
 
-public class PolygonGeometry implements Geometry {
-	private String type;
+public class PolygonGeometry extends Geometry {
 	private List<List<List<Double>>> coordinates;
 	
 	public PolygonGeometry() {
-		setType("Polygon");
+		super("Polygon");
 	}
 
-	public String getType() {
-		return type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
 	public List<List<List<Double>>> getCoordinates() {
 		return coordinates;
 	}

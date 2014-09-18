@@ -4,17 +4,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
+import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.services.DapService;
 
-@Controller
+@RestController
 @RequestMapping("/maps")
 public class MapsController {
 	private AtomicInteger idGenerator;
@@ -26,7 +29,6 @@ public class MapsController {
 	}
 	
 	@RequestMapping(value = "/geojson", produces = "application/json")
-	@ResponseBody
 	public GeoJsonFeatures geojson() {
 		List<GeoJsonFeature> shapes = dapService.getLevees()
 				.stream()
@@ -57,7 +59,6 @@ public class MapsController {
 	}
 	
 	@RequestMapping(value = "/sensors", produces = "application/json")
-	@ResponseBody
 	public GeoJsonFeatures sensors() {
 		List<GeoJsonFeature> shapes = dapService.getSensors()
 				.stream()
@@ -78,6 +79,49 @@ public class MapsController {
 				.collect(Collectors.toList());
 		
 		GeoJsonFeatures result = new GeoJsonFeatures(shapes);
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/profiles", produces = "application/json")
+	public GeoJsonFeatures profiles() {
+		List<Profile> profiles = dapService.getProfiles();
+		Map<String, Sensor> sensors = dapService.getSensors()
+				.stream()
+				.collect(Collectors.toMap(sensor -> {
+					return sensor.getId();
+				}, Function.<Sensor>identity()));
+		List<GeoJsonFeature> shapes = profiles.stream()
+				.map(profile -> {
+					GeoJsonFeature geoJsonFeature = new GeoJsonFeature();
+					geoJsonFeature.setId(String.valueOf(idGenerator.incrementAndGet()));
+					geoJsonFeature.setProperties(new HashMap<>());
+					geoJsonFeature.getProperties().put("id", profile.getId());
+					geoJsonFeature.getProperties().put("name", profile.getName());
+					geoJsonFeature.getProperties().put("type", "profile");
+					
+					LineGeometry line = new LineGeometry();
+					line.setCoordinates(profileToLine(profile, sensors));
+					geoJsonFeature.setGeometry(line);
+					
+					return geoJsonFeature;
+				})
+				.collect(Collectors.toList());
+		
+		GeoJsonFeatures result = new GeoJsonFeatures(shapes);
+		
+		return result;
+	}
+
+	private List<List<Double>> profileToLine(Profile profile, Map<String, Sensor> sensors) {
+		List<List<Double>> result = new ArrayList<>();
+		
+		for(String sensorId : profile.getSensorIds()) {
+			result.add(Arrays.asList(new Double[] {
+					sensors.get(sensorId).getPlacement().getCoordinates().get(1),
+					sensors.get(sensorId).getPlacement().getCoordinates().get(0)
+			}));
+		}
 		
 		return result;
 	}

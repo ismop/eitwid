@@ -13,9 +13,11 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
+import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
@@ -24,11 +26,14 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.EventHandler;
@@ -49,6 +54,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private Sensor selectedSensor;
 	private JavaScriptObject currentGraph;
 	private Timer sensorTimer;
+	private boolean modalInitialized;
+
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
@@ -233,7 +240,6 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							chart.setId("measurements");
 							chart.getStyle().setHeight(250, Unit.PX);
 							RootPanel.get(detailsElementId).getElement().appendChild(chart);
-//							showMorrisChart(values, sensor.getUnit(), min, max, sensor.getUnitLabel());
 							currentGraph = showDygraphChart(getDygraphValues(measurements, sensor.getUnitLabel()), sensor.getUnitLabel() + ", " + sensor.getUnit(),
 									sensor.getUnitLabel() + " (" + sensor.getCustomId() + ")");
 							sensorTimer = new Timer() {
@@ -338,6 +344,66 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		return "white";
 	}
 	
+	private String getFeatureStrokeColor(String featureId) {
+		switch(getFeatureType(featureId)) {
+			case "levee":
+				return "black";
+			case "profile":
+				return "green";
+		}
+		
+		return "white";
+	}
+	
+	private int getFeatureStrokeWeight(String featureId) {
+		switch(getFeatureType(featureId)) {
+			case "levee":
+				return 1;
+			case "profile":
+				return 3;
+		}
+		
+		return 0;
+	}
+	
+	private void onAreaSelected(float top, float left, float bottom, float right) {
+		dapController.getProfiles(top, left, bottom, right, new ProfilesCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert("Error: " + message);
+			}
+			
+			@Override
+			public void processProfiles(List<Profile> profiles) {
+				initializeExperimentModal();
+				
+				if(profiles.size() > 0) {
+					showModal();
+				}
+			}
+		});
+	}
+	
+	private void initializeExperimentModal() {
+		if(!modalInitialized) {
+			Button startButton = new Button(messages.startExperimentButtonLabel());
+			startButton.setStyleName("btn btn-primary");
+			startButton.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					Window.alert("Starting experiment: TODO");
+				}
+			});
+			RootPanel.get("experiment-modal-footer").add(startButton);
+			modalInitialized = true;
+		}
+	}
+	
+	private native void showModal() /*-{
+		$wnd.jQuery('#experiment-modal').modal();
+		$wnd.jQuery('#experiment-modal').modal('show');
+	}-*/;
+	
 	private native void updateLeveeOnMap(String leveeId) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
 		var foundFeature = null;
@@ -411,13 +477,14 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		map.fitBounds(bounds);
 		map.data.loadGeoJson($wnd.geojsonUrl);
 		map.data.loadGeoJson($wnd.sensorUrl);
+		map.data.loadGeoJson($wnd.profileUrl);
 		map.data.setStyle(function(feature) {
 			return {
-				strokeColor: 'black',
+				strokeColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureStrokeColor(Ljava/lang/String;)(feature.getId()),
 				fillOpacity: 0.9,
 				strokeOpacity: 1.0,
 				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(feature.getId()),
-				strokeWeight: 1,
+				strokeWeight: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureStrokeWeight(Ljava/lang/String;)(feature.getId()),
 				icon: $wnd.iconBaseUrl + '/sensor.png'
 			};
 		});
@@ -437,13 +504,34 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::onFeatureClicked(Ljava/lang/String;)(event.feature.getId());
 		});
 		
+		var drawingManager = new $wnd.google.maps.drawing.DrawingManager({
+			drawingControl: true,
+			drawingControlOptions: {
+				position: $wnd.google.maps.ControlPosition.TOP_CENTER,
+				drawingModes: [
+					$wnd.google.maps.drawing.OverlayType.RECTANGLE
+				]
+			},
+			rectangleOptions: {
+				fillColor: '#aaaaaa',
+				fillOpacity: 0.5,
+				strokeWeight: 0
+			}
+		});
+		drawingManager.setMap(map);
+		$wnd.google.maps.event.addListener(drawingManager, 'rectanglecomplete', function(r) {
+			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::onAreaSelected(FFFF)(r.getBounds().getNorthEast().lat(),
+				r.getBounds().getNorthEast().lng(), r.getBounds().getSouthWest().lat(), r.getBounds().getSouthWest().lng());
+			r.setMap(null);
+		});
+		
 		return map;
 	}-*/;
 	
 	private native String getFeatureType(String featureId) /*-{
 		if(featureId) {
 			var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
-			var feature = geoJsonMap.data.getFeatureById(id);
+			var feature = geoJsonMap.data.getFeatureById(featureId);
 			
 			if(feature) {
 				return feature.getProperty('type');

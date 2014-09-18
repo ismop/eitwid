@@ -6,4 +6,5 @@ public interface MapMessages extends Messages {
 	String insufficientPointsError();
 	String noFeatureSelected();
 	String noMeasurements();
+	String startExperimentButtonLabel();
 }
