@@ -14,14 +14,14 @@ import pl.ismop.web.client.dap.DapDispatcher;
 @Options(dispatcher = DapDispatcher.class)
 public interface LeveeService extends RestService {
 	@GET
-	@Path("levees")
+	@Path("https://dap.moc.ismop.edu.pl/api/v1/levees")
 	void getLevees(MethodCallback<LeveesResponse> callback);
 
 	@PUT
-	@Path("levees/{id}")
+	@Path("https://dap.moc.ismop.edu.pl/api/v1/levees/{id}")
 	void changeMode(@PathParam("id") String leveeId, ModeChangeRequest request, MethodCallback<LeveeResponse> methodCallback);
 
 	@GET
-	@Path("levees/{id}")
+	@Path("https://dap.moc.ismop.edu.pl/api/v1/levees/{id}")
 	void getLevee(@PathParam("id") String leveeId, MethodCallback<LeveeResponse> methodCallback);
 }

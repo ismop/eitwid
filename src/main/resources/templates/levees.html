@@ -14,18 +14,7 @@
 		</div>
 		<div id="mapContainer" style="height: 400px;"></div>
 		<div id="detailsContainer" style="margin-top: 20px;"></div>
-		<div class="modal fade" id="experiment-modal">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
-						<span th:text="#{levees.experiment.modal.title}"></span>
-					</div>
-					<div class="modal-header" id="experiment-modal.body"></div>
-					<div class="modal-footer" id="experiment-modal-footer"></div>
-				</div>
-			</div>
-		</div>
+		<div id="modalContainer"></div>
 	</div>
 	<div layout:fragment="javascripts">
 		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false&amp;libraries=drawing'}"></script>
@@ -33,7 +22,7 @@
 		<script type="text/javascript" th:utext="'var sensorUrl = \'' + @{/maps/sensors} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var profileUrl = \'' + @{/maps/profiles} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var iconBaseUrl = \'' + @{/icons} + '\';'"></script>
-		<script type="text/javascript" th:utext="'var properties = {dapEndpoint: \'' + ${dapEndpoint} + '\', dapToken: \'' + ${dapToken} + '\'};'"></script>
+		<script type="text/javascript" th:utext="'var properties = {dapEndpoint: \'' + ${dapEndpoint} + '\', dapToken: \'' + ${dapToken} + '\', hypgenToken: \'' + ${hypgenToken} + '\'};'"></script>
 		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
 	</div>
 </body>

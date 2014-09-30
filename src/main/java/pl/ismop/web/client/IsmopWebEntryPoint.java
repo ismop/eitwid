@@ -13,7 +13,9 @@ public class IsmopWebEntryPoint implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 		properties = Dictionary.getDictionary("properties");
-		Defaults.setServiceRoot(properties.get("dapEndpoint"));
+//		Defaults.setServiceRoot(properties.get("dapEndpoint"));
+		Defaults.ignoreJsonNulls();
+		Defaults.setDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		
 		Mvp4gModule module = (Mvp4gModule)GWT.create(Mvp4gModule.class);
 		module.createAndStartModule();

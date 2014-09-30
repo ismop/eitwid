@@ -13,12 +13,11 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
-import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.measurement.Measurement;
-import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.sensor.Sensor;
+import pl.ismop.web.client.widgets.experiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 
@@ -26,14 +25,12 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.EventHandler;
@@ -54,8 +51,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private Sensor selectedSensor;
 	private JavaScriptObject currentGraph;
 	private Timer sensorTimer;
-	private boolean modalInitialized;
-
+	private ListBox days;
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
@@ -367,42 +363,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	private void onAreaSelected(float top, float left, float bottom, float right) {
-		dapController.getProfiles(top, left, bottom, right, new ProfilesCallback() {
-			@Override
-			public void onError(int code, String message) {
-				Window.alert("Error: " + message);
-			}
-			
-			@Override
-			public void processProfiles(List<Profile> profiles) {
-				initializeExperimentModal();
-				
-				if(profiles.size() > 0) {
-					showModal();
-				}
-			}
-		});
+		eventBus.addHandler(ExperimentPresenter.class);
+		eventBus.areaSelected(top, left, bottom, right);
 	}
-	
-	private void initializeExperimentModal() {
-		if(!modalInitialized) {
-			Button startButton = new Button(messages.startExperimentButtonLabel());
-			startButton.setStyleName("btn btn-primary");
-			startButton.addClickHandler(new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					Window.alert("Starting experiment: TODO");
-				}
-			});
-			RootPanel.get("experiment-modal-footer").add(startButton);
-			modalInitialized = true;
-		}
-	}
-	
-	private native void showModal() /*-{
-		$wnd.jQuery('#experiment-modal').modal();
-		$wnd.jQuery('#experiment-modal').modal('show');
-	}-*/;
 	
 	private native void updateLeveeOnMap(String leveeId) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;

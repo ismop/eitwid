@@ -13,10 +13,10 @@ import pl.ismop.web.client.dap.DapDispatcher;
 @Options(dispatcher = DapDispatcher.class)
 public interface SensorService extends RestService {
 	@GET
-	@Path("sensors")
+	@Path("https://dap.moc.ismop.edu.pl/api/v1/sensors")
 	void getSensors(MethodCallback<SensorsResponse> callback);
 	
 	@GET
-	@Path("sensors/{id}")
+	@Path("https://dap.moc.ismop.edu.pl/api/v1/sensors/{id}")
 	void getSensor(@PathParam("id") String sensorId, MethodCallback<SensorResponse> callback);
 }

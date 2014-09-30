@@ -1,5 +1,7 @@
 package pl.ismop.web.controllers.main;
 
+import java.util.Base64;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -32,6 +34,8 @@ public class MainController {
 	@Value("${dap.token}") private String dapToken;
 	@Value("${dap.endpoint}") private String dapEndpoint;
 	@Value("${maps.google.key}") private String googleMapApiKey;
+	@Value("${hypgen.user}") private String hypgenUser;
+	@Value("${hypgen.pass}") private String hypgenPass;
 	
 	@RequestMapping("/")
 	public String home(Model model, HttpServletRequest request) {
@@ -91,15 +95,20 @@ public class MainController {
 		model.addAttribute("googleMapApiKey", googleMapApiKey);
 		model.addAttribute("dapToken", dapToken);
 		model.addAttribute("dapEndpoint", dapEndpoint);
+		model.addAttribute("hypgenToken", createHypgenToken());
 		
 		return "levees";
 	}
-	
+
 	@RequestMapping("/leveesOL")
 	public String leveesOl(Model model) {
 		model.addAttribute("dapToken", dapToken);
 		model.addAttribute("dapEndpoint", dapEndpoint);
 		
 		return "leveesOL";
+	}
+	
+	private String createHypgenToken() {
+		return Base64.getEncoder().encodeToString((hypgenUser + ":" + hypgenPass).getBytes());
 	}
 }

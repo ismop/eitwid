@@ -1,6 +1,7 @@
 package pl.ismop.web.client;
 
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.widgets.experiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
@@ -13,12 +14,15 @@ import com.mvp4g.client.presenter.NoStartPresenter;
 @Events(startPresenter = NoStartPresenter.class)
 public interface MainEventBus extends EventBus {
 	@Start
-	@Event(handlers = RootPresenter.class)
+	@Event(handlers = {RootPresenter.class})
 	void start();
 
 	@Event(handlers = GoogleMapsPresenter.class)
 	void drawGoogleMap(String elementId, String detailsElementId);
 
-	@Event(handlers = {GoogleMapsPresenter.class})
+	@Event(handlers = GoogleMapsPresenter.class)
 	void leveeUpdated(Levee levee);
+
+	@Event(handlers = ExperimentPresenter.class)
+	void areaSelected(float top, float left, float bottom, float right);
 }
