@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.experimentitem.ExperimentItemMessages" field="messages"/>
+	<ui:style>
+		.row {
+			display: table-row;
+		}
+		.row:hover {
+			background-color: #F5F5F5;
+		}
+		.cell {
+			display: table-cell;
+		}
+		.name {
+			font-size: large;
+		}
+	</ui:style>
+	<g:HTMLPanel styleName="{style.row}">
+		<g:Label ui:field="name" styleName="{style.cell} {style.name}"/>
+		<g:FlowPanel styleName="{style.cell}">
+			<g:Label ui:field="status"/>
+		</g:FlowPanel>
+		<g:HTML ui:field="startDate" styleName="{style.cell}"/>
+		<g:HTML ui:field="endDate" styleName="{style.cell}"/>
+		<g:FlowPanel>
+			<g:Button ui:field="showResults" styleName="btn btn-xs"><ui:text from="{messages.resultsLabel}"/></g:Button>
+		</g:FlowPanel>
+	</g:HTMLPanel>
+</ui:UiBinder>

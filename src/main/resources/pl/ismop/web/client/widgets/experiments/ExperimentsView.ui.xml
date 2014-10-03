@@ -3,13 +3,30 @@
 		xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.experiments.ExperimentsMessages" field="messages"/>
 	<ui:style>
+		.panel {
+			display: table;
+			border-spacing: 5px;
+			border-collapse: separate;
+			width: 100%;
+		}
 	</ui:style>
 	<g:HTMLPanel>
 		<div class="row">
 			<div class="col-lg-12">
 				<h1 class="page-header"><ui:text from="{messages.mainHeader}"/></h1>
 			</div>
-			<g:HTMLPanel ui:field="experimentContainer"/>
+			<g:HTMLPanel ui:field="experimentContainer" addStyleNames="{style.panel}"/>
+			<div class="modal fade" id="results-modal">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+							<h4><ui:text from="{messages.resultsModalLabel}"/></h4>
+						</div>
+						<div id="results-modal-body" class="modal-body"></div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

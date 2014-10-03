@@ -13,6 +13,6 @@ import pl.ismop.web.client.dap.DapDispatcher;
 @Options(dispatcher = DapDispatcher.class)
 public interface MeasurementService  extends RestService {
 	@GET
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/measurements?sensor_id={id}")
-	void getMeasurements(@PathParam("id") String sensorId, MethodCallback<MeasurementsResponse> callback);
+	@Path("https://dap.moc.ismop.edu.pl/api/v1/measurements?sensor_id={id}&time_to={timeTo}")
+	void getMeasurements(@PathParam("id") String sensorId, @PathParam("timeTo") String timeTo, MethodCallback<MeasurementsResponse> callback);
 }

@@ -27,6 +27,7 @@ public class ExperimentTabPresenter extends BaseEventHandler<MainEventBus>{
 	private InternalExperimentController internalExperimentController;
 	private Element span;
 	private int numberOfExperiments;
+	private List<String> experimentIds;
 
 	@Inject
 	public ExperimentTabPresenter(ExperimentTabMessages messages, DapController dapController, InternalExperimentController internalExperimentController) {
@@ -67,7 +68,9 @@ public class ExperimentTabPresenter extends BaseEventHandler<MainEventBus>{
 		});
 	}
 	
-	private void createTab(final List<String> experimentIds) {
+	private void createTab(List<String> experimentIds) {
+		this.experimentIds = experimentIds;
+		
 		Element li = DOM.createElement("li");
 		Element a = DOM.createAnchor();
 		a.setAttribute("href", "#");
@@ -75,7 +78,7 @@ public class ExperimentTabPresenter extends BaseEventHandler<MainEventBus>{
 		DOM.setEventListener(a, new EventListener() {
 			@Override
 			public void onBrowserEvent(Event event) {
-				eventBus.showExperiments(experimentIds);
+				eventBus.showExperiments(ExperimentTabPresenter.this.experimentIds);
 				span.getStyle().clearFontWeight();
 			}
 		});
@@ -92,6 +95,7 @@ public class ExperimentTabPresenter extends BaseEventHandler<MainEventBus>{
 	
 	public void onExperimentCreated(Experiment experiment) {
 		numberOfExperiments++;
+		experimentIds.add(experiment.getId());
 		span.setInnerText(messages.experimentTabLabel(numberOfExperiments));
 		span.getStyle().setFontWeight(FontWeight.BOLD);
 	}

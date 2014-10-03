@@ -20,12 +20,12 @@ public class Experiment {
 	@JsonProperty("profile_ids")
 	private List<String> profileIds;
 	
-	@Json(name = "start")
-	@JsonProperty("start")
+	@Json(name = "start_date")
+	@JsonProperty("start_date")
 	private Date startDate;
 	
-	@Json(name = "end")
-	@JsonProperty("end")
+	@Json(name = "end_date")
+	@JsonProperty("end_date")
 	private Date endDate;
 	
 	public String getId() {

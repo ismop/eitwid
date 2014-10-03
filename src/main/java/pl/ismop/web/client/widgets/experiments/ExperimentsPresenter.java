@@ -1,5 +1,6 @@
 package pl.ismop.web.client.widgets.experiments;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -8,6 +9,8 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.ExperimentsCallback;
 import pl.ismop.web.client.hypgen.Experiment;
+import pl.ismop.web.client.widgets.experimentitem.ExperimentItemPresenter;
+import pl.ismop.web.client.widgets.experiments.IExperimentsView.IExperimentsPresenter;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
@@ -17,19 +20,31 @@ import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = ExperimentsView.class)
-public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEventBus>{
+public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEventBus> implements IExperimentsPresenter {
 	private DapController dapController;
 	private List<String> experimentsIds;
+	private List<ExperimentItemPresenter> experimentItemPresenters;
 
 	@Inject
 	public ExperimentsPresenter(DapController dapController) {
 		this.dapController = dapController;
+		experimentItemPresenters = new ArrayList<>();
 	}
 	
 	public void onShowExperiments(List<String> experimentsIds) {
 		this.experimentsIds = experimentsIds;
-		DOM.getElementById("page-wrapper").removeAllChildren();
-		RootPanel.get("page-wrapper").add(view);
+		int count = RootPanel.get("page-wrapper").getWidgetCount();
+		
+		if(count == 0) {
+			DOM.getElementById("page-wrapper").removeAllChildren();
+			RootPanel.get("page-wrapper").add(view);
+		}
+		
+		for(ExperimentItemPresenter presenter : experimentItemPresenters) {
+			eventBus.removeHandler(presenter);
+		}
+		
+		view.clear();
 		loadExperiments();
 	}
 
@@ -53,11 +68,19 @@ public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEv
 					});
 					
 					for(Experiment experiment : experiments) {
-						view.addExperiment(experiment.getName());
+						ExperimentItemPresenter presenter = eventBus.addHandler(ExperimentItemPresenter.class);
+						experimentItemPresenters.add(presenter);
+						presenter.setExperiment(experiment);
+						view.addExperiment(presenter.getView());
 					}
 					
 				}
 			});
 		}
+	}
+
+	@Override
+	public void showResults(String id) {
+		Window.alert("TODO");
 	}
 }
