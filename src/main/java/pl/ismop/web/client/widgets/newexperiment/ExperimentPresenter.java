@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.experiment;
+package pl.ismop.web.client.widgets.newexperiment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,9 @@ import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.hypgen.HypgenController;
 import pl.ismop.web.client.hypgen.HypgenController.ExperimentCallback;
-import pl.ismop.web.client.widgets.experiment.IExperimentView.IExperimentPresenter;
+import pl.ismop.web.client.internal.InternalExperimentController;
+import pl.ismop.web.client.internal.InternalExperimentController.InternalExperimentCallback;
+import pl.ismop.web.client.widgets.newexperiment.IExperimentView.IExperimentPresenter;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -24,11 +26,13 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 	private boolean modalInitialized;
 	protected List<Profile> currentProfiles;
 	private HypgenController hypgenController;
+	private InternalExperimentController internalExperimentController;
 
 	@Inject
-	public ExperimentPresenter(DapController dapController, HypgenController hypgenController) {
+	public ExperimentPresenter(DapController dapController, HypgenController hypgenController, InternalExperimentController internalExperimentController) {
 		this.dapController = dapController;
 		this.hypgenController = hypgenController;
+		this.internalExperimentController = internalExperimentController;
 	}
 	
 	public void onAreaSelected(float top, float left, float bottom, float right) {
@@ -52,28 +56,48 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 		});
 	}
 	
-	private void executeExperiment(String days, List<String> profileIds) {
-		hypgenController.startExperiment("Sample experiment: TODO", profileIds, days, new ExperimentCallback() {
+	private void executeExperiment(String name, String days, List<String> profileIds) {
+		hypgenController.startExperiment(name, profileIds, days, new ExperimentCallback() {
 			@Override
 			public void onError(int code, String message) {
 				Window.alert("Error: " + message);
 			}
 
 			@Override
-			public void processExperiment(Experiment experiment) {
-				Window.alert("New experiment: " + experiment);
+			public void processExperiment(final Experiment experiment) {
+				internalExperimentController.addExperiment(experiment.getId(), new InternalExperimentCallback() {
+					@Override
+					public void onError(int code, String message) {
+						Window.alert("Error: " + message);
+					}
+					
+					@Override
+					public void experimentAdded() {
+						eventBus.experimentCreated(experiment);
+					}
+				});
 			}});
 	}
 	
 	@Override
 	public void onStartClicked() {
+		view.clearErrorMessages();
+		
+		String name = view.getName().getText();
+		
+		if(name.trim().isEmpty()) {
+			view.showNameEmptyMessage();
+			
+			return;
+		}
+		
 		List<String> profileIds = new ArrayList<>();
 		
 		for(Profile profile : currentProfiles) {
 			profileIds.add(profile.getId());
 		}
 		
-		executeExperiment(view.getDaysValue(), profileIds);
+		executeExperiment(name, view.getDaysValue(), profileIds);
 		hideModal();
 	}
 	

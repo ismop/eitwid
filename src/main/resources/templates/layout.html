@@ -3,6 +3,9 @@
 <head>
 	<title layout:title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">ISMOP</title>
 	<meta name="gwt:property" th:content="'locale=' + ${#httpServletRequest.getLocale().getLanguage()}"/>
+	<meta id="csrfToken" name="_csrf" th:content="${_csrf.token}"/>
+	<meta id="csrfHeaderName" name="_csrf_header" th:content="${_csrf.headerName}"/>
+	<meta name="_csrf_parameter_name" th:content="${_csrf.parameterName}"/>
 	
 	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet"/>
@@ -21,5 +24,6 @@
 	<script type="text/javascript" th:src="@{/js/sb-admin.js}"></script>
 	<script type="text/javascript" th:src="@{/js/dygraph-combined.js}"></script>
 	<section layout:fragment="javascripts"></section>
+	<section layout:fragment="javascripts2"></section>
 </body>
 </html>

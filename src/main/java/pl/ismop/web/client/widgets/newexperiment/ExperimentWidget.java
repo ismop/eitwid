@@ -1,6 +1,6 @@
-package pl.ismop.web.client.widgets.experiment;
+package pl.ismop.web.client.widgets.newexperiment;
 
-import pl.ismop.web.client.widgets.experiment.IExperimentView.IExperimentPresenter;
+import pl.ismop.web.client.widgets.newexperiment.IExperimentView.IExperimentPresenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,8 +9,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
@@ -18,11 +20,14 @@ public class ExperimentWidget extends Composite implements IExperimentView, Reve
 	private static ExperimentWidgetUiBinder uiBinder = GWT.create(ExperimentWidgetUiBinder.class);
 	interface ExperimentWidgetUiBinder extends UiBinder<Widget, ExperimentWidget> {}
 	
+	private IExperimentPresenter presenter;
+	
 	@UiField HTMLPanel panel;
 	@UiField ExperimentMessages messages;
 	@UiField Label profileLabel;
+	@UiField TextBox name;
 	@UiField(provided = true) ListBox days;
-	private IExperimentPresenter presenter;
+	@UiField Label errorLabel;
 	
 	public ExperimentWidget() {
 		days = new ListBox();
@@ -62,5 +67,20 @@ public class ExperimentWidget extends Composite implements IExperimentView, Reve
 	@Override
 	public IExperimentPresenter getPresenter() {
 		return presenter;
+	}
+
+	@Override
+	public void showNameEmptyMessage() {
+		errorLabel.setText(messages.emptyName());
+	}
+
+	@Override
+	public HasText getName() {
+		return name;
+	}
+
+	@Override
+	public void clearErrorMessages() {
+		errorLabel.setText("");
 	}
 }

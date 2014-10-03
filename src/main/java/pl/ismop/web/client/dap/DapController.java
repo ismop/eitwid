@@ -5,6 +5,8 @@ import java.util.List;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
+import pl.ismop.web.client.dap.experiment.ExperimentService;
+import pl.ismop.web.client.dap.experiment.ExperimentsResponse;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.LeveeResponse;
 import pl.ismop.web.client.dap.levee.LeveeService;
@@ -20,6 +22,7 @@ import pl.ismop.web.client.dap.profile.ProfilesResponse;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.dap.sensor.SensorResponse;
 import pl.ismop.web.client.dap.sensor.SensorService;
+import pl.ismop.web.client.hypgen.Experiment;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,6 +33,7 @@ public class DapController {
 	private SensorService sensorService;
 	private MeasurementService measurementService;
 	private ProfileService profileService;
+	private ExperimentService experimentService;
 	
 	public interface ErrorCallback {
 		void onError(int code, String message);
@@ -54,14 +58,20 @@ public class DapController {
 	public interface ProfilesCallback extends ErrorCallback {
 		void processProfiles(List<Profile> profiles);
 	}
+	
+	public interface ExperimentsCallback extends ErrorCallback {
+		void processExperiments(List<Experiment> experiments);
+	}
 
 	@Inject
 	public DapController(LeveeService leveeService, SensorService sensorService,
-			MeasurementService measurementService, ProfileService profileService) {
+			MeasurementService measurementService, ProfileService profileService,
+			ExperimentService experimentService) {
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
 		this.profileService = profileService;
+		this.experimentService = experimentService;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -149,6 +159,34 @@ public class DapController {
 				callback.processProfiles(response.getProfiles());
 			}
 		});
+	}
+	
+	public void getExperiments(List<String> experimentIds, final ExperimentsCallback callback) {
+		experimentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ExperimentsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, ExperimentsResponse response) {
+				callback.processExperiments(response.getExperiments());
+			}
+		});
+	}
+
+	private String merge(List<String> chunks, String delimeter) {
+		StringBuilder result = new StringBuilder();
+		
+		for(String chunk : chunks) {
+			result.append(chunk).append(delimeter);
+		}
+		
+		if(result.length() > 0) {
+			result.delete(result.length() - delimeter.length(), result.length());
+		}
+		
+		return result.toString();
 	}
 
 	private String createSelectionQuery(double top, double left, double bottom, double right) {

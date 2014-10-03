@@ -5,15 +5,28 @@ import java.util.List;
 
 import org.fusesource.restygwt.client.Json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Experiment {
 	private String id;
 	private String name;
 	private String status;
 	
-	@Json(name = "result_ids") private List<String> resultIds;
-	@Json(name = "profile_ids") private List<String> profileIds;
-	@Json(name = "start") private Date startDate;
-	@Json(name = "end") private Date endDate;
+	@Json(name = "result_ids")
+	@JsonProperty("result_ids")
+	private List<String> resultIds;
+	
+	@Json(name = "profile_ids")
+	@JsonProperty("profile_ids")
+	private List<String> profileIds;
+	
+	@Json(name = "start")
+	@JsonProperty("start")
+	private Date startDate;
+	
+	@Json(name = "end")
+	@JsonProperty("end")
+	private Date endDate;
 	
 	public String getId() {
 		return id;

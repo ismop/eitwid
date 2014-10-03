@@ -17,8 +17,8 @@ import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.sensor.Sensor;
-import pl.ismop.web.client.widgets.experiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.maps.MapMessages;
+import pl.ismop.web.client.widgets.newexperiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 
 import com.google.gwt.core.client.JavaScriptObject;

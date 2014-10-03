@@ -1,0 +1,48 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.newexperiment.ExperimentMessages" field="messages"/>
+	<ui:style>
+		.control {
+			margin-left: 10px;
+		}
+		.form-table {
+			display: table;
+		}
+		.form-row {
+			display: table-row;
+		}
+		.form-cell {
+			display: table-cell;
+		}
+	</ui:style>
+	<g:HTMLPanel ui:field="panel">
+		<div class="modal fade" id="experiment-modal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+						<h4><ui:text from="{messages.leveesExperimentModalTitle}"/></h4>
+					</div>
+					<div id="experiment-modal-body" class="modal-body">
+						<g:Label ui:field="profileLabel"/>
+						<g:FlowPanel addStyleNames="{style.form-table}">
+							<g:FlowPanel addStyleNames="{style.form-row}">
+								<g:InlineLabel addStyleNames="{style.form-cell}"><ui:text from="{messages.nameLabel}"/></g:InlineLabel>
+								<g:TextBox ui:field="name" addStyleNames="{style.control} {style.form-cell}"/>
+							</g:FlowPanel>
+							<g:FlowPanel addStyleNames="{style.form-row}">
+								<g:InlineLabel addStyleNames="{style.form-cell}"><ui:text from="{messages.daysLabel}"/></g:InlineLabel>
+								<g:ListBox ui:field="days" addStyleNames="{style.control} {style.form-cell}"/>
+							</g:FlowPanel>
+						</g:FlowPanel>
+						<g:Label ui:field="errorLabel" styleName="text-danger"/>
+					</div>
+					<div id="experiment-modal-footer" class="modal-footer">
+						<g:Button ui:field="startButton" styleName="btn btn-primary"><ui:text from="{messages.startExperimentButtonLabel}"/></g:Button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

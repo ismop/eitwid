@@ -22,7 +22,9 @@
 				</a>
 				<ul class="dropdown-menu dropdown-user">
 					<li>
-						<a th:href="@{/logout}">
+						<form id="logoutForm" th:action="@{/logout}" method="post">
+						</form>
+						<a id="logoutAnchor" href="/hello">
 							<i class="fa fa-sign-out fa-fw"></i> <span th:text="#{logout.label}"></span>
 						</a>
 					</li>
@@ -49,6 +51,18 @@
 	<div id="page-wrapper">
 		<section layout:fragment="home-content"></section>
 	</div>
+</div>
+<div layout:fragment="javascripts2">
+	<script type="text/javascript">
+		$(function() {
+			$('#logoutAnchor').click(function(e) {
+				e.preventDefault();
+				$('#logoutForm').submit();
+				
+				return false;
+			});
+		});
+	</script>
 </div>
 </body>
 </html>
