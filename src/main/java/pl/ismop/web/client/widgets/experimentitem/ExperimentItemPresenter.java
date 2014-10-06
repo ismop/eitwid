@@ -29,11 +29,14 @@ public class ExperimentItemPresenter extends BasePresenter<IExperimentItemView, 
 	}
 
 	public void setExperiment(Experiment experiment) {
-		this.experiment = experiment;
-		view.getName().setText(experiment.getName());
+		if(this.experiment == null) {
+			this.experiment = experiment;
+			view.getName().setText(experiment.getName());
+			view.setStartDate(experiment.getStartDate());
+			view.setEndDate(experiment.getEndDate());
+		}
+		
 		view.setStatus(experiment.getStatus());
-		view.setStartDate(experiment.getStartDate());
-		view.setEndDate(experiment.getEndDate());
 	}
 
 	@Override

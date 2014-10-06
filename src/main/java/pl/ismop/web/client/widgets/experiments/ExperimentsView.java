@@ -49,4 +49,10 @@ public class ExperimentsView extends Composite implements IExperimentsView, Reve
 	public void clear() {
 		experimentContainer.clear();
 	}
+	
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		getPresenter().onWidgetDetached();
+	}
 }

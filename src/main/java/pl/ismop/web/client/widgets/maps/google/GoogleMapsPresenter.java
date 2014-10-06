@@ -111,6 +111,19 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			updateLeveeOnMap(newLevee.getId());
 		}
 	}
+	
+	public void onShowExperiments(List<String> experimentIds) {
+		if(selectedLevee != null) {
+			selectedLevee.stopUpdate();
+		}
+		
+		if(selectedSensor != null) {
+			if(sensorTimer != null) {
+				sensorTimer.cancel();
+				sensorTimer = null;
+			}
+		}
+	}
 
 	private void setNoFeatureSelectedLabel() {
 		Element element = DOM.getElementById(detailsElementId);

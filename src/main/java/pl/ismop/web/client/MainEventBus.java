@@ -34,6 +34,6 @@ public interface MainEventBus extends EventBus {
 	@Event(handlers = ExperimentTabPresenter.class)
 	void experimentCreated(Experiment experiment);
 
-	@Event(handlers = ExperimentsPresenter.class)
+	@Event(handlers = {ExperimentsPresenter.class, GoogleMapsPresenter.class, RootPresenter.class})
 	void showExperiments(List<String> experimentIds);
 }

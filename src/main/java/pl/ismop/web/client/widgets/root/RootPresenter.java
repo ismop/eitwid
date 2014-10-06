@@ -1,5 +1,6 @@
 package pl.ismop.web.client.widgets.root;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import pl.ismop.web.client.MainEventBus;
@@ -24,10 +25,12 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 	private static final String MAP_CONTAINER_ID = "mapContainer";
 	
 	private DapController dapController;
+	private List<LeveeSummaryPresenter> leveePresenters;
 
 	@Inject
 	public RootPresenter(DapController dapController) {
 		this.dapController = dapController;
+		leveePresenters = new ArrayList<>();
 	}
 	
 	public void onStart() {
@@ -46,6 +49,7 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 					
 					for(Levee levee : levees) {
 						LeveeSummaryPresenter presenter = eventBus.addHandler(LeveeSummaryPresenter.class);
+						leveePresenters.add(presenter);
 						presenter.setLevee(levee);
 						RootPanel.get(SUMMARY_CONTAINER_ID).add(presenter.getView());
 					}
@@ -53,6 +57,12 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 			});
 		} else if(RootPanel.get(MAP_CONTAINER_ID) != null) {
 			eventBus.drawGoogleMap(MAP_CONTAINER_ID, DETAILS_CONTAINER_ID);
+		}
+	}
+	
+	public void onShowExperiments(List<String> experimentIds) {
+		for(LeveeSummaryPresenter presenter : leveePresenters) {
+			presenter.stopUpdate();
 		}
 	}
 
