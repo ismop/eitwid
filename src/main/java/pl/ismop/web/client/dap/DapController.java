@@ -202,6 +202,20 @@ public class DapController {
 			}
 		});
 	}
+	
+	public void getProfiles(final ProfilesCallback profilesCallback) {
+		profileService.getProfiles(new MethodCallback<ProfilesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				Window.alert(exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, ProfilesResponse response) {
+				profilesCallback.processProfiles(response.getProfiles());
+			}
+		});
+	}
 
 	private String merge(List<String> chunks, String delimeter) {
 		StringBuilder result = new StringBuilder();

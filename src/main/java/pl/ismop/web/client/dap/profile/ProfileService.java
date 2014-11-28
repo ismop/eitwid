@@ -10,13 +10,13 @@ import org.fusesource.restygwt.client.RestService;
 
 import pl.ismop.web.client.dap.DapDispatcher;
 
-@Options(dispatcher = DapDispatcher.class)
+@Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
 public interface ProfileService extends RestService {
 	@GET
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/profiles")
+	@Path("profiles")
 	void getProfiles(MethodCallback<ProfilesResponse> callback);
 	
 	@GET
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/profiles?selection={selection}")
+	@Path("profiles?selection={selection}")
 	void getProfiles(@PathParam("selection") String selection, MethodCallback<ProfilesResponse> callback);
 }

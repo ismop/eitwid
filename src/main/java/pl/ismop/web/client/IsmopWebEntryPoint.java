@@ -1,6 +1,7 @@
 package pl.ismop.web.client;
 
 import org.fusesource.restygwt.client.Defaults;
+import org.fusesource.restygwt.client.ServiceRoots;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -13,7 +14,8 @@ public class IsmopWebEntryPoint implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 		properties = Dictionary.getDictionary("properties");
-//		Defaults.setServiceRoot(properties.get("dapEndpoint"));
+		ServiceRoots.add("dap", properties.get("dapEndpoint"));
+		ServiceRoots.add("hypgen", properties.get("hypgenEndpoint"));
 		Defaults.ignoreJsonNulls();
 		Defaults.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		

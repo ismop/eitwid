@@ -10,13 +10,13 @@ import org.fusesource.restygwt.client.RestService;
 
 import pl.ismop.web.client.dap.DapDispatcher;
 
-@Options(dispatcher = DapDispatcher.class)
+@Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
 public interface SensorService extends RestService {
 	@GET
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/sensors")
+	@Path("sensors")
 	void getSensors(MethodCallback<SensorsResponse> callback);
 	
 	@GET
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/sensors/{id}")
+	@Path("sensors/{id}")
 	void getSensor(@PathParam("id") String sensorId, MethodCallback<SensorResponse> callback);
 }

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +70,7 @@ public class MapsController {
 					geoJsonFeature.getProperties().put("type", "sensor");
 					
 					PointGeometry point = new PointGeometry();
-					point.setCoordinates(reversePointCoordinates(sensor.getPlacement().getCoordinates()));
+					point.setCoordinates(sensor.getPlacement().getCoordinates());
 					geoJsonFeature.setGeometry(point);
 					
 					return geoJsonFeature;
@@ -86,11 +85,6 @@ public class MapsController {
 	@RequestMapping(value = "/profiles", produces = "application/json")
 	public GeoJsonFeatures profiles() {
 		List<Profile> profiles = dapService.getProfiles();
-		Map<String, Sensor> sensors = dapService.getSensors()
-				.stream()
-				.collect(Collectors.toMap(sensor -> {
-					return sensor.getId();
-				}, Function.<Sensor>identity()));
 		List<GeoJsonFeature> shapes = profiles.stream()
 				.map(profile -> {
 					GeoJsonFeature geoJsonFeature = new GeoJsonFeature();
@@ -100,9 +94,14 @@ public class MapsController {
 					geoJsonFeature.getProperties().put("name", profile.getName());
 					geoJsonFeature.getProperties().put("type", "profile");
 					
-					LineGeometry line = new LineGeometry();
-					line.setCoordinates(profileToLine(profile, sensors));
-					geoJsonFeature.setGeometry(line);
+					PolygonGeometry geometry = new PolygonGeometry();
+					ArrayList<List<List<Double>>> polygons = new ArrayList<List<List<Double>>>();
+					polygons.add(profile.getShape().getCoordinates());
+					
+					//we need to close the polygon
+					polygons.get(0).add(profile.getShape().getCoordinates().get(0));
+					geometry.setCoordinates(polygons);
+					geoJsonFeature.setGeometry(geometry);
 					
 					return geoJsonFeature;
 				})
@@ -134,7 +133,11 @@ public class MapsController {
 		for(List<Double> point : coordinates) {
 			Double first = point.remove(0);
 			Double second = point.remove(0);
-			Double third = point.remove(0);
+			
+			if(point.size() > 0) {
+				point.remove(0);
+			}
+			
 			point.add(second);
 			point.add(first);
 			//third coordinate breaks OpenLayers

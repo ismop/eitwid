@@ -10,9 +10,9 @@ import org.fusesource.restygwt.client.RestService;
 
 import pl.ismop.web.client.dap.DapDispatcher;
 
-@Options(dispatcher = DapDispatcher.class)
+@Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
 public interface ExperimentService extends RestService {
 	@GET
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/experiments?id={ids}")
+	@Path("experiments?id={ids}")
 	void getExperiments(@PathParam("ids") String ids, MethodCallback<ExperimentsResponse> callback);
 }

@@ -36,11 +36,13 @@ public class MainController {
 	@Value("${maps.google.key}") private String googleMapApiKey;
 	@Value("${hypgen.user}") private String hypgenUser;
 	@Value("${hypgen.pass}") private String hypgenPass;
+	@Value("${hypgen.endpoint}") private String hypgenEndpoint;
 	
 	@RequestMapping("/")
 	public String home(Model model, HttpServletRequest request) {
 		model.addAttribute("dapEndpoint", dapEndpoint);
 		model.addAttribute("dapToken", dapToken);
+		model.addAttribute("hypgenEndpoint", hypgenEndpoint);
 		
 		return "summary";
 	}
@@ -95,17 +97,10 @@ public class MainController {
 		model.addAttribute("googleMapApiKey", googleMapApiKey);
 		model.addAttribute("dapToken", dapToken);
 		model.addAttribute("dapEndpoint", dapEndpoint);
+		model.addAttribute("hypgenEndpoint", hypgenEndpoint);
 		model.addAttribute("hypgenToken", createHypgenToken());
 		
 		return "levees";
-	}
-
-	@RequestMapping("/leveesOL")
-	public String leveesOl(Model model) {
-		model.addAttribute("dapToken", dapToken);
-		model.addAttribute("dapEndpoint", dapEndpoint);
-		
-		return "leveesOL";
 	}
 	
 	private String createHypgenToken() {

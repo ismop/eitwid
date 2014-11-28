@@ -11,14 +11,10 @@
 	<source path="client"/>
 	
 	<!-- Logging configuration -->
-	<set-property name="gwt.logging.popupHandler" value="DISABLED"/>
 	<set-property name="gwt.logging.logLevel" value="FINE"/>
 	
 	<!-- locale setup -->
 	<extend-property name="locale" values="en,pl"/>
 	<set-property-fallback name="locale" value="pl"/>
-	<set-property name="locale" value="en,pl"/>
-	
-	<!-- Super Dev Mode properties -->
-	<add-linker name="xsiframe"/>
+	<set-property name="locale" value="en,pl"/>>
 </module>

@@ -11,17 +11,17 @@ import org.fusesource.restygwt.client.RestService;
 
 import pl.ismop.web.client.dap.DapDispatcher;
 
-@Options(dispatcher = DapDispatcher.class)
+@Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
 public interface LeveeService extends RestService {
 	@GET
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/levees")
+	@Path("levees")
 	void getLevees(MethodCallback<LeveesResponse> callback);
 
 	@PUT
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/levees/{id}")
+	@Path("levees/{id}")
 	void changeMode(@PathParam("id") String leveeId, ModeChangeRequest request, MethodCallback<LeveeResponse> methodCallback);
 
 	@GET
-	@Path("https://dap.moc.ismop.edu.pl/api/v1/levees/{id}")
+	@Path("levees/{id}")
 	void getLevee(@PathParam("id") String leveeId, MethodCallback<LeveeResponse> methodCallback);
 }

@@ -11,15 +11,16 @@ import org.slf4j.LoggerFactory;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.LeveesCallback;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
+import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.newexperiment.ExperimentPresenter;
-import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
+import pl.ismop.web.client.widgets.profile.ProfilePresenter;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
@@ -43,11 +44,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private DapController dapController;
 	private String elementId;
 	private MapMessages messages;
-	private Map<String, Levee> levees;
+	private Map<String, Profile> profiles;
 	private String detailsElementId;
-	private LeveeSummaryPresenter selectedLevee;
+	private ProfilePresenter selectedProfile;
 	private JavaScriptObject map;
-	private Map<String, String> leveeColors;
+	private Map<String, String> profileColors;
 	private Sensor selectedSensor;
 	private JavaScriptObject currentGraph;
 	private Timer sensorTimer;
@@ -57,11 +58,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
 		this.dapController = dapController;
 		this.messages = messages;
-		levees = new HashMap<>();
-		leveeColors = new HashMap<>();
-		leveeColors.put("none", "#D9EDF7");
-		leveeColors.put("heightened", "#FAEBCC");
-		leveeColors.put("severe", "#EBCCD1");
+		profiles = new HashMap<>();
+		profileColors = new HashMap<>();
+		profileColors.put("none", "#D9EDF7");
+		profileColors.put("heightened", "#FAEBCC");
+		profileColors.put("severe", "#EBCCD1");
 	}
 	
 	public void onDrawGoogleMap(String mapElementId, String detailsElementId) {
@@ -69,28 +70,28 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		this.detailsElementId = detailsElementId;
 		showProgressIndicator(true);
 		setNoFeatureSelectedLabel();
-		dapController.getLevees(new LeveesCallback() {
+		dapController.getProfiles(new ProfilesCallback() {
 			@Override
 			public void onError(int code, String message) {
 				showProgressIndicator(false);
 				Window.alert("Error: " + message);
 			}
-			
+
 			@Override
-			public void processLevees(List<Levee> levees) {
+			public void processProfiles(List<Profile> profiles) {
 				showProgressIndicator(false);
 				List<List<Double>> allPoints = new ArrayList<List<Double>>();
 
-				for(Levee levee : levees) {
-					GoogleMapsPresenter.this.levees.put(levee.getId(), levee);
-					allPoints.addAll(levee.getShape().getCoordinates());
+				for(Profile profile : profiles) {
+					GoogleMapsPresenter.this.profiles.put(profile.getId(), profile);
+					allPoints.addAll(profile.getShape().getCoordinates());
 				}
 				
 				if(allPoints.size() > 1) {
 					Object bounds = createLatLngBounds();
 					
 					for(List<Double> point : allPoints) {
-						extend(bounds, point.get(0), point.get(1));
+						extend(bounds, point.get(1), point.get(0));
 					}
 					
 					Element element = DOM.getElementById(GoogleMapsPresenter.this.elementId);
@@ -102,19 +103,20 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 					showInsufficientPointsError();
 				}
 			}
+			
 		});
 	}
 	
-	public void onLeveeUpdated(Levee newLevee) {
-		if(levees.get(newLevee.getId()) != null) {
-			levees.put(newLevee.getId(), newLevee);
-			updateLeveeOnMap(newLevee.getId());
+	public void onProfileUpdated(Profile profile) {
+		if(profiles.get(profile.getId()) != null) {
+			profiles.put(profile.getId(), profile);
+			updateProfileOnMap(profile.getId());
 		}
 	}
 	
 	public void onShowExperiments(List<String> experimentIds) {
-		if(selectedLevee != null) {
-			selectedLevee.stopUpdate();
+		if(selectedProfile != null) {
+			selectedProfile.stopUpdate();
 		}
 		
 		if(selectedSensor != null) {
@@ -170,9 +172,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		log.info("Feature with id {} clicked", featureId);
 		
 		if(RootPanel.get(detailsElementId) != null) {
-			if(getLeveeId(featureId) != null) {
-				Levee levee = levees.get(getLeveeId(featureId));
-				showLeveeDetails(levee);
+			if(getProfileId(featureId) != null) {
+				Profile profile = profiles.get(getProfileId(featureId));
+				showProfileDetails(profile);
 			} else if(getSensorId(featureId) != null) {
 				showSensorDetails(getSensorId(featureId));
 			}
@@ -195,12 +197,12 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 
 			@Override
 			public void processSensor(final Sensor sensor) {
-				if(selectedLevee != null) {
-					String previousLeveeId = selectedLevee.getLevee().getId();
-					eventBus.removeHandler(selectedLevee);
-					selectedLevee.stopUpdate();
-					selectedLevee = null;
-					selectLevee(previousLeveeId, false);
+				if(selectedProfile != null) {
+					String previousProfileId = selectedProfile.getProfile().getId();
+					eventBus.removeHandler(selectedProfile);
+					selectedProfile.stopUpdate();
+					selectedProfile = null;
+					selectProfile(previousProfileId, false);
 				}
 				
 				dapController.getMeasurements(sensor.getId(), new MeasurementsCallback() {
@@ -249,8 +251,12 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							chart.setId("measurements");
 							chart.getStyle().setHeight(250, Unit.PX);
 							RootPanel.get(detailsElementId).getElement().appendChild(chart);
-							currentGraph = showDygraphChart(getDygraphValues(measurements, sensor.getUnitLabel()), sensor.getUnitLabel() + ", " + sensor.getUnit(),
-									sensor.getUnitLabel() + " (" + sensor.getCustomId() + ")");
+							
+							
+							String unit = sensor.getUnit() == null ? "unknown" : sensor.getUnit();
+							String unitLabel = sensor.getUnitLabel() == null ? "unknown" : sensor.getUnitLabel();
+							currentGraph = showDygraphChart(getDygraphValues(measurements, unitLabel), unitLabel + ", " + unit,
+									unitLabel + " (" + sensor.getCustomId() + ")");
 							sensorTimer = new Timer() {
 								@Override
 								public void run() {
@@ -287,14 +293,14 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	
 	private String getDygraphValues(List<Measurement> measurements, String yLabel) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("aa,").append(yLabel).append("\n");
+		builder.append("aa|").append(yLabel).append("\n");
 		
 		for(Measurement measurement : measurements) {
 			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
 			Date date = format.parse(measurement.getTimestamp());
 			date = new Date(date.getTime() - 7200000);
 			builder.append(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date))
-					.append(",")
+					.append("|")
 					.append(measurement.getValue())
 					.append("\n");
 		}
@@ -302,7 +308,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		return builder.toString();
 	}
 
-	private void showLeveeDetails(Levee levee) {
+	private void showProfileDetails(Profile profile) {
 		if(sensorTimer != null) {
 			sensorTimer.cancel();
 			sensorTimer = null;
@@ -315,37 +321,37 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		selectedSensor = null;
 		currentGraph = null;
 		
-		String previousLeveeId = null;
+		String previousProfileId = null;
 		
-		if(selectedLevee != null) {
-			previousLeveeId = selectedLevee.getLevee().getId();
-			eventBus.removeHandler(selectedLevee);
-			selectedLevee.stopUpdate();
-			selectedLevee = null;
+		if(selectedProfile != null) {
+			previousProfileId = selectedProfile.getProfile().getId();
+			eventBus.removeHandler(selectedProfile);
+			selectedProfile.stopUpdate();
+			selectedProfile = null;
 		}
 		
 		Element element = DOM.getElementById(detailsElementId);
 		element.setInnerHTML("");
 		
-		LeveeSummaryPresenter presenter = eventBus.addHandler(LeveeSummaryPresenter.class);
-		selectedLevee = presenter;
-		presenter.setLevee(levee);
+		ProfilePresenter presenter = eventBus.addHandler(ProfilePresenter.class);
+		selectedProfile = presenter;
+		presenter.setProfile(profile);
 		RootPanel.get(detailsElementId).add(presenter.getView());
 		
-		if(previousLeveeId != null) {
-			selectLevee(previousLeveeId, false);
+		if(previousProfileId != null) {
+			selectProfile(previousProfileId, false);
 		}
 		
-		selectLevee(levee.getId(), true);
+		selectProfile(profile.getId(), true);
 	}
 	
 	private String getFeatureColor(String featureId) {
-		String leveeId = getLeveeId(featureId);
+		String profileId = getProfileId(featureId);
 		
-		if(leveeId != null) {
-			for(Levee levee : levees.values()) {
-				if(levee.getId().equals(leveeId)) {
-					return leveeColors.get(levee.getEmergencyLevel());
+		if(profileId != null) {
+			for(Profile profile : profiles.values()) {
+				if(profile.getId().equals(profileId)) {
+					return profileColors.get(profile.getThreatLevel());
 				}
 			}
 		}
@@ -369,7 +375,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			case "levee":
 				return 1;
 			case "profile":
-				return 3;
+				return 1;
 		}
 		
 		return 0;
@@ -380,11 +386,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		eventBus.areaSelected(top, left, bottom, right);
 	}
 	
-	private native void updateLeveeOnMap(String leveeId) /*-{
+	private native void updateProfileOnMap(String leveeId) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
 		var foundFeature = null;
 		geoJsonMap.data.forEach(function(feature) {
-			if(feature.getProperty('type') == 'levee' && leveeId == feature.getProperty('id')) {
+			if(feature.getProperty('type') == 'profile' && leveeId == feature.getProperty('id')) {
 				foundFeature = feature;
 			}
 		});
@@ -398,11 +404,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		}
 	}-*/;
 	
-	private native void selectLevee(String leveeId, boolean show) /*-{
+	private native void selectProfile(String leveeId, boolean show) /*-{
 		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
 		var foundFeature = null;
 		geoJsonMap.data.forEach(function(feature) {
-			if(feature.getProperty('type') == 'levee' && leveeId == feature.getProperty('id')) {
+			if(feature.getProperty('type') == 'profile' && leveeId == feature.getProperty('id')) {
 				foundFeature = feature;
 			}
 		});
@@ -451,7 +457,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			$doc.getElementById(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::elementId));
 		var thisObject = this;
 		map.fitBounds(bounds);
-		map.data.loadGeoJson($wnd.geojsonUrl);
+//		map.data.loadGeoJson($wnd.geojsonUrl);
 		map.data.loadGeoJson($wnd.sensorUrl);
 		map.data.loadGeoJson($wnd.profileUrl);
 		map.data.setStyle(function(feature) {
@@ -517,12 +523,12 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		}
 	}-*/;
 	
-	private native String getLeveeId(String featureId) /*-{
+	private native String getProfileId(String featureId) /*-{
 		if(featureId) {
 			var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
 			var feature = geoJsonMap.data.getFeatureById(featureId);
 			
-			if(feature && feature.getProperty('type') == 'levee') {
+			if(feature && feature.getProperty('type') == 'profile') {
 				return feature.getProperty('id');
 			}
 		}
@@ -571,7 +577,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			},
 			axisLabelWidth: 100,
 			title: title,
-			digitsAfterDecimal: 1
+			digitsAfterDecimal: 1,
+			delimiter: '|'
 		});
 	}-*/;
 	

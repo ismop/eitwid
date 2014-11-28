@@ -6,6 +6,8 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.fusesource.restygwt.client.Json;
 
+import pl.ismop.web.client.dap.levee.Shape;
+
 public class Profile {
 	private String id;
 	private String name;
@@ -15,6 +17,13 @@ public class Profile {
 	@Json(name = "sensor_ids")
 	@XmlElement(name = "sensor_ids")
 	private List<String> sensorIds;
+	private Shape shape;
+	@Json(name = "threat_level")
+	@XmlElement(name = "threat_level")
+	private String threatLevel;
+	@Json(name = "levee_id")
+	@XmlElement(name = "levee_id")
+	private String leveeId;
 	
 	public String getId() {
 		return id;
@@ -40,8 +49,20 @@ public class Profile {
 	public void setSensorIds(List<String> sensorIds) {
 		this.sensorIds = sensorIds;
 	}
+	public Shape getShape() {
+		return shape;
+	}
+	public void setShape(Shape shape) {
+		this.shape = shape;
+	}
 	@Override
 	public String toString() {
-		return "Profile [id=" + id + ", name=" + name + ", experimentIds=" + experimentIds + ", sensorIds=" + sensorIds + "]";
+		return "Profile [id=" + id + ", name=" + name + ", experimentIds=" + experimentIds + ", sensorIds=" + sensorIds + ", shape=" + shape + "]";
+	}
+	public String getThreatLevel() {
+		return threatLevel;
+	}
+	public void setThreatLevel(String threatLevel) {
+		this.threatLevel = threatLevel;
 	}
 }

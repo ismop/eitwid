@@ -12,7 +12,7 @@
 				<h1 class="page-header" th:text="#{levees.label}"></h1>
 			</div>
 		</div>
-		<div id="mapContainer" style="height: 400px;"></div>
+		<div id="mapContainer" style="height: 600px;"></div>
 		<div id="detailsContainer" style="margin-top: 20px;"></div>
 		<div id="modalContainer"></div>
 	</div>
@@ -22,7 +22,7 @@
 		<script type="text/javascript" th:utext="'var sensorUrl = \'' + @{/maps/sensors} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var profileUrl = \'' + @{/maps/profiles} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var iconBaseUrl = \'' + @{/icons} + '\';'"></script>
-		<script type="text/javascript" th:utext="'var properties = {dapEndpoint: \'' + ${dapEndpoint} + '\', dapToken: \'' + ${dapToken} + '\', hypgenToken: \'' + ${hypgenToken} + '\'};'"></script>
+		<script type="text/javascript" th:utext="'var properties = {dapEndpoint: \'' + ${dapEndpoint} + '\', dapToken: \'' + ${dapToken} + '\', hypgenEndpoint: \'' + ${hypgenEndpoint} + '\', hypgenToken: \'' + ${hypgenToken} + '\'};'"></script>
 		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
 	</div>
 </body>
