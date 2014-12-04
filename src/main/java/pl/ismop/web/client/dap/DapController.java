@@ -234,11 +234,11 @@ public class DapController {
 	private String createSelectionQuery(double top, double left, double bottom, double right) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("POLYGON ((")
-				.append(top).append(" ").append(left).append(", ")
-				.append(top).append(" ").append(right).append(", ")
-				.append(bottom).append(" ").append(right).append(", ")
-				.append(bottom).append(" ").append(left).append(", ")
-				.append(top).append(" ").append(left)
+				.append(left).append(" ").append(top).append(", ")
+				.append(right).append(" ").append(top).append(", ")
+				.append(right).append(" ").append(bottom).append(", ")
+				.append(left).append(" ").append(bottom).append(", ")
+				.append(left).append(" ").append(top)
 				.append("))");
 		
 		return builder.toString();
