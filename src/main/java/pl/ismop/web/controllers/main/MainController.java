@@ -40,11 +40,13 @@ public class MainController {
 	
 	@RequestMapping("/")
 	public String home(Model model, HttpServletRequest request) {
-		model.addAttribute("dapEndpoint", dapEndpoint);
+		model.addAttribute("googleMapApiKey", googleMapApiKey);
 		model.addAttribute("dapToken", dapToken);
+		model.addAttribute("dapEndpoint", dapEndpoint);
 		model.addAttribute("hypgenEndpoint", hypgenEndpoint);
+		model.addAttribute("hypgenToken", createHypgenToken());
 		
-		return "summary";
+		return "workspace";
 	}
 	
 	@RequestMapping("/login")

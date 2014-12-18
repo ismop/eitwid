@@ -3,6 +3,8 @@ package pl.ismop.web.client.widgets.root;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gwtbootstrap3.client.ui.Label;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
@@ -11,8 +13,11 @@ import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.EventHandler;
@@ -57,6 +62,16 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 			});
 		} else if(RootPanel.get(MAP_CONTAINER_ID) != null) {
 			eventBus.drawGoogleMap(MAP_CONTAINER_ID, DETAILS_CONTAINER_ID);
+		} else {
+			SplitLayoutPanel panel = new SplitLayoutPanel();
+			FlowPanel south = new FlowPanel();
+			FlowPanel map = new FlowPanel();
+			map.getElement().setId("map");
+			south.getElement().setId("details");
+			panel.addSouth(south, 100);
+			panel.add(map);
+			RootLayoutPanel.get().add(panel);
+			eventBus.drawGoogleMap("map", "details");
 		}
 	}
 	

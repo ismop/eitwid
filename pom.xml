@@ -23,6 +23,7 @@
 		<tomcat.version>8.0.8</tomcat.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gwt.version>2.7.0</gwt.version>
+		<gwt.bootstrap.version>0.8.1</gwt.bootstrap.version>
 	</properties>
 
 	<scm>
@@ -139,6 +140,13 @@
 			<groupId>de.benediktmeurer.gwt-slf4j</groupId>
 			<artifactId>gwt-slf4j</artifactId>
 			<version>0.0.2</version>
+		</dependency>
+		
+		<!-- GWT Bootstrap dependencies -->
+		<dependency>
+			<groupId>org.gwtbootstrap3</groupId>
+			<artifactId>gwtbootstrap3</artifactId>
+			<version>${gwt.bootstrap.version}</version>
 		</dependency>
 
 		<!-- REST client dependencies -->

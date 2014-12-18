@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="gwt:property" th:content="'locale=' + ${#httpServletRequest.getLocale().getLanguage()}"/>
+		<title>#{workspace.page.title}</title>
+		
+		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false&amp;libraries=drawing'}"></script>
+		<script type="text/javascript" th:utext="'var properties = {dapEndpoint: \'' + ${dapEndpoint} + '\', dapToken: \'' + ${dapToken} + '\', hypgenEndpoint: \'' + ${hypgenEndpoint} + '\', hypgenToken: \'' + ${hypgenToken} + '\'};'"></script>
+		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
+	</head>
+	<body>
+	</body>
+</html>
