@@ -63,15 +63,8 @@ public class RootPresenter extends BaseEventHandler<MainEventBus> {
 		} else if(RootPanel.get(MAP_CONTAINER_ID) != null) {
 			eventBus.drawGoogleMap(MAP_CONTAINER_ID, DETAILS_CONTAINER_ID);
 		} else {
-			SplitLayoutPanel panel = new SplitLayoutPanel();
-			FlowPanel south = new FlowPanel();
-			FlowPanel map = new FlowPanel();
-			map.getElement().setId("map");
-			south.getElement().setId("details");
-			panel.addSouth(south, 100);
-			panel.add(map);
-			RootLayoutPanel.get().add(panel);
-			eventBus.drawGoogleMap("map", "details");
+			RootLayoutPanel.get().add(new pl.ismop.web.client.widgets.root.RootPanel());
+			eventBus.drawGoogleMap("mapPanel", "detailsPanel");
 		}
 	}
 	
