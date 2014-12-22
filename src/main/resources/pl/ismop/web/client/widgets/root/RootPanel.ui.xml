@@ -7,12 +7,13 @@
 			padding-right: 10px;
 		}
 	</ui:style>
-	<g:SplitLayoutPanel>
+	<g:DockLayoutPanel>
 		<g:north size="50">
 			<b:Navbar>
 				<b:NavbarBrand href="/">ISMOP</b:NavbarBrand>
 					<b:NavbarNav>
 						<b:AnchorListItem active="true">Levees</b:AnchorListItem>
+						<b:AnchorListItem active="true">Sensors</b:AnchorListItem>
 					</b:NavbarNav>
 					<b:NavbarText pull="RIGHT">
 						<b:NavbarLink href="/logout" icon="SIGN_OUT" text="Logout" addStyleNames="{style.logout}"/>
@@ -25,5 +26,5 @@
 		<g:south size="100">	
 			<g:HTMLPanel ui:field="detailsPanel"/>
 		</g:south>
-	</g:SplitLayoutPanel>
+	</g:DockLayoutPanel>
 </ui:UiBinder>
