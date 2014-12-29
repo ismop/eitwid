@@ -14,7 +14,6 @@ import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
-import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.sensor.Sensor;
@@ -45,7 +44,6 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private String elementId;
 	private MapMessages messages;
 	private Map<String, Profile> profiles;
-	private String detailsElementId;
 	private ProfilePresenter selectedProfile;
 	private JavaScriptObject map;
 	private Map<String, String> profileColors;
@@ -53,6 +51,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private JavaScriptObject currentGraph;
 	private Timer sensorTimer;
 	private ListBox days;
+	private JavaScriptObject profileMapData;
+	private JavaScriptObject sensorMapData;
+	
+	private String detailsElementId;
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
@@ -65,11 +67,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		profileColors.put("severe", "#EBCCD1");
 	}
 	
-	public void onDrawGoogleMap(String mapElementId, String detailsElementId) {
+	public void onDrawGoogleMap(String mapElementId) {
 		this.elementId = mapElementId;
-		this.detailsElementId = detailsElementId;
 		showProgressIndicator(true);
-		setNoFeatureSelectedLabel();
 		dapController.getProfiles(new ProfilesCallback() {
 			@Override
 			public void onError(int code, String message) {
@@ -126,15 +126,15 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			}
 		}
 	}
-
-	private void setNoFeatureSelectedLabel() {
-		Element element = DOM.getElementById(detailsElementId);
-		
-		if(element != null) {
-			element.setInnerText(messages.noFeatureSelected());
-		}
+	
+	public void onShowLevees(boolean show) {
+		showLayer(profileMapData, show);
 	}
 	
+	public void onShowSensors(boolean show) {
+		showLayer(sensorMapData, show);
+	}
+
 	private void setNoMeasurementsLabel() {
 		Element element = DOM.getElementById(detailsElementId);
 		
@@ -190,7 +190,6 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		dapController.getSensor(sensorId, new SensorCallback() {
 			@Override
 			public void onError(int code, String message) {
-				setNoFeatureSelectedLabel();
 				selectSensor(sensorId, false);
 				Window.alert("Error: " + message);
 			}
@@ -208,7 +207,6 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				dapController.getMeasurements(sensor.getId(), new MeasurementsCallback() {
 					@Override
 					public void onError(int code, String message) {
-						setNoFeatureSelectedLabel();
 						Window.alert("Error: " + message);
 					}
 
@@ -387,9 +385,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	private native void updateProfileOnMap(String leveeId) /*-{
-		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+		var profileData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData;
 		var foundFeature = null;
-		geoJsonMap.data.forEach(function(feature) {
+		profileData.forEach(function(feature) {
 			if(feature.getProperty('type') == 'profile' && leveeId == feature.getProperty('id')) {
 				foundFeature = feature;
 			}
@@ -398,47 +396,47 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		
 		if(foundFeature) {
 			var color = thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(foundFeature.getId());
-			geoJsonMap.data.overrideStyle(foundFeature, {
+			profileData.overrideStyle(foundFeature, {
 				fillColor: color
 			});
 		}
 	}-*/;
 	
 	private native void selectProfile(String leveeId, boolean show) /*-{
-		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+		var profileData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData;
 		var foundFeature = null;
-		geoJsonMap.data.forEach(function(feature) {
+		profileData.forEach(function(feature) {
 			if(feature.getProperty('type') == 'profile' && leveeId == feature.getProperty('id')) {
 				foundFeature = feature;
 			}
 		});
 		
 		if(show) {
-			geoJsonMap.data.overrideStyle(foundFeature, {
+			profileData.overrideStyle(foundFeature, {
 				strokeWeight: 3
 			});
 		} else {
-			geoJsonMap.data.overrideStyle(foundFeature, {
+			profileData.overrideStyle(foundFeature, {
 				strokeWeight: 1
 			});
 		}
 	}-*/;
 	
 	private native void selectSensor(String sensorId, boolean show) /*-{
-		var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
+		var sensorData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::sensorMapData;
 		var foundFeature = null;
-		geoJsonMap.data.forEach(function(feature) {
+		sensorData.forEach(function(feature) {
 			if(feature.getProperty('type') == 'sensor' && sensorId == feature.getProperty('id')) {
 				foundFeature = feature;
 			}
 		});
 		
 		if(show) {
-			geoJsonMap.data.overrideStyle(foundFeature, {
+			sensorData.overrideStyle(foundFeature, {
 				icon: $wnd.iconBaseUrl + '/sensor-selected.png'
 			});
 		} else {
-			geoJsonMap.data.overrideStyle(foundFeature, {
+			sensorData.overrideStyle(foundFeature, {
 				icon: $wnd.iconBaseUrl + '/sensor.png'
 			});
 		}
@@ -457,34 +455,18 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			$doc.getElementById(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::elementId));
 		var thisObject = this;
 		map.fitBounds(bounds);
-//		map.data.loadGeoJson($wnd.geojsonUrl);
-		map.data.loadGeoJson($wnd.sensorUrl);
-		map.data.loadGeoJson($wnd.profileUrl);
-		map.data.setStyle(function(feature) {
-			return {
-				strokeColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureStrokeColor(Ljava/lang/String;)(feature.getId()),
-				fillOpacity: 0.9,
-				strokeOpacity: 1.0,
-				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(feature.getId()),
-				strokeWeight: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureStrokeWeight(Ljava/lang/String;)(feature.getId()),
-				icon: $wnd.iconBaseUrl + '/sensor.png'
-			};
-		});
-		map.data.addListener('mouseover', function(event) {
-			map.data.overrideStyle(event.feature, {
-				fillOpacity: 0.6,
-				strokeOpacity: 0.5
-			});
-		});
-		map.data.addListener('mouseout', function(event) {
-			map.data.overrideStyle(event.feature, {
-				fillOpacity: 0.9,
-				strokeOpacity: 1.0
-			});
-		});
-		map.data.addListener('click', function(event) {
-			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::onFeatureClicked(Ljava/lang/String;)(event.feature.getId());
-		});
+		
+		var profileData = new $wnd.google.maps.Data();
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData = profileData;
+		profileData.loadGeoJson($wnd.profileUrl);
+		profileData.setMap(map);
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::overrideStyle(Lcom/google/gwt/core/client/JavaScriptObject;)(profileData);
+		
+		var sensorData = new $wnd.google.maps.Data();
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::sensorMapData = sensorData;
+		sensorData.loadGeoJson($wnd.sensorUrl);
+		//sensors are not shown at the start
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::overrideStyle(Lcom/google/gwt/core/client/JavaScriptObject;)(sensorData);
 		
 		var drawingManager = new $wnd.google.maps.drawing.DrawingManager({
 			drawingControl: true,
@@ -510,10 +492,42 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		return map;
 	}-*/;
 	
+	private native void overrideStyle(JavaScriptObject mapData) /*-{
+		var thisObject = this;
+		mapData.setStyle(function(feature) {
+			return {
+				strokeColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureStrokeColor(Ljava/lang/String;)(feature.getId()),
+				fillOpacity: 0.9,
+				strokeOpacity: 1.0,
+				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(feature.getId()),
+				strokeWeight: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureStrokeWeight(Ljava/lang/String;)(feature.getId()),
+				icon: $wnd.iconBaseUrl + '/sensor.png'
+			};
+		});
+		mapData.addListener('mouseover', function(event) {
+			mapData.overrideStyle(event.feature, {
+				fillOpacity: 0.6,
+				strokeOpacity: 0.5
+			});
+		});
+		mapData.addListener('mouseout', function(event) {
+			mapData.overrideStyle(event.feature, {
+				fillOpacity: 0.9,
+				strokeOpacity: 1.0
+			});
+		});
+		mapData.addListener('click', function(event) {
+			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::onFeatureClicked(Ljava/lang/String;)(event.feature.getId());
+		});
+	}-*/;
+	
 	private native String getFeatureType(String featureId) /*-{
 		if(featureId) {
-			var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
-			var feature = geoJsonMap.data.getFeatureById(featureId);
+			var feature = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.getFeatureById(featureId);
+			
+			if(feature == null) {
+				feature = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::sensorMapData.getFeatureById(featureId);
+			}
 			
 			if(feature) {
 				return feature.getProperty('type');
@@ -525,8 +539,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	
 	private native String getProfileId(String featureId) /*-{
 		if(featureId) {
-			var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
-			var feature = geoJsonMap.data.getFeatureById(featureId);
+			var profileData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData;
+			var feature = profileData.getFeatureById(featureId);
 			
 			if(feature && feature.getProperty('type') == 'profile') {
 				return feature.getProperty('id');
@@ -538,8 +552,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	
 	private native String getSensorId(String featureId) /*-{
 		if(featureId) {
-			var geoJsonMap = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map;
-			var feature = geoJsonMap.data.getFeatureById(featureId);
+			var sensorData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::sensorMapData;
+			var feature = sensorData.getFeatureById(featureId);
 			
 			if(feature && feature.getProperty('type') == 'sensor') {
 				return feature.getProperty('id');
@@ -589,6 +603,14 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::currentGraph.updateOptions({
 				file: data
 			});
+		}
+	}-*/;
+	
+	private native void showLayer(JavaScriptObject mapData, boolean show) /*-{
+		if(show) {
+			mapData.setMap(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map);
+		} else {
+			mapData.setMap(null);
 		}
 	}-*/;
 }

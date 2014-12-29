@@ -3,6 +3,9 @@
 	<head>
 		<meta charset="UTF-8"/>
 		<meta name="gwt:property" th:content="'locale=' + ${#httpServletRequest.getLocale().getLanguage()}"/>
+		<meta id="csrfToken" name="_csrf" th:content="${_csrf} ? ${_csrf.token}"/>
+		<meta id="csrfHeaderName" name="_csrf_header" th:content="${_csrf} ? ${_csrf.headerName}"/>
+		<meta id="csrfParameterName" name="_csrf_parameter_name" th:content="${_csrf} ? ${_csrf.parameterName}"/>
 		<title th:text="#{workspace.page.title}"></title>
 		
 		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false&amp;libraries=drawing'}"></script>

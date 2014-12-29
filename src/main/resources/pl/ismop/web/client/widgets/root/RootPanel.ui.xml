@@ -2,6 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.root.RootPanelMessages" field="messages"/>
 	<ui:style>
 		.logout {
 			padding-right: 10px;
@@ -12,19 +13,19 @@
 			<b:Navbar>
 				<b:NavbarBrand href="/">ISMOP</b:NavbarBrand>
 					<b:NavbarNav>
-						<b:AnchorListItem active="true">Levees</b:AnchorListItem>
-						<b:AnchorListItem active="true">Sensors</b:AnchorListItem>
+						<b:AnchorListItem ui:field="levees" active="true"><ui:text from="{messages.leveesLabel}"/></b:AnchorListItem>
+						<b:AnchorListItem ui:field="sensors"><ui:text from="{messages.sensorsLabel}"/></b:AnchorListItem>
 					</b:NavbarNav>
 					<b:NavbarText pull="RIGHT">
-						<b:NavbarLink href="/logout" icon="SIGN_OUT" text="Logout" addStyleNames="{style.logout}"/>
+						<b:NavbarLink ui:field="logout" href="/logout" icon="SIGN_OUT" text="{messages.logoutLabel}" addStyleNames="{style.logout}"/>
+						<g:FormPanel ui:field="logoutForm" action="/logout" method="POST">
+							<g:Hidden ui:field="csrf"/>
+						</g:FormPanel>
 					</b:NavbarText>
 			</b:Navbar>
 		</g:north>
 		<g:center>
 			<g:HTMLPanel ui:field="mapPanel"/>
 		</g:center>
-		<g:south size="100">	
-			<g:HTMLPanel ui:field="detailsPanel"/>
-		</g:south>
 	</g:DockLayoutPanel>
 </ui:UiBinder>

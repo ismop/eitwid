@@ -23,7 +23,7 @@ public interface MainEventBus extends EventBus {
 	void start();
 
 	@Event(handlers = GoogleMapsPresenter.class)
-	void drawGoogleMap(String elementId, String detailsElementId);
+	void drawGoogleMap(String elementId);
 
 	@Event
 	void leveeUpdated(Levee levee);
@@ -36,4 +36,10 @@ public interface MainEventBus extends EventBus {
 
 	@Event(handlers = {ExperimentsPresenter.class, GoogleMapsPresenter.class, RootPresenter.class})
 	void showExperiments(List<String> experimentIds);
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void showLevees(boolean show);
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void showSensors(boolean show);
 }
