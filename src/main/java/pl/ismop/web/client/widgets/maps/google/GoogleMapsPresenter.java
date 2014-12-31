@@ -19,6 +19,7 @@ import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.newexperiment.ExperimentPresenter;
+import pl.ismop.web.client.widgets.popup.PopupPresenter;
 import pl.ismop.web.client.widgets.profile.ProfilePresenter;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -30,8 +31,9 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.EventHandler;
 import com.mvp4g.client.event.BaseEventHandler;
@@ -53,8 +55,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private ListBox days;
 	private JavaScriptObject profileMapData;
 	private JavaScriptObject sensorMapData;
-	
-	private String detailsElementId;
+	private PopupPresenter popupPresenter;
+
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
@@ -135,12 +137,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		showLayer(sensorMapData, show);
 	}
 
-	private void setNoMeasurementsLabel() {
-		Element element = DOM.getElementById(detailsElementId);
-		
-		if(element != null) {
-			element.setInnerText(messages.noMeasurements());
-		}
+	private void setNoMeasurementsLabel(String sensorId) {
+		PopupPresenter presenter = preparePopupPresenter();
+		presenter.setTitleAndShow(messages.sensorTitle(sensorId), new Label(messages.noMeasurements()));
 	}
 
 	private void showInsufficientPointsError() {
@@ -171,13 +170,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private  void onFeatureClicked(String featureId) {
 		log.info("Feature with id {} clicked", featureId);
 		
-		if(RootPanel.get(detailsElementId) != null) {
-			if(getProfileId(featureId) != null) {
-				Profile profile = profiles.get(getProfileId(featureId));
-				showProfileDetails(profile);
-			} else if(getSensorId(featureId) != null) {
-				showSensorDetails(getSensorId(featureId));
-			}
+		if(getProfileId(featureId) != null) {
+			Profile profile = profiles.get(getProfileId(featureId));
+			showProfileDetails(profile);
+		} else if(getSensorId(featureId) != null) {
+			showSensorDetails(getSensorId(featureId));
 		}
 	}
 
@@ -213,7 +210,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 					@Override
 					public void processMeasurements(List<Measurement> measurements) {
 						if(measurements.size() == 0) {
-							setNoMeasurementsLabel();
+							setNoMeasurementsLabel(sensor.getId());
 						} else {
 							if(selectedSensor != null) {
 								selectSensor(selectedSensor.getId(), false);
@@ -242,13 +239,15 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							min = min - 0.1 * diff;
 							max = max + 0.1 * diff;
 							
-							Element element = DOM.getElementById(detailsElementId);
-							element.setInnerHTML("");
-							
 							Element chart = DOM.createDiv();
 							chart.setId("measurements");
 							chart.getStyle().setHeight(250, Unit.PX);
-							RootPanel.get(detailsElementId).getElement().appendChild(chart);
+							chart.getStyle().setWidth(600, Unit.PX);
+							chart.getStyle().setBackgroundColor("white");
+							
+							FlowPanel panel = new FlowPanel();
+							panel.getElement().appendChild(chart);
+							preparePopupPresenter().setTitleAndShow(messages.sensorTitle(sensorId), panel);
 							
 							
 							String unit = sensor.getUnit() == null ? "unknown" : sensor.getUnit();
@@ -328,13 +327,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			selectedProfile = null;
 		}
 		
-		Element element = DOM.getElementById(detailsElementId);
-		element.setInnerHTML("");
-		
 		ProfilePresenter presenter = eventBus.addHandler(ProfilePresenter.class);
 		selectedProfile = presenter;
 		presenter.setProfile(profile);
-		RootPanel.get(detailsElementId).add(presenter.getView());
+		
+		preparePopupPresenter().setTitleAndShow(messages.profileTitle(profile.getId()), presenter.getView());
 		
 		if(previousProfileId != null) {
 			selectProfile(previousProfileId, false);
@@ -343,6 +340,14 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		selectProfile(profile.getId(), true);
 	}
 	
+	private PopupPresenter preparePopupPresenter() {
+		if(popupPresenter == null) {
+			popupPresenter = eventBus.addHandler(PopupPresenter.class);
+		}
+		
+		return popupPresenter;
+	}
+
 	private String getFeatureColor(String featureId) {
 		String profileId = getProfileId(featureId);
 		
