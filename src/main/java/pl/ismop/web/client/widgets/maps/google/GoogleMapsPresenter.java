@@ -57,7 +57,6 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private JavaScriptObject sensorMapData;
 	private PopupPresenter popupPresenter;
 
-
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
 		this.dapController = dapController;
@@ -136,6 +135,28 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	public void onShowSensors(boolean show) {
 		showLayer(sensorMapData, show);
 	}
+	
+	public void onPopupClosed() {
+		if(selectedProfile != null) {
+			String previousProfileId = selectedProfile.getProfile().getId();
+			eventBus.removeHandler(selectedProfile);
+			selectedProfile.stopUpdate();
+			selectedProfile = null;
+			selectProfile(previousProfileId, false);
+		}
+		
+		if(sensorTimer != null) {
+			sensorTimer.cancel();
+			sensorTimer = null;
+		}
+		
+		if(selectedSensor != null) {
+			selectSensor(selectedSensor.getId(), false);
+		}
+		
+		selectedSensor = null;
+		currentGraph = null;
+	}
 
 	private void setNoMeasurementsLabel(String sensorId) {
 		PopupPresenter presenter = preparePopupPresenter();
@@ -209,15 +230,16 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 
 					@Override
 					public void processMeasurements(List<Measurement> measurements) {
+						if(selectedSensor != null) {
+							selectSensor(selectedSensor.getId(), false);
+						}
+						
+						selectedSensor = sensor;
+						selectSensor(selectedSensor.getId(), true);
+						
 						if(measurements.size() == 0) {
 							setNoMeasurementsLabel(sensor.getId());
 						} else {
-							if(selectedSensor != null) {
-								selectSensor(selectedSensor.getId(), false);
-							}
-							
-							selectedSensor = sensor;
-							selectSensor(selectedSensor.getId(), true);
 							
 							JavaScriptObject values = JavaScriptObject.createArray();
 							double min = Double.MAX_VALUE;
@@ -247,7 +269,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							
 							FlowPanel panel = new FlowPanel();
 							panel.getElement().appendChild(chart);
-							preparePopupPresenter().setTitleAndShow(messages.sensorTitle(sensorId), panel);
+							preparePopupPresenter().setTitleAndShow(messages.sensorTitle(sensor.getCustomId()), panel);
 							
 							
 							String unit = sensor.getUnit() == null ? "unknown" : sensor.getUnit();
@@ -276,15 +298,17 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 
 			@Override
 			public void processMeasurements(List<Measurement> measurements) {
-				String data = getDygraphValues(measurements, selectedSensor.getUnitLabel());
-				updateDygraphData(data);
-				sensorTimer = new Timer() {
-					@Override
-					public void run() {
-						updateSensorDetails(sensorId);
-					}
-				};
-				sensorTimer.schedule(10000);
+				if(selectedSensor != null) {
+					String data = getDygraphValues(measurements, selectedSensor.getUnitLabel());
+					updateDygraphData(data);
+					sensorTimer = new Timer() {
+						@Override
+						public void run() {
+							updateSensorDetails(sensorId);
+						}
+					};
+					sensorTimer.schedule(10000);
+				}
 			}});
 	}
 	
@@ -296,7 +320,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
 			Date date = format.parse(measurement.getTimestamp());
 			date = new Date(date.getTime() - 7200000);
-			builder.append(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date))
+			builder.append(DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date))
 					.append("|")
 					.append(measurement.getValue())
 					.append("\n");

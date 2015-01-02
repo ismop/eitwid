@@ -42,4 +42,7 @@ public interface MainEventBus extends EventBus {
 
 	@Event(handlers = GoogleMapsPresenter.class)
 	void showSensors(boolean show);
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void popupClosed();
 }

@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.popup;
 
+import pl.ismop.web.client.widgets.popup.IPopupView.IPopupPresenter;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -11,14 +13,16 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.mvp4g.client.view.ReverseViewInterface;
 
-public class PopupView extends Composite implements IPopupView {
+public class PopupView extends Composite implements IPopupView, ReverseViewInterface<IPopupPresenter> {
 	private static PopupViewUiBinder uiBinder = GWT.create(PopupViewUiBinder.class);
 	interface PopupViewUiBinder extends UiBinder<Widget, PopupView> {}
 
 	@UiField PopupPanel popup;
 	@UiField HTMLPanel contents;
 	@UiField Label title;
+	private IPopupPresenter presenter;
 	
 	public PopupView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -26,6 +30,7 @@ public class PopupView extends Composite implements IPopupView {
 
 	@UiHandler("close")
 	void close(ClickEvent event) {
+		getPresenter().onClose();
 		popup.hide();
 	}
 	
@@ -52,5 +57,20 @@ public class PopupView extends Composite implements IPopupView {
 	@Override
 	public void setTitle(String title) {
 		this.title.setText(title);
+	}
+
+	@Override
+	public void setPresenter(IPopupPresenter presenter) {
+		this.presenter = presenter;
+	}
+
+	@Override
+	public IPopupPresenter getPresenter() {
+		return presenter;
+	}
+
+	@Override
+	public void hide() {
+		popup.hide();
 	}
 }

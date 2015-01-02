@@ -148,7 +148,8 @@ public class DapController {
 
 	public void getMeasurements(String sensorId, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		measurementService.getMeasurements(sensorId, until, new MethodCallback<MeasurementsResponse>() {
+		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date(new Date().getTime() - 2678400000L));//fetching one month old data
+		measurementService.getMeasurements(sensorId, from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(0, exception.getMessage());

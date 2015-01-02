@@ -15,4 +15,10 @@ public class PopupPresenter extends BasePresenter<IPopupView, MainEventBus> impl
 		view.add(widget);
 		view.show(true);
 	}
+
+	@Override
+	public void onClose() {
+		eventBus.popupClosed();
+		view.hide();
+	}
 }
