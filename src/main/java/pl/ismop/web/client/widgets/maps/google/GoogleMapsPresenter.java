@@ -116,16 +116,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	public void onShowExperiments(List<String> experimentIds) {
-		if(selectedProfile != null) {
-			selectedProfile.stopUpdate();
-		}
-		
-		if(selectedSensor != null) {
-			if(sensorTimer != null) {
-				sensorTimer.cancel();
-				sensorTimer = null;
-			}
-		}
+		onPopupClosed();
 	}
 	
 	public void onShowLevees(boolean show) {
@@ -159,8 +150,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 
 	private void setNoMeasurementsLabel(String sensorId) {
-		PopupPresenter presenter = preparePopupPresenter();
-		presenter.setTitleAndShow(messages.sensorTitle(sensorId), new Label(messages.noMeasurements()));
+		eventBus.setTitleAndShow(messages.sensorTitle(sensorId), new Label(messages.noMeasurements()));
 	}
 
 	private void showInsufficientPointsError() {
@@ -269,8 +259,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							
 							FlowPanel panel = new FlowPanel();
 							panel.getElement().appendChild(chart);
-							preparePopupPresenter().setTitleAndShow(messages.sensorTitle(sensor.getCustomId()), panel);
-							
+							eventBus.setTitleAndShow(messages.sensorTitle(sensor.getCustomId()), panel);
 							
 							String unit = sensor.getUnit() == null ? "unknown" : sensor.getUnit();
 							String unitLabel = sensor.getUnitLabel() == null ? "unknown" : sensor.getUnitLabel();
@@ -354,22 +343,13 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		ProfilePresenter presenter = eventBus.addHandler(ProfilePresenter.class);
 		selectedProfile = presenter;
 		presenter.setProfile(profile);
-		
-		preparePopupPresenter().setTitleAndShow(messages.profileTitle(profile.getId()), presenter.getView());
+		eventBus.setTitleAndShow(messages.profileTitle(profile.getId()), presenter.getView());
 		
 		if(previousProfileId != null) {
 			selectProfile(previousProfileId, false);
 		}
 		
 		selectProfile(profile.getId(), true);
-	}
-	
-	private PopupPresenter preparePopupPresenter() {
-		if(popupPresenter == null) {
-			popupPresenter = eventBus.addHandler(PopupPresenter.class);
-		}
-		
-		return popupPresenter;
 	}
 
 	private String getFeatureColor(String featureId) {

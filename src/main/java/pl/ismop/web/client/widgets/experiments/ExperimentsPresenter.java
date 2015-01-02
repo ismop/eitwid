@@ -13,10 +13,8 @@ import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.widgets.experimentitem.ExperimentItemPresenter;
 import pl.ismop.web.client.widgets.experiments.IExperimentsView.IExperimentsPresenter;
 
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -36,16 +34,6 @@ public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEv
 	
 	public void onShowExperiments(List<String> experimentsIds) {
 		this.experimentsIds = experimentsIds;
-		int count = RootPanel.get("page-wrapper").getWidgetCount();
-		
-		if(count == 0) {
-			DOM.getElementById("page-wrapper").removeAllChildren();
-			RootPanel.get("page-wrapper").add(view);
-		}
-		
-		for(ExperimentItemPresenter presenter : experimentItemPresenters.values()) {
-			eventBus.removeHandler(presenter);
-		}
 		
 		if(timer != null) {
 			timer.cancel();
@@ -72,6 +60,9 @@ public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEv
 	}
 
 	private void loadExperiments() {
+		eventBus.popupClosed();
+		eventBus.setTitleAndShow(view.popupTitle(), view);
+		
 		if(experimentsIds.size() == 0) {
 			view.showNoExperimentsMessage();
 		} else {
@@ -101,7 +92,6 @@ public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEv
 						view.addExperiment(presenter.getView());
 						presenter.setExperiment(experiment);
 					}
-					
 				}
 			});
 		}

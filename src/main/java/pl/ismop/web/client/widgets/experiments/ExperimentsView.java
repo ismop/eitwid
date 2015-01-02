@@ -55,4 +55,9 @@ public class ExperimentsView extends Composite implements IExperimentsView, Reve
 		super.onDetach();
 		getPresenter().onWidgetDetached();
 	}
+
+	@Override
+	public String popupTitle() {
+		return messages.popupTitle();
+	}
 }

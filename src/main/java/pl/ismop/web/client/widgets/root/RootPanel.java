@@ -30,6 +30,8 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@UiField Hidden csrf;
 	@UiField AnchorListItem levees;
 	@UiField AnchorListItem sensors;
+	@UiField AnchorListItem experiments;
+	@UiField RootPanelMessages messages;
 
 	public RootPanel() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -60,6 +62,11 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 		getPresenter().onShowSensors(!sensors.isActive());
 		sensors.setActive(!sensors.isActive());
 	}
+	
+	@UiHandler("experiments")
+	void showExperiments(ClickEvent event) {
+		getPresenter().onShowExperiments();
+	}
 
 	@Override
 	public void setPresenter(IRootPresenter presenter) {
@@ -69,5 +76,10 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@Override
 	public IRootPresenter getPresenter() {
 		return presenter;
+	}
+
+	@Override
+	public void setExperimentsLabel(int numberOfExperiments) {
+		experiments.setText(messages.experimentsLabel(numberOfExperiments));
 	}
 }

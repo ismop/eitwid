@@ -13,5 +13,7 @@ public interface IExperimentView extends IsWidget {
 	void setPickedProfilesMessage(int size);
 	void showNameEmptyMessage();
 	HasText getName();
-	void clearErrorMessages();
+	void clearMessages();
+	String title();
+	void showExperimentCreatedMessage();
 }

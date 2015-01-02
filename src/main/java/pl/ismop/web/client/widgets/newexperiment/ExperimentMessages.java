@@ -9,4 +9,5 @@ public interface ExperimentMessages extends Messages {
 	String daysLabel();
 	String nameLabel();
 	String emptyName();
+	String experimentCreated();
 }

@@ -15,6 +15,7 @@
 					<b:NavbarNav>
 						<b:AnchorListItem ui:field="levees" active="true"><ui:text from="{messages.leveesLabel}"/></b:AnchorListItem>
 						<b:AnchorListItem ui:field="sensors"><ui:text from="{messages.sensorsLabel}"/></b:AnchorListItem>
+						<b:AnchorListItem ui:field="experiments"></b:AnchorListItem>
 					</b:NavbarNav>
 					<b:NavbarText pull="RIGHT">
 						<b:NavbarLink ui:field="logout" href="/logout" icon="SIGN_OUT" text="{messages.logoutLabel}" addStyleNames="{style.logout}"/>

@@ -15,7 +15,6 @@ import pl.ismop.web.client.internal.InternalExperimentController.InternalExperim
 import pl.ismop.web.client.widgets.newexperiment.IExperimentView.IExperimentPresenter;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -23,7 +22,6 @@ import com.mvp4g.client.presenter.BasePresenter;
 @Presenter(view = ExperimentWidget.class, multiple = true)
 public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEventBus> implements IExperimentPresenter {
 	private DapController dapController;
-	private boolean modalInitialized;
 	protected List<Profile> currentProfiles;
 	private HypgenController hypgenController;
 	private InternalExperimentController internalExperimentController;
@@ -36,8 +34,8 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 	}
 	
 	public void onAreaSelected(float top, float left, float bottom, float right) {
-		RootPanel.get("modalContainer").clear();
-		RootPanel.get("modalContainer").add(view);
+		eventBus.popupClosed();
+		eventBus.setTitleAndShow(view.title(), view);
 		dapController.getProfiles(top, left, bottom, right, new ProfilesCallback() {
 			@Override
 			public void onError(int code, String message) {
@@ -50,7 +48,6 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 				
 				if(profiles.size() > 0) {
 					view.setPickedProfilesMessage(profiles.size());
-					showModal();
 				}
 			}
 		});
@@ -73,6 +70,7 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 					
 					@Override
 					public void experimentAdded() {
+						view.showExperimentCreatedMessage();
 						eventBus.experimentCreated(experiment);
 					}
 				});
@@ -81,7 +79,7 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 	
 	@Override
 	public void onStartClicked() {
-		view.clearErrorMessages();
+		view.clearMessages();
 		
 		String name = view.getName().getText();
 		
@@ -98,14 +96,5 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 		}
 		
 		executeExperiment(name, view.getDaysValue(), profileIds);
-		hideModal();
 	}
-	
-	private native void hideModal() /*-{
-		$wnd.jQuery('#experiment-modal').modal('hide');
-	}-*/;
-
-	private native void showModal() /*-{
-		$wnd.jQuery('#experiment-modal').modal('show');
-	}-*/;
 }

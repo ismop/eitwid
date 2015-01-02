@@ -7,9 +7,9 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
-@Presenter(view = PopupView.class, multiple = true)
+@Presenter(view = PopupView.class)
 public class PopupPresenter extends BasePresenter<IPopupView, MainEventBus> implements IPopupPresenter {
-	public void setTitleAndShow(String title, IsWidget widget) {
+	public void onSetTitleAndShow(String title, IsWidget widget) {
 		view.clean();
 		view.setTitle(title);
 		view.add(widget);
