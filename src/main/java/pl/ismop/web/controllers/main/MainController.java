@@ -38,8 +38,8 @@ public class MainController {
 	public String home(Model model, HttpServletRequest request) {
 		model.addAttribute("googleMapApiKey", googleMapApiKey);
 		model.addAttribute("dapToken", dapToken);
-		model.addAttribute("dapEndpoint", dapEndpoint);
-		model.addAttribute("hypgenEndpoint", hypgenEndpoint);
+		model.addAttribute("dapEndpoint", "/dapproxy");
+		model.addAttribute("hypgenEndpoint", "/hypgenproxy");
 		model.addAttribute("hypgenToken", createHypgenToken());
 		
 		return "workspace";

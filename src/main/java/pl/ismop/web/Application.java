@@ -49,6 +49,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import pl.ismop.web.client.dap.levee.LeveeServiceSync;
 import pl.ismop.web.client.dap.profile.ProfileServiceSync;
 import pl.ismop.web.client.dap.sensor.SensorServiceSync;
+import pl.ismop.web.misc.HttpsIgnoringProxyServlet;
 import pl.ismop.web.services.DapService;
 
 @EnableAutoConfiguration
@@ -61,6 +62,7 @@ public class Application extends WebMvcConfigurerAdapter {
 	@Value("${dap.endpoint}") private String dapEndpoint;
 	@Value("${public.maps.server.url}") private String mapsServerUrl;
 	@Value("${session.store.path}") private String sessionStorePath;
+	@Value("${hypgen.endpoint}") private String hypgenEndpoint;
 	
 	class AuthFilter implements ClientRequestFilter {
 		@Override
@@ -168,6 +170,30 @@ public class Application extends WebMvcConfigurerAdapter {
 		registration.addInitParameter("log", "true");
 		registration.setName("wmsproxy");
 		registration.addUrlMappings("/wmsproxy/*");
+		
+		return registration;
+	}
+	
+	@Bean
+	public ServletRegistrationBean dapProxy() {
+		ServletRegistrationBean registration = new ServletRegistrationBean();
+		registration.setServlet(new HttpsIgnoringProxyServlet());
+		registration.addInitParameter("targetUri", dapEndpoint);
+		registration.addInitParameter("log", "true");
+		registration.setName("dapproxy");
+		registration.addUrlMappings("/dapproxy/*");
+		
+		return registration;
+	}
+	
+	@Bean
+	public ServletRegistrationBean hypgenProxy() {
+		ServletRegistrationBean registration = new ServletRegistrationBean();
+		registration.setServlet(new HttpsIgnoringProxyServlet());
+		registration.addInitParameter("targetUri", hypgenEndpoint);
+		registration.addInitParameter("log", "true");
+		registration.setName("hypgenproxy");
+		registration.addUrlMappings("/hypgenproxy/*");
 		
 		return registration;
 	}
