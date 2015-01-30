@@ -107,13 +107,13 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 	private String getPanelStyle(String level) {
 		switch(level) {
 			case "none":
-				return "panel-info";
+				return "text-success";
 			case "heightened":
-				return "panel-warning";
+				return "text-warning";
 			case "severe":
-				return "panel-danger";
+				return "text-danger";
 			default:
-				return "panel-default";
+				return "text-default";
 		}
 	}
 }

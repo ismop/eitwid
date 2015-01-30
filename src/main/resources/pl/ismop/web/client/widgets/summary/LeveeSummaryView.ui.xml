@@ -3,54 +3,60 @@
 		xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.summary.LeveeSummaryViewMessages" field="messages"/>
 	<ui:style>
+		.name {
+			margin-bottom: 5px;
+			font-weight: bold;
+		}
 	</ui:style>
-	<g:HTMLPanel addStyleNames="row">
-		<h2 ui:field="header"></h2>
-		<div class="col-lg-6">
-			<div ui:field="modePanel" class="panel">
-				<div class="panel-heading">
-					<div class="row">
-						<div class="col-xs-4">
-							<i class="fa fa-desktop fa-5x"></i>
-						</div>
-						<div class="col-xs-8 text-right">
-							<p class="announcement-heading"><strong><ui:text from="{messages.modeLabel}"/></strong></p>
-							<p ui:field="mode" class="announcement-text"></p>
-						</div>
+	<g:HTMLPanel>
+		<div class="panel panel-info">
+			<div class="panel-heading">
+				<div ui:field="header" class="{style.name}"></div>
+				<div class="row">
+					<div class="col-lg-6">
+							<div class="row">
+								<div class="col-xs-4">
+									<i class="fa fa-desktop fa-5x"></i>
+								</div>
+								<div class="col-xs-8 text-right">
+									<p class="announcement-heading"><strong><ui:text from="{messages.modeLabel}"/></strong></p>
+									<p class="announcement-text">
+										<span ui:field="mode" class="label"></span>
+									</p>
+								</div>
+							</div>
 					</div>
-				</div>
-				<div class="panel-footer announcement-bottom">
-					<div class="dropdown">
-						<a data-toggle="dropdown" href="#"><ui:text from="{messages.modeChangeLabel}"/></a>
-						<ul class="dropdown-menu">
-							<li>
-								<g:Anchor ui:field="changeToNone" href="#"><ui:text from="{messages.stantbyModeLabel}"/></g:Anchor>
-							</li>
-							<li>
-								<g:Anchor ui:field="changeToHeightened" href="#"><ui:text from="{messages.alertModeLabel}"/></g:Anchor>
-							</li>
-							<li>
-								<g:Anchor ui:field="changeToSevere" href="#"><ui:text from="{messages.threatModeLabel}"/></g:Anchor>
-							</li>
-						</ul>
+					<div class="col-lg-6">
+						<div class="row">
+							<div class="col-xs-4">
+								<i class="fa fa-tasks fa-5x"></i>
+							</div>
+							<div class="col-xs-8 text-right">
+								<p class="announcement-heading"><strong><ui:text from="{messages.threatLabel}"/></strong></p>
+								<p class="announcement-text">
+									<span ui:field="threat"></span>
+								</p>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="col-lg-6">
-			<div ui:field="threatPanel" class="panel">
-				<div class="panel-heading">
-					<div class="row">
-						<div class="col-xs-4">
-							<i class="fa fa-tasks fa-5x"></i>
-						</div>
-						<div class="col-xs-8 text-right">
-							<p class="announcement-heading"><strong><ui:text from="{messages.threatLabel}"/></strong></p>
-							<p ui:field="threat" class="announcement-text"></p>
-						</div>
-					</div>
+			<div class="panel-footer announcement-bottom clearfix">
+				<div class="dropdown" style="float: left;">
+					<a data-toggle="dropdown" href="#"><ui:text from="{messages.modeChangeLabel}"/></a>
+					<ul class="dropdown-menu">
+						<li>
+							<g:Anchor ui:field="changeToNone" href="#"><ui:text from="{messages.stantbyModeLabel}"/></g:Anchor>
+						</li>
+						<li>
+							<g:Anchor ui:field="changeToHeightened" href="#"><ui:text from="{messages.alertModeLabel}"/></g:Anchor>
+						</li>
+						<li>
+							<g:Anchor ui:field="changeToSevere" href="#"><ui:text from="{messages.threatModeLabel}"/></g:Anchor>
+						</li>
+					</ul>
 				</div>
-				<div ui:field="threatTimestamp" class="panel-footer announcement-bottom"></div>
+				<div ui:field="threatTimestamp" style="float: right;"/>
 			</div>
 		</div>
 	</g:HTMLPanel>

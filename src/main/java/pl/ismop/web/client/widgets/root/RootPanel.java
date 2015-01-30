@@ -54,7 +54,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@UiHandler("levees")
 	void showLevees(ClickEvent event) {
 		getPresenter().onShowLevees(!levees.isActive());
-		levees.setActive(!levees.isActive());
 	}
 	
 	@UiHandler("sensors")

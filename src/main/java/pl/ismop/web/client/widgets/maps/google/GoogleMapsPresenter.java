@@ -358,7 +358,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		if(profileId != null) {
 			for(Profile profile : profiles.values()) {
 				if(profile.getId().equals(profileId)) {
-					return profileColors.get(profile.getThreatLevel());
+					String color = profileColors.get(profile.getThreatLevel());
+					
+					return color == null ? "#aaaaaa" : color;
 				}
 			}
 		}

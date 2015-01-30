@@ -76,7 +76,7 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 
 	@Override
 	public void onShowLevees(boolean show) {
-		eventBus.showLevees(show);
+		eventBus.showLeveeList();
 	}
 
 	@Override
