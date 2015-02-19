@@ -1,4 +1,4 @@
-package pl.ismop.web.client.dap.profile;
+package pl.ismop.web.client.dap.section;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import org.fusesource.restygwt.client.Json;
 
 import pl.ismop.web.client.dap.levee.Shape;
 
-public class Profile {
+public class Section {
 	private String id;
 	private String name;
 	@Json(name = "experiment_ids")
@@ -24,7 +24,22 @@ public class Profile {
 	@Json(name = "levee_id")
 	@XmlElement(name = "levee_id")
 	private String leveeId;
+	@Json(name = "profile_shape")
+	@XmlElement(name = "profile_shape")
+	private Shape profileShape;
 	
+	public String getLeveeId() {
+		return leveeId;
+	}
+	public void setLeveeId(String leveeId) {
+		this.leveeId = leveeId;
+	}
+	public Shape getProfileShape() {
+		return profileShape;
+	}
+	public void setProfileShape(Shape profileShape) {
+		this.profileShape = profileShape;
+	}
 	public String getId() {
 		return id;
 	}

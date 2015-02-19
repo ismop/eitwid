@@ -1,4 +1,4 @@
-package pl.ismop.web.client.dap.profile;
+package pl.ismop.web.client.dap.section;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -11,12 +11,12 @@ import org.fusesource.restygwt.client.RestService;
 import pl.ismop.web.client.dap.DapDispatcher;
 
 @Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
-public interface ProfileService extends RestService {
+public interface SectionService extends RestService {
 	@GET
-	@Path("profiles")
-	void getProfiles(MethodCallback<ProfilesResponse> callback);
+	@Path("sections")
+	void getProfiles(MethodCallback<SectionsResponse> callback);
 	
 	@GET
-	@Path("profiles?selection={selection}")
-	void getProfiles(@PathParam("selection") String selection, MethodCallback<ProfilesResponse> callback);
+	@Path("sections?selection={selection}")
+	void getSections(@PathParam("selection") String selection, MethodCallback<SectionsResponse> callback);
 }

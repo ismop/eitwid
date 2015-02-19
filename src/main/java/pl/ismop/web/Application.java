@@ -47,7 +47,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import pl.ismop.web.client.dap.levee.LeveeServiceSync;
-import pl.ismop.web.client.dap.profile.ProfileServiceSync;
+import pl.ismop.web.client.dap.section.SectionServiceSync;
 import pl.ismop.web.client.dap.sensor.SensorServiceSync;
 import pl.ismop.web.misc.HttpsIgnoringProxyServlet;
 import pl.ismop.web.services.DapService;
@@ -108,7 +108,7 @@ public class Application extends WebMvcConfigurerAdapter {
 	}
 	
 	@Bean
-	public DapService dapService(LeveeServiceSync leveeService, SensorServiceSync sensorService, ProfileServiceSync profileService) {
+	public DapService dapService(LeveeServiceSync leveeService, SensorServiceSync sensorService, SectionServiceSync profileService) {
 		return new DapService(leveeService, sensorService, profileService);
 	}
 	
@@ -127,8 +127,8 @@ public class Application extends WebMvcConfigurerAdapter {
 	}
 	
 	@Bean
-	public ProfileServiceSync profileServiceSync(WebTarget target) throws KeyManagementException, NoSuchAlgorithmException {
-		ProfileServiceSync profileService = WebResourceFactory.newResource(ProfileServiceSync.class, target);
+	public SectionServiceSync profileServiceSync(WebTarget target) throws KeyManagementException, NoSuchAlgorithmException {
+		SectionServiceSync profileService = WebResourceFactory.newResource(SectionServiceSync.class, target);
 		
 		return profileService;
 	}

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.services.DapService;
 
@@ -84,7 +84,7 @@ public class MapsController {
 	
 	@RequestMapping(value = "/profiles", produces = "application/json")
 	public GeoJsonFeatures profiles() {
-		List<Profile> profiles = dapService.getProfiles();
+		List<Section> profiles = dapService.getSections();
 		List<GeoJsonFeature> shapes = profiles.stream()
 				.map(profile -> {
 					GeoJsonFeature geoJsonFeature = new GeoJsonFeature();
@@ -112,7 +112,7 @@ public class MapsController {
 		return result;
 	}
 
-	private List<List<Double>> profileToLine(Profile profile, Map<String, Sensor> sensors) {
+	private List<List<Double>> profileToLine(Section profile, Map<String, Sensor> sensors) {
 		List<List<Double>> result = new ArrayList<>();
 		
 		for(String sensorId : profile.getSensorIds()) {

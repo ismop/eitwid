@@ -5,8 +5,8 @@ import java.util.List;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.ProfilesCallback;
-import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.DapController.SectionsCallback;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.hypgen.HypgenController;
 import pl.ismop.web.client.hypgen.HypgenController.ExperimentCallback;
@@ -22,7 +22,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 @Presenter(view = ExperimentWidget.class, multiple = true)
 public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEventBus> implements IExperimentPresenter {
 	private DapController dapController;
-	protected List<Profile> currentProfiles;
+	protected List<Section> currentProfiles;
 	private HypgenController hypgenController;
 	private InternalExperimentController internalExperimentController;
 
@@ -36,14 +36,14 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 	public void onAreaSelected(float top, float left, float bottom, float right) {
 		eventBus.popupClosed();
 		eventBus.setTitleAndShow(view.title(), view);
-		dapController.getProfiles(top, left, bottom, right, new ProfilesCallback() {
+		dapController.getSections(top, left, bottom, right, new SectionsCallback() {
 			@Override
 			public void onError(int code, String message) {
 				Window.alert("Error: " + message);
 			}
 			
 			@Override
-			public void processProfiles(List<Profile> profiles) {
+			public void processSections(List<Section> profiles) {
 				currentProfiles = profiles;
 				
 				if(profiles.size() > 0) {
@@ -91,7 +91,7 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 		
 		List<String> profileIds = new ArrayList<>();
 		
-		for(Profile profile : currentProfiles) {
+		for(Section profile : currentProfiles) {
 			profileIds.add(profile.getId());
 		}
 		

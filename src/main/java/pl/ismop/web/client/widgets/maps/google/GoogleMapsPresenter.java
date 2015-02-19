@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
-import pl.ismop.web.client.dap.DapController.ProfilesCallback;
+import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.measurement.Measurement;
-import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.newexperiment.ExperimentPresenter;
@@ -45,7 +45,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private DapController dapController;
 	private String elementId;
 	private MapMessages messages;
-	private Map<String, Profile> profiles;
+	private Map<String, Section> profiles;
 	private ProfilePresenter selectedProfile;
 	private JavaScriptObject map;
 	private Map<String, String> profileColors;
@@ -71,7 +71,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	public void onDrawGoogleMap(String mapElementId) {
 		this.elementId = mapElementId;
 		showProgressIndicator(true);
-		dapController.getProfiles(new ProfilesCallback() {
+		dapController.getSections(new SectionsCallback() {
 			@Override
 			public void onError(int code, String message) {
 				showProgressIndicator(false);
@@ -79,11 +79,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			}
 
 			@Override
-			public void processProfiles(List<Profile> profiles) {
+			public void processSections(List<Section> sections) {
 				showProgressIndicator(false);
 				List<List<Double>> allPoints = new ArrayList<List<Double>>();
 
-				for(Profile profile : profiles) {
+				for(Section profile : sections) {
 					GoogleMapsPresenter.this.profiles.put(profile.getId(), profile);
 					allPoints.addAll(profile.getShape().getCoordinates());
 				}
@@ -108,7 +108,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		});
 	}
 	
-	public void onProfileUpdated(Profile profile) {
+	public void onProfileUpdated(Section profile) {
 		if(profiles.get(profile.getId()) != null) {
 			profiles.put(profile.getId(), profile);
 			updateProfileOnMap(profile.getId());
@@ -182,7 +182,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		log.info("Feature with id {} clicked", featureId);
 		
 		if(getProfileId(featureId) != null) {
-			Profile profile = profiles.get(getProfileId(featureId));
+			Section profile = profiles.get(getProfileId(featureId));
 			showProfileDetails(profile);
 		} else if(getSensorId(featureId) != null) {
 			showSensorDetails(getSensorId(featureId));
@@ -318,7 +318,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		return builder.toString();
 	}
 
-	private void showProfileDetails(Profile profile) {
+	private void showProfileDetails(Section profile) {
 		if(sensorTimer != null) {
 			sensorTimer.cancel();
 			sensorTimer = null;
@@ -356,7 +356,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		String profileId = getProfileId(featureId);
 		
 		if(profileId != null) {
-			for(Profile profile : profiles.values()) {
+			for(Section profile : profiles.values()) {
 				if(profile.getId().equals(profileId)) {
 					String color = profileColors.get(profile.getThreatLevel());
 					

@@ -16,8 +16,8 @@ public class Experiment {
 	@JsonProperty("result_ids")
 	private List<String> resultIds;
 	
-	@Json(name = "profile_ids")
-	@JsonProperty("profile_ids")
+	@Json(name = "section_ids")
+	@JsonProperty("section_ids")
 	private List<String> profileIds;
 	
 	@Json(name = "start_date")

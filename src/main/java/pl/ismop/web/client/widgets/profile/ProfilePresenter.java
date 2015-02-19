@@ -1,7 +1,7 @@
 package pl.ismop.web.client.widgets.profile;
 
 import pl.ismop.web.client.MainEventBus;
-import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.widgets.profile.IProfileView.IProfilePresenter;
 
 import com.mvp4g.client.annotation.Presenter;
@@ -9,9 +9,9 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = ProfileView.class, multiple = true)
 public class ProfilePresenter extends BasePresenter<IProfileView, MainEventBus> implements IProfilePresenter {
-	private Profile profile;
+	private Section profile;
 
-	public void setProfile(Profile profile) {
+	public void setProfile(Section profile) {
 		this.profile = profile;
 		showProfileDetails();
 	}
@@ -21,7 +21,7 @@ public class ProfilePresenter extends BasePresenter<IProfileView, MainEventBus> 
 		
 	}
 
-	public Profile getProfile() {
+	public Section getProfile() {
 		return profile;
 	}
 	
