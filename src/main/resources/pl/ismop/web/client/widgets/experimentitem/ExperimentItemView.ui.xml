@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-		xmlns:g="urn:import:com.google.gwt.user.client.ui">
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.experimentitem.ExperimentItemMessages" field="messages"/>
 	<ui:style>
 		.row {
@@ -16,15 +17,21 @@
 			font-size: large;
 		}
 	</ui:style>
-	<g:HTMLPanel styleName="{style.row}">
-		<g:Label ui:field="name" styleName="{style.cell} {style.name}"/>
-		<g:FlowPanel styleName="{style.cell}">
-			<g:Label ui:field="status"/>
-		</g:FlowPanel>
-		<g:HTML ui:field="startDate" styleName="{style.cell}"/>
-		<g:HTML ui:field="endDate" styleName="{style.cell}"/>
-		<g:FlowPanel>
-			<g:Button ui:field="showResults" styleName="btn btn-xs"><ui:text from="{messages.resultsLabel}"/></g:Button>
-		</g:FlowPanel>
+	<g:HTMLPanel>
+		<b:Button ui:field="collapseButton" text="{messages.resultsLabel}" dataToggle="COLLAPSE"/>
+		<b:Collapse ui:field="collapse">
+			<b:Label>hello</b:Label>
+		</b:Collapse>
+		<g:HTMLPanel styleName="{style.row}">
+			<g:Label ui:field="name" styleName="{style.cell} {style.name}"/>
+			<g:FlowPanel styleName="{style.cell}">
+				<g:Label ui:field="status"/>
+			</g:FlowPanel>
+			<g:HTML ui:field="startDate" styleName="{style.cell}"/>
+			<g:HTML ui:field="endDate" styleName="{style.cell}"/>
+			<g:FlowPanel>
+				<g:Button ui:field="showResults" styleName="btn btn-xs"><ui:text from="{messages.resultsLabel}"/></g:Button>
+			</g:FlowPanel>
+		</g:HTMLPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

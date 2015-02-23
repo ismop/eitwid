@@ -2,6 +2,9 @@ package pl.ismop.web.client.widgets.experimentitem;
 
 import java.util.Date;
 
+import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Collapse;
+
 import pl.ismop.web.client.widgets.experimentitem.IExperimentItemView.IExperimentItemPresenter;
 
 import com.google.gwt.core.client.GWT;
@@ -29,6 +32,8 @@ public class ExperimentItemView extends Composite implements IExperimentItemView
 	@UiField HTML startDate;
 	@UiField HTML endDate;
 	@UiField ExperimentItemMessages messages;
+	@UiField Button collapseButton;
+	@UiField Collapse collapse;
 
 	private IExperimentItemPresenter presenter;
 	
@@ -40,6 +45,11 @@ public class ExperimentItemView extends Composite implements IExperimentItemView
 	@UiHandler("showResults")
 	void showResults(ClickEvent event) {
 		getPresenter().onShowResults();
+	}
+	
+	@UiHandler("collapseButton")
+	void collapse(ClickEvent event) {
+		collapse.toggle();
 	}
 
 	@Override

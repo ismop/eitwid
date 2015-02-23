@@ -1,10 +1,8 @@
 package pl.ismop.web.controllers.maps;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.services.DapService;
 
 @RestController
@@ -82,51 +79,54 @@ public class MapsController {
 		return result;
 	}
 	
-	@RequestMapping(value = "/profiles", produces = "application/json")
+	@RequestMapping(value = "/sections", produces = "application/json")
 	public GeoJsonFeatures profiles() {
 		List<Section> profiles = dapService.getSections();
-		List<GeoJsonFeature> shapes = profiles.stream()
-				.map(profile -> {
+		List<GeoJsonFeature> shapes = profiles.stream().
+				map(section -> {
 					GeoJsonFeature geoJsonFeature = new GeoJsonFeature();
 					geoJsonFeature.setId(String.valueOf(idGenerator.incrementAndGet()));
 					geoJsonFeature.setProperties(new HashMap<>());
-					geoJsonFeature.getProperties().put("id", profile.getId());
-					geoJsonFeature.getProperties().put("name", profile.getName());
-					geoJsonFeature.getProperties().put("type", "profile");
+					geoJsonFeature.getProperties().put("id", section.getId());
+					geoJsonFeature.getProperties().put("name", section.getName());
+					geoJsonFeature.getProperties().put("type", "section");
 					
 					PolygonGeometry geometry = new PolygonGeometry();
 					ArrayList<List<List<Double>>> polygons = new ArrayList<List<List<Double>>>();
-					polygons.add(profile.getShape().getCoordinates());
+					polygons.add(section.getShape().getCoordinates());
 					
 					//we need to close the polygon
-					polygons.get(0).add(profile.getShape().getCoordinates().get(0));
+					polygons.get(0).add(section.getShape().getCoordinates().get(0));
 					geometry.setCoordinates(polygons);
 					geoJsonFeature.setGeometry(geometry);
 					
 					return geoJsonFeature;
-				})
-				.collect(Collectors.toList());
+				}).
+				collect(Collectors.toList());
+		
+		//constructing profile shapes
+		List<GeoJsonFeature> profileShapes = dapService.getSections().
+				stream().
+				map(section -> {
+					GeoJsonFeature geoJsonFeature = new GeoJsonFeature();
+					geoJsonFeature.setId(String.valueOf(idGenerator.incrementAndGet()));
+					geoJsonFeature.setProperties(new HashMap<>());
+					geoJsonFeature.getProperties().put("id", section.getId());
+					geoJsonFeature.getProperties().put("name", section.getName());
+					geoJsonFeature.getProperties().put("type", "profile");
+					
+					LineGeometry geometry = new LineGeometry();
+					geometry.setCoordinates(section.getProfileShape().getCoordinates());
+					geoJsonFeature.setGeometry(geometry);
+					
+					return geoJsonFeature;
+				}).
+				collect(Collectors.toList());
+		shapes.addAll(profileShapes);
 		
 		GeoJsonFeatures result = new GeoJsonFeatures(shapes);
 		
 		return result;
-	}
-
-	private List<List<Double>> profileToLine(Section profile, Map<String, Sensor> sensors) {
-		List<List<Double>> result = new ArrayList<>();
-		
-		for(String sensorId : profile.getSensorIds()) {
-			result.add(Arrays.asList(new Double[] {
-					sensors.get(sensorId).getPlacement().getCoordinates().get(1),
-					sensors.get(sensorId).getPlacement().getCoordinates().get(0)
-			}));
-		}
-		
-		return result;
-	}
-
-	private List<Double> reversePointCoordinates(List<Double> coordinates) {
-		return Arrays.asList(new Double[] {coordinates.get(1), coordinates.get(0), coordinates.get(2)});
 	}
 
 	private List<List<Double>> reverseCoordinates(List<List<Double>> coordinates) {

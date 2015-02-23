@@ -23,7 +23,7 @@
 		<tomcat.version>8.0.8</tomcat.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gwt.version>2.7.0</gwt.version>
-		<gwt.bootstrap.version>0.8.1</gwt.bootstrap.version>
+		<gwt.bootstrap.version>0.9</gwt.bootstrap.version>
 	</properties>
 
 	<scm>

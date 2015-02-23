@@ -7,5 +7,5 @@ public interface MapMessages extends Messages {
 	String noFeatureSelected();
 	String noMeasurements();
 	String sensorTitle(String sensorId);
-	String profileTitle(String profileId);
+	String sectionTitle(String profileId);
 }
