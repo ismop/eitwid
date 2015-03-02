@@ -6,11 +6,14 @@ public class Result {
 	private String id;
 	private float similarity;
 	
-	@Json(name = "profile_id")
-	private String profileId;
+	@Json(name = "section_id")
+	private String sectionId;
 	
-	@Json(name = "experiment_id")
-	private String experimentId;
+	@Json(name = "threat_assessment_id")
+	private String threatAssessmentId;
+	
+	@Json(name = "threat_level")
+	private String threatLevel;
 	
 	public String getId() {
 		return id;
@@ -24,16 +27,22 @@ public class Result {
 	public void setSimilarity(float similarity) {
 		this.similarity = similarity;
 	}
-	public String getProfileId() {
-		return profileId;
+	public String getSectionId() {
+		return sectionId;
 	}
-	public void setProfileId(String profileId) {
-		this.profileId = profileId;
+	public void setSectionId(String sectionId) {
+		this.sectionId = sectionId;
 	}
-	public String getExperimentId() {
-		return experimentId;
+	public String getThreatAssessmentId() {
+		return threatAssessmentId;
 	}
-	public void setExperimentId(String experimentId) {
-		this.experimentId = experimentId;
+	public void setThreatAssessmentId(String threatAssessmentId) {
+		this.threatAssessmentId = threatAssessmentId;
+	}
+	public String getThreatLevel() {
+		return threatLevel;
+	}
+	public void setThreatLevel(String threatLevel) {
+		this.threatLevel = threatLevel;
 	}
 }

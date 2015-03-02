@@ -81,9 +81,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				showProgressIndicator(false);
 				List<List<Double>> allPoints = new ArrayList<List<Double>>();
 
-				for(Section profile : sections) {
-					GoogleMapsPresenter.this.sections.put(profile.getId(), profile);
-					allPoints.addAll(profile.getShape().getCoordinates());
+				for(Section section : sections) {
+					GoogleMapsPresenter.this.sections.put(section.getId(), section);
+					allPoints.addAll(section.getShape().getCoordinates());
 				}
 				
 				if(allPoints.size() > 1) {
@@ -145,6 +145,18 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		
 		selectedSensor = null;
 		currentGraph = null;
+	}
+	
+	public void onZoomToSection(String sectionId) {
+		if(sections.containsKey(sectionId)) {
+			Object bounds = createLatLngBounds();
+			
+			for(List<Double> point : sections.get(sectionId).getProfileShape().getCoordinates()) {
+				extend(bounds, point.get(1), point.get(0));
+			}
+			
+			panMap(bounds);
+		}
 	}
 
 	private void setNoMeasurementsLabel(String sensorId) {
@@ -373,7 +385,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			case "section":
 				return "green";
 			case "profile":
-				return "yellow";
+				return "#ffe871";
 		}
 		
 		return "white";
@@ -466,6 +478,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private native JavaScriptObject showMap(Object bounds) /*-{
 		var map = new $wnd.google.maps.Map(
 			$doc.getElementById(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::elementId));
+		
 		var thisObject = this;
 		map.fitBounds(bounds);
 		
@@ -625,5 +638,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		} else {
 			mapData.setMap(null);
 		}
+	}-*/;
+	
+	private native void panMap(Object bounds) /*-{
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map.panToBounds(bounds);
 	}-*/;
 }

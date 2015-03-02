@@ -42,7 +42,7 @@ public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEv
 		
 		view.clear();
 		loadExperiments();
-		update();
+		//update();
 	}
 
 	private void update() {

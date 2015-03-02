@@ -5,7 +5,7 @@
 	<ui:with type="pl.ismop.web.client.widgets.root.RootPanelMessages" field="messages"/>
 	<ui:style>
 		.logout {
-			padding-right: 10px;
+			padding-right: 30px;
 		}
 	</ui:style>
 	<g:DockLayoutPanel>

@@ -50,4 +50,7 @@ public interface MainEventBus extends EventBus {
 
 	@Event(handlers = PopupPresenter.class)
 	void setTitleAndShow(String title, IsWidget widget);
+	
+	@Event(handlers = GoogleMapsPresenter.class)
+	void zoomToSection(String sectionId);
 }
