@@ -1,18 +1,20 @@
 package pl.ismop.web.client.widgets.experimentitem;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.Collapse;
+import org.gwtbootstrap3.client.ui.constants.ButtonSize;
 import org.gwtbootstrap3.client.ui.constants.ButtonType;
 
 import pl.ismop.web.client.widgets.experimentitem.IExperimentItemView.IExperimentItemPresenter;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -129,9 +131,12 @@ public class ExperimentItemView extends Composite implements IExperimentItemView
 
 	@Override
 	public void addResultItem(Map<String, String> threatLevels) {
+		ButtonGroup group = new ButtonGroup();
 		FlowPanel resultItem = new FlowPanel();
+		resultItem.getElement().getStyle().setMarginBottom(2, Unit.PX);
+		resultItem.add(group);
+		
 		List<String> keys = new ArrayList<>(threatLevels.keySet());
-		Collections.sort(keys);
 		
 		for(final String sectionId : keys) {
 			Button sectionButton = new Button(sectionId, new ClickHandler() {
@@ -141,7 +146,8 @@ public class ExperimentItemView extends Composite implements IExperimentItemView
 				}
 			});
 			sectionButton.setType(getButtonType(threatLevels.get(sectionId)));
-			resultItem.add(sectionButton);
+			sectionButton.setSize(ButtonSize.EXTRA_SMALL);
+			group.add(sectionButton);
 		}
 		
 		results.add(resultItem);

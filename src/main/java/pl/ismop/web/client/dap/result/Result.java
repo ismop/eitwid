@@ -15,6 +15,9 @@ public class Result {
 	@Json(name = "threat_level")
 	private String threatLevel;
 	
+	@Json(name = "scenario_id")
+	private String scenarioId;
+	
 	public String getId() {
 		return id;
 	}
@@ -44,5 +47,11 @@ public class Result {
 	}
 	public void setThreatLevel(String threatLevel) {
 		this.threatLevel = threatLevel;
+	}
+	public String getScenarioId() {
+		return scenarioId;
+	}
+	public void setScenarioId(String scenarioId) {
+		this.scenarioId = scenarioId;
 	}
 }

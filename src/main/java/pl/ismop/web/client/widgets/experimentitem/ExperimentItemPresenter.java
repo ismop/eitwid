@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,13 +47,21 @@ public class ExperimentItemPresenter extends BasePresenter<IExperimentItemView, 
 			if(!resultsSet) {
 				resultsSet = true;
 				view.showResultsLabel();
+				//<sectionId, list of results sorted by similarity>
 				Map<String, List<Result>> sorted = sortResults(experiment.getResults());
+				List<String> sectionIds = new ArrayList<>(sorted.keySet());
+				Collections.sort(sectionIds, new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						return Integer.parseInt(o2) - Integer.parseInt(o2);
+					}
+				});
 				
 				RESULTS:
 				for(int i = 0; ; i++) {
-					Map<String, String> threatLevels = new HashMap<>();
+					Map<String, String> threatLevels = new LinkedHashMap<>();
 					
-					for(String key : sorted.keySet()) {
+					for(String key : sectionIds) {
 						if(sorted.get(key).size() > i) {
 							threatLevels.put(sorted.get(key).get(i).getSectionId(), sorted.get(key).get(i).getThreatLevel());
 						} else {

@@ -151,7 +151,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		if(sections.containsKey(sectionId)) {
 			Object bounds = createLatLngBounds();
 			
-			for(List<Double> point : sections.get(sectionId).getProfileShape().getCoordinates()) {
+			for(List<Double> point : sections.get(sectionId).getShape().getCoordinates()) {
 				extend(bounds, point.get(1), point.get(0));
 			}
 			
@@ -641,6 +641,6 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}-*/;
 	
 	private native void panMap(Object bounds) /*-{
-		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map.panToBounds(bounds);
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map.fitBounds(bounds);
 	}-*/;
 }
