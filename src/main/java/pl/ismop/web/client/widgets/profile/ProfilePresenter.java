@@ -2,13 +2,13 @@ package pl.ismop.web.client.widgets.profile;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.widgets.profile.IProfileView.IProfilePresenter;
+import pl.ismop.web.client.widgets.profile.IProfileView.ISideProfilePresenter;
 
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = ProfileView.class, multiple = true)
-public class ProfilePresenter extends BasePresenter<IProfileView, MainEventBus> implements IProfilePresenter {
+public class ProfilePresenter extends BasePresenter<IProfileView, MainEventBus> implements ISideProfilePresenter {
 	private Section profile;
 
 	public void setProfile(Section profile) {
