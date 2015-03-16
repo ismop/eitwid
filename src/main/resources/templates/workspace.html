@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="gwt:property" th:content="'locale=' + ${#httpServletRequest.getLocale().getLanguage()}"/>
+		<meta id="csrfToken" name="_csrf" th:content="${_csrf} ? ${_csrf.token}"/>
+		<meta id="csrfHeaderName" name="_csrf_header" th:content="${_csrf} ? ${_csrf.headerName}"/>
+		<meta id="csrfParameterName" name="_csrf_parameter_name" th:content="${_csrf} ? ${_csrf.parameterName}"/>
+		<title th:text="#{workspace.page.title}"></title>
+		
+		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false&amp;libraries=drawing'}"></script>
+		<script type="text/javascript" th:src="@{/js/dygraph-combined.js}"></script>
+		
+		<script type="text/javascript" th:utext="'var geojsonUrl = \'' + @{/maps/geojson} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var sensorUrl = \'' + @{/maps/sensors} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var profileUrl = \'' + @{/maps/sections} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var iconBaseUrl = \'' + @{/icons} + '\';'"></script>
+		<script type="text/javascript" th:utext="'var properties = {dapEndpoint: \'' + ${dapEndpoint} + '\', dapToken: \'' + ${dapToken} + '\', hypgenEndpoint: \'' + ${hypgenEndpoint} + '\', hypgenToken: \'' + ${hypgenToken} + '\'};'"></script>
+		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
+	</head>
+	<body>
+	</body>
+</html>

@@ -1,4 +1,4 @@
-package pl.ismop.web.client.dap.profile;
+package pl.ismop.web.client.dap.section;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -8,14 +8,14 @@ import javax.ws.rs.Produces;
 /**
  * This synchronous version is used by the server-side communication with DAP.
  */
-public interface ProfileServiceSync {
+public interface SectionServiceSync {
 	@GET
-	@Path("profiles")
+	@Path("sections")
 	@Produces("application/json")
-	ProfilesResponse getProfiles();
+	SectionsResponse getSections();
 	
 	@GET
-	@Path("profiles?selection={selection}")
+	@Path("sections?selection={selection}")
 	@Produces("application/json")
-	ProfilesResponse getProfiles(@PathParam("selection") String selection);
+	SectionsResponse getProfiles(@PathParam("selection") String selection);
 }

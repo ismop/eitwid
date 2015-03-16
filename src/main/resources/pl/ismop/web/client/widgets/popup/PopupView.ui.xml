@@ -1,0 +1,33 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:style>
+		.contents {
+			padding: 10px;
+			background-color: rgba(255, 255, 255, 0.9);
+			border-radius: 5px;
+		}
+		.header {
+			padding: 2px;
+		}
+		.close {
+			padding-left: 20px;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<g:PopupPanel ui:field="popup" addStyleNames="{style.contents}">
+			<g:FlowPanel>
+				<g:FlowPanel addStyleNames="{style.header} clearfix">
+					<g:FlowPanel addStyleNames="pull-left">
+						<g:Label ui:field="title">Title</g:Label>
+					</g:FlowPanel>
+					<g:FlowPanel addStyleNames="pull-right {style.close}">
+						<b:Anchor ui:field="close" icon="TIMES"/>
+					</g:FlowPanel>
+				</g:FlowPanel>
+				<g:HTMLPanel ui:field="contents"/>
+			</g:FlowPanel>
+		</g:PopupPanel>
+	</g:HTMLPanel>
+</ui:UiBinder>

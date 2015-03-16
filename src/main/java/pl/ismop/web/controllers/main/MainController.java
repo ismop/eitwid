@@ -5,8 +5,6 @@ import java.util.Base64;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -24,8 +22,6 @@ import pl.ismop.web.repository.UserRepository;
 
 @Controller
 public class MainController {
-	private static final Logger log = LoggerFactory.getLogger(MainController.class);
-	
 	@Autowired private UserRepository userReposiotory;
 	@Autowired private PasswordEncoder passwordEncoder;
 	@Autowired private MessageSource messages;
@@ -40,11 +36,13 @@ public class MainController {
 	
 	@RequestMapping("/")
 	public String home(Model model, HttpServletRequest request) {
-		model.addAttribute("dapEndpoint", dapEndpoint);
+		model.addAttribute("googleMapApiKey", googleMapApiKey);
 		model.addAttribute("dapToken", dapToken);
-		model.addAttribute("hypgenEndpoint", hypgenEndpoint);
+		model.addAttribute("dapEndpoint", "/dapproxy");
+		model.addAttribute("hypgenEndpoint", "/hypgenproxy");
+		model.addAttribute("hypgenToken", createHypgenToken());
 		
-		return "summary";
+		return "workspace";
 	}
 	
 	@RequestMapping("/login")

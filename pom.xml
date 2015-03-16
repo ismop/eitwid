@@ -5,7 +5,7 @@
 
 	<groupId>pl.ismop</groupId>
 	<artifactId>web</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>ismop-web</name>
@@ -23,6 +23,7 @@
 		<tomcat.version>8.0.8</tomcat.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gwt.version>2.7.0</gwt.version>
+		<gwt.bootstrap.version>0.9</gwt.bootstrap.version>
 	</properties>
 
 	<scm>
@@ -140,6 +141,13 @@
 			<artifactId>gwt-slf4j</artifactId>
 			<version>0.0.2</version>
 		</dependency>
+		
+		<!-- GWT Bootstrap dependencies -->
+		<dependency>
+			<groupId>org.gwtbootstrap3</groupId>
+			<artifactId>gwtbootstrap3</artifactId>
+			<version>${gwt.bootstrap.version}</version>
+		</dependency>
 
 		<!-- REST client dependencies -->
 		<dependency>
@@ -164,11 +172,8 @@
 			<artifactId>smiley-http-proxy-servlet</artifactId>
 			<version>1.4</version>
 		</dependency>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>2.10.4</version>
-		</dependency>
+		
+		<!-- Gatling dependecies -->
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>

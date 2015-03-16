@@ -10,6 +10,6 @@ import org.fusesource.restygwt.client.RestService;
 @Options(dispatcher = HypgenDispatcher.class, serviceRootKey = "hypgen")
 public interface ExperimentService extends RestService {
 	@POST
-	@Path("experiments")
+	@Path("threat_assessments")
 	void createExperiment(ExperimentRequest request, MethodCallback<ExperimentResponse> callback);
 }

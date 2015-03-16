@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.fusesource.restygwt.client.Json;
 
+import pl.ismop.web.client.dap.result.Result;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Experiment {
@@ -16,8 +18,8 @@ public class Experiment {
 	@JsonProperty("result_ids")
 	private List<String> resultIds;
 	
-	@Json(name = "profile_ids")
-	@JsonProperty("profile_ids")
+	@Json(name = "section_ids")
+	@JsonProperty("section_ids")
 	private List<String> profileIds;
 	
 	@Json(name = "start_date")
@@ -27,6 +29,7 @@ public class Experiment {
 	@Json(name = "end_date")
 	@JsonProperty("end_date")
 	private Date endDate;
+	private List<Result> results;
 	
 	public String getId() {
 		return id;
@@ -75,5 +78,11 @@ public class Experiment {
 	public String toString() {
 		return "Experiment [id=" + id + ", name=" + name + ", status=" + status + ", resultIds=" + resultIds + ", profileIds=" + profileIds + ", startDate="
 				+ startDate + ", endDate=" + endDate + "]";
+	}
+	public List<Result> getResults() {
+		return results;
+	}
+	public void setResults(List<Result> results) {
+		this.results = results;
 	}
 }

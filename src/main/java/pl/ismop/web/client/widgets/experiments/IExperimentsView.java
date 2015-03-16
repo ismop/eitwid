@@ -12,4 +12,5 @@ public interface IExperimentsView extends IsWidget {
 	void showNoExperimentsMessage();
 	void addExperiment(IExperimentItemView view);
 	void clear();
+	String popupTitle();
 }

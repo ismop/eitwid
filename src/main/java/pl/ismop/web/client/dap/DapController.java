@@ -6,8 +6,6 @@ import java.util.List;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
-import pl.ismop.web.client.dap.experiment.ExperimentService;
-import pl.ismop.web.client.dap.experiment.ExperimentsResponse;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.LeveeResponse;
 import pl.ismop.web.client.dap.levee.LeveeService;
@@ -17,15 +15,17 @@ import pl.ismop.web.client.dap.levee.ModeChangeRequest;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.measurement.MeasurementService;
 import pl.ismop.web.client.dap.measurement.MeasurementsResponse;
-import pl.ismop.web.client.dap.profile.Profile;
-import pl.ismop.web.client.dap.profile.ProfileService;
-import pl.ismop.web.client.dap.profile.ProfilesResponse;
 import pl.ismop.web.client.dap.result.Result;
 import pl.ismop.web.client.dap.result.ResultService;
 import pl.ismop.web.client.dap.result.ResultsResponse;
+import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.section.SectionService;
+import pl.ismop.web.client.dap.section.SectionsResponse;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.dap.sensor.SensorResponse;
 import pl.ismop.web.client.dap.sensor.SensorService;
+import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentService;
+import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentResponse;
 import pl.ismop.web.client.hypgen.Experiment;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -39,8 +39,8 @@ public class DapController {
 	private LeveeService leveeService;
 	private SensorService sensorService;
 	private MeasurementService measurementService;
-	private ProfileService profileService;
-	private ExperimentService experimentService;
+	private SectionService sectionService;
+	private ThreatAssessmentService experimentService;
 	private ResultService resultService;
 	
 	public interface ErrorCallback {
@@ -63,8 +63,8 @@ public class DapController {
 		void processMeasurements(List<Measurement> measurements);
 	}
 	
-	public interface ProfilesCallback extends ErrorCallback {
-		void processProfiles(List<Profile> profiles);
+	public interface SectionsCallback extends ErrorCallback {
+		void processSections(List<Section> profiles);
 	}
 	
 	public interface ExperimentsCallback extends ErrorCallback {
@@ -77,12 +77,12 @@ public class DapController {
 
 	@Inject
 	public DapController(LeveeService leveeService, SensorService sensorService,
-			MeasurementService measurementService, ProfileService profileService,
-			ExperimentService experimentService, ResultService resultService) {
+			MeasurementService measurementService, SectionService sectionService,
+			ThreatAssessmentService experimentService, ResultService resultService) {
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
-		this.profileService = profileService;
+		this.sectionService = sectionService;
 		this.experimentService = experimentService;
 		this.resultService = resultService;
 	}
@@ -148,7 +148,8 @@ public class DapController {
 
 	public void getMeasurements(String sensorId, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		measurementService.getMeasurements(sensorId, until, new MethodCallback<MeasurementsResponse>() {
+		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date(new Date().getTime() - 2678400000L));//fetching one month old data
+		measurementService.getMeasurements(sensorId, from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(0, exception.getMessage());
@@ -161,29 +162,29 @@ public class DapController {
 		});
 	}
 	
-	public void getProfiles(float top, float left, float bottom, float right, final ProfilesCallback callback) {
-		profileService.getProfiles(createSelectionQuery(top, left, bottom, right), new MethodCallback<ProfilesResponse>() {
+	public void getSections(float top, float left, float bottom, float right, final SectionsCallback callback) {
+		sectionService.getSections(createSelectionQuery(top, left, bottom, right), new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(0, exception.getMessage());
 			}
 
 			@Override
-			public void onSuccess(Method method, ProfilesResponse response) {
-				callback.processProfiles(response.getProfiles());
+			public void onSuccess(Method method, SectionsResponse response) {
+				callback.processSections(response.getSections());
 			}
 		});
 	}
 	
 	public void getExperiments(List<String> experimentIds, final ExperimentsCallback callback) {
-		experimentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ExperimentsResponse>() {
+		experimentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ThreatAssessmentResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(0, exception.getMessage());
 			}
 
 			@Override
-			public void onSuccess(Method method, ExperimentsResponse response) {
+			public void onSuccess(Method method, ThreatAssessmentResponse response) {
 				callback.processExperiments(response.getExperiments());
 			}
 		});
@@ -203,16 +204,16 @@ public class DapController {
 		});
 	}
 	
-	public void getProfiles(final ProfilesCallback profilesCallback) {
-		profileService.getProfiles(new MethodCallback<ProfilesResponse>() {
+	public void getSections(final SectionsCallback sectionsCallback) {
+		sectionService.getProfiles(new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				Window.alert(exception.getMessage());
 			}
 
 			@Override
-			public void onSuccess(Method method, ProfilesResponse response) {
-				profilesCallback.processProfiles(response.getProfiles());
+			public void onSuccess(Method method, SectionsResponse response) {
+				sectionsCallback.processSections(response.getSections());
 			}
 		});
 	}

@@ -1,84 +1,86 @@
 package pl.ismop.web.client.widgets.root;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.LeveesCallback;
-import pl.ismop.web.client.dap.levee.Levee;
-import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
+import pl.ismop.web.client.dap.DapController.ExperimentsCallback;
+import pl.ismop.web.client.hypgen.Experiment;
+import pl.ismop.web.client.internal.InternalExperimentController;
+import pl.ismop.web.client.internal.InternalExperimentController.UserExperimentsCallback;
+import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 
-import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
-import com.mvp4g.client.annotation.EventHandler;
-import com.mvp4g.client.event.BaseEventHandler;
+import com.mvp4g.client.annotation.Presenter;
+import com.mvp4g.client.presenter.BasePresenter;
 
-@EventHandler
-public class RootPresenter extends BaseEventHandler<MainEventBus> {
-	private static final String DETAILS_CONTAINER_ID = "detailsContainer";
-	private static final String SUMMARY_CONTAINER_ID = "leveesContainer";
-	private static final String MAP_CONTAINER_ID = "mapContainer";
-	
+@Presenter(view = RootPanel.class)
+public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> implements IRootPresenter{
 	private DapController dapController;
-	private List<LeveeSummaryPresenter> leveePresenters;
-
+	private InternalExperimentController internalExperimentController;
+	private int numberOfExperiments;
+	private List<String> experimentIds;
+	
 	@Inject
-	public RootPresenter(DapController dapController) {
+	public RootPresenter(DapController dapController, InternalExperimentController internalExperimentController) {
 		this.dapController = dapController;
-		leveePresenters = new ArrayList<>();
+		this.internalExperimentController = internalExperimentController;
 	}
 	
 	public void onStart() {
-		if(RootPanel.get(SUMMARY_CONTAINER_ID) != null) {
-			addSpinner();
-			dapController.getLevees(new LeveesCallback() {
-				@Override
-				public void onError(int code, String message) {
-					removeSpinner();
-					Window.alert("Error: " + message);
-				}
+		RootLayoutPanel.get().add(view);
+		eventBus.drawGoogleMap("mapPanel");
+		internalExperimentController.getExperiments(new UserExperimentsCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert("Error: " + message);
+			}
+			
+			@Override
+			public void processUserExperiments(List<String> experimentIds) {
+				RootPresenter.this.experimentIds = experimentIds;
+				numberOfExperiments = experimentIds.size();
 				
-				@Override
-				public void processLevees(List<Levee> levees) {
-					removeSpinner();
-					
-					for(Levee levee : levees) {
-						LeveeSummaryPresenter presenter = eventBus.addHandler(LeveeSummaryPresenter.class);
-						leveePresenters.add(presenter);
-						presenter.setLevee(levee);
-						RootPanel.get(SUMMARY_CONTAINER_ID).add(presenter.getView());
-					}
+				if(numberOfExperiments == 0) {
+					view.setExperimentsLabel(numberOfExperiments);
+				} else {
+					dapController.getExperiments(experimentIds, new ExperimentsCallback() {
+						@Override
+						public void onError(int code, String message) {
+							Window.alert("Error: " + message);
+						}
+						
+						@Override
+						public void processExperiments(List<Experiment> experiments) {
+							view.setExperimentsLabel(numberOfExperiments);
+						}
+					});
 				}
-			});
-		} else if(RootPanel.get(MAP_CONTAINER_ID) != null) {
-			eventBus.drawGoogleMap(MAP_CONTAINER_ID, DETAILS_CONTAINER_ID);
-		}
+			}
+
+		});
 	}
 	
-	public void onShowExperiments(List<String> experimentIds) {
-		for(LeveeSummaryPresenter presenter : leveePresenters) {
-			presenter.stopUpdate();
-		}
+	public void onExperimentCreated(Experiment experiment) {
+		numberOfExperiments++;
+		experimentIds.add(experiment.getId());
+		view.setExperimentsLabel(numberOfExperiments);
 	}
 
-	private void addSpinner() {
-		RootPanel.get(SUMMARY_CONTAINER_ID).add(createSpinner());
-		RootPanel.get(SUMMARY_CONTAINER_ID).getElement().getStyle().setTextAlign(TextAlign.CENTER);
-	}
-	
-	private void removeSpinner() {
-		RootPanel.get(SUMMARY_CONTAINER_ID).clear();
-		RootPanel.get(SUMMARY_CONTAINER_ID).getElement().getStyle().clearTextAlign();
+	@Override
+	public void onShowSensors(boolean show) {
+		eventBus.showSensors(show);
 	}
 
-	private Widget createSpinner() {
-		HTMLPanel panel = new HTMLPanel("<i class='fa fa-spinner fa-2x fa-spin'></i>");
-		
-		return panel;
+	@Override
+	public void onShowLevees(boolean show) {
+		eventBus.showLeveeList();
+	}
+
+	@Override
+	public void onShowExperiments() {
+		eventBus.showExperiments(experimentIds);
 	}
 }

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.LeveeServiceSync;
 import pl.ismop.web.client.dap.levee.LeveesResponse;
-import pl.ismop.web.client.dap.profile.Profile;
-import pl.ismop.web.client.dap.profile.ProfileServiceSync;
+import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.section.SectionServiceSync;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.dap.sensor.SensorServiceSync;
 
@@ -17,13 +17,13 @@ import pl.ismop.web.client.dap.sensor.SensorServiceSync;
 public class DapService {
 	private LeveeServiceSync leveeService;
 	private SensorServiceSync sensorService;
-	private ProfileServiceSync profileService;
+	private SectionServiceSync sectionService;
 
 	@Autowired
-	public DapService(LeveeServiceSync leveeService, SensorServiceSync sensorService, ProfileServiceSync profileService) {
+	public DapService(LeveeServiceSync leveeService, SensorServiceSync sensorService, SectionServiceSync sectionService) {
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
-		this.profileService = profileService;
+		this.sectionService = sectionService;
 	}
 	
 	public List<Levee> getLevees() {
@@ -36,7 +36,7 @@ public class DapService {
 		return sensorService.getSensors().getSensors();
 	}
 
-	public List<Profile> getProfiles() {
-		return profileService.getProfiles().getProfiles();
+	public List<Section> getSections() {
+		return sectionService.getSections().getSections();
 	}
 }

@@ -46,6 +46,6 @@ public class MainControllerTest {
 		
         this.mockMvc.perform(get("/"))
             .andExpect(status().isOk())
-            .andExpect(content().string(containsString("ISMOP - Summary")));
+            .andExpect(content().string(containsString("Workspace")));
     }
 }

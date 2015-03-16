@@ -4,8 +4,7 @@ import pl.ismop.web.client.widgets.summary.ILeveeSummaryView.ILeveeSummaryPresen
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.HeadingElement;
-import com.google.gwt.dom.client.ParagraphElement;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -21,12 +20,10 @@ public class LeveeSummaryView extends Composite implements ILeveeSummaryView, Re
 	private ILeveeSummaryPresenter presenter;
 
 	@UiField LeveeSummaryViewMessages messages;
-	@UiField DivElement modePanel;
-	@UiField HeadingElement header;
-	@UiField ParagraphElement mode;
-	@UiField ParagraphElement threat;
+	@UiField DivElement header;
+	@UiField SpanElement mode;
+	@UiField SpanElement threat;
 	@UiField DivElement threatTimestamp;
-	@UiField DivElement threatPanel;
 
 	public LeveeSummaryView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -49,9 +46,8 @@ public class LeveeSummaryView extends Composite implements ILeveeSummaryView, Re
 
 	@Override
 	public void addModePanelStyle(String style) {
-		modePanel.removeAttribute("class");
-		modePanel.addClassName("panel");
-		modePanel.addClassName(style);
+		mode.removeAttribute("class");
+		mode.addClassName(style);
 	}
 
 	@Override
@@ -76,9 +72,8 @@ public class LeveeSummaryView extends Composite implements ILeveeSummaryView, Re
 
 	@Override
 	public void addThreatPanelStyle(String style) {
-		threatPanel.removeAttribute("class");
-		threatPanel.addClassName("panel");
-		threatPanel.addClassName(style);
+		threat.removeAttribute("class");
+		threat.addClassName(style);
 	}
 
 	@Override

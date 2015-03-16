@@ -1,5 +1,9 @@
 package pl.ismop.web.client.widgets.newexperiment;
 
+import org.gwtbootstrap3.client.ui.Label;
+import org.gwtbootstrap3.client.ui.ListBox;
+import org.gwtbootstrap3.client.ui.TextBox;
+
 import pl.ismop.web.client.widgets.newexperiment.IExperimentView.IExperimentPresenter;
 
 import com.google.gwt.core.client.GWT;
@@ -10,9 +14,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
@@ -28,6 +29,7 @@ public class ExperimentWidget extends Composite implements IExperimentView, Reve
 	@UiField TextBox name;
 	@UiField(provided = true) ListBox days;
 	@UiField Label errorLabel;
+	@UiField Label successLabel;
 	
 	public ExperimentWidget() {
 		days = new ListBox();
@@ -80,7 +82,18 @@ public class ExperimentWidget extends Composite implements IExperimentView, Reve
 	}
 
 	@Override
-	public void clearErrorMessages() {
+	public void clearMessages() {
 		errorLabel.setText("");
+		successLabel.setText("");
+	}
+
+	@Override
+	public String title() {
+		return messages.leveesExperimentModalTitle();
+	}
+
+	@Override
+	public void showExperimentCreatedMessage() {
+		successLabel.setText(messages.experimentCreated());
 	}
 }

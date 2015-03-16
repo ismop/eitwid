@@ -1,30 +1,62 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-		xmlns:g="urn:import:com.google.gwt.user.client.ui">
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.experimentitem.ExperimentItemMessages" field="messages"/>
-	<ui:style>
+	<ui:style type="pl.ismop.web.client.widgets.experimentitem.ExperimentItemView.Style">
 		.row {
 			display: table-row;
 		}
 		.row:hover {
 			background-color: #F5F5F5;
 		}
-		.cell {
-			display: table-cell;
-		}
 		.name {
 			font-size: large;
+			font-weight: bold;
+		}
+		.right-column {
+			float: left;
+			width: 20%;
+			text-align: right;
+		}
+		.name-column {
+			float: left;
+			width: 80%;
+		}
+		.main {
+			width: 700px;
+			border-bottom: solid #aaaaaa 1px;
+		}
+		.headerRow {
+			font-weight: bold;
+		}
+		.label {
+			font-style: italic;
+			font-weight: bold;
+			margin-right: 10px;
 		}
 	</ui:style>
-	<g:HTMLPanel styleName="{style.row}">
-		<g:Label ui:field="name" styleName="{style.cell} {style.name}"/>
-		<g:FlowPanel styleName="{style.cell}">
-			<g:Label ui:field="status"/>
+	<g:HTMLPanel styleName="{style.main}">
+		<g:FlowPanel addStyleNames="clearfix">
+			<g:FlowPanel addStyleNames="{style.name-column}">
+				<g:Label ui:field="name" styleName="{style.name}"/>
+			</g:FlowPanel>
+			<g:FlowPanel addStyleNames="{style.right-column}">
+				<b:Button ui:field="collapseButton" text="{messages.resultsLabel}" dataToggle="COLLAPSE" size="EXTRA_SMALL"/>
+			</g:FlowPanel>
 		</g:FlowPanel>
-		<g:HTML ui:field="startDate" styleName="{style.cell}"/>
-		<g:HTML ui:field="endDate" styleName="{style.cell}"/>
 		<g:FlowPanel>
-			<g:Button ui:field="showResults" styleName="btn btn-xs"><ui:text from="{messages.resultsLabel}"/></g:Button>
+			<g:FlowPanel styleName="clearfix">
+				<g:InlineLabel styleName="{style.label}" text="{messages.statusLabel}"/>
+				<g:InlineLabel ui:field="status"/>
+			</g:FlowPanel>
 		</g:FlowPanel>
+		<g:FlowPanel styleName="clearfix">
+			<g:InlineLabel styleName="{style.label}" text="{messages.comparisonLabel}"/>
+			<g:InlineLabel ui:field="comparisonDates"/>
+		</g:FlowPanel>
+		<b:Collapse ui:field="collapse" toggle="false">
+			<g:FlowPanel ui:field="results" styleName="clearfix"/>
+		</b:Collapse>
 	</g:HTMLPanel>
 </ui:UiBinder>
