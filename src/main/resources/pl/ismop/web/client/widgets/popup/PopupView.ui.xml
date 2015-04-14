@@ -10,15 +10,16 @@
 		}
 		.header {
 			padding: 2px;
+			cursor: move;
 		}
 		.close {
 			padding-left: 20px;
 		}
 	</ui:style>
 	<g:HTMLPanel>
-		<g:PopupPanel ui:field="popup" addStyleNames="{style.contents}">
+		<g:PopupPanel ui:field="popup" addStyleNames="{style.contents} draggable">
 			<g:FlowPanel>
-				<g:FlowPanel addStyleNames="{style.header} clearfix">
+				<g:FlowPanel addStyleNames="{style.header} clearfix draggable-handle">
 					<g:FlowPanel addStyleNames="pull-left">
 						<g:Label ui:field="title">Title</g:Label>
 					</g:FlowPanel>

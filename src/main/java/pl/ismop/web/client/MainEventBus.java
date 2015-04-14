@@ -21,7 +21,7 @@ import com.mvp4g.client.presenter.NoStartPresenter;
 @Events(startPresenter = NoStartPresenter.class)
 public interface MainEventBus extends EventBus {
 	@Start
-	@Event(handlers = {RootPresenter.class})
+	@Event(handlers = RootPresenter.class)
 	void start();
 
 	@Event(handlers = GoogleMapsPresenter.class)

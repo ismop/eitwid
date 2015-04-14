@@ -19,4 +19,8 @@ public interface SensorService extends RestService {
 	@GET
 	@Path("sensors/{id}")
 	void getSensor(@PathParam("id") String sensorId, MethodCallback<SensorResponse> callback);
+	
+	@GET
+	@Path("sensors?section_id={sectionId}")
+	void getSensorsForSection(@PathParam("sectionId") String sectionId, MethodCallback<SensorsResponse> callback);
 }

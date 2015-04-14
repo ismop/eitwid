@@ -32,18 +32,25 @@
 		<url>https://gitlab.dev.cyfronet.pl/ismop/eitwid</url>
 		<tag>HEAD</tag>
 	</scm>
+	
+	<repositories>
+		<repository>
+			<id>dev.cyfronet.pl</id>
+			<url>http://dev.cyfronet.pl/mvnrepo</url>
+		</repository>
+	</repositories>
 
 	<distributionManagement>
 		<repository>
 			<uniqueVersion>false</uniqueVersion>
 			<id>dice-mvnrepo</id>
 			<name>Cyfronet Repository</name>
-			<url>scp://dev.cyfronet.pl/var/www/mvnrepo</url>
+			<url>sftp://dev.cyfronet.pl/var/www/mvnrepo</url>
 		</repository>
 		<snapshotRepository>
 			<id>dice-snapshot-mvnrepo</id>
 			<name>Cyfronet Snapshot Repository</name>
-			<url>scp://dev.cyfronet.pl/var/www/mvnrepo</url>
+			<url>sftp://dev.cyfronet.pl/var/www/mvnrepo</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -136,17 +143,19 @@
 			<artifactId>restygwt</artifactId>
 			<version>1.5</version>
 		</dependency>
-		<dependency>
-			<groupId>de.benediktmeurer.gwt-slf4j</groupId>
-			<artifactId>gwt-slf4j</artifactId>
-			<version>0.0.2</version>
-		</dependency>
 		
 		<!-- GWT Bootstrap dependencies -->
 		<dependency>
 			<groupId>org.gwtbootstrap3</groupId>
 			<artifactId>gwtbootstrap3</artifactId>
 			<version>${gwt.bootstrap.version}</version>
+		</dependency>
+		
+		<!-- GWT parallax 3D dependencies -->
+		<dependency>
+			<groupId>thothbot</groupId>
+			<artifactId>parallax</artifactId>
+			<version>1.6.0</version>
 		</dependency>
 
 		<!-- REST client dependencies -->
@@ -230,12 +239,5 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh</artifactId>
-				<version>2.3</version>
-			</extension>
-		</extensions>
 	</build>
 </project>

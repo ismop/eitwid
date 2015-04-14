@@ -8,4 +8,5 @@ public interface MapMessages extends Messages {
 	String noMeasurements();
 	String sensorTitle(String sensorId);
 	String sectionTitle(String profileId);
+	String profileTitle();
 }

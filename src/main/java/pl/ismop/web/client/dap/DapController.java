@@ -24,8 +24,9 @@ import pl.ismop.web.client.dap.section.SectionsResponse;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.dap.sensor.SensorResponse;
 import pl.ismop.web.client.dap.sensor.SensorService;
-import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentService;
+import pl.ismop.web.client.dap.sensor.SensorsResponse;
 import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentResponse;
+import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentService;
 import pl.ismop.web.client.hypgen.Experiment;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -73,6 +74,10 @@ public class DapController {
 	
 	public interface ResultsCallback extends ErrorCallback {
 		void processResults(List<Result> results);
+	}
+	
+	public interface SensorsCallback extends ErrorCallback {
+		void processSensors(List<Sensor> sensors);
 	}
 
 	@Inject
@@ -214,6 +219,20 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, SectionsResponse response) {
 				sectionsCallback.processSections(response.getSections());
+			}
+		});
+	}
+	
+	public void getSensors(String sectionId, final SensorsCallback callback) {
+		sensorService.getSensorsForSection(sectionId, new MethodCallback<SensorsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, SensorsResponse response) {
+				callback.processSensors(response.getSensors());
 			}
 		});
 	}
