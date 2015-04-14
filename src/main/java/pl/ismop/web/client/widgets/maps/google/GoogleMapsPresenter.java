@@ -14,12 +14,14 @@ import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
+import pl.ismop.web.client.dap.DapController.SensorsCallback;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.newexperiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.profile.ProfilePresenter;
+import pl.ismop.web.client.widgets.sideprofile.SideProfilePresenter;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
@@ -54,6 +56,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private ListBox days;
 	private JavaScriptObject sectionMapData;
 	private JavaScriptObject sensorMapData;
+	private SideProfilePresenter presenter;
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
@@ -193,10 +196,31 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		
 		if(getSectionId(featureId) != null) {
 			Section profile = sections.get(getSectionId(featureId));
-			showProfileDetails(profile);
+			showSectionDetails(profile);
 		} else if(getSensorId(featureId) != null) {
 			showSensorDetails(getSensorId(featureId));
+		} else if(getProfileId(featureId) != null) {
+			showProfileDetails(getProfileId(featureId));
 		}
+	}
+
+	private void showProfileDetails(final String sectionId) {
+		dapController.getSensors(sectionId, new SensorsCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert("Error: " + message);
+			}
+			
+			@Override
+			public void processSensors(List<Sensor> sensors) {
+				if(presenter == null) {
+					presenter = eventBus.addHandler(SideProfilePresenter.class);
+				}
+				
+				eventBus.setTitleAndShow(messages.profileTitle(), presenter.getView());
+				presenter.setProfileNameAndSensors(sectionId, sensors);
+			}
+		});
 	}
 
 	private void showSensorDetails(final String sensorId) {
@@ -328,7 +352,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		return builder.toString();
 	}
 
-	private void showProfileDetails(Section profile) {
+	private void showSectionDetails(Section section) {
 		if(sensorTimer != null) {
 			sensorTimer.cancel();
 			sensorTimer = null;
@@ -352,14 +376,14 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		
 		ProfilePresenter presenter = eventBus.addHandler(ProfilePresenter.class);
 		selectedSection = presenter;
-		presenter.setProfile(profile);
-		eventBus.setTitleAndShow(messages.sectionTitle(profile.getId()), presenter.getView());
+		presenter.setProfile(section);
+		eventBus.setTitleAndShow(messages.sectionTitle(section.getId()), presenter.getView());
 		
 		if(previousProfileId != null) {
 			selectSection(previousProfileId, false);
 		}
 		
-		selectSection(profile.getId(), true);
+		selectSection(section.getId(), true);
 	}
 
 	private String getFeatureColor(String featureId) {
@@ -398,7 +422,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			case "section":
 				return 1;
 			case "profile":
-				return 3;
+				return 7;
 		}
 		
 		return 0;
@@ -582,6 +606,19 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			var feature = sensorData.getFeatureById(featureId);
 			
 			if(feature && feature.getProperty('type') == 'sensor') {
+				return feature.getProperty('id');
+			}
+		}
+	
+		return null;
+	}-*/;
+	
+	private native String getProfileId(String featureId) /*-{
+		if(featureId) {
+			var profileData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::sectionMapData;
+			var feature = profileData.getFeatureById(featureId);
+			
+			if(feature && feature.getProperty('type') == 'profile') {
 				return feature.getProperty('id');
 			}
 		}

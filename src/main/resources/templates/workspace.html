@@ -8,6 +8,8 @@
 		<meta id="csrfParameterName" name="_csrf_parameter_name" th:content="${_csrf} ? ${_csrf.parameterName}"/>
 		<title th:text="#{workspace.page.title}"></title>
 		
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+		
 		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false&amp;libraries=drawing'}"></script>
 		<script type="text/javascript" th:src="@{/js/dygraph-combined.js}"></script>
 		
@@ -17,7 +19,11 @@
 		<script type="text/javascript" th:utext="'var iconBaseUrl = \'' + @{/icons} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var properties = {dapEndpoint: \'' + ${dapEndpoint} + '\', dapToken: \'' + ${dapToken} + '\', hypgenEndpoint: \'' + ${hypgenEndpoint} + '\', hypgenToken: \'' + ${hypgenToken} + '\'};'"></script>
 		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
+		<script type="text/javascript" th:src="@{/js/three.min.js}"></script>
+		<script type="text/javascript" th:src="@{/js/optimer_bold.typeface.js}"></script>
+		<script type="text/javascript" th:src="@{/js/optimer_regular.typeface.js}"></script>
 	</head>
 	<body>
+		<div id="three" style="width: 800px; height: 800px;"></div>
 	</body>
 </html>

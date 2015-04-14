@@ -10,7 +10,6 @@ import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
 import pl.ismop.web.client.widgets.newexperiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.popup.PopupPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
-import pl.ismop.web.client.widgets.sideprofile.SideProfilePresenter;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.mvp4g.client.annotation.Event;
@@ -22,7 +21,7 @@ import com.mvp4g.client.presenter.NoStartPresenter;
 @Events(startPresenter = NoStartPresenter.class)
 public interface MainEventBus extends EventBus {
 	@Start
-	@Event(handlers = {RootPresenter.class, SideProfilePresenter.class})
+	@Event(handlers = RootPresenter.class)
 	void start();
 
 	@Event(handlers = GoogleMapsPresenter.class)

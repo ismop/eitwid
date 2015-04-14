@@ -2,14 +2,12 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:p="urn:import:thothbot.parallax.core.client">
-	<ui:with type="pl.ismop.web.client.widgets.profile.ProfileViewMessages" field="messages"/>
+	<ui:with type="pl.ismop.web.client.widgets.sideprofile.SideProfileViewMessages" field="messages"/>
 	<ui:style>
 		.panel {
-			width: 400px;
-			height: 400px;
+			width: 800px;
+			height: 600px;
 		}
 	</ui:style>
-	<g:HTMLPanel addStyleNames="{style.panel}">
-		<p:RenderingPanel ui:field="panel"/>
-	</g:HTMLPanel>
+	<g:HTMLPanel ui:field="panel" addStyleNames="{style.panel}"/>
 </ui:UiBinder>
