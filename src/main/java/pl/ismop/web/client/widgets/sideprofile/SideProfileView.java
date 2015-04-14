@@ -124,7 +124,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		camera.position.set(-70, 70, 100);
 		camera.lookAt(new $wnd.THREE.Vector3(0, 0, 0));
 		
-		this.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::addAxes()();
+		//this.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::addAxes()();
 		
 		var fog = new $wnd.THREE.FogExp2(0xbebebe, 0.003);
 		scene.fog = fog;
@@ -180,7 +180,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		waterMesh.position.set(-100, 0, -301);
 		scene.add(waterMesh);
 
-		var renderer = new $wnd.THREE.WebGLRenderer();
+		var renderer = new $wnd.THREE.WebGLRenderer({antialias: true});
 		renderer.setSize(800, 600);
 		renderer.setClearColor(0xbad7f3);
 		element.appendChild(renderer.domElement);

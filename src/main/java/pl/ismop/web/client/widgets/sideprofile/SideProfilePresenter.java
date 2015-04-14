@@ -10,6 +10,7 @@ import java.util.List;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
+import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.profile.IProfileView.ISideProfilePresenter;
@@ -45,34 +46,44 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 	public void onSensorSelected(final String sensorId, boolean selected) {
 		if(selected) {
 			selectedSensorId = sensorId;
-			dapController.getMeasurements(sensorId, new MeasurementsCallback() {
+			dapController.getSensor(sensorId, new SensorCallback() {
 				@Override
 				public void onError(int code, String message) {
 					Window.alert(message);
 				}
 				
 				@Override
-				public void processMeasurements(List<Measurement> measurements) {
-					if(selectedSensorId != null && selectedSensorId.equals(sensorId)) {
-						if(measurements != null && measurements.size() > 0) {
-							sort(measurements, new Comparator<Measurement>() {
-								@Override
-								public int compare(Measurement m1, Measurement m2) {
-									Date d1 = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).parse(m1.getTimestamp());
-									Date d2 = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).parse(m2.getTimestamp());
-									
-									if(d1.after(d2)) {
-										return -1;
-									} else {
-										return 1;
-									}
-								}
-							});
-							view.showMeasurement("" + measurements.get(0).getValue());
-						} else {
-							view.showMeasurement(view.getNoMeasurementLabel());
+				public void processSensor(final Sensor sensor) {
+					dapController.getMeasurements(sensorId, new MeasurementsCallback() {
+						@Override
+						public void onError(int code, String message) {
+							Window.alert(message);
 						}
-					}
+						
+						@Override
+						public void processMeasurements(List<Measurement> measurements) {
+							if(selectedSensorId != null && selectedSensorId.equals(sensorId)) {
+								if(measurements != null && measurements.size() > 0) {
+									sort(measurements, new Comparator<Measurement>() {
+										@Override
+										public int compare(Measurement m1, Measurement m2) {
+											Date d1 = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).parse(m1.getTimestamp());
+											Date d2 = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).parse(m2.getTimestamp());
+											
+											if(d1.after(d2)) {
+												return -1;
+											} else {
+												return 1;
+											}
+										}
+									});
+									view.showMeasurement("" + measurements.get(0).getValue() + " " + sensor.getUnit());
+								} else {
+									view.showMeasurement(view.getNoMeasurementLabel());
+								}
+							}
+						}
+					});
 				}
 			});
 		} else {

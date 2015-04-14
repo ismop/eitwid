@@ -19,10 +19,11 @@ public class PopupView extends Composite implements IPopupView, ReverseViewInter
 	private static PopupViewUiBinder uiBinder = GWT.create(PopupViewUiBinder.class);
 	interface PopupViewUiBinder extends UiBinder<Widget, PopupView> {}
 
+	private IPopupPresenter presenter;
+
 	@UiField PopupPanel popup;
 	@UiField HTMLPanel contents;
 	@UiField Label title;
-	private IPopupPresenter presenter;
 	
 	public PopupView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -44,6 +45,7 @@ public class PopupView extends Composite implements IPopupView, ReverseViewInter
 		if(show) {
 			popup.setPopupPosition(100, 60);
 			popup.show();
+			makeDraggable();
 		} else {
 			popup.hide();
 		}
@@ -73,4 +75,8 @@ public class PopupView extends Composite implements IPopupView, ReverseViewInter
 	public void hide() {
 		popup.hide();
 	}
+	
+	private native void makeDraggable() /*-{
+		$wnd.jQuery('.draggable').draggable({handle: '.draggable-handle'});
+	}-*/;
 }
