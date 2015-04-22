@@ -115,9 +115,11 @@ public class MapsController {
 					geoJsonFeature.getProperties().put("name", section.getName());
 					geoJsonFeature.getProperties().put("type", "profile");
 					
-					LineGeometry geometry = new LineGeometry();
-					geometry.setCoordinates(section.getProfileShape().getCoordinates());
-					geoJsonFeature.setGeometry(geometry);
+					if(section.getProfileShape() != null) {
+						LineGeometry geometry = new LineGeometry();
+						geometry.setCoordinates(section.getProfileShape().getCoordinates());
+						geoJsonFeature.setGeometry(geometry);
+					}
 					
 					return geoJsonFeature;
 				}).
