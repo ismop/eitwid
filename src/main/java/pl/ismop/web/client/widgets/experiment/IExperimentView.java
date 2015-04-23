@@ -11,4 +11,5 @@ public interface IExperimentView extends IsWidget {
 	String getMainTitle();
 	void addAnalysis(IsWidget view);
 	void addPlot(FlowPanel panel);
+	void showWave();
 }

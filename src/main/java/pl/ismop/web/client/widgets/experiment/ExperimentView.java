@@ -1,5 +1,8 @@
 package pl.ismop.web.client.widgets.experiment;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.gwtbootstrap3.client.shared.event.ShownEvent;
 import org.gwtbootstrap3.client.ui.BlockQuote;
 import org.gwtbootstrap3.client.ui.ListBox;
@@ -7,6 +10,8 @@ import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.client.ui.html.Small;
+
+import pl.ismop.web.client.widgets.experiment.IExperimentView.IExperimentPresenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,13 +25,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
-import pl.ismop.web.client.widgets.experiment.IExperimentView.IExperimentPresenter;
-
 public class ExperimentView extends Composite implements IExperimentView, ReverseViewInterface<IExperimentPresenter> {
 	private static ExperimentViewUiBinder uiBinder = GWT.create(ExperimentViewUiBinder.class);
 	interface ExperimentViewUiBinder extends UiBinder<Widget, ExperimentView> {}
 	
 	private IExperimentPresenter presenter;
+	private Map<Integer, Double> levels;
 	
 	@UiField ExperimentMessages messages;
 	@UiField PanelBody analysisBody;
@@ -36,22 +40,69 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 	@UiField ListBox type;
 	@UiField TextBox message;
 	@UiField FlowPanel wave;
+	@UiField TextBox time;
+	@UiField TextBox height;
 
 	public ExperimentView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		fillInSensors();
 		plot.getElement().setAttribute("id", "singlePlot");
 		wave.getElement().setAttribute("id", "wave");
+		levels = new LinkedHashMap<>();
 	}
 	
+	@UiHandler("addPoint")
+	void addPoint(ClickEvent event) {
+		addLevelPoint(Integer.parseInt(time.getValue()), Double.parseDouble(height.getValue()));
+		time.setValue("");
+		height.setValue("");
+	}
+	
+	@UiHandler("removePoint")
+	void removePoint(ClickEvent event) {
+		Integer last = null;
+		
+		for(Integer key : levels.keySet()) {
+			last = key;
+		}
+		
+		if(last != null && levels.size() > 0) {
+			levels.remove(last);
+		}
+		
+		regenerateWave(createData());
+	}
+	
+	private void addLevelPoint(int hours, double level) {
+		Integer key = hours;
+		levels.put(key, level);
+		regenerateWave(createData());
+	}
+
+	private String createData() {
+		String data = "Czas w godzinach,Planowana fala,Rzeczywisty poziom\n";
+		
+		for(Integer h : levels.keySet()) {
+			double real = levels.get(h) + Math.random() * 0.4 - 0.2;
+			data += "" + h + "," + levels.get(h) + "," + real + "\n";
+		}
+		
+		return data;
+	}
+
+	private native void regenerateWave(String data) /*-{
+		new $wnd.Dygraph(
+		    $doc.getElementById("wave"),
+			    data, {
+			    	ylabel: "Poziom wody, m",
+			    	xlabel: "Czas, h"
+			    }
+		   );
+	}-*/;
+
 	@UiHandler("plotCollapse")
 	void plotShowed(ShownEvent event) {
 		getPresenter().showPlot();
-	}
-	
-	@UiHandler("waveCollapse")
-	void waveShowed(ShownEvent event) {
-		showWave();
 	}
 	
 	@UiHandler("add")
@@ -105,14 +156,11 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 		return presenter;
 	}
 	
-	public native void showWave() /*-{
-		new $wnd.Dygraph(
-		    $doc.getElementById("wave"),
-			    "Czas w godzinach,Poziom wody wału\n" +
-			    "0,0.5\n" +
-			    "10,3.0\n" +
-			    "30,3.0\n" +
-			    "40,0.4\n"
-		   );
-	}-*/;
+	@Override
+	public void showWave() {
+		addLevelPoint(0, 0.5);
+		addLevelPoint(10, 3.0);
+		addLevelPoint(30, 3.0);
+		addLevelPoint(40, 0.4);
+	};
 }

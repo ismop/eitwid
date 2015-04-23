@@ -18,6 +18,9 @@
 		.panel {
 			width: 800px;
 		}
+		.form {
+			margin-top: 5px;
+		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
 		<b:PanelGroup b:id="parent">
@@ -51,6 +54,22 @@
 						</b:Form>
 						<b.html:Paragraph>Symulowana fala</b.html:Paragraph>
 						<g:FlowPanel ui:field="wave"/>
+						<b:Form type="INLINE" addStyleNames="{style.form}">
+							<b:FieldSet>
+								<b:FormGroup>
+									<b:TextBox ui:field="time" placeholder="Czas, h"/>
+								</b:FormGroup>
+								<b:FormGroup>
+									<b:TextBox ui:field="height" placeholder="Poziom wody, m"/>
+								</b:FormGroup>
+								<b:FormGroup>
+									<b:Button ui:field="addPoint">Dodaj</b:Button>
+								</b:FormGroup>
+								<b:FormGroup>
+									<b:Button ui:field="removePoint">Usuń ostatni</b:Button>
+								</b:FormGroup>
+							</b:FieldSet>
+						</b:Form>
 					</b:PanelBody>
 				</b:PanelCollapse>
 			</b:Panel>
