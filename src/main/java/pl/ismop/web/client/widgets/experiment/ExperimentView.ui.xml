@@ -1,0 +1,50 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.experiment.ExperimentMessages" field="messages"/>
+	<ui:style>
+	</ui:style>
+	<g:HTMLPanel>
+		<b:PanelGroup b:id="parent">
+			<b:Panel>
+				<b:PanelHeader>
+					<b:Anchor dataToggle="COLLAPSE" dataParent="#parent" dataTarget="#main" text="{messages.mainPanelTitle}"/>
+				</b:PanelHeader>
+				<b:PanelCollapse b:id="main">
+					<b:PanelBody>
+						<b:Label>main</b:Label>
+					</b:PanelBody>
+				</b:PanelCollapse>
+			</b:Panel>
+			<b:Panel>
+				<b:PanelHeader>
+					<b:Anchor dataToggle="COLLAPSE" dataParent="#parent" dataTarget="#pomps" text="{messages.pompsPanelTitle}"/>
+				</b:PanelHeader>
+				<b:PanelCollapse b:id="pomps">
+					<b:PanelBody>
+						<b:Label>pomps</b:Label>
+					</b:PanelBody>
+				</b:PanelCollapse>
+			</b:Panel>
+			<b:Panel>
+				<b:PanelHeader>
+					<b:Anchor dataToggle="COLLAPSE" dataParent="#parent" dataTarget="#plots" text="{messages.plotsPanelTitle}"/>
+				</b:PanelHeader>
+				<b:PanelCollapse b:id="plots">
+					<b:PanelBody>
+						<b:Label>plots</b:Label>
+					</b:PanelBody>
+				</b:PanelCollapse>
+			</b:Panel>
+			<b:Panel>
+				<b:PanelHeader>
+					<b:Anchor dataToggle="COLLAPSE" dataParent="#parent" dataTarget="#compare" text="{messages.comparePanelTitle}"/>
+				</b:PanelHeader>
+				<b:PanelCollapse b:id="compare" in="true">
+					<b:PanelBody ui:field="analysisBody"/>
+				</b:PanelCollapse>
+			</b:Panel>
+		</b:PanelGroup>
+	</g:HTMLPanel>
+</ui:UiBinder>

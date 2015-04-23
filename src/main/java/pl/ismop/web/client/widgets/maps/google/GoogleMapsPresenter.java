@@ -19,7 +19,7 @@ import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.maps.MapMessages;
-import pl.ismop.web.client.widgets.newexperiment.ExperimentPresenter;
+import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.profile.ProfilePresenter;
 import pl.ismop.web.client.widgets.sideprofile.SideProfilePresenter;
 
@@ -429,7 +429,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	private void onAreaSelected(float top, float left, float bottom, float right) {
-		eventBus.addHandler(ExperimentPresenter.class);
+		eventBus.addHandler(ThreatAssessmentPresenter.class);
 		eventBus.areaSelected(top, left, bottom, right);
 	}
 	

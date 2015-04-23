@@ -12,22 +12,22 @@ import pl.ismop.web.client.hypgen.HypgenController;
 import pl.ismop.web.client.hypgen.HypgenController.ExperimentCallback;
 import pl.ismop.web.client.internal.InternalExperimentController;
 import pl.ismop.web.client.internal.InternalExperimentController.InternalExperimentCallback;
-import pl.ismop.web.client.widgets.newexperiment.IExperimentView.IExperimentPresenter;
+import pl.ismop.web.client.widgets.newexperiment.IThreatAssessmentView.IThreatAssessmentPresenter;
 
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
-@Presenter(view = ExperimentWidget.class, multiple = true)
-public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEventBus> implements IExperimentPresenter {
+@Presenter(view = ThreatAssessmentWidget.class, multiple = true)
+public class ThreatAssessmentPresenter extends BasePresenter<IThreatAssessmentView, MainEventBus> implements IThreatAssessmentPresenter {
 	private DapController dapController;
 	protected List<Section> currentProfiles;
 	private HypgenController hypgenController;
 	private InternalExperimentController internalExperimentController;
 
 	@Inject
-	public ExperimentPresenter(DapController dapController, HypgenController hypgenController, InternalExperimentController internalExperimentController) {
+	public ThreatAssessmentPresenter(DapController dapController, HypgenController hypgenController, InternalExperimentController internalExperimentController) {
 		this.dapController = dapController;
 		this.hypgenController = hypgenController;
 		this.internalExperimentController = internalExperimentController;

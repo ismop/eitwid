@@ -83,4 +83,9 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	public void onShowExperiments() {
 		eventBus.showExperiments(experimentIds);
 	}
+
+	@Override
+	public void onShowExperiment() {
+		eventBus.showExperiment();
+	}
 }

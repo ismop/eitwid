@@ -66,6 +66,11 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	void showExperiments(ClickEvent event) {
 		getPresenter().onShowExperiments();
 	}
+	
+	@UiHandler("experiment")
+	void showExperiment(ClickEvent event) {
+		getPresenter().onShowExperiment();
+	}
 
 	@Override
 	public void setPresenter(IRootPresenter presenter) {

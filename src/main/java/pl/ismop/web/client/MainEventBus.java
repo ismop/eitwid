@@ -4,10 +4,11 @@ import java.util.List;
 
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.hypgen.Experiment;
+import pl.ismop.web.client.widgets.experiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.experiments.ExperimentsPresenter;
 import pl.ismop.web.client.widgets.levees.LeveesPresenter;
 import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
-import pl.ismop.web.client.widgets.newexperiment.ExperimentPresenter;
+import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.popup.PopupPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
@@ -30,7 +31,7 @@ public interface MainEventBus extends EventBus {
 	@Event
 	void leveeUpdated(Levee levee);
 
-	@Event(handlers = ExperimentPresenter.class)
+	@Event(handlers = ThreatAssessmentPresenter.class)
 	void areaSelected(float top, float left, float bottom, float right);
 
 	@Event(handlers = RootPresenter.class)
@@ -53,4 +54,7 @@ public interface MainEventBus extends EventBus {
 	
 	@Event(handlers = GoogleMapsPresenter.class)
 	void zoomToSection(String sectionId);
+
+	@Event(handlers = ExperimentPresenter.class)
+	void showExperiment();
 }

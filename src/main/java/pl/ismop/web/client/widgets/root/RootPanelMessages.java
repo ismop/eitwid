@@ -7,4 +7,5 @@ public interface RootPanelMessages extends Messages {
 	String sensorsLabel();
 	String logoutLabel();
 	String experimentsLabel(int numberOfExperiments);
+	String experimentLabel();
 }

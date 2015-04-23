@@ -4,7 +4,7 @@ import org.gwtbootstrap3.client.ui.Label;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.TextBox;
 
-import pl.ismop.web.client.widgets.newexperiment.IExperimentView.IExperimentPresenter;
+import pl.ismop.web.client.widgets.newexperiment.IThreatAssessmentView.IThreatAssessmentPresenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -17,21 +17,21 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
-public class ExperimentWidget extends Composite implements IExperimentView, ReverseViewInterface<IExperimentPresenter> {
-	private static ExperimentWidgetUiBinder uiBinder = GWT.create(ExperimentWidgetUiBinder.class);
-	interface ExperimentWidgetUiBinder extends UiBinder<Widget, ExperimentWidget> {}
+public class ThreatAssessmentWidget extends Composite implements IThreatAssessmentView, ReverseViewInterface<IThreatAssessmentPresenter> {
+	private static ThreatAssessmentWidgetUiBinder uiBinder = GWT.create(ThreatAssessmentWidgetUiBinder.class);
+	interface ThreatAssessmentWidgetUiBinder extends UiBinder<Widget, ThreatAssessmentWidget> {}
 	
-	private IExperimentPresenter presenter;
+	private IThreatAssessmentPresenter presenter;
 	
 	@UiField HTMLPanel panel;
-	@UiField ExperimentMessages messages;
+	@UiField ThreatAssessmentMessages messages;
 	@UiField Label profileLabel;
 	@UiField TextBox name;
 	@UiField(provided = true) ListBox days;
 	@UiField Label errorLabel;
 	@UiField Label successLabel;
 	
-	public ExperimentWidget() {
+	public ThreatAssessmentWidget() {
 		days = new ListBox();
 		
 		for(int i = 0; i < 14; i++) {
@@ -62,12 +62,12 @@ public class ExperimentWidget extends Composite implements IExperimentView, Reve
 	}
 
 	@Override
-	public void setPresenter(IExperimentPresenter presenter) {
+	public void setPresenter(IThreatAssessmentPresenter presenter) {
 		this.presenter = presenter;
 	}
 
 	@Override
-	public IExperimentPresenter getPresenter() {
+	public IThreatAssessmentPresenter getPresenter() {
 		return presenter;
 	}
 

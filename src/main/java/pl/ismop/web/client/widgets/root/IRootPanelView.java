@@ -7,6 +7,7 @@ public interface IRootPanelView extends IsWidget {
 		void onShowSensors(boolean show);
 		void onShowLevees(boolean show);
 		void onShowExperiments();
+		void onShowExperiment();
 	}
 
 	void setExperimentsLabel(int numberOfExperiments);

@@ -3,8 +3,8 @@ package pl.ismop.web.client.widgets.newexperiment;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 
-public interface IExperimentView extends IsWidget {
-	interface IExperimentPresenter {
+public interface IThreatAssessmentView extends IsWidget {
+	interface IThreatAssessmentPresenter {
 		void onStartClicked();
 	}
 
