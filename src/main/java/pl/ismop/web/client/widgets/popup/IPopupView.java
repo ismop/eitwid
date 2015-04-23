@@ -12,4 +12,5 @@ public interface IPopupView {
 	void add(IsWidget widget);
 	void setTitle(String title);
 	void hide();
+	void showResizableHandler(boolean show);
 }

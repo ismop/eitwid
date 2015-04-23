@@ -61,7 +61,7 @@ public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEv
 
 	private void loadExperiments() {
 		eventBus.popupClosed();
-		eventBus.setTitleAndShow(view.popupTitle(), view);
+		eventBus.setTitleAndShow(view.popupTitle(), view, false);
 		
 		if(experimentsIds.size() == 0) {
 			view.showNoExperimentsMessage();

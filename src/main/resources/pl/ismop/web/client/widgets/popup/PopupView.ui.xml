@@ -27,7 +27,7 @@
 						<b:Anchor ui:field="close" icon="TIMES"/>
 					</g:FlowPanel>
 				</g:FlowPanel>
-				<g:HTMLPanel ui:field="contents"/>
+				<g:HTMLPanel ui:field="contents" addStyleNames="resizable"/>
 			</g:FlowPanel>
 		</g:PopupPanel>
 	</g:HTMLPanel>

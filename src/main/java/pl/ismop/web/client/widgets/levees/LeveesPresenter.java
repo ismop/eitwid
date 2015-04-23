@@ -29,7 +29,7 @@ public class LeveesPresenter extends BasePresenter<ILeveesView, MainEventBus> im
 	
 	public void onShowLeveeList() {
 		eventBus.popupClosed();
-		eventBus.setTitleAndShow(view.popupTitle(), view);
+		eventBus.setTitleAndShow(view.popupTitle(), view, false);
 		dapController.getLevees(new LeveesCallback() {
 			@Override
 			public void onError(int code, String message) {

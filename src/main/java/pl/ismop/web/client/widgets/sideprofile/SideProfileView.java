@@ -104,13 +104,33 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		var sensorMaterial = new $wnd.THREE.MeshLambertMaterial();
 		sensorMaterial.color.setHex(0xf44f4f);
 		
-		var sensor = new $wnd.THREE.CylinderGeometry(1, 1, 20, 10, 10);
+		var height = 0.0;
+		var startX = 0.0;
+		var numberInRow = 0;
+		
+		if(index < 5) {
+			height = 10;
+			startX = -70;
+			numberInRow = index;
+		} else if(index < 8) {
+			height = 25;
+			startX = -35;
+			numberInRow = index - 5;
+		} else if(index < 9) {
+			height = 40;
+			startX = 0;
+			numberInRow = index - 8;
+		}
+		
+		var sensor = new $wnd.THREE.SphereGeometry(2, 12, 12);
 		var sensorMesh = new $wnd.THREE.Mesh(sensor, sensorMaterial);
-		var distance = (70 / numberOfSensors) * index;
-		var height = distance * 2 / 3;
-		sensorMesh.position.set(-95 + distance, height, 0);
+		var distance = startX + 35 * numberInRow;
+		sensorMesh.position.set(distance, height, 0);
 		this.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::sensors.push(sensorMesh);
-		this.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::scene.add(sensorMesh);
+		
+		if(height > 0.0) {
+			this.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::scene.add(sensorMesh);
+		}
 		
 		return sensorMesh;
 	}-*/;
@@ -153,6 +173,15 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		mesh.position.set(-100, 0, -300);
 		scene.add(mesh);
 		
+		var profile2 = profileSide.extrude({
+			amount: 1000,
+			steps: 2,
+			bevelEnabled: false
+		});
+		mesh2 = new $wnd.THREE.Mesh(profile2, profileMaterial);
+		mesh2.position.set(200, 0, -500);
+		scene.add(mesh2);
+		
 		var planeMaterial = new $wnd.THREE.MeshLambertMaterial();
 		planeMaterial.color.setHex(0xa2e56d);
 		
@@ -192,6 +221,8 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 			object.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::mouseX = ((event.clientX - element.getBoundingClientRect().left) / 800 ) * 2 - 1;
 			object.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::mouseY = - ((event.clientY - element.getBoundingClientRect().top) / 600 ) * 2 + 1;
 		}, false);
+		
+		var diff = -0.05;
 
 		var render = function() {
 			if(object.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::mouseX < 2.0 &&
@@ -229,6 +260,16 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 					object.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::selectedSensor = null;
 				}
 			}
+			
+			if(waterMesh.position.y > 0) {
+				diff = -0.05;
+			}
+			
+			if(waterMesh.position.y < -29.0) {
+				diff = 0.05;
+			}
+			
+			waterMesh.position.y += diff;
 			
 			$wnd.requestAnimationFrame(render);
 			renderer.render(scene, camera);
@@ -274,12 +315,13 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		
 		var measurement = new $wnd.THREE.TextGeometry(measurement, {
 			font: 'optimer',
-			size: 10,
-			height: 1
+			size: 7,
+			height: 0.5
 		});
 		var measurementMesh = new $wnd.THREE.Mesh(measurement, measurementMaterial);
 		this.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::measurement = measurementMesh;
-		measurementMesh.position.set(-50, 5, 0);
+		measurementMesh.rotation.x = 270 * $wnd.Math.PI / 180;
+		measurementMesh.position.set(-50, 0, 45);
 		this.@pl.ismop.web.client.widgets.sideprofile.SideProfileView::scene.add(measurementMesh);
 	}-*/;
 

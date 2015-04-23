@@ -77,7 +77,8 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 											}
 										}
 									});
-									view.showMeasurement("" + measurements.get(0).getValue() + " " + sensor.getUnit());
+									double value = Math.round(measurements.get(0).getValue() * 100);
+									view.showMeasurement("Sensor " + sensor.getCustomId() + ": " + value / 100 + " " + sensor.getUnit());
 								} else {
 									view.showMeasurement(view.getNoMeasurementLabel());
 								}

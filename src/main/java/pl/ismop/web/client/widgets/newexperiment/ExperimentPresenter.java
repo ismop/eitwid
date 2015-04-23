@@ -35,7 +35,7 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 	
 	public void onAreaSelected(float top, float left, float bottom, float right) {
 		eventBus.popupClosed();
-		eventBus.setTitleAndShow(view.title(), view);
+		eventBus.setTitleAndShow(view.title(), view, false);
 		dapController.getSections(top, left, bottom, right, new SectionsCallback() {
 			@Override
 			public void onError(int code, String message) {

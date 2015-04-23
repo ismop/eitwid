@@ -45,7 +45,8 @@ public class PopupView extends Composite implements IPopupView, ReverseViewInter
 		if(show) {
 			popup.setPopupPosition(100, 60);
 			popup.show();
-			makeDraggable();
+//			makeDraggable();
+			makeResizable();
 		} else {
 			popup.hide();
 		}
@@ -76,6 +77,15 @@ public class PopupView extends Composite implements IPopupView, ReverseViewInter
 		popup.hide();
 	}
 	
+	@Override
+	public void showResizableHandler(boolean show) {
+		makeResizable();
+	}
+	
+	private native void makeResizable() /*-{
+		$wnd.jQuery('.resizable').resizable();
+	}-*/;
+
 	private native void makeDraggable() /*-{
 		$wnd.jQuery('.draggable').draggable({handle: '.draggable-handle'});
 	}-*/;

@@ -163,7 +163,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 
 	private void setNoMeasurementsLabel(String sensorId) {
-		eventBus.setTitleAndShow(messages.sensorTitle(sensorId), new Label(messages.noMeasurements()));
+		eventBus.setTitleAndShow(messages.sensorTitle(sensorId), new Label(messages.noMeasurements()), false);
 	}
 
 	private void showInsufficientPointsError() {
@@ -217,7 +217,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 					presenter = eventBus.addHandler(SideProfilePresenter.class);
 				}
 				
-				eventBus.setTitleAndShow(messages.profileTitle(), presenter.getView());
+				eventBus.setTitleAndShow(messages.profileTitle(), presenter.getView(), true);
 				presenter.setProfileNameAndSensors(sectionId, sensors);
 			}
 		});
@@ -293,7 +293,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							
 							FlowPanel panel = new FlowPanel();
 							panel.getElement().appendChild(chart);
-							eventBus.setTitleAndShow(messages.sensorTitle(sensor.getCustomId()), panel);
+							eventBus.setTitleAndShow(messages.sensorTitle(sensor.getCustomId()), panel, false);
 							
 							String unit = sensor.getUnit() == null ? "unknown" : sensor.getUnit();
 							String unitLabel = sensor.getUnitLabel() == null ? "unknown" : sensor.getUnitLabel();
@@ -377,7 +377,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		ProfilePresenter presenter = eventBus.addHandler(ProfilePresenter.class);
 		selectedSection = presenter;
 		presenter.setProfile(section);
-		eventBus.setTitleAndShow(messages.sectionTitle(section.getId()), presenter.getView());
+		eventBus.setTitleAndShow(messages.sectionTitle(section.getId()), presenter.getView(), false);
 		
 		if(previousProfileId != null) {
 			selectSection(previousProfileId, false);

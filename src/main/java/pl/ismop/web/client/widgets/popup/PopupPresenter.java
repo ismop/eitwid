@@ -9,10 +9,17 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = PopupView.class)
 public class PopupPresenter extends BasePresenter<IPopupView, MainEventBus> implements IPopupPresenter {
-	public void onSetTitleAndShow(String title, IsWidget widget) {
+	public void onSetTitleAndShow(String title, IsWidget widget, boolean resizable) {
 		view.clean();
 		view.setTitle(title);
 		view.add(widget);
+		
+		if(resizable) {
+			view.showResizableHandler(true);
+		} else {
+			view.showResizableHandler(false);
+		}
+		
 		view.show(true);
 	}
 

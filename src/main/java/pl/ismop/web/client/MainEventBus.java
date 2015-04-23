@@ -49,7 +49,7 @@ public interface MainEventBus extends EventBus {
 	void popupClosed();
 
 	@Event(handlers = PopupPresenter.class)
-	void setTitleAndShow(String title, IsWidget widget);
+	void setTitleAndShow(String title, IsWidget widget, boolean resizable);
 	
 	@Event(handlers = GoogleMapsPresenter.class)
 	void zoomToSection(String sectionId);
