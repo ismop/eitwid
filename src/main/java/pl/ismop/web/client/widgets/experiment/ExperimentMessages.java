@@ -8,4 +8,5 @@ public interface ExperimentMessages extends Messages {
 	String pompsPanelTitle();
 	String plotsPanelTitle();
 	String comparePanelTitle();
+	String getSensorLabel(int i);
 }
