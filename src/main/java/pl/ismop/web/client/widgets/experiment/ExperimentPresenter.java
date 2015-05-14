@@ -52,7 +52,7 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 				view.addAnalysis(presenter.getView());
 			}
 		});
-		view.showWave();
+		view.showFirstWave();
 	}
 	
 	private native void push(double value, String timestamp, JavaScriptObject values) /*-{

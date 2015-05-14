@@ -35,7 +35,11 @@
 								<b:FormGroup>
 									<b:FormLabel addStyleNames="col-lg-4">Nazwa</b:FormLabel>
 									<g:FlowPanel addStyleNames="col-lg-8">
-										<b:FormControlStatic>Pierwszy eksperyment zalewania</b:FormControlStatic>
+										<b:ListBox ui:field="experimentSelector">
+											<g:item value="1">Pierwszy eksperyment zalewania</g:item>
+											<g:item value="2">Drugi eksperyment zalewania</g:item>
+											<g:item value="3">Trzeci eksperyment zalewania</g:item>
+										</b:ListBox>
 									</g:FlowPanel>
 								</b:FormGroup>
 								<b:FormGroup>
@@ -67,6 +71,9 @@
 								</b:FormGroup>
 								<b:FormGroup>
 									<b:Button ui:field="removePoint">Usuń ostatni</b:Button>
+								</b:FormGroup>
+								<b:FormGroup>
+									<b:Button ui:field="showPomps" type="WARNING" dataToggle="BUTTON">Nastawy pomp</b:Button>
 								</b:FormGroup>
 							</b:FieldSet>
 						</b:Form>

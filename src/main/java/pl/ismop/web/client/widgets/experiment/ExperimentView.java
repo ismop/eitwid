@@ -1,10 +1,12 @@
 package pl.ismop.web.client.widgets.experiment;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.gwtbootstrap3.client.shared.event.ShownEvent;
 import org.gwtbootstrap3.client.ui.BlockQuote;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.TextBox;
@@ -14,6 +16,7 @@ import org.gwtbootstrap3.client.ui.html.Small;
 import pl.ismop.web.client.widgets.experiment.IExperimentView.IExperimentPresenter;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -31,6 +34,9 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 	
 	private IExperimentPresenter presenter;
 	private Map<Integer, Double> levels;
+	private String currentExperiment;
+	private boolean pompsActive;
+	private Map<Integer, Double> secondPomp;
 	
 	@UiField ExperimentMessages messages;
 	@UiField PanelBody analysisBody;
@@ -42,6 +48,8 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 	@UiField FlowPanel wave;
 	@UiField TextBox time;
 	@UiField TextBox height;
+	@UiField ListBox experimentSelector;
+	@UiField Button showPomps;
 
 	public ExperimentView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -49,6 +57,8 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 		plot.getElement().setAttribute("id", "singlePlot");
 		wave.getElement().setAttribute("id", "wave");
 		levels = new LinkedHashMap<>();
+		currentExperiment = "1";
+		secondPomp = new LinkedHashMap<>();
 	}
 	
 	@UiHandler("addPoint")
@@ -73,6 +83,94 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 		regenerateWave(createData());
 	}
 	
+	@UiHandler("experimentSelector")
+	void experimentSelected(ChangeEvent event) {
+		currentExperiment = experimentSelector.getSelectedValue();
+		checkGraph();
+	}
+	
+	@UiHandler("showPomps")
+	void showPompsClicked(ClickEvent event) {
+		if(showPomps.isActive()) {
+			pompsActive = false;
+		} else {
+			pompsActive = true;
+		}
+		
+		checkGraph();
+	}
+
+	private void checkGraph() {
+		if(pompsActive) {
+			switch(currentExperiment) {
+				case "1":
+					removeAllPoints();
+					showFirstPomps();
+				break;
+				case "2":
+					removeAllPoints();
+					showSecondPomps();
+				break;
+				case "3":
+					removeAllPoints();
+					showThirdPomps();
+			}
+		} else {
+			switch(currentExperiment) {
+			case "1":
+				removeAllPoints();
+				showFirstWave();
+			break;
+			case "2":
+				removeAllPoints();
+				showSecondWave();
+			break;
+			case "3":
+				removeAllPoints();
+				showThirdWave();
+		}
+		}
+	}
+
+	private void showFirstPomps() {
+		secondPomp.put(0, 0.0);
+		addLevelPoint(0, 0.0);
+		secondPomp.put(1, 200.0);
+		addLevelPoint(1, 100.0);
+		secondPomp.put(35, 200.0);
+		addLevelPoint(35, 100.0);
+		secondPomp.put(36, 0.0);
+		addLevelPoint(36, 0.0);
+	}
+
+	private void showSecondPomps() {
+		secondPomp.put(0, 0.0);
+		addLevelPoint(0, 0.0);
+		secondPomp.put(1, 123.0);
+		addLevelPoint(1, 100.0);
+		secondPomp.put(35, 123.0);
+		addLevelPoint(35, 100.0);
+		secondPomp.put(36, 0.0);
+		addLevelPoint(36, 0.0);
+	}
+
+	private void showThirdPomps() {
+		secondPomp.put(0, 0.0);
+		addLevelPoint(0, 0.0);
+		secondPomp.put(1, 200.0);
+		addLevelPoint(1, 100.0);
+		secondPomp.put(35, 200.0);
+		addLevelPoint(35, 100.0);
+		secondPomp.put(36, 0.0);
+		addLevelPoint(36, 0.0);
+	}
+
+	private void removeAllPoints() {
+		levels.clear();
+		secondPomp.clear();
+		regenerateWave(createData());
+	}
+
 	private void addLevelPoint(int hours, double level) {
 		Integer key = hours;
 		levels.put(key, level);
@@ -80,22 +178,53 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 	}
 
 	private String createData() {
-		String data = "Czas w godzinach,Planowana fala,Rzeczywisty poziom\n";
+		String data = null;
 		
-		for(Integer h : levels.keySet()) {
-			double real = levels.get(h) + Math.random() * 0.4 - 0.2;
-			data += "" + h + "," + levels.get(h) + "," + real + "\n";
+		if(pompsActive) {
+			data = "Czas w godzinach,Wydajność pompy 100 m^3/h,Wydajność pompy 200 m^3/h\n";
+		} else {
+			data = "Czas w godzinach,Planowana fala,Rzeczywisty poziom\n";
+		}
+		
+		
+		if(pompsActive) {
+			Iterator<Integer> i1 = levels.keySet().iterator();
+			Iterator<Integer> i2 = secondPomp.keySet().iterator();
+			
+			while(i1.hasNext() && i2.hasNext()) {
+				Integer key1 = i1.next();
+				Integer key2 = i2.next();
+				double v1 = levels.get(key1);
+				double v2 = secondPomp.get(key2);
+				data += "" + key1 + "," + v1 + "," + v2 + "\n";
+			}
+		} else {
+			for(Integer h : levels.keySet()) {
+				double real = levels.get(h) + Math.random() * 0.4 - 0.2;
+				data += "" + h + "," + levels.get(h) + "," + real + "\n";
+			}
 		}
 		
 		return data;
 	}
 
 	private native void regenerateWave(String data) /*-{
+		var x = null;
+		var y = null;
+		
+		if(this.@pl.ismop.web.client.widgets.experiment.ExperimentView::pompsActive) {
+			y = "Wydajność pompy, m^3/h";
+			x = "Czas, h";
+		} else {
+			y = "Poziom wody, m";
+			x = "Czas, h";
+		}
+		
 		new $wnd.Dygraph(
 		    $doc.getElementById("wave"),
 			    data, {
-			    	ylabel: "Poziom wody, m",
-			    	xlabel: "Czas, h"
+			    	ylabel: y,
+			    	xlabel: x
 			    }
 		   );
 	}-*/;
@@ -157,10 +286,23 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 	}
 	
 	@Override
-	public void showWave() {
-		addLevelPoint(0, 0.5);
-		addLevelPoint(10, 3.0);
-		addLevelPoint(30, 3.0);
-		addLevelPoint(40, 0.4);
+	public void showFirstWave() {
+		addLevelPoint(0, 0.0);
+		addLevelPoint(36, 4.0);
+		addLevelPoint(108, 0.0);
 	};
+	
+	private void showSecondWave() {
+		addLevelPoint(0, 0.0);
+		addLevelPoint(48, 4.0);
+		addLevelPoint(96, 4.0);
+		addLevelPoint(216, 0.0);
+	}
+
+	private void showThirdWave() {
+		addLevelPoint(0, 0.0);
+		addLevelPoint(36, 4.0);
+		addLevelPoint(156, 4.0);
+		addLevelPoint(228, 0.0);
+	}
 }
