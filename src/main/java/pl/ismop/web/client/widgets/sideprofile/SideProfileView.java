@@ -163,12 +163,32 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		
 		var profileMaterial = new $wnd.THREE.MeshLambertMaterial();
 		profileMaterial.color.setHex(0xe1b154);
+		profileMaterial.vertexColors = $wnd.THREE.VertexColors;
 		
 		var profile = profileSide.extrude({
 			amount: 300,
 			steps: 2,
 			bevelEnabled: false
 		});
+		var vertexIndexes = ['a', 'b', 'c', 'd'];
+		for(var i = 0; i < profile.faces.length; i++) {
+			var face = profile.faces[i];
+			var numberOfSides = (face instanceof $wnd.THREE.Face3) ? 3 : 4;
+			for(var j = 0; j < numberOfSides; j++) {
+				var vertexIndex = face[vertexIndexes[j]];
+				var point = profile.vertices[vertexIndex];
+				$wnd.console.log(point);
+				if(point.x == 200) {
+					face.vertexColors[j] = new $wnd.THREE.Color(0x0049e5);
+				} else if(point.x == 125) {
+					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
+				} else if(point.x == 75) {
+					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
+				} else {
+					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
+				}
+			}
+		}
 		mesh = new $wnd.THREE.Mesh(profile, profileMaterial);
 		mesh.position.set(-100, 0, -300);
 		scene.add(mesh);
