@@ -30,6 +30,9 @@
 							<input class="form-control" th:placeholder="#{secret.token.placeholder}" type="password" th:field="*{secretToken}"></input>
 							<p th:if="${#fields.hasErrors('secretToken')}" th:errors="*{secretToken}"></p>
 						</div>
+						<div th:if="${#fields.hasGlobalErrors()}" th:class="${#fields.hasGlobalErrors()}? 'form-group has-error':'form-group'">
+							<p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+						</div>
 						<button type="submit" class="btn btn-lg btn-success btn-block" th:text="#{register.label}"></button>
 					</fieldset>
 				</form>

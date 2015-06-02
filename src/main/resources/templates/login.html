@@ -21,8 +21,9 @@
 							<div class="form-group">
 								<input class="form-control" th:placeholder="#{password.placeholder}" name="password" type="password" value=""></input>
 							</div>
-							<div class="form-group pull-right">
-								<a th:href="@{/register}" th:text="#{register.label}"></a>
+							<div class="form-group clearfix">
+								<a th:href="@{/forgotPassword}" th:text="#{change.password.label}" style="display: block; float: left;"></a>
+								<a th:href="@{/register}" th:text="#{register.label}" style="display: block; float: right;"></a>
 							</div>
 							<button type="submit" class="btn btn-lg btn-success btn-block" th:text="#{login.label}"></button>
 						</fieldset>
