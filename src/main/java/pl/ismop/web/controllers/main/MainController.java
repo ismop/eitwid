@@ -5,6 +5,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
@@ -33,8 +34,6 @@ import pl.ismop.web.domain.PasswordChangeToken;
 import pl.ismop.web.domain.User;
 import pl.ismop.web.repository.PasswordChangeTokenRepository;
 import pl.ismop.web.repository.UserRepository;
-
-import com.ibm.icu.util.Calendar;
 
 @Controller
 public class MainController {
