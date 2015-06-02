@@ -13,6 +13,7 @@ public class PasswordChangeToken {
 	private Long id;
 	private Date generationDate;
 	private String token;
+	private String email;
 
 	public Date getGenerationDate() {
 		return generationDate;
@@ -25,5 +26,11 @@ public class PasswordChangeToken {
 	}
 	public void setToken(String token) {
 		this.token = token;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

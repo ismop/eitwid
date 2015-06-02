@@ -37,7 +37,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -91,7 +90,7 @@ public class Application extends WebMvcConfigurerAdapter {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.authorizeRequests()
-				.antMatchers("/register", "/login**", "/forgotPassword", "/changePassword")
+				.antMatchers("/register", "/login**", "/forgotPassword", "/changePassword/**")
 					.permitAll()
 				.anyRequest()
 					.authenticated()
@@ -215,10 +214,5 @@ public class Application extends WebMvcConfigurerAdapter {
 		});
 		
 	    return factory;
-	}
-	
-	@Bean
-	public JavaMailSender mailSender() {
-		JavaMailSender mailSender = new javamail
 	}
 }

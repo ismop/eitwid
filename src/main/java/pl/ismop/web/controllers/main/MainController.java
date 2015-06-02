@@ -1,5 +1,6 @@
 package pl.ismop.web.controllers.main;
 
+import static java.util.Calendar.HOUR;
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.fromMethodCall;
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +34,8 @@ import pl.ismop.web.domain.User;
 import pl.ismop.web.repository.PasswordChangeTokenRepository;
 import pl.ismop.web.repository.UserRepository;
 
+import com.ibm.icu.util.Calendar;
+
 @Controller
 public class MainController {
 	private static final Logger log = LoggerFactory.getLogger(MainController.class);
@@ -39,6 +44,7 @@ public class MainController {
 	@Autowired private PasswordChangeTokenRepository passwordChangeTokenRepository;
 	@Autowired private PasswordEncoder passwordEncoder;
 	@Autowired private MessageSource messages;
+	@Autowired private JavaMailSender mailSender;
 	
 	@Value("${secret.token}") private String secretToken;
 	@Value("${dap.token}") private String dapToken;
@@ -47,6 +53,7 @@ public class MainController {
 	@Value("${hypgen.user}") private String hypgenUser;
 	@Value("${hypgen.pass}") private String hypgenPass;
 	@Value("${hypgen.endpoint}") private String hypgenEndpoint;
+	@Value("${change.password.link.expiry.hours}") private String changePasswordExpiryHours;
 	
 	@RequestMapping("/")
 	public String home(Model model, HttpServletRequest request) {
@@ -112,14 +119,50 @@ public class MainController {
 	}
 	
 	@RequestMapping("/changePassword/{token}")
-	public ModelAndView changePassword(@PathVariable String token) {
-		return new ModelAndView("changePassword", "passwords", new Passwords());
+	public ModelAndView changePassword(@PathVariable String token, HttpServletRequest request) {
+		PasswordChangeToken changeToken = passwordChangeTokenRepository.findOneByToken(token);
+		
+		if(changeToken != null) {
+			Calendar minusEpiryPeriodTime = Calendar.getInstance();
+			minusEpiryPeriodTime.add(HOUR, -Integer.parseInt(changePasswordExpiryHours));
+			
+			if(changeToken.getGenerationDate().after(minusEpiryPeriodTime.getTime())) {
+				Passwords passwords = new Passwords();
+				passwords.setToken(token);
+				
+				return new ModelAndView("changePassword", "passwords", passwords);
+			} else {
+				return new ModelAndView("changePassword", "error", messages.getMessage("change.password.token.expired.error", null, request.getLocale()));
+			}
+		} else {
+			return new ModelAndView("changePassword", "error", messages.getMessage("change.password.no.token.error", null, request.getLocale()));
+		}
 	}
 	
 	@RequestMapping(value = "/changePassword", method = RequestMethod.POST)
 	@Transactional
-	public String processChangePassword() {
-		return "";
+	public ModelAndView processChangePassword(@Valid Passwords passwords, BindingResult errors, HttpServletRequest request) {
+		if(errors.hasErrors()) {
+			return new ModelAndView("changePassword");
+		} else {
+			PasswordChangeToken changeToken = passwordChangeTokenRepository.findOneByToken(passwords.getToken());
+			
+			if(changeToken != null) {
+				User user = userReposiotory.findOneByEmail(changeToken.getEmail());
+				
+				if(user != null) {
+					user.setPasswordHash(passwordEncoder.encode(passwords.getPassword()));
+					userReposiotory.save(user);
+					
+					return new ModelAndView("changePassword", "success", messages.getMessage("change.password.success", null, request.getLocale()));
+				} else {
+					return new ModelAndView("changePassword", "error", messages.getMessage("change.password.no.token.error", null, request.getLocale()));
+				}
+				
+			} else {
+				return new ModelAndView("changePassword", "error", messages.getMessage("change.password.no.token.error", null, request.getLocale()));
+			}
+		}
 	}
 	
 	@RequestMapping("/forgotPassword")
@@ -131,9 +174,9 @@ public class MainController {
 	
 	@RequestMapping(value = "/forgotPassword", method = RequestMethod.POST)
 	@Transactional
-	public String processForgotPassword(@Valid Email email, BindingResult errors, HttpServletRequest request) {
+	public ModelAndView processForgotPassword(@Valid Email email, BindingResult errors, HttpServletRequest request) {
 		if(errors.hasErrors()) {
-			return "forgotPassword";
+			return new ModelAndView("forgotPassword");
 		} else {
 			User user = userReposiotory.findOneByEmail(email.getEmail());
 			
@@ -143,16 +186,24 @@ public class MainController {
 				PasswordChangeToken passwordChangeToken = new PasswordChangeToken();
 				passwordChangeToken.setGenerationDate(new Date());
 				passwordChangeToken.setToken(UUID.randomUUID().toString());
+				passwordChangeToken.setEmail(user.getEmail());
 				passwordChangeTokenRepository.save(passwordChangeToken);
 				
-				String url = fromMethodCall(on(MainController.class).changePassword("{token}")).buildAndExpand(passwordChangeToken.getToken()).
+				String url = fromMethodCall(on(MainController.class).changePassword("{token}", null)).buildAndExpand(passwordChangeToken.getToken()).
 						encode().toUri().toString();
 				log.debug("Generated password change token for email {}", email.getEmail());
 				
-				//TODO
+				SimpleMailMessage message = new SimpleMailMessage();
+				message.setTo(email.getEmail());
+				message.setSubject(messages.getMessage("password.change.message.subject", null, request.getLocale()));
+				message.setText(messages.getMessage("password.change.message.body", new Object[] {url, changePasswordExpiryHours}, request.getLocale()));
+				mailSender.send(message);
+				email.setEmail("");
+				
+				return new ModelAndView("forgotPassword", "success", messages.getMessage("change.password.mail.sent", null, request.getLocale()));
 			}
 			
-			return "forgotPassword";
+			return new ModelAndView("forgotPassword");
 		}
 	}
 	

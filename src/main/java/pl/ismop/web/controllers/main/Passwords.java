@@ -8,6 +8,7 @@ public class Passwords {
 	@Length(min = 5)
 	private String password;
 	private String confirmPassword;
+	private String token;
 	
 	public String getPassword() {
 		return password;
@@ -23,5 +24,13 @@ public class Passwords {
 	
 	public void setConfirmPassword(String confirmPassword) {
 		this.confirmPassword = confirmPassword;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 }
