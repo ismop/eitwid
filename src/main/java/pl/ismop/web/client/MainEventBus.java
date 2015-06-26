@@ -11,6 +11,8 @@ import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
 import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.popup.PopupPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
+import pl.ismop.web.client.widgets.sidepanel.ISidePanelView;
+import pl.ismop.web.client.widgets.sidepanel.SidePanelPresenter;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.mvp4g.client.annotation.Event;
@@ -22,7 +24,7 @@ import com.mvp4g.client.presenter.NoStartPresenter;
 @Events(startPresenter = NoStartPresenter.class)
 public interface MainEventBus extends EventBus {
 	@Start
-	@Event(handlers = RootPresenter.class)
+	@Event(handlers = {RootPresenter.class, SidePanelPresenter.class})
 	void start();
 
 	@Event(handlers = GoogleMapsPresenter.class)
@@ -57,4 +59,7 @@ public interface MainEventBus extends EventBus {
 
 	@Event(handlers = ExperimentPresenter.class)
 	void showExperiment();
+
+	@Event(handlers = RootPresenter.class)
+	void setSidePanel(IsWidget view);
 }

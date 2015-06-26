@@ -11,6 +11,7 @@ import pl.ismop.web.client.internal.InternalExperimentController.UserExperiments
 import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
@@ -31,7 +32,7 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	
 	public void onStart() {
 		RootLayoutPanel.get().add(view);
-		eventBus.drawGoogleMap("mapPanel");
+		eventBus.drawGoogleMap("mainPanel");
 		internalExperimentController.getExperiments(new UserExperimentsCallback() {
 			@Override
 			public void onError(int code, String message) {
@@ -67,6 +68,10 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		numberOfExperiments++;
 		experimentIds.add(experiment.getId());
 		view.setExperimentsLabel(numberOfExperiments);
+	}
+	
+	public void onSetSidePanel(IsWidget view) {
+		this.view.setSidePanel(view);
 	}
 
 	@Override

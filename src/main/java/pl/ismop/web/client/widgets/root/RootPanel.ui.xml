@@ -8,7 +8,7 @@
 			padding-right: 30px;
 		}
 	</ui:style>
-	<g:DockLayoutPanel>
+	<g:DockLayoutPanel unit="PX">
 		<g:north size="50">
 			<b:Navbar>
 				<b:NavbarBrand href="/">ISMOP</b:NavbarBrand>
@@ -27,7 +27,14 @@
 			</b:Navbar>
 		</g:north>
 		<g:center>
-			<g:HTMLPanel ui:field="mapPanel"/>
+			<g:DockLayoutPanel unit="PCT">
+				<g:east size="35">
+					<g:HTMLPanel ui:field="sidePanel"/>
+				</g:east>
+				<g:center>
+					<g:HTMLPanel ui:field="mainPanel"/>
+				</g:center>
+			</g:DockLayoutPanel>
 		</g:center>
 	</g:DockLayoutPanel>
 </ui:UiBinder>

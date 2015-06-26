@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
@@ -25,7 +26,8 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	
 	private IRootPresenter presenter;
 	
-	@UiField HTMLPanel mapPanel;
+	@UiField HTMLPanel mainPanel;
+	@UiField HTMLPanel sidePanel;
 	@UiField FormPanel logoutForm;
 	@UiField Hidden csrf;
 	@UiField AnchorListItem levees;
@@ -35,7 +37,7 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 
 	public RootPanel() {
 		initWidget(uiBinder.createAndBindUi(this));
-		mapPanel.getElement().setId("mapPanel");
+		mainPanel.getElement().setId("mainPanel");
 		csrf.setName(DOM.getElementById("csrfParameterName").getAttribute("content"));
 		csrf.setValue(DOM.getElementById("csrfToken").getAttribute("content"));
 	}
@@ -85,5 +87,11 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@Override
 	public void setExperimentsLabel(int numberOfExperiments) {
 		experiments.setText(messages.experimentsLabel(numberOfExperiments));
+	}
+
+	@Override
+	public void setSidePanel(IsWidget view) {
+		sidePanel.clear();
+		sidePanel.add(view);
 	}
 }

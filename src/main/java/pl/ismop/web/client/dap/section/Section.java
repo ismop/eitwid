@@ -10,23 +10,38 @@ import pl.ismop.web.client.dap.levee.Shape;
 
 public class Section {
 	private String id;
+	
 	private String name;
+	
 	@Json(name = "experiment_ids")
 	@XmlElement(name = "experiment_ids")
 	private List<String> experimentIds;
+	
 	@Json(name = "sensor_ids")
 	@XmlElement(name = "sensor_ids")
 	private List<String> sensorIds;
+	
 	private Shape shape;
+	
 	@Json(name = "threat_level")
 	@XmlElement(name = "threat_level")
 	private String threatLevel;
+	
 	@Json(name = "levee_id")
 	@XmlElement(name = "levee_id")
 	private String leveeId;
+	
 	@Json(name = "profile_shape")
 	@XmlElement(name = "profile_shape")
 	private Shape profileShape;
+	
+	@Json(name = "device_ids")
+	@XmlElement(name = "device_ids")
+	private List<String> deviceIds;
+	
+	@Json(name = "device_aggregation_ids")
+	@XmlElement(name = "device_aggregation_ids")
+	private List<String> deviceAggregationIds;
 	
 	public String getLeveeId() {
 		return leveeId;
@@ -79,5 +94,11 @@ public class Section {
 	}
 	public void setThreatLevel(String threatLevel) {
 		this.threatLevel = threatLevel;
+	}
+	public List<String> getDeviceIds() {
+		return deviceIds;
+	}
+	public void setDeviceIds(List<String> deviceIds) {
+		this.deviceIds = deviceIds;
 	}
 }

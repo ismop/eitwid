@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.sidepanel.SidePanelMessages" field="messages"/>
+	<ui:style>
+		.panel {
+			padding: 10px;
+			overflow-y: scroll;
+			position: absolute;
+			left: 0px;
+			top: 0px;
+			right: 0px;
+			bottom: 0px;
+		}
+	</ui:style>
+	<g:HTMLPanel addStyleNames="{style.panel}">
+		<b:Heading size="H2" text="{messages.leveeHeader}"></b:Heading>
+		<b:ListBox ui:field="levees"/>
+	</g:HTMLPanel>
+</ui:UiBinder>
