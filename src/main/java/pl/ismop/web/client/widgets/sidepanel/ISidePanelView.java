@@ -8,4 +8,14 @@ public interface ISidePanelView extends IsWidget {
 	}
 
 	void addLeveeValue(String leveeId, String leveeName);
+
+	void setLeveeBusyState(boolean busy);
+
+	void showLeveeList(boolean show);
+
+	void showNoLeveesLabel(boolean show);
+
+	void removeSummaryView();
+
+	void addLeveeSummary(IsWidget view);
 }

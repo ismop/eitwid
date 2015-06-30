@@ -6,16 +6,24 @@
 	<ui:style>
 		.panel {
 			padding: 10px;
-			overflow-y: scroll;
+			overflow-y: auto;
 			position: absolute;
 			left: 0px;
 			top: 0px;
 			right: 0px;
 			bottom: 0px;
 		}
+		.summary {
+			margin-top: 10px;
+		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
 		<b:Heading size="H2" text="{messages.leveeHeader}"></b:Heading>
-		<b:ListBox ui:field="levees"/>
+		<g:FlowPanel ui:field="leveeBusyPanel" visible="false" addStyleNames="text-center">
+			<b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
+		</g:FlowPanel>
+		<b:ListBox ui:field="levees" visible="false"/>
+		<g:Label ui:field="noLeveesLabel" text="{messages.noLevees}" visible="false"/>
+		<g:FlowPanel ui:field="summaryPanel" addStyleNames="{style.summary}"/>
 	</g:HTMLPanel>
 </ui:UiBinder>
