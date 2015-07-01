@@ -6,12 +6,10 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.widgets.experiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.experiments.ExperimentsPresenter;
-import pl.ismop.web.client.widgets.levees.LeveesPresenter;
 import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
 import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.popup.PopupPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
-import pl.ismop.web.client.widgets.sidepanel.ISidePanelView;
 import pl.ismop.web.client.widgets.sidepanel.SidePanelPresenter;
 
 import com.google.gwt.user.client.ui.IsWidget;
@@ -42,13 +40,10 @@ public interface MainEventBus extends EventBus {
 	@Event(handlers = {ExperimentsPresenter.class, GoogleMapsPresenter.class})
 	void showExperiments(List<String> experimentIds);
 
-	@Event(handlers = LeveesPresenter.class)
-	void showLeveeList();
-
 	@Event(handlers = GoogleMapsPresenter.class)
 	void showSensors(boolean show);
 
-	@Event(handlers = {GoogleMapsPresenter.class, LeveesPresenter.class})
+	@Event(handlers = GoogleMapsPresenter.class)
 	void popupClosed();
 
 	@Event(handlers = PopupPresenter.class)

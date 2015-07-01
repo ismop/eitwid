@@ -13,7 +13,6 @@
 			<b:Navbar>
 				<b:NavbarBrand href="/">ISMOP</b:NavbarBrand>
 					<b:NavbarNav>
-						<b:AnchorListItem ui:field="levees"><ui:text from="{messages.leveesLabel}"/></b:AnchorListItem>
 						<b:AnchorListItem ui:field="sensors"><ui:text from="{messages.sensorsLabel}"/></b:AnchorListItem>
 						<b:AnchorListItem ui:field="experiments"></b:AnchorListItem>
 						<b:AnchorListItem ui:field="experiment"><ui:text from="{messages.experimentLabel}"/></b:AnchorListItem>

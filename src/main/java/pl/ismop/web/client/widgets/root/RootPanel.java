@@ -30,7 +30,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@UiField HTMLPanel sidePanel;
 	@UiField FormPanel logoutForm;
 	@UiField Hidden csrf;
-	@UiField AnchorListItem levees;
 	@UiField AnchorListItem sensors;
 	@UiField AnchorListItem experiments;
 	@UiField RootPanelMessages messages;
@@ -51,11 +50,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@UiHandler("logoutForm")
 	void afterLogout(SubmitCompleteEvent event) {
 		Window.Location.assign("/login?logout");
-	}
-	
-	@UiHandler("levees")
-	void showLevees(ClickEvent event) {
-		getPresenter().onShowLevees(!levees.isActive());
 	}
 	
 	@UiHandler("sensors")
