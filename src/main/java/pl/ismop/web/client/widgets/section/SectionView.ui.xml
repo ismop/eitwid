@@ -8,23 +8,21 @@
 			font-weight: bold;
 		}
 	</ui:style>
-	<g:HTMLPanel addStyleNames="row">
-		<div class="col-lg-12">
-			<div ui:field="threatPanel" class="panel">
-				<div class="panel-heading">
-					<div ui:field="header" class="{style.name}"></div>
-					<div class="row">
-						<div class="col-xs-4">
-							<i class="fa fa-tasks fa-5x"></i>
-						</div>
-						<div class="col-xs-8 text-right">
-							<p class="announcement-heading"><strong><ui:text from="{messages.threatLabel}"/></strong></p>
-							<p ui:field="threat" class="announcement-text"></p>
-						</div>
+	<g:HTMLPanel>
+		<div ui:field="threatPanel" class="panel">
+			<div class="panel-heading">
+				<div ui:field="header" class="{style.name}"></div>
+				<div class="row">
+					<div class="col-xs-4">
+						<i class="fa fa-tasks fa-5x"></i>
+					</div>
+					<div class="col-xs-8 text-right">
+						<p class="announcement-heading"><strong><ui:text from="{messages.threatLabel}"/></strong></p>
+						<p ui:field="threat" class="announcement-text"></p>
 					</div>
 				</div>
-				<div ui:field="threatTimestamp" class="panel-footer announcement-bottom"></div>
 			</div>
+			<div ui:field="threatTimestamp" class="panel-footer announcement-bottom"></div>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
