@@ -1,24 +1,23 @@
-package pl.ismop.web.client.widgets.profile;
+package pl.ismop.web.client.widgets.section;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ProfileView extends Composite implements IProfileView {
-	private static ProfileViewUiBinder uiBinder = GWT.create(ProfileViewUiBinder.class);
-	interface ProfileViewUiBinder extends UiBinder<Widget, ProfileView> {}
+public class SectionView extends Composite implements ISectionView {
+	private static SectionViewUiBinder uiBinder = GWT.create(SectionViewUiBinder.class);
+	interface SectionViewUiBinder extends UiBinder<Widget, SectionView> {}
 	
-	@UiField HeadingElement header;
+	@UiField DivElement header;
 	@UiField DivElement threatPanel;
 	@UiField ParagraphElement threat;
-	@UiField ProfileViewMessages messages;
+	@UiField SectionViewMessages messages;
 
-	public ProfileView() {
+	public SectionView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
@@ -50,5 +49,10 @@ public class ProfileView extends Composite implements IProfileView {
 			default:
 				return messages.threatLevelUnknown();
 		}
+	}
+
+	@Override
+	public String getHeaderLabel(String sectionName) {
+		return messages.headerLabel(sectionName);
 	}
 }

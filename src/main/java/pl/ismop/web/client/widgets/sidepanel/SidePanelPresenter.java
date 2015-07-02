@@ -10,6 +10,7 @@ import pl.ismop.web.client.dap.DapController.LeveesCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.widgets.section.SectionPresenter;
 import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 
@@ -21,6 +22,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventBus> implements ISidePanelPresenter {
 	private DapController dapController;
 	private LeveeSummaryPresenter leveeSummaryPresenter;
+	private SectionPresenter sectionPresenter;
 
 	@Inject
 	public SidePanelPresenter(DapController dapController) {
@@ -66,7 +68,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		}
 		
 		leveeSummaryPresenter = eventBus.addHandler(LeveeSummaryPresenter.class);
-		view.addLeveeSummary(leveeSummaryPresenter.getView());
+		view.setLeveeSummary(leveeSummaryPresenter.getView());
 		leveeSummaryPresenter.setLevee(levee);
 	}
 	
@@ -85,13 +87,29 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 				
 				if(sections.size() > 0) {
 					view.showSectionList(true);
+					
 					for(Section section : sections) {
-						view.addSectionValue(section.getId(), section.getName());
+						view.addSectionValue(section.getId(), section.getId());
 					}
+					
+					loadSectionStatus(sections.get(0));
 				} else {
 					view.showNoSectionsLabel(true);
 				}
 			}
 		});
+	}
+
+	private void loadSectionStatus(Section section) {
+		if(sectionPresenter != null) {
+			sectionPresenter.stopUpdate();
+			view.removeSectionView();
+			eventBus.removeHandler(sectionPresenter);
+			sectionPresenter = null;
+		}
+		
+		sectionPresenter = eventBus.addHandler(SectionPresenter.class);
+		view.setSectionView(sectionPresenter.getView());
+		sectionPresenter.setSection(section);
 	}
 }

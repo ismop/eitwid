@@ -13,7 +13,7 @@ import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.sensor.Sensor;
-import pl.ismop.web.client.widgets.profile.IProfileView.ISideProfilePresenter;
+import pl.ismop.web.client.widgets.section.ISectionView.ISectionPresenter;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -23,7 +23,7 @@ import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = SideProfileView.class, multiple = true)
-public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEventBus> implements ISideProfilePresenter {
+public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEventBus> implements ISectionPresenter {
 	private DapController dapController;
 	private String selectedSensorId;
 

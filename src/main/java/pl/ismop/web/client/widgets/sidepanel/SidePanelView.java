@@ -23,6 +23,7 @@ public class SidePanelView extends Composite implements ISidePanelView {
 	@UiField FlowPanel sectionBusyPanel;
 	@UiField Label noSectionsLabel;
 	@UiField ListBox sections;
+	@UiField FlowPanel sectionDetails;
 	
 	public SidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -54,7 +55,7 @@ public class SidePanelView extends Composite implements ISidePanelView {
 	}
 
 	@Override
-	public void addLeveeSummary(IsWidget view) {
+	public void setLeveeSummary(IsWidget view) {
 		summaryPanel.add(view);
 	}
 
@@ -81,5 +82,15 @@ public class SidePanelView extends Composite implements ISidePanelView {
 	@Override
 	public void showSectionList(boolean show) {
 		sections.setVisible(show);
+	}
+
+	@Override
+	public void removeSectionView() {
+		sectionDetails.clear();
+	}
+
+	@Override
+	public void setSectionView(IsWidget view) {
+		sectionDetails.add(view);
 	}
 }

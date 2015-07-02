@@ -2,6 +2,8 @@ package pl.ismop.web.client.widgets.sidepanel;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
+import pl.ismop.web.client.widgets.section.ISectionView;
+
 public interface ISidePanelView extends IsWidget {
 	interface ISidePanelPresenter {
 		
@@ -17,7 +19,7 @@ public interface ISidePanelView extends IsWidget {
 
 	void removeSummaryView();
 
-	void addLeveeSummary(IsWidget view);
+	void setLeveeSummary(IsWidget view);
 
 	void showSectionPanel(boolean show);
 
@@ -28,4 +30,8 @@ public interface ISidePanelView extends IsWidget {
 	void addSectionValue(String sectionId, String sectionName);
 
 	void showSectionList(boolean show);
+
+	void removeSectionView();
+
+	void setSectionView(IsWidget view);
 }

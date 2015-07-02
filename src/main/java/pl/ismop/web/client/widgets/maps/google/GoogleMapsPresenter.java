@@ -20,7 +20,7 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
-import pl.ismop.web.client.widgets.profile.ProfilePresenter;
+import pl.ismop.web.client.widgets.section.SectionPresenter;
 import pl.ismop.web.client.widgets.sideprofile.SideProfilePresenter;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -47,7 +47,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private String elementId;
 	private MapMessages messages;
 	private Map<String, Section> sections;
-	private ProfilePresenter selectedSection;
+	private SectionPresenter selectedSection;
 	private JavaScriptObject map;
 	private Map<String, String> sectionColors;
 	private Sensor selectedSensor;
@@ -130,7 +130,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	
 	public void onPopupClosed() {
 		if(selectedSection != null) {
-			String previousProfileId = selectedSection.getProfile().getId();
+			String previousProfileId = selectedSection.getSection().getId();
 			eventBus.removeHandler(selectedSection);
 			selectedSection.stopUpdate();
 			selectedSection = null;
@@ -239,7 +239,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			@Override
 			public void processSensor(final Sensor sensor) {
 				if(selectedSection != null) {
-					String previousProfileId = selectedSection.getProfile().getId();
+					String previousProfileId = selectedSection.getSection().getId();
 					eventBus.removeHandler(selectedSection);
 					selectedSection.stopUpdate();
 					selectedSection = null;
@@ -368,15 +368,15 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		String previousProfileId = null;
 		
 		if(selectedSection != null) {
-			previousProfileId = selectedSection.getProfile().getId();
+			previousProfileId = selectedSection.getSection().getId();
 			eventBus.removeHandler(selectedSection);
 			selectedSection.stopUpdate();
 			selectedSection = null;
 		}
 		
-		ProfilePresenter presenter = eventBus.addHandler(ProfilePresenter.class);
+		SectionPresenter presenter = eventBus.addHandler(SectionPresenter.class);
 		selectedSection = presenter;
-		presenter.setProfile(section);
+		presenter.setSection(section);
 		eventBus.setTitleAndShow(messages.sectionTitle(section.getId()), presenter.getView(), false);
 		
 		if(previousProfileId != null) {
