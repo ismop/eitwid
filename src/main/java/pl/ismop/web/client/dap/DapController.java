@@ -65,7 +65,7 @@ public class DapController {
 	}
 	
 	public interface SectionsCallback extends ErrorCallback {
-		void processSections(List<Section> profiles);
+		void processSections(List<Section> sections);
 	}
 	
 	public interface ExperimentsCallback extends ErrorCallback {
@@ -181,6 +181,34 @@ public class DapController {
 		});
 	}
 	
+	public void getSections(final SectionsCallback sectionsCallback) {
+		sectionService.getSections(new MethodCallback<SectionsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				Window.alert(exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, SectionsResponse response) {
+				sectionsCallback.processSections(response.getSections());
+			}
+		});
+	}
+	
+	public void getSections(String leveeId, final SectionsCallback sectionsCallback) {
+		sectionService.getSectionsForLevee(leveeId, new MethodCallback<SectionsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				Window.alert(exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, SectionsResponse response) {
+				sectionsCallback.processSections(response.getSections());
+			}
+		});
+	}
+	
 	public void getExperiments(List<String> experimentIds, final ExperimentsCallback callback) {
 		experimentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ThreatAssessmentResponse>() {
 			@Override
@@ -205,20 +233,6 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, ResultsResponse response) {
 				callback.processResults(response.getResults());
-			}
-		});
-	}
-	
-	public void getSections(final SectionsCallback sectionsCallback) {
-		sectionService.getProfiles(new MethodCallback<SectionsResponse>() {
-			@Override
-			public void onFailure(Method method, Throwable exception) {
-				Window.alert(exception.getMessage());
-			}
-
-			@Override
-			public void onSuccess(Method method, SectionsResponse response) {
-				sectionsCallback.processSections(response.getSections());
 			}
 		});
 	}

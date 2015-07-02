@@ -7,7 +7,9 @@ import javax.inject.Inject;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
+import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 
@@ -47,6 +49,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 					}
 					
 					loadLeveeStatus(levees.get(0));
+					loadSections(levees.get(0).getId());
 				} else {
 					view.showNoLeveesLabel(true);
 				}
@@ -65,5 +68,30 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		leveeSummaryPresenter = eventBus.addHandler(LeveeSummaryPresenter.class);
 		view.addLeveeSummary(leveeSummaryPresenter.getView());
 		leveeSummaryPresenter.setLevee(levee);
+	}
+	
+	private void loadSections(String leveeId) {
+		view.showSectionPanel(true);
+		view.setSectionBusyState(true);
+		dapController.getSections(leveeId, new SectionsCallback() {
+			@Override
+			public void onError(int code, String message) {
+				view.setSectionBusyState(false);
+			}
+			
+			@Override
+			public void processSections(List<Section> sections) {
+				view.setSectionBusyState(false);
+				
+				if(sections.size() > 0) {
+					view.showSectionList(true);
+					for(Section section : sections) {
+						view.addSectionValue(section.getId(), section.getName());
+					}
+				} else {
+					view.showNoSectionsLabel(true);
+				}
+			}
+		});
 	}
 }

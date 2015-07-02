@@ -18,4 +18,14 @@ public interface ISidePanelView extends IsWidget {
 	void removeSummaryView();
 
 	void addLeveeSummary(IsWidget view);
+
+	void showSectionPanel(boolean show);
+
+	void setSectionBusyState(boolean busy);
+
+	void showNoSectionsLabel(boolean show);
+
+	void addSectionValue(String sectionId, String sectionName);
+
+	void showSectionList(boolean show);
 }

@@ -18,12 +18,20 @@
 		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
-		<b:Heading size="H2" text="{messages.leveeHeader}"></b:Heading>
+		<b:Heading size="H2" text="{messages.leveeHeader}"/>
 		<g:FlowPanel ui:field="leveeBusyPanel" visible="false" addStyleNames="text-center">
 			<b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
 		</g:FlowPanel>
 		<b:ListBox ui:field="levees" visible="false"/>
 		<g:Label ui:field="noLeveesLabel" text="{messages.noLevees}" visible="false"/>
 		<g:FlowPanel ui:field="summaryPanel" addStyleNames="{style.summary}"/>
+		<g:FlowPanel ui:field="sectionPanel" visible="false">
+			<b:Heading size="H2" text="{messages.sectionHeader}"/>
+			<g:FlowPanel ui:field="sectionBusyPanel" visible="false" addStyleNames="text-center">
+				<b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
+			</g:FlowPanel>
+			<b:ListBox ui:field="sections" visible="false"/>
+			<g:Label ui:field="noSectionsLabel" text="{messages.noLevees}" visible="false"/>
+		</g:FlowPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>
