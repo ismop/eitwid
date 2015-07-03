@@ -3,18 +3,24 @@ package pl.ismop.web.client.widgets.sidepanel;
 import org.gwtbootstrap3.client.ui.ListBox;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.mvp4g.client.view.ReverseViewInterface;
 
-public class SidePanelView extends Composite implements ISidePanelView {
+import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
+
+public class SidePanelView extends Composite implements ISidePanelView, ReverseViewInterface<ISidePanelPresenter> {
 	private static SidePanelViewUiBinder uiBinder = GWT.create(SidePanelViewUiBinder.class);
 	interface SidePanelViewUiBinder extends UiBinder<Widget, SidePanelView> {}
 
+	@UiField SidePanelMessages messages;
 	@UiField ListBox levees;
 	@UiField FlowPanel leveeBusyPanel;
 	@UiField Label noLeveesLabel;
@@ -24,9 +30,15 @@ public class SidePanelView extends Composite implements ISidePanelView {
 	@UiField Label noSectionsLabel;
 	@UiField ListBox sections;
 	@UiField FlowPanel sectionDetails;
+	private ISidePanelPresenter presenter;
 	
 	public SidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
+	}
+	
+	@UiHandler("sections")
+	void sectionPicked(ChangeEvent event) {
+		getPresenter().onSectionChanged(sections.getSelectedValue());
 	}
 
 	@Override
@@ -92,5 +104,20 @@ public class SidePanelView extends Composite implements ISidePanelView {
 	@Override
 	public void setSectionView(IsWidget view) {
 		sectionDetails.add(view);
+	}
+
+	@Override
+	public String getPickSectionLabel() {
+		return messages.pickSectionLabel();
+	}
+
+	@Override
+	public void setPresenter(ISidePanelPresenter presenter) {
+		this.presenter = presenter;
+	}
+
+	@Override
+	public ISidePanelPresenter getPresenter() {
+		return presenter;
 	}
 }

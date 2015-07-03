@@ -2,11 +2,9 @@ package pl.ismop.web.client.widgets.sidepanel;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
-import pl.ismop.web.client.widgets.section.ISectionView;
-
 public interface ISidePanelView extends IsWidget {
 	interface ISidePanelPresenter {
-		
+		void onSectionChanged(String selectedValue);
 	}
 
 	void addLeveeValue(String leveeId, String leveeName);
@@ -34,4 +32,6 @@ public interface ISidePanelView extends IsWidget {
 	void removeSectionView();
 
 	void setSectionView(IsWidget view);
+
+	String getPickSectionLabel();
 }

@@ -1,8 +1,14 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
+
+import com.google.gwt.user.client.Window;
+import com.mvp4g.client.annotation.Presenter;
+import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -14,19 +20,17 @@ import pl.ismop.web.client.widgets.section.SectionPresenter;
 import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 
-import com.google.gwt.user.client.Window;
-import com.mvp4g.client.annotation.Presenter;
-import com.mvp4g.client.presenter.BasePresenter;
-
 @Presenter(view = SidePanelView.class)
 public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventBus> implements ISidePanelPresenter {
 	private DapController dapController;
 	private LeveeSummaryPresenter leveeSummaryPresenter;
 	private SectionPresenter sectionPresenter;
+	private Map<String, Section> sections;
 
 	@Inject
 	public SidePanelPresenter(DapController dapController) {
 		this.dapController = dapController;
+		sections = new HashMap<>();
 	}
 	
 	public void onStart() {
@@ -59,6 +63,11 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		});
 	}
 	
+	@Override
+	public void onSectionChanged(String sectionId) {
+		loadSectionStatus(sections.get(sectionId));
+	}
+
 	private void loadLeveeStatus(Levee levee) {
 		if(leveeSummaryPresenter != null) {
 			leveeSummaryPresenter.stopUpdate();
@@ -83,16 +92,17 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			
 			@Override
 			public void processSections(List<Section> sections) {
+				SidePanelPresenter.this.sections.clear();
 				view.setSectionBusyState(false);
 				
 				if(sections.size() > 0) {
 					view.showSectionList(true);
+					view.addSectionValue(null, view.getPickSectionLabel());
 					
 					for(Section section : sections) {
 						view.addSectionValue(section.getId(), section.getId());
+						SidePanelPresenter.this.sections.put(section.getId(), section);
 					}
-					
-					loadSectionStatus(sections.get(0));
 				} else {
 					view.showNoSectionsLabel(true);
 				}
@@ -108,8 +118,10 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			sectionPresenter = null;
 		}
 		
-		sectionPresenter = eventBus.addHandler(SectionPresenter.class);
-		view.setSectionView(sectionPresenter.getView());
-		sectionPresenter.setSection(section);
+		if(section != null) {
+			sectionPresenter = eventBus.addHandler(SectionPresenter.class);
+			view.setSectionView(sectionPresenter.getView());
+			sectionPresenter.setSection(section);
+		}
 	}
 }
