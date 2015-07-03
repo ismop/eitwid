@@ -10,4 +10,12 @@ public interface SidePanelMessages extends Messages {
 	String sectionHeader();
 
 	String pickSectionLabel();
+	
+	String profileHeader();
+
+	String pickProfileLabel();
+	
+	String noSections();
+	
+	String noProfiles();
 }

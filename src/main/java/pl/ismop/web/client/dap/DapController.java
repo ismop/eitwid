@@ -6,6 +6,12 @@ import java.util.List;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.Window;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.LeveeResponse;
 import pl.ismop.web.client.dap.levee.LeveeService;
@@ -15,6 +21,9 @@ import pl.ismop.web.client.dap.levee.ModeChangeRequest;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.measurement.MeasurementService;
 import pl.ismop.web.client.dap.measurement.MeasurementsResponse;
+import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.profile.ProfileService;
+import pl.ismop.web.client.dap.profile.ProfilesResponse;
 import pl.ismop.web.client.dap.result.Result;
 import pl.ismop.web.client.dap.result.ResultService;
 import pl.ismop.web.client.dap.result.ResultsResponse;
@@ -29,12 +38,6 @@ import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentResponse;
 import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentService;
 import pl.ismop.web.client.hypgen.Experiment;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.client.Window;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 @Singleton
 public class DapController {
 	private LeveeService leveeService;
@@ -43,6 +46,7 @@ public class DapController {
 	private SectionService sectionService;
 	private ThreatAssessmentService experimentService;
 	private ResultService resultService;
+	private ProfileService profileService;
 	
 	public interface ErrorCallback {
 		void onError(int code, String message);
@@ -79,17 +83,21 @@ public class DapController {
 	public interface SensorsCallback extends ErrorCallback {
 		void processSensors(List<Sensor> sensors);
 	}
+	
+	public interface ProfilesCallback extends ErrorCallback {
+		void processProfiles(List<Profile> profiles);
+	}
 
 	@Inject
-	public DapController(LeveeService leveeService, SensorService sensorService,
-			MeasurementService measurementService, SectionService sectionService,
-			ThreatAssessmentService experimentService, ResultService resultService) {
+	public DapController(LeveeService leveeService, SensorService sensorService, MeasurementService measurementService, SectionService sectionService,
+			ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService) {
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
 		this.sectionService = sectionService;
 		this.experimentService = experimentService;
 		this.resultService = resultService;
+		this.profileService = profileService;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -247,6 +255,20 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, SensorsResponse response) {
 				callback.processSensors(response.getSensors());
+			}
+		});
+	}
+
+	public void getProfiles(String sectionId, final ProfilesCallback callback) {
+		profileService.getProfilesForSection(sectionId, new MethodCallback<ProfilesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+	
+			@Override
+			public void onSuccess(Method method, ProfilesResponse response) {
+				callback.processProfiles(response.getProfiles());
 			}
 		});
 	}

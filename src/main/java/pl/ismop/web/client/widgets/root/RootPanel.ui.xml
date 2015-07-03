@@ -7,6 +7,9 @@
 		.logout {
 			padding-right: 30px;
 		}
+		.mainPanel {
+			background-color: #eaeaea;
+		}
 	</ui:style>
 	<g:DockLayoutPanel unit="PX">
 		<g:north size="50">
@@ -31,7 +34,7 @@
 					<g:HTMLPanel ui:field="sidePanel"/>
 				</g:east>
 				<g:center>
-					<g:HTMLPanel ui:field="mainPanel"/>
+					<g:HTMLPanel ui:field="mainPanel" addStyleNames="{style.mainPanel}"/>
 				</g:center>
 			</g:DockLayoutPanel>
 		</g:center>

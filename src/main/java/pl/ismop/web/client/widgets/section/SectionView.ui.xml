@@ -22,7 +22,6 @@
 					</div>
 				</div>
 			</div>
-			<div ui:field="threatTimestamp" class="panel-footer announcement-bottom"></div>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

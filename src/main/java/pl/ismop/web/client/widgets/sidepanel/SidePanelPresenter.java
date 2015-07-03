@@ -13,8 +13,10 @@ import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
+import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.widgets.section.SectionPresenter;
 import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
@@ -26,11 +28,13 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 	private LeveeSummaryPresenter leveeSummaryPresenter;
 	private SectionPresenter sectionPresenter;
 	private Map<String, Section> sections;
+	private Map<String, Profile> profiles;
 
 	@Inject
 	public SidePanelPresenter(DapController dapController) {
 		this.dapController = dapController;
 		sections = new HashMap<>();
+		profiles = new HashMap<>();
 	}
 	
 	public void onStart() {
@@ -55,6 +59,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 					}
 					
 					loadLeveeStatus(levees.get(0));
+					eventBus.drawGoogleMap("mainPanel", levees.get(0).getId());
 					loadSections(levees.get(0).getId());
 				} else {
 					view.showNoLeveesLabel(true);
@@ -88,6 +93,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			@Override
 			public void onError(int code, String message) {
 				view.setSectionBusyState(false);
+				Window.alert(message);
 			}
 			
 			@Override
@@ -122,6 +128,38 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			sectionPresenter = eventBus.addHandler(SectionPresenter.class);
 			view.setSectionView(sectionPresenter.getView());
 			sectionPresenter.setSection(section);
+			eventBus.zoomToSection(section.getId());
+			loadProfiles(section.getId());
 		}
+	}
+
+	private void loadProfiles(String sectionId) {
+		profiles.clear();
+		view.clearProfileValues();
+		view.showProfilePanel(true);
+		view.setProfileBusyState(true);
+		dapController.getProfiles(sectionId, new ProfilesCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert(message);
+			}
+			
+			@Override
+			public void processProfiles(List<Profile> profiles) {
+				view.setProfileBusyState(false);
+				
+				if(profiles.size() > 0) {
+					view.showProfileList(true);
+					view.addProfileValue(null, view.getPickProfileLabel());
+					
+					for(Profile profile : profiles) {
+						view.addProfileValue(profile.getId(), profile.getId());
+						SidePanelPresenter.this.profiles.put(profile.getId(), profile);
+					}
+				} else {
+					view.showNoProfilesLabel(true);
+				}
+			}
+		});
 	}
 }

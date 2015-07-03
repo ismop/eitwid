@@ -69,10 +69,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		sectionColors.put("severe", "#EBCCD1");
 	}
 	
-	public void onDrawGoogleMap(String mapElementId) {
+	public void onDrawGoogleMap(String mapElementId, String leveeId) {
 		this.elementId = mapElementId;
 		showProgressIndicator(true);
-		dapController.getSections(new SectionsCallback() {
+		dapController.getSections(leveeId, new SectionsCallback() {
 			@Override
 			public void onError(int code, String message) {
 				showProgressIndicator(false);
@@ -392,7 +392,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		if(sectionId != null) {
 			for(Section section : sections.values()) {
 				if(section.getId().equals(sectionId)) {
-					String color = sectionColors.get(section.getThreatLevel());
+					String color = sectionColors.get(null);
 					
 					return color == null ? "#aaaaaa" : color;
 				}

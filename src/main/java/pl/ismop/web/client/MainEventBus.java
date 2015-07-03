@@ -26,7 +26,7 @@ public interface MainEventBus extends EventBus {
 	void start();
 
 	@Event(handlers = GoogleMapsPresenter.class)
-	void drawGoogleMap(String elementId);
+	void drawGoogleMap(String elementId, String leveeId);
 
 	@Event
 	void leveeUpdated(Levee levee);

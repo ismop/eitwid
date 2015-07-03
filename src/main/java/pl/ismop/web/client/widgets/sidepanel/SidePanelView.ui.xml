@@ -27,15 +27,24 @@
 		</g:FlowPanel>
 		<b:ListBox ui:field="levees" visible="false"/>
 		<g:Label ui:field="noLeveesLabel" text="{messages.noLevees}" visible="false"/>
-		<g:FlowPanel ui:field="summaryPanel" addStyleNames="{style.summary}"/>
+		<g:FlowPanel ui:field="leveePanel" addStyleNames="{style.summary}"/>
 		<g:FlowPanel ui:field="sectionPanel" visible="false">
-			<b:Heading size="H3" text="{messages.sectionHeader}"/>
+			<b:Heading size="H4" text="{messages.sectionHeader}"/>
 			<g:FlowPanel ui:field="sectionBusyPanel" visible="false" addStyleNames="text-center">
 				<b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
 			</g:FlowPanel>
 			<b:ListBox ui:field="sections" visible="false"/>
-			<g:Label ui:field="noSectionsLabel" text="{messages.noLevees}" visible="false"/>
+			<g:Label ui:field="noSectionsLabel" text="{messages.noSections}" visible="false"/>
 			<g:FlowPanel ui:field="sectionDetails" addStyleNames="{style.sectionDetails}"/>
+		</g:FlowPanel>
+		<g:FlowPanel ui:field="profilePanel" visible="false">
+			<b:Heading size="H5" text="{messages.profileHeader}"/>
+			<g:FlowPanel ui:field="profileBusyPanel" visible="false" addStyleNames="text-center">
+				<b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
+			</g:FlowPanel>
+			<b:ListBox ui:field="profiles" visible="false"/>
+			<g:Label ui:field="noProfilesLabel" text="{messages.noProfiles}" visible="false"/>
+			<g:FlowPanel ui:field="profileDetails" addStyleNames="{style.sectionDetails}"/>
 		</g:FlowPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

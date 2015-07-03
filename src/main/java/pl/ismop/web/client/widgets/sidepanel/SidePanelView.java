@@ -19,18 +19,20 @@ import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
 public class SidePanelView extends Composite implements ISidePanelView, ReverseViewInterface<ISidePanelPresenter> {
 	private static SidePanelViewUiBinder uiBinder = GWT.create(SidePanelViewUiBinder.class);
 	interface SidePanelViewUiBinder extends UiBinder<Widget, SidePanelView> {}
-
-	@UiField SidePanelMessages messages;
-	@UiField ListBox levees;
-	@UiField FlowPanel leveeBusyPanel;
-	@UiField Label noLeveesLabel;
-	@UiField FlowPanel summaryPanel;
-	@UiField FlowPanel sectionPanel;
-	@UiField FlowPanel sectionBusyPanel;
-	@UiField Label noSectionsLabel;
-	@UiField ListBox sections;
-	@UiField FlowPanel sectionDetails;
+	
 	private ISidePanelPresenter presenter;
+
+	@UiField
+	SidePanelMessages messages;
+	
+	@UiField
+	ListBox levees, sections, profiles;
+
+	@UiField
+	FlowPanel leveeBusyPanel, leveePanel, sectionPanel, sectionBusyPanel, sectionDetails, profilePanel, profileBusyPanel;
+	
+	@UiField
+	Label noLeveesLabel, noSectionsLabel, noProfilesLabel;
 	
 	public SidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -63,12 +65,12 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 
 	@Override
 	public void removeSummaryView() {
-		summaryPanel.clear();
+		leveePanel.clear();
 	}
 
 	@Override
 	public void setLeveeSummary(IsWidget view) {
-		summaryPanel.add(view);
+		leveePanel.add(view);
 	}
 
 	@Override
@@ -119,5 +121,40 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	@Override
 	public ISidePanelPresenter getPresenter() {
 		return presenter;
+	}
+
+	@Override
+	public void setProfileBusyState(boolean busy) {
+		profileBusyPanel.setVisible(busy);
+	}
+
+	@Override
+	public void showNoProfilesLabel(boolean show) {
+		noProfilesLabel.setVisible(show);
+	}
+
+	@Override
+	public void showProfileList(boolean show) {
+		profiles.setVisible(show);
+	}
+
+	@Override
+	public void addProfileValue(String profileId, String profileName) {
+		profiles.addItem(profileName, profileId);
+	}
+
+	@Override
+	public String getPickProfileLabel() {
+		return messages.pickProfileLabel();
+	}
+
+	@Override
+	public void showProfilePanel(boolean show) {
+		profilePanel.setVisible(show);
+	}
+
+	@Override
+	public void clearProfileValues() {
+		profiles.clear();
 	}
 }

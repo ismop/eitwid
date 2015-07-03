@@ -32,7 +32,6 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	
 	public void onStart() {
 		RootLayoutPanel.get().add(view);
-		eventBus.drawGoogleMap("mainPanel");
 		internalExperimentController.getExperiments(new UserExperimentsCallback() {
 			@Override
 			public void onError(int code, String message) {

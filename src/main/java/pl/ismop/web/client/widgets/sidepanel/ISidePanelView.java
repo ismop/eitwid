@@ -34,4 +34,18 @@ public interface ISidePanelView extends IsWidget {
 	void setSectionView(IsWidget view);
 
 	String getPickSectionLabel();
+
+	void setProfileBusyState(boolean busy);
+
+	void showNoProfilesLabel(boolean show);
+
+	void showProfileList(boolean show);
+
+	void addProfileValue(String profileId, String profileName);
+
+	String getPickProfileLabel();
+
+	void showProfilePanel(boolean show);
+
+	void clearProfileValues();
 }

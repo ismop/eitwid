@@ -26,8 +26,11 @@ public class SectionPresenter extends BasePresenter<ISectionView, MainEventBus> 
 	
 	private void showSectionDetails() {
 		view.setHeader(view.getHeaderLabel(section.getId()));
-		view.setModeStyle(getPanelStyle(section.getThreatLevel()));
-		view.setThreatLevel(section.getThreatLevel());
+//		view.setModeStyle(getPanelStyle(section.getThreatLevel()));
+//		view.setThreatLevel(section.getThreatLevel());
+		//TODO(DH): check where the threat level state went
+		view.setModeStyle("panel-default");
+		view.setThreatLevel("TODO");
 	}
 	
 	private String getPanelStyle(String level) {
