@@ -500,8 +500,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}-*/;
 	
 	private native JavaScriptObject showMap(Object bounds) /*-{
-		var map = new $wnd.google.maps.Map(
-			$doc.getElementById(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::elementId));
+		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::elementId), {
+			disableDefaultUI: true,
+			draggable: false,
+			keyboardShortcuts: false
+		});
 		
 		var thisObject = this;
 		map.fitBounds(bounds);
@@ -518,26 +521,26 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		//sensors are not shown at the start
 		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::overrideStyle(Lcom/google/gwt/core/client/JavaScriptObject;)(sensorData);
 		
-		var drawingManager = new $wnd.google.maps.drawing.DrawingManager({
-			drawingControl: true,
-			drawingControlOptions: {
-				position: $wnd.google.maps.ControlPosition.TOP_CENTER,
-				drawingModes: [
-					$wnd.google.maps.drawing.OverlayType.RECTANGLE
-				]
-			},
-			rectangleOptions: {
-				fillColor: '#aaaaaa',
-				fillOpacity: 0.5,
-				strokeWeight: 0
-			}
-		});
-		drawingManager.setMap(map);
-		$wnd.google.maps.event.addListener(drawingManager, 'rectanglecomplete', function(r) {
-			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::onAreaSelected(FFFF)(r.getBounds().getNorthEast().lat(),
-				r.getBounds().getNorthEast().lng(), r.getBounds().getSouthWest().lat(), r.getBounds().getSouthWest().lng());
-			r.setMap(null);
-		});
+//		var drawingManager = new $wnd.google.maps.drawing.DrawingManager({
+//			drawingControl: true,
+//			drawingControlOptions: {
+//				position: $wnd.google.maps.ControlPosition.TOP_CENTER,
+//				drawingModes: [
+//					$wnd.google.maps.drawing.OverlayType.RECTANGLE
+//				]
+//			},
+//			rectangleOptions: {
+//				fillColor: '#aaaaaa',
+//				fillOpacity: 0.5,
+//				strokeWeight: 0
+//			}
+//		});
+//		drawingManager.setMap(map);
+//		$wnd.google.maps.event.addListener(drawingManager, 'rectanglecomplete', function(r) {
+//			thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::onAreaSelected(FFFF)(r.getBounds().getNorthEast().lat(),
+//				r.getBounds().getNorthEast().lng(), r.getBounds().getSouthWest().lat(), r.getBounds().getSouthWest().lng());
+//			r.setMap(null);
+//		});
 		
 		return map;
 	}-*/;
