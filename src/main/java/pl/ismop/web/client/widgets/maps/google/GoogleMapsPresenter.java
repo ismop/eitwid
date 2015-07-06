@@ -9,20 +9,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import pl.ismop.web.client.MainEventBus;
-import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
-import pl.ismop.web.client.dap.DapController.SectionsCallback;
-import pl.ismop.web.client.dap.DapController.SensorCallback;
-import pl.ismop.web.client.dap.DapController.SensorsCallback;
-import pl.ismop.web.client.dap.measurement.Measurement;
-import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.dap.sensor.Sensor;
-import pl.ismop.web.client.widgets.maps.MapMessages;
-import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
-import pl.ismop.web.client.widgets.section.SectionPresenter;
-import pl.ismop.web.client.widgets.sideprofile.SideProfilePresenter;
-
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.TextAlign;
@@ -39,6 +25,19 @@ import com.google.inject.Inject;
 import com.mvp4g.client.annotation.EventHandler;
 import com.mvp4g.client.event.BaseEventHandler;
 
+import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
+import pl.ismop.web.client.dap.DapController.SectionsCallback;
+import pl.ismop.web.client.dap.DapController.SensorCallback;
+import pl.ismop.web.client.dap.DapController.SensorsCallback;
+import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.sensor.Sensor;
+import pl.ismop.web.client.widgets.maps.MapMessages;
+import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
+import pl.ismop.web.client.widgets.sideprofile.SideProfilePresenter;
+
 @EventHandler
 public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private static final Logger log = LoggerFactory.getLogger(GoogleMapsPresenter.class);
@@ -47,7 +46,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private String elementId;
 	private MapMessages messages;
 	private Map<String, Section> sections;
-	private SectionPresenter selectedSection;
+	private String selectedSectionId;
 	private JavaScriptObject map;
 	private Map<String, String> sectionColors;
 	private Sensor selectedSensor;
@@ -129,12 +128,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	public void onPopupClosed() {
-		if(selectedSection != null) {
-			String previousProfileId = selectedSection.getSection().getId();
-			eventBus.removeHandler(selectedSection);
-			selectedSection.stopUpdate();
-			selectedSection = null;
-			selectSection(previousProfileId, false);
+		if(selectedSectionId != null) {
+			selectSection(selectedSectionId, false);
+			selectedSectionId = null;
 		}
 		
 		if(sensorTimer != null) {
@@ -150,7 +146,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		currentGraph = null;
 	}
 	
-	public void onZoomToSection(String sectionId) {
+	public void onZoomToAndSelectSection(String sectionId) {
 		if(sections.containsKey(sectionId)) {
 			Object bounds = createLatLngBounds();
 			
@@ -159,7 +155,25 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			}
 			
 			panMap(bounds);
+			showSectionDetails(sections.get(sectionId));
 		}
+	}
+	
+	public void onZoomToLevee(String selectedLeveeId) {
+		if(selectedSectionId != null) {
+			selectSection(selectedSectionId, false);
+			selectedSectionId = null;
+		}
+		
+		Object bounds = createLatLngBounds();
+		
+		for(Section section : sections.values()) {
+			for(List<Double> point : section.getShape().getCoordinates()) {
+				extend(bounds, point.get(1), point.get(0));
+			}
+		}
+		
+		panMap(bounds);
 	}
 
 	private void setNoMeasurementsLabel(String sensorId) {
@@ -195,8 +209,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		log.info("Feature with id {} clicked", featureId);
 		
 		if(getSectionId(featureId) != null) {
-			Section profile = sections.get(getSectionId(featureId));
-			showSectionDetails(profile);
+			onZoomToAndSelectSection(getSectionId(featureId));
 		} else if(getSensorId(featureId) != null) {
 			showSensorDetails(getSensorId(featureId));
 		} else if(getProfileId(featureId) != null) {
@@ -238,12 +251,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 
 			@Override
 			public void processSensor(final Sensor sensor) {
-				if(selectedSection != null) {
-					String previousProfileId = selectedSection.getSection().getId();
-					eventBus.removeHandler(selectedSection);
-					selectedSection.stopUpdate();
-					selectedSection = null;
-					selectSection(previousProfileId, false);
+				if(selectedSectionId != null) {
+					selectSection(selectedSectionId, false);
+					selectedSectionId = null;
 				}
 				
 				dapController.getMeasurements(sensor.getId(), new MeasurementsCallback() {
@@ -365,25 +375,20 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		selectedSensor = null;
 		currentGraph = null;
 		
-		String previousProfileId = null;
+		String previousSectionId = null;
 		
-		if(selectedSection != null) {
-			previousProfileId = selectedSection.getSection().getId();
-			eventBus.removeHandler(selectedSection);
-			selectedSection.stopUpdate();
-			selectedSection = null;
+		if(selectedSectionId != null) {
+			previousSectionId = selectedSectionId;
 		}
 		
-		SectionPresenter presenter = eventBus.addHandler(SectionPresenter.class);
-		selectedSection = presenter;
-		presenter.setSection(section);
-		eventBus.setTitleAndShow(messages.sectionTitle(section.getId()), presenter.getView(), false);
+		selectedSectionId = section.getId();
 		
-		if(previousProfileId != null) {
-			selectSection(previousProfileId, false);
+		if(previousSectionId != null) {
+			selectSection(previousSectionId, false);
 		}
 		
-		selectSection(section.getId(), true);
+		selectSection(selectedSectionId, true);
+		eventBus.sectionSelectedOnMap(selectedSectionId);
 	}
 
 	private String getFeatureColor(String featureId) {
@@ -451,11 +456,11 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		}
 	}-*/;
 	
-	private native void selectSection(String leveeId, boolean show) /*-{
+	private native void selectSection(String sectionId, boolean show) /*-{
 		var profileData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::sectionMapData;
 		var foundFeature = null;
 		profileData.forEach(function(feature) {
-			if(feature.getProperty('type') == 'section' && leveeId == feature.getProperty('id')) {
+			if(feature.getProperty('type') == 'section' && sectionId == feature.getProperty('id')) {
 				foundFeature = feature;
 			}
 		});
@@ -503,7 +508,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::elementId), {
 			disableDefaultUI: true,
 			draggable: false,
-			keyboardShortcuts: false
+			keyboardShortcuts: false,
+			disableDoubleClickZoom: false,
+			scrollwheel: false
 		});
 		
 		var thisObject = this;

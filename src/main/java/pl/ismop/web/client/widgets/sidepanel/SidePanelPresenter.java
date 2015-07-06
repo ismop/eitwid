@@ -68,9 +68,14 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		});
 	}
 	
+	public void onSectionSelectedOnMap(String sectionId) {
+		loadSectionStatus(sections.get(sectionId), false);
+		view.setSelectedSection(sectionId);
+	}
+	
 	@Override
 	public void onSectionChanged(String sectionId) {
-		loadSectionStatus(sections.get(sectionId));
+		loadSectionStatus(sections.get(sectionId), true);
 	}
 
 	private void loadLeveeStatus(Levee levee) {
@@ -116,7 +121,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		});
 	}
 
-	private void loadSectionStatus(Section section) {
+	private void loadSectionStatus(Section section, boolean fireEvent) {
 		if(sectionPresenter != null) {
 			sectionPresenter.stopUpdate();
 			view.removeSectionView();
@@ -128,8 +133,17 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			sectionPresenter = eventBus.addHandler(SectionPresenter.class);
 			view.setSectionView(sectionPresenter.getView());
 			sectionPresenter.setSection(section);
-			eventBus.zoomToSection(section.getId());
+			
+			if(fireEvent) {
+				eventBus.zoomToAndSelectSection(section.getId());
+			}
+			
 			loadProfiles(section.getId());
+		} else {
+			profiles.clear();
+			view.clearProfileValues();
+			view.showProfilePanel(false);
+			eventBus.zoomToLevee(view.getSelectedLeveeId());
 		}
 	}
 

@@ -48,4 +48,8 @@ public interface ISidePanelView extends IsWidget {
 	void showProfilePanel(boolean show);
 
 	void clearProfileValues();
+
+	void setSelectedSection(String sectionId);
+
+	String getSelectedLeveeId();
 }

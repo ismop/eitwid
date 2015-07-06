@@ -50,11 +50,17 @@ public interface MainEventBus extends EventBus {
 	void setTitleAndShow(String title, IsWidget widget, boolean resizable);
 	
 	@Event(handlers = GoogleMapsPresenter.class)
-	void zoomToSection(String sectionId);
+	void zoomToAndSelectSection(String sectionId);
 
 	@Event(handlers = ExperimentPresenter.class)
 	void showExperiment();
 
 	@Event(handlers = RootPresenter.class)
 	void setSidePanel(IsWidget view);
+
+	@Event(handlers = SidePanelPresenter.class)
+	void sectionSelectedOnMap(String sectionId);
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void zoomToLevee(String selectedLeveeId);
 }

@@ -39,7 +39,7 @@ public class ExperimentItemPresenter extends BasePresenter<IExperimentItemView, 
 	
 	@Override
 	public void onShowSection(String sectionId) {
-		eventBus.zoomToSection(sectionId);
+		eventBus.zoomToAndSelectSection(sectionId);
 	}
 
 	private void updateResults() {

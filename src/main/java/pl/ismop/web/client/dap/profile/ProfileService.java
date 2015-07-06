@@ -13,7 +13,7 @@ import pl.ismop.web.client.dap.DapDispatcher;
 @Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
 public interface ProfileService extends RestService {
 	@GET
-	@Path("profiles?sectionId={sectionId}")
+	@Path("profiles?section_id={sectionId}")
 	void getProfilesForSection(@PathParam("sectionId") String sectionId, MethodCallback<ProfilesResponse> callback);
 	
 	@GET

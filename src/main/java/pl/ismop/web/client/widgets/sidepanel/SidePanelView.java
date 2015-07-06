@@ -157,4 +157,20 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	public void clearProfileValues() {
 		profiles.clear();
 	}
+
+	@Override
+	public void setSelectedSection(String sectionId) {
+		for(int i = 0; i < sections.getItemCount(); i++) {
+			if(sectionId.equals(sections.getValue(i))) {
+				sections.setSelectedIndex(i);
+				
+				break;
+			}
+		}
+	}
+
+	@Override
+	public String getSelectedLeveeId() {
+		return levees.getSelectedValue();
+	}
 }
