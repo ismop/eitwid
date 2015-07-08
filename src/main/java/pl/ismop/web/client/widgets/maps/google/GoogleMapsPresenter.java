@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +32,14 @@ import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.DapController.SensorsCallback;
+import pl.ismop.web.client.dap.levee.Shape;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.sensor.Sensor;
+import pl.ismop.web.client.geojson.GeoJsonFeature;
+import pl.ismop.web.client.geojson.GeoJsonFeatures;
+import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
+import pl.ismop.web.client.geojson.LineGeometry;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.sideprofile.SideProfilePresenter;
@@ -55,17 +61,24 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private ListBox days;
 	private JavaScriptObject sectionMapData;
 	private JavaScriptObject sensorMapData;
+	private JavaScriptObject profileMapData;
 	private SideProfilePresenter presenter;
+	private GeoJsonFeaturesEncDec jsonFeaturesEncDec;
+	private List<String> profileFeatureIds;
+	private Integer featureIdGenerator;
 
 	@Inject
-	public GoogleMapsPresenter(DapController dapController, MapMessages messages) {
+	public GoogleMapsPresenter(DapController dapController, MapMessages messages, GeoJsonFeaturesEncDec jsonFeaturesEncDec) {
 		this.dapController = dapController;
 		this.messages = messages;
+		this.jsonFeaturesEncDec = jsonFeaturesEncDec;
 		sections = new HashMap<>();
 		sectionColors = new HashMap<>();
 		sectionColors.put("none", "#D9EDF7");
 		sectionColors.put("heightened", "#FAEBCC");
 		sectionColors.put("severe", "#EBCCD1");
+		profileFeatureIds = new ArrayList<>();
+		featureIdGenerator = new Random().nextInt();
 	}
 	
 	public void onDrawGoogleMap(String mapElementId, String leveeId) {
@@ -175,6 +188,34 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		
 		panMap(bounds);
 	}
+	
+	public void onDrawProfiles(List<Shape> profileShapes) {
+		if(profileShapes.size() > 0) {
+			if(profileFeatureIds.size() > 0) {
+				for(String profileFeatureId : profileFeatureIds) {
+					removeProfileFeature(profileFeatureId);
+				}
+				
+				profileFeatureIds.clear();
+			}
+			
+			List<GeoJsonFeature> features = new ArrayList<>();
+			
+			for(Shape shape : profileShapes) {
+				LineGeometry lineGeometry = new LineGeometry();
+				lineGeometry.setCoordinates(shape.getCoordinates());
+				
+				GeoJsonFeature feature = new GeoJsonFeature();
+				feature.setGeometry(lineGeometry);
+				feature.setId(String.valueOf(featureIdGenerator++));
+				profileFeatureIds.add(feature.getId());
+				features.add(feature);
+			}
+			
+			String jsonValue = jsonFeaturesEncDec.encode(new GeoJsonFeatures(features)).toString();
+			addFeatures(jsonValue);
+		}
+	}
 
 	private void setNoMeasurementsLabel(String sensorId) {
 		eventBus.setTitleAndShow(messages.sensorTitle(sensorId), new Label(messages.noMeasurements()), false);
@@ -210,6 +251,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		
 		if(getSectionId(featureId) != null) {
 			onZoomToAndSelectSection(getSectionId(featureId));
+			eventBus.sectionSelectedOnMap(selectedSectionId);
 		} else if(getSensorId(featureId) != null) {
 			showSensorDetails(getSensorId(featureId));
 		} else if(getProfileId(featureId) != null) {
@@ -388,7 +430,6 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		}
 		
 		selectSection(selectedSectionId, true);
-		eventBus.sectionSelectedOnMap(selectedSectionId);
 	}
 
 	private String getFeatureColor(String featureId) {
@@ -527,6 +568,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		sensorData.loadGeoJson($wnd.sensorUrl);
 		//sensors are not shown at the start
 		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::overrideStyle(Lcom/google/gwt/core/client/JavaScriptObject;)(sensorData);
+		
+		var profileData = new $wnd.google.maps.Data();
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData = profileData;
+		profileData.setMap(map);
 		
 //		var drawingManager = new $wnd.google.maps.drawing.DrawingManager({
 //			drawingControl: true,
@@ -689,5 +734,14 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	
 	private native void panMap(Object bounds) /*-{
 		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::map.fitBounds(bounds);
+	}-*/;
+	
+	private native void addFeatures(String jsonValue) /*-{
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.addGeoJson(JSON.parse(jsonValue));
+	}-*/;
+	
+	private native void removeProfileFeature(String profileFeatureId) /*-{
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.remove(
+				this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.getFeatureById(profileFeatureId));
 	}-*/;
 }

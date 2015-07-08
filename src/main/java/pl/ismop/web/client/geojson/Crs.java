@@ -1,4 +1,4 @@
-package pl.ismop.web.controllers.maps;
+package pl.ismop.web.client.geojson;
 
 import java.util.Map;
 

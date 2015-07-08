@@ -1,5 +1,6 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import pl.ismop.web.client.dap.DapController.LeveesCallback;
 import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.dap.levee.Shape;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.widgets.section.SectionPresenter;
@@ -147,6 +149,18 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		}
 	}
 
+	private void drawProfileLayer(List<Profile> profiles) {
+		List<Shape> profileShapes = new ArrayList<>();
+		
+		for(Profile profile : profiles) {
+			if(profile.getShape() != null) {
+				profileShapes.add(profile.getShape());
+			}
+		}
+		
+		eventBus.drawProfiles(profileShapes);
+	}
+
 	private void loadProfiles(String sectionId) {
 		profiles.clear();
 		view.clearProfileValues();
@@ -169,6 +183,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 					for(Profile profile : profiles) {
 						view.addProfileValue(profile.getId(), profile.getId());
 						SidePanelPresenter.this.profiles.put(profile.getId(), profile);
+						drawProfileLayer(profiles);
 					}
 				} else {
 					view.showNoProfilesLabel(true);
