@@ -42,6 +42,11 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	void sectionPicked(ChangeEvent event) {
 		getPresenter().onSectionChanged(sections.getSelectedValue());
 	}
+	
+	@UiHandler("profiles")
+	void profilePicked(ChangeEvent event) {
+		getPresenter().onProfileChanged(profiles.getSelectedValue());
+	}
 
 	@Override
 	public void addLeveeValue(String leveeId, String leveeName) {

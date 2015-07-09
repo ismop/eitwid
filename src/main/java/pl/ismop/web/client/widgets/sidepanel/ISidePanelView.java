@@ -5,6 +5,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 public interface ISidePanelView extends IsWidget {
 	interface ISidePanelPresenter {
 		void onSectionChanged(String selectedValue);
+
+		void onProfileChanged(String selectedValue);
 	}
 
 	void addLeveeValue(String leveeId, String leveeName);

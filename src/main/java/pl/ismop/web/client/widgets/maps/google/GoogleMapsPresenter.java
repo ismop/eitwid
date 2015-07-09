@@ -208,6 +208,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				GeoJsonFeature feature = new GeoJsonFeature();
 				feature.setGeometry(lineGeometry);
 				feature.setId(String.valueOf(featureIdGenerator++));
+				feature.setProperties(new HashMap<String, String>());
+				feature.getProperties().put("id", feature.getId());
+				feature.getProperties().put("name", feature.getId());
+				feature.getProperties().put("type", "profile");
 				profileFeatureIds.add(feature.getId());
 				features.add(feature);
 			}
@@ -572,6 +576,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		var profileData = new $wnd.google.maps.Data();
 		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData = profileData;
 		profileData.setMap(map);
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::overrideStyle(Lcom/google/gwt/core/client/JavaScriptObject;)(profileData);
 		
 //		var drawingManager = new $wnd.google.maps.drawing.DrawingManager({
 //			drawingControl: true,
@@ -632,6 +637,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			
 			if(feature == null) {
 				feature = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::sensorMapData.getFeatureById(featureId);
+			}
+			
+			if(feature == null) {
+				feature = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.getFeatureById(featureId);
 			}
 			
 			if(feature) {

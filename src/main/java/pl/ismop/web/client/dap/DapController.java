@@ -1,5 +1,6 @@
 package pl.ismop.web.client.dap;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,6 +13,11 @@ import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.device.DeviceService;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationService;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationsResponse;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.LeveeResponse;
 import pl.ismop.web.client.dap.levee.LeveeService;
@@ -47,6 +53,8 @@ public class DapController {
 	private ThreatAssessmentService experimentService;
 	private ResultService resultService;
 	private ProfileService profileService;
+	private DeviceService deviceService;
+	private DeviceAggregationService deviceAggregationService;
 	
 	public interface ErrorCallback {
 		void onError(int code, String message);
@@ -87,10 +95,15 @@ public class DapController {
 	public interface ProfilesCallback extends ErrorCallback {
 		void processProfiles(List<Profile> profiles);
 	}
+	
+	public interface DevicesCallback extends ErrorCallback {
+		void processDevices(List<Device> devices);
+	}
 
 	@Inject
 	public DapController(LeveeService leveeService, SensorService sensorService, MeasurementService measurementService, SectionService sectionService,
-			ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService) {
+			ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService, DeviceService deviceService,
+			DeviceAggregationService deviceAggregationService) {
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
@@ -98,6 +111,8 @@ public class DapController {
 		this.experimentService = experimentService;
 		this.resultService = resultService;
 		this.profileService = profileService;
+		this.deviceService = deviceService;
+		this.deviceAggregationService = deviceAggregationService;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -271,6 +286,35 @@ public class DapController {
 				callback.processProfiles(response.getProfiles());
 			}
 		});
+	}
+
+	public void getDevicesRecursively(String profileId, final DevicesCallback callback) {
+		List<Device> result = new ArrayList<>();
+		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				collectDevices(response.getDeviceAggregations(), result, new DevicesCallback() {
+					@Override
+					public void onError(int code, String message) {
+						callback.onError(code, message);
+					}
+					
+					@Override
+					public void processDevices(List<Device> devices) {
+						callback.processDevices(devices);
+					}
+				});
+			}
+		});
+	}
+
+	private void collectDevices(List<DeviceAggregation> deviceAggregations, List<Device> result, DevicesCallback devicesCallback) {
+		//TODO
 	}
 
 	private String merge(List<String> chunks, String delimeter) {

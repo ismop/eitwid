@@ -13,9 +13,11 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.DapController.DevicesCallback;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
 import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
+import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.Shape;
 import pl.ismop.web.client.dap.profile.Profile;
@@ -78,6 +80,22 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 	@Override
 	public void onSectionChanged(String sectionId) {
 		loadSectionStatus(sections.get(sectionId), true);
+	}
+
+	@Override
+	public void onProfileChanged(String profileId) {
+		dapController.getDevicesRecursively(profileId, new DevicesCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert(message);
+			}
+			
+			@Override
+			public void processDevices(List<Device> devices) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 
 	private void loadLeveeStatus(Levee levee) {
