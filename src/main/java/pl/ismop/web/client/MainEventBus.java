@@ -3,7 +3,7 @@ package pl.ismop.web.client;
 import java.util.List;
 
 import pl.ismop.web.client.dap.levee.Levee;
-import pl.ismop.web.client.dap.levee.Shape;
+import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.widgets.experiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.experiments.ExperimentsPresenter;
@@ -66,5 +66,5 @@ public interface MainEventBus extends EventBus {
 	void zoomToLevee(String selectedLeveeId);
 
 	@Event(handlers = GoogleMapsPresenter.class)
-	void drawProfiles(List<Shape> profileShapes);
+	void drawProfiles(List<PolygonShape> profileShapes);
 }

@@ -4,12 +4,12 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.fusesource.restygwt.client.Json;
 
-import pl.ismop.web.client.dap.levee.Shape;
+import pl.ismop.web.client.dap.levee.PolygonShape;
 
 public class Section {
 	private String id;
 	private String name;
-	private Shape shape;
+	private PolygonShape shape;
 	
 	@Json(name = "levee_id")
 	@XmlElement(name = "levee_id")
@@ -39,10 +39,10 @@ public class Section {
 		this.name = name;
 	}
 	
-	public Shape getShape() {
+	public PolygonShape getShape() {
 		return shape;
 	}
-	public void setShape(Shape shape) {
+	public void setShape(PolygonShape shape) {
 		this.shape = shape;
 	}
 	

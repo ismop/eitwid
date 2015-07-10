@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.fusesource.restygwt.client.Json;
 
-import pl.ismop.web.client.dap.levee.Shape;
-
 public class DeviceAggregation {
 	private String id;
 	
@@ -17,7 +15,7 @@ public class DeviceAggregation {
 	
 	private String type;
 	
-	private Shape placement;
+	private PointShape placement;
 	
 	@Json(name = "profile_id")
 	private String profileId;
@@ -63,11 +61,11 @@ public class DeviceAggregation {
 		this.type = type;
 	}
 
-	public Shape getPlacement() {
+	public PointShape getPlacement() {
 		return placement;
 	}
 
-	public void setPlacement(Shape placement) {
+	public void setPlacement(PointShape placement) {
 		this.placement = placement;
 	}
 
@@ -101,5 +99,5 @@ public class DeviceAggregation {
 
 	public void setDeviceIds(List<String> deviceIds) {
 		this.deviceIds = deviceIds;
-	} 
+	}
 }

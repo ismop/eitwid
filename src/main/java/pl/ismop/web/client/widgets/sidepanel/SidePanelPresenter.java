@@ -19,7 +19,7 @@ import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.levee.Levee;
-import pl.ismop.web.client.dap.levee.Shape;
+import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.widgets.section.SectionPresenter;
@@ -92,8 +92,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			
 			@Override
 			public void processDevices(List<Device> devices) {
-				// TODO Auto-generated method stub
-				
+				Window.alert("" + devices.size());
 			}
 		});
 	}
@@ -168,7 +167,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 	}
 
 	private void drawProfileLayer(List<Profile> profiles) {
-		List<Shape> profileShapes = new ArrayList<>();
+		List<PolygonShape> profileShapes = new ArrayList<>();
 		
 		for(Profile profile : profiles) {
 			if(profile.getShape() != null) {

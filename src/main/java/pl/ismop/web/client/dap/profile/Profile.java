@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.fusesource.restygwt.client.Json;
 
-import pl.ismop.web.client.dap.levee.Shape;
+import pl.ismop.web.client.dap.levee.PolygonShape;
 
 public class Profile {
 	private String id;
@@ -12,7 +12,7 @@ public class Profile {
 	private String sectionId;
 	
 	@Json(name = "profile_shape")
-	private Shape shape;
+	private PolygonShape shape;
 	
 	@Json(name = "device_ids")
 	private List<String> deviceIds;
@@ -36,11 +36,11 @@ public class Profile {
 		this.sectionId = sectionId;
 	}
 
-	public Shape getShape() {
+	public PolygonShape getShape() {
 		return shape;
 	}
 
-	public void setShape(Shape shape) {
+	public void setShape(PolygonShape shape) {
 		this.shape = shape;
 	}
 

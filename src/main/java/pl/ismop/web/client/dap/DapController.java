@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.device.DeviceService;
+import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationService;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationsResponse;
@@ -289,16 +290,16 @@ public class DapController {
 	}
 
 	public void getDevicesRecursively(String profileId, final DevicesCallback callback) {
-		List<Device> result = new ArrayList<>();
+		final List<Device> result = new ArrayList<>();
 		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(0, "Message: " + method.getResponse().getText());
 			}
 
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
-				collectDevices(response.getDeviceAggregations(), result, new DevicesCallback() {
+				collectDevices(response.getDeviceAggregations(), result, new MutableInteger(0), new DevicesCallback() {
 					@Override
 					public void onError(int code, String message) {
 						callback.onError(code, message);
@@ -313,8 +314,56 @@ public class DapController {
 		});
 	}
 
-	private void collectDevices(List<DeviceAggregation> deviceAggregations, List<Device> result, DevicesCallback devicesCallback) {
-		//TODO
+	private void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
+			final DevicesCallback devicesCallback) {
+		for(DeviceAggregation deviceAggregation : deviceAggregations) {
+			requestCounter.increment();
+			deviceService.getDevices(deviceAggregation.getId(), new MethodCallback<DevicesResponse>() {
+				@Override
+				public void onFailure(Method method, Throwable exception) {
+					requestCounter.decrement();
+					
+					if(requestCounter.get() == 0) {
+						devicesCallback.onError(0, exception.getMessage());
+					}
+				}
+
+				@Override
+				public void onSuccess(Method method, DevicesResponse response) {
+					result.addAll(response.getDevices());
+					requestCounter.decrement();
+					
+					if(requestCounter.get() == 0) {
+						devicesCallback.processDevices(result);
+					}
+				}
+			});
+			
+			if(deviceAggregation.getChildernIds() != null && deviceAggregation.getChildernIds().size() > 0) {
+				requestCounter.increment();
+				deviceAggregationService.getDeviceAggregationsForIds(merge(deviceAggregation.getChildernIds(), ","),
+						new MethodCallback<DeviceAggregationsResponse>() {
+					@Override
+					public void onFailure(Method method, Throwable exception) {
+						requestCounter.decrement();
+						
+						if(requestCounter.get() == 0) {
+							devicesCallback.onError(0, exception.getMessage());
+						}
+					}
+
+					@Override
+					public void onSuccess(Method method, DeviceAggregationsResponse response) {
+						requestCounter.decrement();
+						collectDevices(response.getDeviceAggregations(), result, requestCounter, devicesCallback);
+						
+						if(requestCounter.get() == 0) {
+							devicesCallback.processDevices(result);
+						}
+					}
+				});
+			}
+		}
 	}
 
 	private String merge(List<String> chunks, String delimeter) {

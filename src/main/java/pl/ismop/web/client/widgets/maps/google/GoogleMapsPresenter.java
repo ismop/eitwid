@@ -32,7 +32,7 @@ import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.DapController.SensorsCallback;
-import pl.ismop.web.client.dap.levee.Shape;
+import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.sensor.Sensor;
@@ -189,7 +189,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		panMap(bounds);
 	}
 	
-	public void onDrawProfiles(List<Shape> profileShapes) {
+	public void onDrawProfiles(List<PolygonShape> profileShapes) {
 		if(profileShapes.size() > 0) {
 			if(profileFeatureIds.size() > 0) {
 				for(String profileFeatureId : profileFeatureIds) {
@@ -201,7 +201,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			
 			List<GeoJsonFeature> features = new ArrayList<>();
 			
-			for(Shape shape : profileShapes) {
+			for(PolygonShape shape : profileShapes) {
 				LineGeometry lineGeometry = new LineGeometry();
 				lineGeometry.setCoordinates(shape.getCoordinates());
 				

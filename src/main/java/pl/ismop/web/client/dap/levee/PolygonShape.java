@@ -2,7 +2,7 @@ package pl.ismop.web.client.dap.levee;
 
 import java.util.List;
 
-public class Shape {
+public class PolygonShape {
 	private String type;
 	private List<List<Double>> coordinates;
 	

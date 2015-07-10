@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.fusesource.restygwt.client.Json;
 
-import pl.ismop.web.client.dap.levee.Shape;
+import pl.ismop.web.client.dap.deviceaggregation.PointShape;
 
 public class Device {
 	private String id;
@@ -12,7 +12,7 @@ public class Device {
 	@Json(name = "custom_id")
 	private String customId;
 	
-	private Shape placement;
+	private PointShape placement;
 	
 	@Json(name = "device_type")
 	private String deviceType;
@@ -57,11 +57,11 @@ public class Device {
 		this.customId = customId;
 	}
 
-	public Shape getPlacement() {
+	public PointShape getPlacement() {
 		return placement;
 	}
 
-	public void setPlacement(Shape placement) {
+	public void setPlacement(PointShape placement) {
 		this.placement = placement;
 	}
 
