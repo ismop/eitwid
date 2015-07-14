@@ -26,13 +26,14 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	SidePanelMessages messages;
 	
 	@UiField
-	ListBox levees, sections, profiles;
+	ListBox levees, sections, profiles, sensors;
 
 	@UiField
-	FlowPanel leveeBusyPanel, leveePanel, sectionPanel, sectionBusyPanel, sectionDetails, profilePanel, profileBusyPanel;
+	FlowPanel leveeBusyPanel, leveePanel, sectionPanel, sectionBusyPanel, sectionDetails, profilePanel, profileBusyPanel, sensorPanel, sensorBusyPanel,
+			plotContainer;
 	
 	@UiField
-	Label noLeveesLabel, noSectionsLabel, noProfilesLabel;
+	Label noLeveesLabel, noSectionsLabel, noProfilesLabel, noSensorsLabel;
 	
 	public SidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -46,6 +47,11 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	@UiHandler("profiles")
 	void profilePicked(ChangeEvent event) {
 		getPresenter().onProfileChanged(profiles.getSelectedValue());
+	}
+	
+	@UiHandler("sensors")
+	void sensorPicked(ChangeEvent event) {
+		getPresenter().onDeviceChanged(sensors.getSelectedValue());
 	}
 
 	@Override
@@ -177,5 +183,45 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	@Override
 	public String getSelectedLeveeId() {
 		return levees.getSelectedValue();
+	}
+
+	@Override
+	public void showDevicePanel(boolean show) {
+		sensorPanel.setVisible(show);
+	}
+
+	@Override
+	public void setDeviceBusyState(boolean busy) {
+		sensorBusyPanel.setVisible(busy);
+	}
+
+	@Override
+	public String getPickDeviceLabel() {
+		return messages.pickSensorLabel();
+	}
+
+	@Override
+	public void showDeviceList(boolean show) {
+		sensors.setVisible(show);
+	}
+
+	@Override
+	public void showNoDevicesLabel(boolean show) {
+		noSensorsLabel.setVisible(show);
+	}
+
+	@Override
+	public void addDeviceValue(String sensorId, String sensorName) {
+		sensors.addItem(sensorName, sensorId);
+	}
+
+	@Override
+	public void showPlotContainer(boolean show) {
+		plotContainer.setVisible(show);
+	}
+
+	@Override
+	public void setPlotView(IsWidget plot) {
+		plotContainer.add(plot);
 	}
 }

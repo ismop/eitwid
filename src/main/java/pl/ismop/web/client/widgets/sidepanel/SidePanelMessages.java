@@ -18,4 +18,10 @@ public interface SidePanelMessages extends Messages {
 	String noSections();
 	
 	String noProfiles();
+	
+	String sensorHeader();
+	
+	String noSensors();
+
+	String pickSensorLabel();
 }

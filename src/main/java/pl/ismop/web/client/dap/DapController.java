@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.Window;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import pl.ismop.web.client.dap.context.Context;
+import pl.ismop.web.client.dap.context.ContextService;
+import pl.ismop.web.client.dap.context.ContextsResponse;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.device.DeviceService;
 import pl.ismop.web.client.dap.device.DevicesResponse;
@@ -28,6 +32,9 @@ import pl.ismop.web.client.dap.levee.ModeChangeRequest;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.measurement.MeasurementService;
 import pl.ismop.web.client.dap.measurement.MeasurementsResponse;
+import pl.ismop.web.client.dap.parameter.Parameter;
+import pl.ismop.web.client.dap.parameter.ParameterService;
+import pl.ismop.web.client.dap.parameter.ParametersResponse;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.profile.ProfileService;
 import pl.ismop.web.client.dap.profile.ProfilesResponse;
@@ -43,6 +50,9 @@ import pl.ismop.web.client.dap.sensor.SensorService;
 import pl.ismop.web.client.dap.sensor.SensorsResponse;
 import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentResponse;
 import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentService;
+import pl.ismop.web.client.dap.timeline.Timeline;
+import pl.ismop.web.client.dap.timeline.TimelineService;
+import pl.ismop.web.client.dap.timeline.TimelinesResponse;
 import pl.ismop.web.client.hypgen.Experiment;
 
 @Singleton
@@ -56,6 +66,9 @@ public class DapController {
 	private ProfileService profileService;
 	private DeviceService deviceService;
 	private DeviceAggregationService deviceAggregationService;
+	private ParameterService parameterService;
+	private ContextService contextService;
+	private TimelineService timelineService;
 	
 	public interface ErrorCallback {
 		void onError(int code, String message);
@@ -100,11 +113,24 @@ public class DapController {
 	public interface DevicesCallback extends ErrorCallback {
 		void processDevices(List<Device> devices);
 	}
+	
+	public interface ParametersCallback extends ErrorCallback {
+		void processParamters(List<Parameter> parameters);
+	}
+	
+	public interface ContextsCallback extends ErrorCallback {
+		void processContexts(List<Context> contexts);
+	}
+	
+	public interface TimelineCallback extends ErrorCallback {
+		void processTimelines(List<Timeline> timelines);
+	}
 
 	@Inject
 	public DapController(LeveeService leveeService, SensorService sensorService, MeasurementService measurementService, SectionService sectionService,
 			ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService, DeviceService deviceService,
-			DeviceAggregationService deviceAggregationService) {
+			DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
+			TimelineService timelineService) {
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
@@ -114,6 +140,9 @@ public class DapController {
 		this.profileService = profileService;
 		this.deviceService = deviceService;
 		this.deviceAggregationService = deviceAggregationService;
+		this.parameterService = parameterService;
+		this.contextService = contextService;
+		this.timelineService = timelineService;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -175,10 +204,10 @@ public class DapController {
 		});
 	}
 
-	public void getMeasurements(String sensorId, final MeasurementsCallback callback) {
+	public void getMeasurements(String timelineId, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
 		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date(new Date().getTime() - 2678400000L));//fetching one month old data
-		measurementService.getMeasurements(sensorId, from, until, new MethodCallback<MeasurementsResponse>() {
+		measurementService.getMeasurements(timelineId, from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(0, exception.getMessage());
@@ -310,6 +339,48 @@ public class DapController {
 						callback.processDevices(devices);
 					}
 				});
+			}
+		});
+	}
+
+	public void getParameters(String deviceId, final ParametersCallback callback) {
+		parameterService.getParameters(deviceId, new MethodCallback<ParametersResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, ParametersResponse response) {
+				callback.processParamters(response.getParameters());
+			}
+		});
+	}
+
+	public void getContext(String contextType, final ContextsCallback callback) {
+		contextService.getContexts(contextType, new MethodCallback<ContextsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, ContextsResponse response) {
+				callback.processContexts(response.getContexts());
+			}
+		});
+	}
+
+	public void getTimeline(String contextId, String paramterId, final TimelineCallback callback) {
+		timelineService.getTimelines(contextId, paramterId, new MethodCallback<TimelinesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, TimelinesResponse response) {
+				callback.processTimelines(response.getTimelines());
 			}
 		});
 	}

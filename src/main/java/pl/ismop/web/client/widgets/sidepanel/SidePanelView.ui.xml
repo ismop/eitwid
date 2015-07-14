@@ -46,5 +46,14 @@
 			<g:Label ui:field="noProfilesLabel" text="{messages.noProfiles}" visible="false"/>
 			<g:FlowPanel ui:field="profileDetails" addStyleNames="{style.sectionDetails}"/>
 		</g:FlowPanel>
+		<g:FlowPanel ui:field="sensorPanel" visible="false">
+			<b:Heading size="H6" text="{messages.sensorHeader}"/>
+			<g:FlowPanel ui:field="sensorBusyPanel" visible="false" addStyleNames="text-center">
+				<b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
+			</g:FlowPanel>
+			<b:ListBox ui:field="sensors" visible="false"/>
+			<g:Label ui:field="noSensorsLabel" text="{messages.noSensors}" visible="false"/>
+			<g:FlowPanel ui:field="plotContainer" visible="false"/>
+		</g:FlowPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

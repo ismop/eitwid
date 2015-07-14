@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
+import static java.util.Arrays.asList;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,7 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.widgets.plot.PlotPresenter;
 import pl.ismop.web.client.widgets.section.SectionPresenter;
 import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
@@ -33,6 +36,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 	private SectionPresenter sectionPresenter;
 	private Map<String, Section> sections;
 	private Map<String, Profile> profiles;
+	private PlotPresenter plotPresenter;
 
 	@Inject
 	public SidePanelPresenter(DapController dapController) {
@@ -84,17 +88,47 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 
 	@Override
 	public void onProfileChanged(String profileId) {
+		view.showDevicePanel(true);
+		view.setDeviceBusyState(true);
 		dapController.getDevicesRecursively(profileId, new DevicesCallback() {
 			@Override
 			public void onError(int code, String message) {
+				view.setDeviceBusyState(false);
 				Window.alert(message);
 			}
 			
 			@Override
 			public void processDevices(List<Device> devices) {
-				Window.alert("" + devices.size());
+				view.setDeviceBusyState(false);
+				
+				if(devices.size() > 0) {
+					view.showDeviceList(true);
+					view.addDeviceValue(null, view.getPickDeviceLabel());
+					
+					for(Device device : devices) {
+						view.addDeviceValue(device.getId(), device.getCustomId());
+					}
+				} else {
+					view.showNoDevicesLabel(true);
+				}
 			}
 		});
+	}
+
+	@Override
+	public void onDeviceChanged(String deviceId) {
+		if(deviceId == null) {
+			view.showPlotContainer(false);
+		} else {
+			view.showPlotContainer(true);
+			
+			if(plotPresenter == null) {
+				plotPresenter = eventBus.addHandler(PlotPresenter.class);
+				view.setPlotView(plotPresenter.getView());
+			}
+			
+			plotPresenter.drawMeasurements(asList(deviceId));
+		}
 	}
 
 	private void loadLeveeStatus(Levee levee) {

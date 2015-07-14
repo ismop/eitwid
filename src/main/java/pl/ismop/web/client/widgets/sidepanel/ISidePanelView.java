@@ -2,11 +2,15 @@ package pl.ismop.web.client.widgets.sidepanel;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
+import pl.ismop.web.client.widgets.plot.IPlotView;
+
 public interface ISidePanelView extends IsWidget {
 	interface ISidePanelPresenter {
-		void onSectionChanged(String selectedValue);
+		void onSectionChanged(String sectionId);
 
-		void onProfileChanged(String selectedValue);
+		void onProfileChanged(String profileId);
+
+		void onDeviceChanged(String deviceId);
 	}
 
 	void addLeveeValue(String leveeId, String leveeName);
@@ -54,4 +58,20 @@ public interface ISidePanelView extends IsWidget {
 	void setSelectedSection(String sectionId);
 
 	String getSelectedLeveeId();
+
+	void showDevicePanel(boolean show);
+
+	void setDeviceBusyState(boolean busy);
+
+	String getPickDeviceLabel();
+
+	void showDeviceList(boolean show);
+
+	void showNoDevicesLabel(boolean show);
+
+	void addDeviceValue(String deviceId, String deviceName);
+
+	void showPlotContainer(boolean show);
+
+	void setPlotView(IsWidget plot);
 }

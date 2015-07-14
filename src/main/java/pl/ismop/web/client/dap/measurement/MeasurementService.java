@@ -13,7 +13,7 @@ import pl.ismop.web.client.dap.DapDispatcher;
 @Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
 public interface MeasurementService  extends RestService {
 	@GET
-	@Path("measurements?sensor_id={id}&time_from={timeFrom}&time_to={timeTo}")
-	void getMeasurements(@PathParam("id") String sensorId, @PathParam("timeFrom") String until, @PathParam("timeTo") String timeTo,
+	@Path("measurements?timeline_id={timelineId}&time_from={timeFrom}&time_to={timeTo}")
+	void getMeasurements(@PathParam("timelineId") String timelineId, @PathParam("timeFrom") String until, @PathParam("timeTo") String timeTo,
 			MethodCallback<MeasurementsResponse> callback);
 }
