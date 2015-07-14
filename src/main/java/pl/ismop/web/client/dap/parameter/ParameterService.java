@@ -13,6 +13,6 @@ import pl.ismop.web.client.dap.DapDispatcher;
 @Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
 public interface ParameterService extends RestService {
 	@GET
-	@Path("paramters?device_id={deviceId}")
+	@Path("parameters?device_id={deviceId}")
 	void getParameters(@PathParam("deviceId") String deviceId, MethodCallback<ParametersResponse> callback);
 }
