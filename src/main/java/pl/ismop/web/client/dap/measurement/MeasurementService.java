@@ -14,6 +14,6 @@ import pl.ismop.web.client.dap.DapDispatcher;
 public interface MeasurementService  extends RestService {
 	@GET
 	@Path("measurements?timeline_id={timelineId}&time_from={timeFrom}&time_to={timeTo}")
-	void getMeasurements(@PathParam("timelineId") String timelineId, @PathParam("timeFrom") String until, @PathParam("timeTo") String timeTo,
+	void getMeasurements(@PathParam("timelineId") String timelineId, @PathParam("timeFrom") String timeFrom, @PathParam("timeTo") String timeTo,
 			MethodCallback<MeasurementsResponse> callback);
 }

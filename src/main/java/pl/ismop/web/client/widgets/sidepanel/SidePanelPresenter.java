@@ -1,7 +1,5 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
-import static java.util.Arrays.asList;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +34,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 	private SectionPresenter sectionPresenter;
 	private Map<String, Section> sections;
 	private Map<String, Profile> profiles;
+	private Map<String, Device> devices;
 	private PlotPresenter plotPresenter;
 
 	@Inject
@@ -43,6 +42,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		this.dapController = dapController;
 		sections = new HashMap<>();
 		profiles = new HashMap<>();
+		devices = new HashMap<>();
 	}
 	
 	public void onStart() {
@@ -88,36 +88,49 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 
 	@Override
 	public void onProfileChanged(String profileId) {
-		view.showDevicePanel(true);
-		view.setDeviceBusyState(true);
-		dapController.getDevicesRecursively(profileId, new DevicesCallback() {
-			@Override
-			public void onError(int code, String message) {
-				view.setDeviceBusyState(false);
-				Window.alert(message);
-			}
-			
-			@Override
-			public void processDevices(List<Device> devices) {
-				view.setDeviceBusyState(false);
+		if(profileId.isEmpty()) {
+			view.showDevicePanel(false);
+			view.setDeviceBusyState(false);
+			view.showPlotContainer(false);
+			view.showDeviceList(false);
+		} else {
+			view.showDevicePanel(true);
+			view.setDeviceBusyState(true);
+			dapController.getDevicesRecursively(profileId, new DevicesCallback() {
+				@Override
+				public void onError(int code, String message) {
+					view.setDeviceBusyState(false);
+					Window.alert(message);
+				}
 				
-				if(devices.size() > 0) {
-					view.showDeviceList(true);
-					view.addDeviceValue(null, view.getPickDeviceLabel());
+				@Override
+				public void processDevices(List<Device> devices) {
+					SidePanelPresenter.this.devices.clear();
 					
 					for(Device device : devices) {
-						view.addDeviceValue(device.getId(), device.getCustomId());
+						SidePanelPresenter.this.devices.put(device.getId(), device);
 					}
-				} else {
-					view.showNoDevicesLabel(true);
+					
+					view.setDeviceBusyState(false);
+					
+					if(devices.size() > 0) {
+						view.showDeviceList(true);
+						view.clearDeviceValues();
+						
+						for(Device device : devices) {
+							view.addDeviceValue(device.getId(), device.getCustomId());
+						}
+					} else {
+						view.showNoDevicesLabel(true);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	@Override
-	public void onDeviceChanged(String deviceId) {
-		if(deviceId == null) {
+	public void onDeviceChanged(List<String> deviceIds) {
+		if(deviceIds.size() == 0) {
 			view.showPlotContainer(false);
 		} else {
 			view.showPlotContainer(true);
@@ -127,7 +140,13 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 				view.setPlotView(plotPresenter.getView());
 			}
 			
-			plotPresenter.drawMeasurements(asList(deviceId));
+			Map<String, Device> drawnDevices = new HashMap<>();
+			
+			for(String deviceId : deviceIds) {
+				drawnDevices.put(deviceId, devices.get(deviceId));
+			}
+			
+			plotPresenter.drawMeasurements(drawnDevices);
 		}
 	}
 
@@ -161,7 +180,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 				
 				if(sections.size() > 0) {
 					view.showSectionList(true);
-					view.addSectionValue(null, view.getPickSectionLabel());
+					view.addSectionValue("", view.getPickSectionLabel());
 					
 					for(Section section : sections) {
 						view.addSectionValue(section.getId(), section.getId());
@@ -196,6 +215,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			profiles.clear();
 			view.clearProfileValues();
 			view.showProfilePanel(false);
+			view.showDevicePanel(false);
 			eventBus.zoomToLevee(view.getSelectedLeveeId());
 		}
 	}
@@ -217,6 +237,10 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		view.clearProfileValues();
 		view.showProfilePanel(true);
 		view.setProfileBusyState(true);
+		view.showDevicePanel(false);
+		view.showNoDevicesLabel(false);
+		view.showPlotContainer(false);
+		view.showProfileList(false);
 		dapController.getProfiles(sectionId, new ProfilesCallback() {
 			@Override
 			public void onError(int code, String message) {
@@ -229,7 +253,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 				
 				if(profiles.size() > 0) {
 					view.showProfileList(true);
-					view.addProfileValue(null, view.getPickProfileLabel());
+					view.addProfileValue("", view.getPickProfileLabel());
 					
 					for(Profile profile : profiles) {
 						view.addProfileValue(profile.getId(), profile.getId());

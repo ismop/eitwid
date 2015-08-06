@@ -1,6 +1,8 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
 import org.gwtbootstrap3.client.ui.ListBox;
+import org.gwtbootstrap3.extras.select.client.ui.Option;
+import org.gwtbootstrap3.extras.select.client.ui.Select;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -26,11 +28,14 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	SidePanelMessages messages;
 	
 	@UiField
-	ListBox levees, sections, profiles, sensors;
+	ListBox levees, sections, profiles;
+	
+	@UiField
+	Select sensors;
 
 	@UiField
 	FlowPanel leveeBusyPanel, leveePanel, sectionPanel, sectionBusyPanel, sectionDetails, profilePanel, profileBusyPanel, sensorPanel, sensorBusyPanel,
-			plotContainer;
+			plotContainer, sensorListPanel;
 	
 	@UiField
 	Label noLeveesLabel, noSectionsLabel, noProfilesLabel, noSensorsLabel;
@@ -51,7 +56,7 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	
 	@UiHandler("sensors")
 	void sensorPicked(ChangeEvent event) {
-		getPresenter().onDeviceChanged(sensors.getSelectedValue());
+		getPresenter().onDeviceChanged(sensors.getAllSelectedValues());
 	}
 
 	@Override
@@ -196,13 +201,8 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	}
 
 	@Override
-	public String getPickDeviceLabel() {
-		return messages.pickSensorLabel();
-	}
-
-	@Override
 	public void showDeviceList(boolean show) {
-		sensors.setVisible(show);
+		sensorListPanel.setVisible(show);
 	}
 
 	@Override
@@ -212,7 +212,11 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 
 	@Override
 	public void addDeviceValue(String sensorId, String sensorName) {
-		sensors.addItem(sensorName, sensorId);
+		Option option = new Option();
+		option.setValue(sensorId);
+		option.setText(sensorName);
+		sensors.add(option);
+		sensors.refresh();
 	}
 
 	@Override
@@ -223,5 +227,10 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	@Override
 	public void setPlotView(IsWidget plot) {
 		plotContainer.add(plot);
+	}
+
+	@Override
+	public void clearDeviceValues() {
+		sensors.clear();
 	}
 }

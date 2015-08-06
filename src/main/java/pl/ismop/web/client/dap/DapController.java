@@ -115,7 +115,7 @@ public class DapController {
 	}
 	
 	public interface ParametersCallback extends ErrorCallback {
-		void processParamters(List<Parameter> parameters);
+		void processParameters(List<Parameter> parameters);
 	}
 	
 	public interface ContextsCallback extends ErrorCallback {
@@ -206,7 +206,7 @@ public class DapController {
 
 	public void getMeasurements(String timelineId, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date(new Date().getTime() - 2678400000L));//fetching one month old data
+		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
 		measurementService.getMeasurements(timelineId, from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -352,7 +352,21 @@ public class DapController {
 
 			@Override
 			public void onSuccess(Method method, ParametersResponse response) {
-				callback.processParamters(response.getParameters());
+				callback.processParameters(response.getParameters());
+			}
+		});
+	}
+
+	public void getParameters(List<String> deviceIds, final ParametersCallback callback) {
+		parameterService.getParameters(merge(deviceIds, ","), new MethodCallback<ParametersResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, ParametersResponse response) {
+				callback.processParameters(response.getParameters());
 			}
 		});
 	}
@@ -383,6 +397,40 @@ public class DapController {
 				callback.processTimelines(response.getTimelines());
 			}
 		});
+	}
+
+	public void getTimelineForParameterIds(String contextId, ArrayList<String> parameterIds, final TimelineCallback callback) {
+		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, TimelinesResponse response) {
+				callback.processTimelines(response.getTimelines());
+			}
+		});
+	}
+
+	public void getMeasurementsForIds(ArrayList<String> measurementIds, final MeasurementsCallback callback) {
+		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
+		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
+		measurementService.getMeasurements(merge(measurementIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, MeasurementsResponse response) {
+				callback.processMeasurements(response.getMeasurements());
+			}
+		});
+	}
+
+	private Date monthEarlier() {
+		return new Date(new Date().getTime() - 9035200000L);
 	}
 
 	private void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,

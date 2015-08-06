@@ -1,8 +1,8 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
-import com.google.gwt.user.client.ui.IsWidget;
+import java.util.List;
 
-import pl.ismop.web.client.widgets.plot.IPlotView;
+import com.google.gwt.user.client.ui.IsWidget;
 
 public interface ISidePanelView extends IsWidget {
 	interface ISidePanelPresenter {
@@ -10,7 +10,7 @@ public interface ISidePanelView extends IsWidget {
 
 		void onProfileChanged(String profileId);
 
-		void onDeviceChanged(String deviceId);
+		void onDeviceChanged(List<String> deviceIds);
 	}
 
 	void addLeveeValue(String leveeId, String leveeName);
@@ -63,8 +63,6 @@ public interface ISidePanelView extends IsWidget {
 
 	void setDeviceBusyState(boolean busy);
 
-	String getPickDeviceLabel();
-
 	void showDeviceList(boolean show);
 
 	void showNoDevicesLabel(boolean show);
@@ -74,4 +72,6 @@ public interface ISidePanelView extends IsWidget {
 	void showPlotContainer(boolean show);
 
 	void setPlotView(IsWidget plot);
+
+	void clearDeviceValues();
 }

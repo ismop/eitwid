@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.plot;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -15,8 +17,10 @@ public class PlotView extends Composite implements IPlotView {
 	interface PlotViewUiBinder extends UiBinder<Widget, PlotView> {}
 
 	@UiField PlotMessages messages;
+	
 	@UiField HTML messageLabel;
-	@UiField FlowPanel container;
+	
+	@UiField FlowPanel container, plotBusyPanel;
 	
 	public PlotView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -51,5 +55,10 @@ public class PlotView extends Composite implements IPlotView {
 	public void setPlot(IsWidget widget) {
 		container.clear();
 		container.add(widget);
+	}
+
+	@Override
+	public void showBusyPanel(boolean busy) {
+		plotBusyPanel.setVisible(busy);
 	}
 }

@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.plot;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
+
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IPlotView extends IsWidget {
@@ -18,4 +20,6 @@ public interface IPlotView extends IsWidget {
 	void setNoMeasurementsMessage();
 
 	void setPlot(IsWidget widget);
+
+	void showBusyPanel(boolean busy);
 }

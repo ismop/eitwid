@@ -11,7 +11,6 @@
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
 		
 		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false&amp;libraries=drawing'}"></script>
-		<script type="text/javascript" th:src="@{/js/dygraph-combined.js}"></script>
 		
 		<script type="text/javascript" th:utext="'var geojsonUrl = \'' + @{/maps/geojson} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var sensorUrl = \'' + @{/maps/sensors} + '\';'"></script>
@@ -24,6 +23,7 @@
 		<script type="text/javascript" th:src="@{/js/optimer_regular.typeface.js}"></script>
 		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 		<script type="text/javascript" src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+		<script type="text/javascript" th:src="@{/js/highstock.js}"></script>
 	</head>
 	<body>
 		<div id="three" style="width: 800px; height: 800px;"></div>

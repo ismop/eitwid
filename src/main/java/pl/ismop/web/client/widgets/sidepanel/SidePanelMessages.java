@@ -22,6 +22,4 @@ public interface SidePanelMessages extends Messages {
 	String sensorHeader();
 	
 	String noSensors();
-
-	String pickSensorLabel();
 }

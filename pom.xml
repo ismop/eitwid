@@ -139,11 +139,26 @@
 			<version>${gwt.bootstrap.version}</version>
 		</dependency>
 		
+		<!-- GWT Bootstrap select dependency -->
+		<dependency>
+			<groupId>org.gwtbootstrap3</groupId>
+			<artifactId>gwtbootstrap3-extras</artifactId>
+			<version>${gwt.bootstrap.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
 		<!-- GWT parallax 3D dependencies -->
 		<dependency>
 			<groupId>thothbot</groupId>
 			<artifactId>parallax</artifactId>
 			<version>1.6.0</version>
+		</dependency>
+		
+		<!-- GWT highstock dependency -->
+		<dependency>
+			<groupId>org.moxieapps</groupId>
+			<artifactId>gwt-highcharts</artifactId>
+			<version>1.7.0</version>
 		</dependency>
 
 		<!-- REST client dependencies -->
