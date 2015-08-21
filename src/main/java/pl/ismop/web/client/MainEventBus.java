@@ -1,6 +1,14 @@
 package pl.ismop.web.client;
 
 import java.util.List;
+import java.util.Map;
+
+import com.google.gwt.user.client.ui.IsWidget;
+import com.mvp4g.client.annotation.Event;
+import com.mvp4g.client.annotation.Events;
+import com.mvp4g.client.annotation.Start;
+import com.mvp4g.client.event.EventBus;
+import com.mvp4g.client.presenter.NoStartPresenter;
 
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.PolygonShape;
@@ -12,13 +20,6 @@ import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.popup.PopupPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 import pl.ismop.web.client.widgets.sidepanel.SidePanelPresenter;
-
-import com.google.gwt.user.client.ui.IsWidget;
-import com.mvp4g.client.annotation.Event;
-import com.mvp4g.client.annotation.Events;
-import com.mvp4g.client.annotation.Start;
-import com.mvp4g.client.event.EventBus;
-import com.mvp4g.client.presenter.NoStartPresenter;
 
 @Events(startPresenter = NoStartPresenter.class)
 public interface MainEventBus extends EventBus {
@@ -66,5 +67,23 @@ public interface MainEventBus extends EventBus {
 	void zoomToLevee(String selectedLeveeId);
 
 	@Event(handlers = GoogleMapsPresenter.class)
-	void drawProfiles(List<PolygonShape> profileShapes);
+	void drawProfiles(Map<String, PolygonShape> profileShapes);
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void markAndCompleteProfile(String profileId);
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void deselectSection();
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void removeProfiles();
+
+	@Event(handlers = GoogleMapsPresenter.class)
+	void removeProfileAggregates();
+
+	@Event(handlers = SidePanelPresenter.class)
+	void profilePicked(String profileId);
+
+	@Event(handlers = SidePanelPresenter.class)
+	void aggregatePicked(String aggregateId);
 }

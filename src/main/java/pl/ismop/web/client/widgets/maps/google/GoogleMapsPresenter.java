@@ -28,10 +28,11 @@ import com.mvp4g.client.event.BaseEventHandler;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.DapController.DeviceAggregationsCallback;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
-import pl.ismop.web.client.dap.DapController.SensorsCallback;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
 import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.section.Section;
@@ -40,6 +41,7 @@ import pl.ismop.web.client.geojson.GeoJsonFeature;
 import pl.ismop.web.client.geojson.GeoJsonFeatures;
 import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
 import pl.ismop.web.client.geojson.LineGeometry;
+import pl.ismop.web.client.geojson.PointGeometry;
 import pl.ismop.web.client.widgets.maps.MapMessages;
 import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.sideprofile.SideProfilePresenter;
@@ -66,6 +68,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private GeoJsonFeaturesEncDec jsonFeaturesEncDec;
 	private List<String> profileFeatureIds;
 	private Integer featureIdGenerator;
+	private List<String> aggregateFeatureIds;
 
 	@Inject
 	public GoogleMapsPresenter(DapController dapController, MapMessages messages, GeoJsonFeaturesEncDec jsonFeaturesEncDec) {
@@ -79,6 +82,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		sectionColors.put("severe", "#EBCCD1");
 		profileFeatureIds = new ArrayList<>();
 		featureIdGenerator = new Random().nextInt();
+		aggregateFeatureIds = new ArrayList<>();
 	}
 	
 	public void onDrawGoogleMap(String mapElementId, String leveeId) {
@@ -189,7 +193,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		panMap(bounds);
 	}
 	
-	public void onDrawProfiles(List<PolygonShape> profileShapes) {
+	public void onDrawProfiles(Map<String, PolygonShape> profileShapes) {
 		if(profileShapes.size() > 0) {
 			if(profileFeatureIds.size() > 0) {
 				for(String profileFeatureId : profileFeatureIds) {
@@ -201,7 +205,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			
 			List<GeoJsonFeature> features = new ArrayList<>();
 			
-			for(PolygonShape shape : profileShapes) {
+			for(String profileId : profileShapes.keySet()) {
+				PolygonShape shape = profileShapes.get(profileId);
 				LineGeometry lineGeometry = new LineGeometry();
 				lineGeometry.setCoordinates(shape.getCoordinates());
 				
@@ -209,7 +214,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				feature.setGeometry(lineGeometry);
 				feature.setId(String.valueOf(featureIdGenerator++));
 				feature.setProperties(new HashMap<String, String>());
-				feature.getProperties().put("id", feature.getId());
+				feature.getProperties().put("id", profileId);
 				feature.getProperties().put("name", feature.getId());
 				feature.getProperties().put("type", "profile");
 				profileFeatureIds.add(feature.getId());
@@ -218,6 +223,68 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			
 			String jsonValue = jsonFeaturesEncDec.encode(new GeoJsonFeatures(features)).toString();
 			addFeatures(jsonValue);
+		}
+	}
+	
+	public void onMarkAndCompleteProfile(String profileId) {
+		dapController.getDeviceAggregations(profileId, new DeviceAggregationsCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert("Error: " + message);
+			}
+			
+			@Override
+			public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
+				if(deviceAggreagations.size() > 0) {
+					List<GeoJsonFeature> features = new ArrayList<>();
+					
+					for(DeviceAggregation deviceAggregation : deviceAggreagations) {
+						
+						PointGeometry pointGeometry = new PointGeometry();
+						pointGeometry.setCoordinates(deviceAggregation.getPlacement().getCoordinates());
+						
+						GeoJsonFeature feature = new GeoJsonFeature();
+						feature.setGeometry(pointGeometry);
+						feature.setId(String.valueOf(featureIdGenerator++));
+						feature.setProperties(new HashMap<String, String>());
+						feature.getProperties().put("id", deviceAggregation.getId());
+						feature.getProperties().put("name", feature.getId());
+						feature.getProperties().put("type", "aggregate");
+						aggregateFeatureIds.add(feature.getId());
+						features.add(feature);
+					}
+					
+					String jsonValue = jsonFeaturesEncDec.encode(new GeoJsonFeatures(features)).toString();
+					addFeatures(jsonValue);
+				}
+			}
+		});
+	}
+	
+	public void onDeselectSection() {
+		if(selectedSectionId != null) {
+			selectSection(selectedSectionId, false);
+			selectedSectionId = null;
+		}
+	}
+	
+	public void onRemoveProfiles() {
+		if(profileFeatureIds.size() > 0) {
+			for(String profileFeatureId : profileFeatureIds) {
+				removeProfileFeature(profileFeatureId);
+			}
+			
+			profileFeatureIds.clear();
+		}
+	}
+	
+	public void onRemoveProfileAggregates() {
+		if(aggregateFeatureIds.size() > 0) {
+			for(String aggregateFeatureId : aggregateFeatureIds) {
+				removeAggregateFeature(aggregateFeatureId);
+			}
+			
+			aggregateFeatureIds.clear();
 		}
 	}
 
@@ -259,27 +326,10 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		} else if(getSensorId(featureId) != null) {
 			showSensorDetails(getSensorId(featureId));
 		} else if(getProfileId(featureId) != null) {
-			showProfileDetails(getProfileId(featureId));
+			eventBus.profilePicked(getProfileId(featureId));
+		} else if(getAggregateId(featureId) != null) {
+			eventBus.aggregatePicked(getAggregateId(featureId));
 		}
-	}
-
-	private void showProfileDetails(final String sectionId) {
-		dapController.getSensors(sectionId, new SensorsCallback() {
-			@Override
-			public void onError(int code, String message) {
-				Window.alert("Error: " + message);
-			}
-			
-			@Override
-			public void processSensors(List<Sensor> sensors) {
-				if(presenter == null) {
-					presenter = eventBus.addHandler(SideProfilePresenter.class);
-				}
-				
-				eventBus.setTitleAndShow(messages.profileTitle(), presenter.getView(), true);
-				presenter.setProfileNameAndSensors(sectionId, sensors);
-			}
-		});
 	}
 
 	private void showSensorDetails(final String sensorId) {
@@ -452,6 +502,14 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		return "white";
 	}
 	
+	private String getFeatureIcon(String featureId) {
+		if(getFeatureType(featureId).equals("aggregate")) {
+			return "/icons/aggregate.png";
+		} else {
+			return "/icons/sensor.png";
+		}
+	}
+	
 	private String getFeatureStrokeColor(String featureId) {
 		switch(getFeatureType(featureId)) {
 			case "levee":
@@ -611,7 +669,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				strokeOpacity: 1.0,
 				fillColor: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureColor(Ljava/lang/String;)(feature.getId()),
 				strokeWeight: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureStrokeWeight(Ljava/lang/String;)(feature.getId()),
-				icon: $wnd.iconBaseUrl + '/sensor.png'
+				icon: thisObject.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::getFeatureIcon(Ljava/lang/String;)(feature.getId())
 			};
 		});
 		mapData.addListener('mouseover', function(event) {
@@ -679,7 +737,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	
 	private native String getProfileId(String featureId) /*-{
 		if(featureId) {
-			var profileData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::sectionMapData;
+			var profileData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData;
 			var feature = profileData.getFeatureById(featureId);
 			
 			if(feature && feature.getProperty('type') == 'profile') {
@@ -752,5 +810,23 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private native void removeProfileFeature(String profileFeatureId) /*-{
 		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.remove(
 				this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.getFeatureById(profileFeatureId));
+	}-*/;
+	
+	private native void removeAggregateFeature(String aggregateFeatureId) /*-{
+		this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.remove(
+				this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData.getFeatureById(aggregateFeatureId));
+	}-*/;
+	
+	private native String getAggregateId(String featureId) /*-{
+		if(featureId) {
+			var aggregateData = this.@pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter::profileMapData;
+			var feature = aggregateData.getFeatureById(featureId);
+			
+			if(feature && feature.getProperty('type') == 'aggregate') {
+				return feature.getProperty('id');
+			}
+		}
+	
+		return null;
 	}-*/;
 }

@@ -74,4 +74,8 @@ public interface ISidePanelView extends IsWidget {
 	void setPlotView(IsWidget plot);
 
 	void clearDeviceValues();
+
+	void setSelectedProfile(String profileId);
+
+	void setSelectedDevices(List<String> deviceIds);
 }

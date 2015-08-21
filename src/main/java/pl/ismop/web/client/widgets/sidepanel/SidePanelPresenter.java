@@ -93,6 +93,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			view.setDeviceBusyState(false);
 			view.showPlotContainer(false);
 			view.showDeviceList(false);
+			eventBus.removeProfileAggregates();
 		} else {
 			view.showDevicePanel(true);
 			view.setDeviceBusyState(true);
@@ -125,6 +126,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 					}
 				}
 			});
+			eventBus.markAndCompleteProfile(profileId);
 		}
 	}
 
@@ -148,6 +150,32 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			
 			plotPresenter.drawMeasurements(drawnDevices);
 		}
+	}
+	
+	public void onProfilePicked(String profileId) {
+		view.setSelectedProfile(profileId);
+		onProfileChanged(profileId);
+	}
+	
+	public void onAggregatePicked(String aggregateId) {
+		dapController.getDevicesRecursivelyForAggregate(aggregateId, new DevicesCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert(message);
+			}
+			
+			@Override
+			public void processDevices(List<Device> devices) {
+				List<String> deviceIds = new ArrayList<>();
+				
+				for(Device device : devices) {
+					deviceIds.add(device.getId());
+				}
+				
+				view.setSelectedDevices(deviceIds);
+				onDeviceChanged(deviceIds);
+			}
+		});
 	}
 
 	private void loadLeveeStatus(Levee levee) {
@@ -199,6 +227,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			view.removeSectionView();
 			eventBus.removeHandler(sectionPresenter);
 			sectionPresenter = null;
+			eventBus.removeProfileAggregates();
 		}
 		
 		if(section != null) {
@@ -216,16 +245,19 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			view.clearProfileValues();
 			view.showProfilePanel(false);
 			view.showDevicePanel(false);
+			eventBus.deselectSection();
+			eventBus.removeProfileAggregates();
+			eventBus.removeProfiles();
 			eventBus.zoomToLevee(view.getSelectedLeveeId());
 		}
 	}
 
 	private void drawProfileLayer(List<Profile> profiles) {
-		List<PolygonShape> profileShapes = new ArrayList<>();
+		Map<String, PolygonShape> profileShapes = new HashMap<>();
 		
 		for(Profile profile : profiles) {
 			if(profile.getShape() != null) {
-				profileShapes.add(profile.getShape());
+				profileShapes.put(profile.getId(), profile.getShape());
 			}
 		}
 		

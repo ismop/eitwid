@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
+import java.util.List;
+
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
 import org.gwtbootstrap3.extras.select.client.ui.Select;
@@ -232,5 +234,21 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	@Override
 	public void clearDeviceValues() {
 		sensors.clear();
+	}
+
+	@Override
+	public void setSelectedProfile(String profileId) {
+		for(int i = 0; i < profiles.getItemCount(); i++) {
+			if(profileId.equals(profiles.getValue(i))) {
+				profiles.setSelectedIndex(i);
+				
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void setSelectedDevices(List<String> deviceIds) {
+		sensors.setValues(deviceIds.toArray(new String[0]));
 	}
 }

@@ -125,6 +125,10 @@ public class DapController {
 	public interface TimelineCallback extends ErrorCallback {
 		void processTimelines(List<Timeline> timelines);
 	}
+	
+	public interface DeviceAggregationsCallback extends ErrorCallback {
+		void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations);
+	}
 
 	@Inject
 	public DapController(LeveeService leveeService, SensorService sensorService, MeasurementService measurementService, SectionService sectionService,
@@ -425,6 +429,34 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, MeasurementsResponse response) {
 				callback.processMeasurements(response.getMeasurements());
+			}
+		});
+	}
+
+	public void getDeviceAggregations(String profileId, final DeviceAggregationsCallback callback) {
+		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				callback.processDeviceAggregations(response.getDeviceAggregations());
+			}
+		});
+	}
+	
+	public void getDevicesRecursivelyForAggregate(String aggregateId, final DevicesCallback callback) {
+		deviceAggregationService.getDeviceAggregationsForIds(aggregateId, new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				collectDevices(response.getDeviceAggregations(), new ArrayList<Device>(), new MutableInteger(0), callback);
 			}
 		});
 	}
