@@ -9,6 +9,8 @@ public interface IRootPanelView extends IsWidget {
 		void onShowExperiments();
 		
 		void onShowExperiment();
+
+		void onShowWeatherStation();
 	}
 
 	void setExperimentsLabel(int numberOfExperiments);

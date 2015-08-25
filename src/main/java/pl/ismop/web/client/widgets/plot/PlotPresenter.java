@@ -26,7 +26,7 @@ import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.ContextsCallback;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.ParametersCallback;
-import pl.ismop.web.client.dap.DapController.TimelineCallback;
+import pl.ismop.web.client.dap.DapController.TimelinesCallback;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.measurement.Measurement;
@@ -75,7 +75,7 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 							PlotPresenter.this.parameters.put(parameter.getId(), parameter);
 						}
 						
-						dapController.getContext("tests", new ContextsCallback() {
+						dapController.getContext("measurements", new ContextsCallback() {
 							@Override
 							public void onError(int code, String message) {
 								view.showBusyPanel(false);
@@ -87,8 +87,8 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 								if(contexts.size() > 0) {
 									//there should be only one context
 									Context context = contexts.get(0);
-									dapController.getTimelineForParameterIds(context.getId(), new ArrayList<String>(PlotPresenter.this.parameters.keySet()),
-											new TimelineCallback() {
+									dapController.getTimelinesForParameterIds(context.getId(), new ArrayList<String>(PlotPresenter.this.parameters.keySet()),
+											new TimelinesCallback() {
 												@Override
 												public void onError(int code, String message) {
 													view.showBusyPanel(false);
@@ -102,7 +102,7 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 															PlotPresenter.this.timelines.put(timeline.getId(), timeline);
 														}
 														
-														dapController.getMeasurementsForIds(new ArrayList<String>(PlotPresenter.this.timelines.keySet()),
+														dapController.getMeasurementsForTimelineIds(new ArrayList<String>(PlotPresenter.this.timelines.keySet()),
 																new MeasurementsCallback() {
 															@Override
 															public void onError(int code, String message) {
@@ -126,8 +126,7 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 																	
 																	List<Readings> readings = createReadings(devices, PlotPresenter.this.parameters,
 																			PlotPresenter.this.timelines, measurements);
-																	chart = new StockChart().setType(Series.Type.LINE).
-																			setChartTitleText("Hello");
+																	chart = new StockChart().setType(Series.Type.LINE);
 																	
 																	int axisIndex = 0;
 																	

@@ -20,6 +20,7 @@ import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.popup.PopupPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 import pl.ismop.web.client.widgets.sidepanel.SidePanelPresenter;
+import pl.ismop.web.client.widgets.weather.WeatherStationPresenter;
 
 @Events(startPresenter = NoStartPresenter.class)
 public interface MainEventBus extends EventBus {
@@ -86,4 +87,7 @@ public interface MainEventBus extends EventBus {
 
 	@Event(handlers = SidePanelPresenter.class)
 	void aggregatePicked(String aggregateId);
+
+	@Event(handlers = WeatherStationPresenter.class)
+	void showWeatherStation();
 }

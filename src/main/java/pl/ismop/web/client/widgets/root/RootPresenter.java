@@ -87,4 +87,9 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	public void onShowExperiment() {
 		eventBus.showExperiment();
 	}
+
+	@Override
+	public void onShowWeatherStation() {
+		eventBus.showWeatherStation();
+	}
 }

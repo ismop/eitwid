@@ -122,7 +122,7 @@ public class DapController {
 		void processContexts(List<Context> contexts);
 	}
 	
-	public interface TimelineCallback extends ErrorCallback {
+	public interface TimelinesCallback extends ErrorCallback {
 		void processTimelines(List<Timeline> timelines);
 	}
 	
@@ -389,7 +389,7 @@ public class DapController {
 		});
 	}
 
-	public void getTimeline(String contextId, String paramterId, final TimelineCallback callback) {
+	public void getTimeline(String contextId, String paramterId, final TimelinesCallback callback) {
 		timelineService.getTimelines(contextId, paramterId, new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -403,7 +403,7 @@ public class DapController {
 		});
 	}
 
-	public void getTimelineForParameterIds(String contextId, ArrayList<String> parameterIds, final TimelineCallback callback) {
+	public void getTimelinesForParameterIds(String contextId, List<String> parameterIds, final TimelinesCallback callback) {
 		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -417,7 +417,7 @@ public class DapController {
 		});
 	}
 
-	public void getMeasurementsForIds(ArrayList<String> measurementIds, final MeasurementsCallback callback) {
+	public void getMeasurementsForTimelineIds(List<String> measurementIds, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
 		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
 		measurementService.getMeasurements(merge(measurementIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
@@ -459,6 +459,33 @@ public class DapController {
 				collectDevices(response.getDeviceAggregations(), new ArrayList<Device>(), new MutableInteger(0), callback);
 			}
 		});
+	}
+
+	public void getDeviceAggregationForType(String type, final DeviceAggregationsCallback callback) {
+		deviceAggregationService.getDeviceAggregationsForType(type, new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				callback.processDeviceAggregations(response.getDeviceAggregations());
+			}
+		});
+	}
+
+	public void getDevicesForType(String deviceType, final DevicesCallback callback) {
+		deviceService.getDevicesForType(deviceType, new MethodCallback<DevicesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(0, exception.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Method method, DevicesResponse response) {
+				callback.processDevices(response.getDevices());
+			}});
 	}
 
 	private Date monthEarlier() {

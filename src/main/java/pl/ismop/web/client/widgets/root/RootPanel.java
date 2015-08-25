@@ -30,7 +30,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@UiField HTMLPanel sidePanel;
 	@UiField FormPanel logoutForm;
 	@UiField Hidden csrf;
-	@UiField AnchorListItem sensors;
 	@UiField AnchorListItem experiments;
 	@UiField RootPanelMessages messages;
 
@@ -52,12 +51,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 		Window.Location.assign("/login?logout");
 	}
 	
-	@UiHandler("sensors")
-	void showSensors(ClickEvent event) {
-		getPresenter().onShowSensors(!sensors.isActive());
-		sensors.setActive(!sensors.isActive());
-	}
-	
 	@UiHandler("experiments")
 	void showExperiments(ClickEvent event) {
 		getPresenter().onShowExperiments();
@@ -66,6 +59,11 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@UiHandler("experiment")
 	void showExperiment(ClickEvent event) {
 		getPresenter().onShowExperiment();
+	}
+	
+	@UiHandler("weather")
+	void showWeatherStation(ClickEvent event) {
+		getPresenter().onShowWeatherStation();
 	}
 
 	@Override
