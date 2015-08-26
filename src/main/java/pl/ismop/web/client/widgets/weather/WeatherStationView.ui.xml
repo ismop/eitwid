@@ -9,7 +9,7 @@
 		}
 	</ui:style>
 	<g:HTMLPanel>
-		<b:Modal ui:field="modal" title="{messages.weatherStation}" fade="true" width="900px">
+		<b:Modal ui:field="modal" title="{messages.weatherStation}" fade="true" width="1200px">
 			<b:ModalBody>
 				<g:FlowPanel ui:field="progress" visible="false" addStyleNames="{style.progress}">
 					<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.loadingLabel}"/>

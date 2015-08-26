@@ -22,6 +22,9 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.internal.ExperimentPlanBean;
+import pl.ismop.web.client.internal.InternalExperimentController;
+import pl.ismop.web.client.internal.InternalExperimentController.ExperimentPlansCallback;
 import pl.ismop.web.client.widgets.plot.PlotPresenter;
 import pl.ismop.web.client.widgets.section.SectionPresenter;
 import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
@@ -30,6 +33,7 @@ import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
 @Presenter(view = SidePanelView.class)
 public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventBus> implements ISidePanelPresenter {
 	private DapController dapController;
+	private InternalExperimentController internalExperimentController;
 	private LeveeSummaryPresenter leveeSummaryPresenter;
 	private SectionPresenter sectionPresenter;
 	private Map<String, Section> sections;
@@ -38,8 +42,9 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 	private PlotPresenter plotPresenter;
 
 	@Inject
-	public SidePanelPresenter(DapController dapController) {
+	public SidePanelPresenter(DapController dapController, InternalExperimentController internalExperimentController) {
 		this.dapController = dapController;
+		this.internalExperimentController = internalExperimentController;
 		sections = new HashMap<>();
 		profiles = new HashMap<>();
 		devices = new HashMap<>();
@@ -74,6 +79,17 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 				}
 			}
 		});
+//		internalExperimentController.getExperimentPlans(new ExperimentPlansCallback() {
+//			@Override
+//			public void onError(int code, String message) {
+//				Window.alert(message);
+//			}
+//			
+//			@Override
+//			public void processExperimentPlans(List<ExperimentPlanBean> experimentPlans) {
+//				Window.alert(experimentPlans.toString());
+//			}
+//		});
 	}
 	
 	public void onSectionSelectedOnMap(String sectionId) {
@@ -176,6 +192,11 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 				onDeviceChanged(deviceIds);
 			}
 		});
+	}
+	
+	@Override
+	public void onAddExperiment() {
+//		eventBus.showNewExperimentDialog();
 	}
 
 	private void loadLeveeStatus(Levee levee) {

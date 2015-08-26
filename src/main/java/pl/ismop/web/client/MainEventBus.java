@@ -90,4 +90,7 @@ public interface MainEventBus extends EventBus {
 
 	@Event(handlers = WeatherStationPresenter.class)
 	void showWeatherStation();
+
+//	@Event(handlers = )
+//	void showNewExperimentDialog();
 }

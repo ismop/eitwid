@@ -494,33 +494,10 @@ public class DapController {
 
 	private void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
 			final DevicesCallback devicesCallback) {
-		for(DeviceAggregation deviceAggregation : deviceAggregations) {
-			requestCounter.increment();
-			deviceService.getDevices(deviceAggregation.getId(), new MethodCallback<DevicesResponse>() {
-				@Override
-				public void onFailure(Method method, Throwable exception) {
-					requestCounter.decrement();
-					
-					if(requestCounter.get() == 0) {
-						devicesCallback.onError(0, exception.getMessage());
-					}
-				}
-
-				@Override
-				public void onSuccess(Method method, DevicesResponse response) {
-					result.addAll(response.getDevices());
-					requestCounter.decrement();
-					
-					if(requestCounter.get() == 0) {
-						devicesCallback.processDevices(result);
-					}
-				}
-			});
-			
-			if(deviceAggregation.getChildernIds() != null && deviceAggregation.getChildernIds().size() > 0) {
+		if(deviceAggregations.size() > 0) {
+			for(DeviceAggregation deviceAggregation : deviceAggregations) {
 				requestCounter.increment();
-				deviceAggregationService.getDeviceAggregationsForIds(merge(deviceAggregation.getChildernIds(), ","),
-						new MethodCallback<DeviceAggregationsResponse>() {
+				deviceService.getDevices(deviceAggregation.getId(), new MethodCallback<DevicesResponse>() {
 					@Override
 					public void onFailure(Method method, Throwable exception) {
 						requestCounter.decrement();
@@ -529,18 +506,45 @@ public class DapController {
 							devicesCallback.onError(0, exception.getMessage());
 						}
 					}
-
+	
 					@Override
-					public void onSuccess(Method method, DeviceAggregationsResponse response) {
+					public void onSuccess(Method method, DevicesResponse response) {
+						result.addAll(response.getDevices());
 						requestCounter.decrement();
-						collectDevices(response.getDeviceAggregations(), result, requestCounter, devicesCallback);
 						
 						if(requestCounter.get() == 0) {
 							devicesCallback.processDevices(result);
 						}
 					}
 				});
+				
+				if(deviceAggregation.getChildernIds() != null && deviceAggregation.getChildernIds().size() > 0) {
+					requestCounter.increment();
+					deviceAggregationService.getDeviceAggregationsForIds(merge(deviceAggregation.getChildernIds(), ","),
+							new MethodCallback<DeviceAggregationsResponse>() {
+						@Override
+						public void onFailure(Method method, Throwable exception) {
+							requestCounter.decrement();
+							
+							if(requestCounter.get() == 0) {
+								devicesCallback.onError(0, exception.getMessage());
+							}
+						}
+	
+						@Override
+						public void onSuccess(Method method, DeviceAggregationsResponse response) {
+							requestCounter.decrement();
+							collectDevices(response.getDeviceAggregations(), result, requestCounter, devicesCallback);
+							
+							if(requestCounter.get() == 0) {
+								devicesCallback.processDevices(result);
+							}
+						}
+					});
+				}
 			}
+		} else {
+			devicesCallback.processDevices(result);
 		}
 	}
 

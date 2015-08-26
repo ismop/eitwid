@@ -5,8 +5,8 @@ import org.fusesource.restygwt.client.Json;
 public class Timeline {
 	private String id;
 	
-	@Json(name = "paramter_id")
-	private String paramterId;
+	@Json(name = "parameter_id")
+	private String parameterId;
 	
 	@Json(name = "context_id")
 	private String contextId;
@@ -19,12 +19,12 @@ public class Timeline {
 		this.id = id;
 	}
 
-	public String getParamterId() {
-		return paramterId;
+	public String getParameterId() {
+		return parameterId;
 	}
 
-	public void setParamterId(String paramterId) {
-		this.paramterId = paramterId;
+	public void setParameterId(String parameterId) {
+		this.parameterId = parameterId;
 	}
 
 	public String getContextId() {

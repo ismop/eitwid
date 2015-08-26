@@ -143,6 +143,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 									
 									for(Timeline timeline : timelines) {
 										timelineIds.add(timeline.getId());
+										timelineMap.put(timeline.getId(), timeline);
 									}
 									
 									dapController.getMeasurementsForTimelineIds(timelineIds, new MeasurementsCallback() {
@@ -182,8 +183,6 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 													
 													axisIndex++;
 												}
-											} else {
-												view.showNoWeatherStationData(true);
 											}
 											
 										}
@@ -208,13 +207,14 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			Parameter parameter = parameterMap.get(parameterId);
 			Readings readings = new Readings();
 			result.add(readings);
+			readings.setMeasurements(new HashMap<String, Number[][]>());
 			readings.setLabel(parameter.getMeasurementTypeName());
 			readings.setUnit(parameter.getMeasurementTypeUnit());
 			
 			Timeline timeline = null;
 			
 			for(String timelineId : timelineMap.keySet()) {
-				if(timelineMap.get(timelineId).getParamterId().equals(parameter.getId())) {
+				if(timelineMap.get(timelineId).getParameterId().equals(parameter.getId())) {
 					timeline = timelineMap.get(timelineId);
 					
 					break;
@@ -234,7 +234,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 				}
 			}
 			
-			
+			readings.getMeasurements().put(parameter.getParamterName(), measurementValues);
 		}
 		
 		return result;

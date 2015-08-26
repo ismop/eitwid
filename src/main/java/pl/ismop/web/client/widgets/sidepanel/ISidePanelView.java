@@ -11,6 +11,8 @@ public interface ISidePanelView extends IsWidget {
 		void onProfileChanged(String profileId);
 
 		void onDeviceChanged(List<String> deviceIds);
+
+		void onAddExperiment();
 	}
 
 	void addLeveeValue(String leveeId, String leveeName);

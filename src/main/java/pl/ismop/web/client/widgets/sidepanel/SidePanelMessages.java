@@ -22,4 +22,10 @@ public interface SidePanelMessages extends Messages {
 	String sensorHeader();
 	
 	String noSensors();
+	
+	String experimentPlansHeader();
+	
+	String addNewExperiment();
+	
+	String noExperimentPlans();
 }
