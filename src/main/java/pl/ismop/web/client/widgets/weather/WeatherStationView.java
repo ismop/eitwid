@@ -67,11 +67,6 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	}
 
 	@Override
-	public void setSecondChart(StockChart secondChart) {
-		secondChartSlot.add(secondChart);
-	}
-
-	@Override
 	public HasVisibility getFirstNoDataMessage() {
 		return noDataMessage1;
 	}

@@ -1,6 +1,5 @@
 package pl.ismop.web.client.widgets.weather;
 
-import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.StockChart;
 
 import com.google.gwt.user.client.ui.HasText;
@@ -23,8 +22,6 @@ public interface IWeatherStationView extends IsWidget {
 	HasText getFirstHeading();
 
 	void setFirstChart(StockChart firstChart);
-
-	void setSecondChart(StockChart secondChart);
 
 	HasVisibility getFirstNoDataMessage();
 

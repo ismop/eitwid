@@ -41,7 +41,6 @@ import pl.ismop.web.client.widgets.weather.IWeatherStationView.IWeatherStationPr
 @Presenter(view = WeatherStationView.class)
 public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, MainEventBus> implements IWeatherStationPresenter {
 	private DapController dapController;
-	private StockChart secondChart;
 	private StockChart firstChart;
 
 	@Inject
@@ -70,7 +69,6 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			public void processDevices(List<Device> devices) {
 				if(devices.size() > 0) {
 					Device firstDevice = devices.get(0);
-					Device secondDevice = devices.size() > 1 ? devices.get(1) : null;
 					
 					if(firstChart != null) {
 						firstChart.removeAllSeries();
@@ -79,23 +77,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					}
 					
 					firstChart = new StockChart().setType(Series.Type.LINE);
-					view.setFirstChart(firstChart);
 					showDataSet(firstDevice, view.getFirstHeading(), firstChart, view.getFirstProgress(), view.getFirstNoDataMessage(),
 							view.getFirstChartVisibility());
-					
-					if(secondDevice != null) {
-						if(secondChart != null) {
-							secondChart.removeAllSeries();
-							secondChart.removeFromParent();
-							secondChart = null;
-						}
-						
-						secondChart = new StockChart().setType(Series.Type.LINE);
-						view.setSecondChart(secondChart);
-						showDataSet(secondDevice, view.getSecondHeading(), secondChart, view.getSecondProgress(), view.getSecondNoDataMessage(),
-								view.getSecondChartVisibility());
-					}
-					
 				} else {
 					view.showProgress1(false);
 				}
@@ -189,6 +172,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 															
 															axisIndex++;
 														}
+														
+														view.setFirstChart(firstChart);
 													} else {
 														progress.setVisible(false);
 														noDataMessage.setVisible(true);

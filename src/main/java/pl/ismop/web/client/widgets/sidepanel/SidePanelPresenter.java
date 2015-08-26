@@ -79,17 +79,16 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 				}
 			}
 		});
-//		internalExperimentController.getExperimentPlans(new ExperimentPlansCallback() {
-//			@Override
-//			public void onError(int code, String message) {
-//				Window.alert(message);
-//			}
-//			
-//			@Override
-//			public void processExperimentPlans(List<ExperimentPlanBean> experimentPlans) {
-//				Window.alert(experimentPlans.toString());
-//			}
-//		});
+		internalExperimentController.getExperimentPlans(new ExperimentPlansCallback() {
+			@Override
+			public void onError(int code, String message) {
+				Window.alert(message);
+			}
+			
+			@Override
+			public void processExperimentPlans(List<ExperimentPlanBean> experimentPlans) {
+			}
+		});
 	}
 	
 	public void onSectionSelectedOnMap(String sectionId) {

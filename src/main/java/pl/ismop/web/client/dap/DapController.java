@@ -489,7 +489,7 @@ public class DapController {
 	}
 
 	private Date monthEarlier() {
-		return new Date(new Date().getTime() - 9035200000L);
+		return new Date(new Date().getTime() - 3600000L);
 	}
 
 	private void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
