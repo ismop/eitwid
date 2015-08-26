@@ -19,6 +19,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasVisibility;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -49,18 +50,19 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	}
 	
 	public void onShowWeatherStation() {
-		view.clearMessage();
-		view.showDataContainer(false);
+		view.getFirstChartVisibility().setVisible(false);
+		view.getSecondChartVisibility().setVisible(false);
 		view.showModal();
 		loadParameters();
 	}
 
 	private void loadParameters() {
-		view.showProgress(true);
+		view.showProgress1(true);
+		view.showProgress2(true);
 		dapController.getDevicesForType("weather_station", new DevicesCallback() {
 			@Override
 			public void onError(int code, String message) {
-				view.showProgress(false);
+				view.showProgress1(false);
 				Window.alert(message);
 			}
 			
@@ -78,7 +80,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					
 					firstChart = new StockChart().setType(Series.Type.LINE);
 					view.setFirstChart(firstChart);
-					showDataSet(firstDevice, view.getFirstHeading(), firstChart);
+					showDataSet(firstDevice, view.getFirstHeading(), firstChart, view.getFirstProgress(), view.getFirstNoDataMessage(),
+							view.getFirstChartVisibility());
 					
 					if(secondDevice != null) {
 						if(secondChart != null) {
@@ -89,112 +92,125 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 						
 						secondChart = new StockChart().setType(Series.Type.LINE);
 						view.setSecondChart(secondChart);
-						showDataSet(secondDevice, view.getSecondHeading(), secondChart);
+						showDataSet(secondDevice, view.getSecondHeading(), secondChart, view.getSecondProgress(), view.getSecondNoDataMessage(),
+								view.getSecondChartVisibility());
 					}
 					
 				} else {
-					view.showProgress(false);
-					view.showNoWeatherStationData(true);
+					view.showProgress1(false);
 				}
 			}
 		});
 	}
 	
-	private void showDataSet(final Device device, final HasText heading, final StockChart chart) {
+	private void showDataSet(final Device device, final HasText heading, final StockChart chart, final HasVisibility progress,
+			final HasVisibility noDataMessage, final HasVisibility chartVisibility) {
 		dapController.getParameters(device.getId(), new ParametersCallback() {
 			@Override
 			public void onError(int code, String message) {
-				view.showProgress(false);
+				view.showProgress1(false);
 				Window.alert(message);
 			}
 			
 			@Override
 			public void processParameters(List<Parameter> parameters) {
-				final List<String> parameterIds = new ArrayList<>();
-				final Map<String, Parameter> parameterMap = new HashMap<>();
-				
-				for(Parameter parameter : parameters) {
-					parameterMap.put(parameter.getId(), parameter);
-					parameterIds.add(parameter.getId());
-				}
-				
-				dapController.getContext("measurements", new ContextsCallback() {
-					@Override
-					public void onError(int code, String message) {
-						view.showProgress(false);
-						Window.alert(message);
+				if(parameters.size() > 0) {
+					final List<String> parameterIds = new ArrayList<>();
+					final Map<String, Parameter> parameterMap = new HashMap<>();
+					
+					for(Parameter parameter : parameters) {
+						parameterMap.put(parameter.getId(), parameter);
+						parameterIds.add(parameter.getId());
 					}
 					
-					@Override
-					public void processContexts(List<Context> contexts) {
-						if(contexts.size() > 0) {
-							Context context = contexts.get(0);
-							dapController.getTimelinesForParameterIds(context.getId(), parameterIds, new TimelinesCallback() {
-								@Override
-								public void onError(int code, String message) {
-									view.showProgress(false);
-									Window.alert(message);
-								}
-								
-								@Override
-								public void processTimelines(List<Timeline> timelines) {
-									List<String> timelineIds = new ArrayList<>();
-									final Map<String, Timeline> timelineMap = new HashMap<>();
-									
-									for(Timeline timeline : timelines) {
-										timelineIds.add(timeline.getId());
-										timelineMap.put(timeline.getId(), timeline);
+					dapController.getContext("measurements", new ContextsCallback() {
+						@Override
+						public void onError(int code, String message) {
+							view.showProgress1(false);
+							Window.alert(message);
+						}
+						
+						@Override
+						public void processContexts(List<Context> contexts) {
+							if(contexts.size() > 0) {
+								Context context = contexts.get(0);
+								dapController.getTimelinesForParameterIds(context.getId(), parameterIds, new TimelinesCallback() {
+									@Override
+									public void onError(int code, String message) {
+										view.showProgress1(false);
+										Window.alert(message);
 									}
 									
-									dapController.getMeasurementsForTimelineIds(timelineIds, new MeasurementsCallback() {
-										@Override
-										public void onError(int code, String message) {
-											view.showProgress(false);
-											Window.alert(message);
-										}
-										
-										@Override
-										public void processMeasurements(List<Measurement> measurements) {
-											view.showProgress(false);
+									@Override
+									public void processTimelines(List<Timeline> timelines) {
+										if(timelines.size() > 0) {
+											List<String> timelineIds = new ArrayList<>();
+											final Map<String, Timeline> timelineMap = new HashMap<>();
 											
-											if(measurements.size() > 0) {
-												view.showDataContainer(true);
-												heading.setText(device.getCustomId());
-												List<Readings> readingsList = sortMeasurements(measurements, parameterMap, timelineMap);
-												
-												int axisIndex = 0;
-												
-												for(final Readings readingsEntry : readingsList) {
-													chart.getYAxis(axisIndex)
-													.setAxisTitle(new AxisTitle().setText(readingsEntry.getLabel()))
-													.setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
-														@Override
-														public String format(AxisLabelsData axisLabelsData) {
-															return axisLabelsData.getValueAsString() + " " + readingsEntry.getUnit();
-														}
-													}));
-													
-													for(String deviceCustomId : readingsEntry.getMeasurements().keySet()) {
-														chart.addSeries(chart.createSeries()
-																.setName(deviceCustomId)
-																.setYAxis(axisIndex)
-																.setPoints(readingsEntry.getMeasurements().get(deviceCustomId)));
-													}
-													
-													axisIndex++;
-												}
+											for(Timeline timeline : timelines) {
+												timelineIds.add(timeline.getId());
+												timelineMap.put(timeline.getId(), timeline);
 											}
 											
+											dapController.getMeasurementsForTimelineIds(timelineIds, new MeasurementsCallback() {
+												@Override
+												public void onError(int code, String message) {
+													view.showProgress1(false);
+													Window.alert(message);
+												}
+												
+												@Override
+												public void processMeasurements(List<Measurement> measurements) {
+													progress.setVisible(false);
+													
+													if(measurements.size() > 0) {
+														chartVisibility.setVisible(true);
+														heading.setText(device.getCustomId());
+														List<Readings> readingsList = sortMeasurements(measurements, parameterMap, timelineMap);
+														
+														int axisIndex = 0;
+														
+														for(final Readings readingsEntry : readingsList) {
+															chart.getYAxis(axisIndex)
+															.setAxisTitle(new AxisTitle().setText(readingsEntry.getLabel()))
+															.setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
+																@Override
+																public String format(AxisLabelsData axisLabelsData) {
+																	return axisLabelsData.getValueAsString() + " " + readingsEntry.getUnit();
+																}
+															}));
+															
+															for(String deviceCustomId : readingsEntry.getMeasurements().keySet()) {
+																chart.addSeries(chart.createSeries()
+																		.setName(deviceCustomId)
+																		.setYAxis(axisIndex)
+																		.setPoints(readingsEntry.getMeasurements().get(deviceCustomId)));
+															}
+															
+															axisIndex++;
+														}
+													} else {
+														progress.setVisible(false);
+														noDataMessage.setVisible(true);
+													}
+												}
+											});
+										} else {
+											progress.setVisible(false);
+											noDataMessage.setVisible(true);
 										}
-									});
-								}
-							});
-						} else {
-							view.showProgress(false);
-							Window.alert("No valid context found");
+									}
+								});
+							} else {
+								progress.setVisible(false);
+								Window.alert("No valid context found");
+							}
 						}
-					}
-				});
+					});
+				} else {
+					progress.setVisible(false);
+					noDataMessage.setVisible(true);
+				}
 			}
 		});
 		heading.setText(device.getCustomId());
@@ -206,7 +222,6 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		for(String parameterId : parameterMap.keySet()) {
 			Parameter parameter = parameterMap.get(parameterId);
 			Readings readings = new Readings();
-			result.add(readings);
 			readings.setMeasurements(new HashMap<String, Number[][]>());
 			readings.setLabel(parameter.getMeasurementTypeName());
 			readings.setUnit(parameter.getMeasurementTypeUnit());
@@ -221,20 +236,25 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 				}
 			}
 			
-			Number[][] measurementValues = new Number[countMeasurements(timeline.getId(), measurements)][2];
-			int index = 0;
+			int measurementCount = countMeasurements(timeline.getId(), measurements);
 			
-			for(Measurement measurement : measurements) {
-				if(measurement.getTimelineId().equals(timeline.getId())) {
-					DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-					Date date = format.parse(measurement.getTimestamp());
-					measurementValues[index][0] = date.getTime();
-					measurementValues[index][1] = measurement.getValue();
-					index++;
+			if(measurementCount > 0) {
+				Number[][] measurementValues = new Number[measurementCount][2];
+				int index = 0;
+				
+				for(Measurement measurement : measurements) {
+					if(measurement.getTimelineId().equals(timeline.getId())) {
+						DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
+						Date date = format.parse(measurement.getTimestamp());
+						measurementValues[index][0] = date.getTime();
+						measurementValues[index][1] = measurement.getValue();
+						index++;
+					}
 				}
+				
+				readings.getMeasurements().put(parameter.getParamterName(), measurementValues);
+				result.add(readings);
 			}
-			
-			readings.getMeasurements().put(parameter.getParamterName(), measurementValues);
 		}
 		
 		return result;

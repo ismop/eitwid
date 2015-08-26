@@ -1,8 +1,10 @@
 package pl.ismop.web.client.widgets.weather;
 
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.StockChart;
 
 import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IWeatherStationView extends IsWidget {
@@ -12,19 +14,27 @@ public interface IWeatherStationView extends IsWidget {
 
 	void showModal();
 
-	void showProgress(boolean show);
-
-	void showNoWeatherStationData(boolean show);
-
-	void clearMessage();
+	void showProgress1(boolean show);
+	
+	void showProgress2(boolean show);
 
 	HasText getSecondHeading();
 
 	HasText getFirstHeading();
 
-	void showDataContainer(boolean show);
-
 	void setFirstChart(StockChart firstChart);
 
 	void setSecondChart(StockChart secondChart);
+
+	HasVisibility getFirstNoDataMessage();
+
+	HasVisibility getFirstProgress();
+	
+	HasVisibility getSecondNoDataMessage();
+
+	HasVisibility getSecondProgress();
+
+	HasVisibility getSecondChartVisibility();
+
+	HasVisibility getFirstChartVisibility();
 }

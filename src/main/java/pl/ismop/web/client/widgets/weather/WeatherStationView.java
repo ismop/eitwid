@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -21,13 +22,15 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	
 	@UiField WeatherStationViewMessages messages;
 	@UiField Modal modal;
-	@UiField FlowPanel message;
-	@UiField FlowPanel progress;
+	@UiField FlowPanel progress1;
+	@UiField FlowPanel progress2;
 	@UiField Heading weatherHeading1;
 	@UiField Heading weatherHeading2;
 	@UiField Container dataContainer;
 	@UiField FlowPanel firstChartSlot;
 	@UiField FlowPanel secondChartSlot;
+	@UiField Label noDataMessage1;
+	@UiField Label noDataMessage2;
 
 	public WeatherStationView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -39,21 +42,13 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	}
 
 	@Override
-	public void showProgress(boolean show) {
-		progress.setVisible(show);
+	public void showProgress1(boolean show) {
+		progress1.setVisible(show);
 	}
-
+	
 	@Override
-	public void showNoWeatherStationData(boolean show) {
-		message.clear();
-		message.add(new Label(messages.noWeatherData()));
-		message.setVisible(show);
-	}
-
-	@Override
-	public void clearMessage() {
-		message.clear();
-		message.setVisible(false);
+	public void showProgress2(boolean show) {
+		progress2.setVisible(show);
 	}
 
 	@Override
@@ -67,11 +62,6 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	}
 
 	@Override
-	public void showDataContainer(boolean show) {
-		dataContainer.setVisible(show);
-	}
-
-	@Override
 	public void setFirstChart(StockChart firstChart) {
 		firstChartSlot.add(firstChart);
 	}
@@ -79,5 +69,35 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	@Override
 	public void setSecondChart(StockChart secondChart) {
 		secondChartSlot.add(secondChart);
+	}
+
+	@Override
+	public HasVisibility getFirstNoDataMessage() {
+		return noDataMessage1;
+	}
+
+	@Override
+	public HasVisibility getFirstProgress() {
+		return progress1;
+	}
+
+	@Override
+	public HasVisibility getSecondNoDataMessage() {
+		return noDataMessage2;
+	}
+
+	@Override
+	public HasVisibility getSecondProgress() {
+		return progress2;
+	}
+
+	@Override
+	public HasVisibility getSecondChartVisibility() {
+		return secondChartSlot;
+	}
+
+	@Override
+	public HasVisibility getFirstChartVisibility() {
+		return firstChartSlot;
 	}
 }
