@@ -347,8 +347,8 @@ public class DapController {
 		});
 	}
 
-	public void getParameters(String deviceId, final ParametersCallback callback) {
-		parameterService.getParameters(deviceId, new MethodCallback<ParametersResponse>() {
+	public void getParameters(String deviceIdFilter, final ParametersCallback callback) {
+		parameterService.getParameters(deviceIdFilter, new MethodCallback<ParametersResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(0, exception.getMessage());
@@ -417,10 +417,10 @@ public class DapController {
 		});
 	}
 
-	public void getMeasurementsForTimelineIds(List<String> measurementIds, final MeasurementsCallback callback) {
+	public void getMeasurementsForTimelineIds(List<String> timelineIds, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
 		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
-		measurementService.getMeasurements(merge(measurementIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
+		measurementService.getMeasurements(merge(timelineIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(0, exception.getMessage());
@@ -489,6 +489,7 @@ public class DapController {
 	}
 
 	private Date monthEarlier() {
+//		return new Date(new Date().getTime() - 2678400000L);
 		return new Date(new Date().getTime() - 3600000L);
 	}
 

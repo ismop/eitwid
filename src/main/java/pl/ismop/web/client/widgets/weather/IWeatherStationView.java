@@ -13,25 +13,21 @@ public interface IWeatherStationView extends IsWidget {
 
 	void showModal();
 
-	void showProgress1(boolean show);
-	
-	void showProgress2(boolean show);
+	void showProgress(boolean show);
 
-	HasText getSecondHeading();
+	void setChart(StockChart firstChart);
 
-	HasText getFirstHeading();
+	HasVisibility getChartVisibility();
 
-	void setFirstChart(StockChart firstChart);
+	HasText getHeading1();
 
-	HasVisibility getFirstNoDataMessage();
+	HasText getHeading2();
 
-	HasVisibility getFirstProgress();
-	
-	HasVisibility getSecondNoDataMessage();
+	HasVisibility getContentVisibility();
 
-	HasVisibility getSecondProgress();
+	void addLatestReading1(String label, Number value, String unit, String timestamp);
 
-	HasVisibility getSecondChartVisibility();
+	void clearMeasurements();
 
-	HasVisibility getFirstChartVisibility();
+	void addLatestReading2(String label, Number value, String unit, String timestamp);
 }

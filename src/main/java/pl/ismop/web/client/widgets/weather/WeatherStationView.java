@@ -1,6 +1,9 @@
 package pl.ismop.web.client.widgets.weather;
 
 import org.gwtbootstrap3.client.ui.Container;
+import org.gwtbootstrap3.client.ui.Description;
+import org.gwtbootstrap3.client.ui.DescriptionData;
+import org.gwtbootstrap3.client.ui.DescriptionTitle;
 import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.moxieapps.gwt.highcharts.client.StockChart;
@@ -12,7 +15,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasVisibility;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public class WeatherStationView extends Composite implements IWeatherStationView {
@@ -22,15 +24,13 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	
 	@UiField WeatherStationViewMessages messages;
 	@UiField Modal modal;
-	@UiField FlowPanel progress1;
-	@UiField FlowPanel progress2;
+	@UiField FlowPanel progress;
 	@UiField Heading weatherHeading1;
 	@UiField Heading weatherHeading2;
-	@UiField Container dataContainer;
-	@UiField FlowPanel firstChartSlot;
-	@UiField FlowPanel secondChartSlot;
-	@UiField Label noDataMessage1;
-	@UiField Label noDataMessage2;
+	@UiField FlowPanel chartSlot;
+	@UiField FlowPanel measurements1;
+	@UiField FlowPanel measurements2;
+	@UiField Container container;
 
 	public WeatherStationView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -42,57 +42,63 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	}
 
 	@Override
-	public void showProgress1(boolean show) {
-		progress1.setVisible(show);
-	}
-	
-	@Override
-	public void showProgress2(boolean show) {
-		progress2.setVisible(show);
+	public void showProgress(boolean show) {
+		progress.setVisible(show);
 	}
 
 	@Override
-	public HasText getSecondHeading() {
-		return weatherHeading2;
+	public void setChart(StockChart firstChart) {
+		chartSlot.add(firstChart);
 	}
 
 	@Override
-	public HasText getFirstHeading() {
+	public HasVisibility getChartVisibility() {
+		return chartSlot;
+	}
+
+	@Override
+	public HasText getHeading1() {
 		return weatherHeading1;
 	}
 
 	@Override
-	public void setFirstChart(StockChart firstChart) {
-		firstChartSlot.add(firstChart);
+	public HasText getHeading2() {
+		return weatherHeading2;
 	}
 
 	@Override
-	public HasVisibility getFirstNoDataMessage() {
-		return noDataMessage1;
+	public HasVisibility getContentVisibility() {
+		return container;
 	}
 
 	@Override
-	public HasVisibility getFirstProgress() {
-		return progress1;
+	public void addLatestReading1(String label, Number value, String unit, String timestamp) {
+		measurements1.add(createDescription(label, value, unit, timestamp));
 	}
 
 	@Override
-	public HasVisibility getSecondNoDataMessage() {
-		return noDataMessage2;
+	public void clearMeasurements() {
+		measurements1.clear();
+		measurements2.clear();
 	}
 
 	@Override
-	public HasVisibility getSecondProgress() {
-		return progress2;
+	public void addLatestReading2(String label, Number value, String unit, String timestamp) {
+		measurements2.add(createDescription(label, value, unit, timestamp));
 	}
-
-	@Override
-	public HasVisibility getSecondChartVisibility() {
-		return secondChartSlot;
-	}
-
-	@Override
-	public HasVisibility getFirstChartVisibility() {
-		return firstChartSlot;
+	
+	private Description createDescription(String label, Number value, String unit, String timestamp) {
+		Description description = new Description();
+		description.setHorizontal(true);
+		
+		DescriptionTitle title = new DescriptionTitle();
+		title.setText(label);
+		description.add(title);
+		
+		DescriptionData data = new DescriptionData();
+		data.setText("" + value + " " + unit);
+		description.add(data);
+		data.setTitle(timestamp);
+		return description;
 	}
 }

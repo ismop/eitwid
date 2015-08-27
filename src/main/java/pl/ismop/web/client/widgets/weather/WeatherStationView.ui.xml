@@ -11,26 +11,22 @@
 	<g:HTMLPanel>
 		<b:Modal ui:field="modal" title="{messages.weatherStation}" fade="true" width="1200px">
 			<b:ModalBody>
-				<b:Container ui:field="dataContainer" fluid="true">
+				<g:FlowPanel ui:field="progress" visible="false" addStyleNames="{style.progress}">
+					<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.loadingLabel}"/>
+				</g:FlowPanel>
+				<b:Container ui:field="container" fluid="true" visible="false">
 					<b:Row>
-						<b:Column size="MD_10">
+						<b:Column size="MD_6">
 							<b:Heading ui:field="weatherHeading1" size="H4"/>
-							<g:FlowPanel ui:field="progress1" visible="false" addStyleNames="{style.progress}">
-								<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.loadingLabel}"/>
-							</g:FlowPanel>
-							<g:Label ui:field="noDataMessage1" text="{messages.noWeatherData}" visible="false"/>
-							<g:FlowPanel ui:field="firstChartSlot" visible="false"/>
+							<g:FlowPanel ui:field="measurements1"/>
 						</b:Column>
-						<b:Column size="MD_2">
+						<b:Column size="MD_6">
 							<b:Heading ui:field="weatherHeading2" size="H4"/>
-							<g:FlowPanel ui:field="progress2" visible="false" addStyleNames="{style.progress}">
-								<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.loadingLabel}"/>
-							</g:FlowPanel>
-							<g:Label ui:field="noDataMessage2" text="{messages.noWeatherData}" visible="false"/>
-							<g:FlowPanel ui:field="secondChartSlot" visible="false"/>
+							<g:FlowPanel ui:field="measurements2"/>
 						</b:Column>
 					</b:Row>
 				</b:Container>
+				<g:FlowPanel ui:field="chartSlot" visible="false"/>
 			</b:ModalBody>
 		</b:Modal>
 	</g:HTMLPanel>
