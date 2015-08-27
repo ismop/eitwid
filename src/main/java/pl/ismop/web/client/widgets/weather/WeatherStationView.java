@@ -72,7 +72,7 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	}
 
 	@Override
-	public void addLatestReading1(String label, Number value, String unit, String timestamp) {
+	public void addLatestReading1(String label, String value, String unit, String timestamp) {
 		measurements1.add(createDescription(label, value, unit, timestamp));
 	}
 
@@ -83,11 +83,11 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	}
 
 	@Override
-	public void addLatestReading2(String label, Number value, String unit, String timestamp) {
+	public void addLatestReading2(String label, String value, String unit, String timestamp) {
 		measurements2.add(createDescription(label, value, unit, timestamp));
 	}
 	
-	private Description createDescription(String label, Number value, String unit, String timestamp) {
+	private Description createDescription(String label, String value, String unit, String timestamp) {
 		Description description = new Description();
 		description.setHorizontal(true);
 		
@@ -96,7 +96,7 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 		description.add(title);
 		
 		DescriptionData data = new DescriptionData();
-		data.setText("" + value + " " + unit);
+		data.setText(value + " " + unit);
 		description.add(data);
 		data.setTitle(timestamp);
 		return description;

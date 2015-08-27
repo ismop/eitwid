@@ -25,9 +25,9 @@ public interface IWeatherStationView extends IsWidget {
 
 	HasVisibility getContentVisibility();
 
-	void addLatestReading1(String label, Number value, String unit, String timestamp);
+	void addLatestReading1(String label, String value, String unit, String timestamp);
 
 	void clearMeasurements();
 
-	void addLatestReading2(String label, Number value, String unit, String timestamp);
+	void addLatestReading2(String label, String value, String unit, String timestamp);
 }

@@ -12,14 +12,19 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
+import org.moxieapps.gwt.highcharts.client.Legend;
+import org.moxieapps.gwt.highcharts.client.Legend.Layout;
+import org.moxieapps.gwt.highcharts.client.Legend.VerticalAlign;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.StockChart;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -265,7 +270,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			sortLatestReadings(groupedReadings.getLatestReadings().get(stationName));
 			
 			for(LatestReading latestReading : groupedReadings.getLatestReadings().get(stationName)) {
-				view.addLatestReading1(latestReading.label, latestReading.value, latestReading.unit,
+				view.addLatestReading1(latestReading.label, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
 						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(latestReading.timestamp));
 			}
 		}
@@ -276,7 +281,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			sortLatestReadings(groupedReadings.getLatestReadings().get(stationName));
 			
 			for(LatestReading latestReading : groupedReadings.getLatestReadings().get(stationName)) {
-				view.addLatestReading2(latestReading.label, latestReading.value, latestReading.unit,
+				view.addLatestReading2(latestReading.label, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
 						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(latestReading.timestamp));
 			}
 		}
@@ -286,17 +291,23 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			chart.removeFromParent();
 		}
 		
-		chart = new StockChart().setType(Series.Type.LINE);
+		chart = new StockChart()
+				.setType(Series.Type.LINE)
+				.setLegend(new Legend()
+						.setVerticalAlign(VerticalAlign.BOTTOM)
+						.setLayout(Layout.HORIZONTAL))
+				.setToolTip(new ToolTip()
+						.setPointFormat("<span style=\"color: {point.color};\">\u25CF</span> {series.name}: <b>{point.y:.2f}</b><br/>"));
 		
 		int axisIndex = 0;
 		
 		for(final Readings readingsEntry : groupedReadings.getReadingsList()) {
 			chart.getYAxis(axisIndex)
-				.setAxisTitle(new AxisTitle().setText(readingsEntry.getLabel()))
+				.setAxisTitle(new AxisTitle().setText(readingsEntry.getLabel() + " [" + readingsEntry.getUnit() + "]"))
 				.setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
 					@Override
 					public String format(AxisLabelsData axisLabelsData) {
-						return axisLabelsData.getValueAsString() + " " + readingsEntry.getUnit();
+						return NumberFormat.getFormat("0.00").format(axisLabelsData.getValueAsDouble()); 
 					}
 				}));
 			
