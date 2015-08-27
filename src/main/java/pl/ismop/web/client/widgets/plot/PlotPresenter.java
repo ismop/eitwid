@@ -17,6 +17,7 @@ import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -132,11 +133,11 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 																	
 																	for(final Readings readingsEntry : readings) {
 																		chart.getYAxis(axisIndex)
-																			.setAxisTitle(new AxisTitle().setText(readingsEntry.getLabel()))
+																			.setAxisTitle(new AxisTitle().setText(readingsEntry.getLabel() + " [" + readingsEntry.getUnit() + "]"))
 																			.setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
 																				@Override
 																				public String format(AxisLabelsData axisLabelsData) {
-																					return axisLabelsData.getValueAsString() + " " + readingsEntry.getUnit();
+																					return NumberFormat.getFormat("0.00").format(axisLabelsData.getValueAsDouble());
 																				}
 																			}));
 																		

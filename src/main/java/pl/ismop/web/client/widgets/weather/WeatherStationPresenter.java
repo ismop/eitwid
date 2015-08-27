@@ -307,7 +307,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 				.setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
 					@Override
 					public String format(AxisLabelsData axisLabelsData) {
-						return NumberFormat.getFormat("0.00").format(axisLabelsData.getValueAsDouble()); 
+						return NumberFormat.getFormat("0.00").format(axisLabelsData.getValueAsDouble());
 					}
 				}));
 			

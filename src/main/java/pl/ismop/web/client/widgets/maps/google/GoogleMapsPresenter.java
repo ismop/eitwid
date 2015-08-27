@@ -613,7 +613,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 			draggable: false,
 			keyboardShortcuts: false,
 			disableDoubleClickZoom: false,
-			scrollwheel: false
+			scrollwheel: true
 		});
 		
 		var thisObject = this;
