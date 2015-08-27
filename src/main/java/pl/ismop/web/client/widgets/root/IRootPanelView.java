@@ -11,9 +11,9 @@ public interface IRootPanelView extends IsWidget {
 		void onShowExperiment();
 
 		void onShowWeatherStation();
-	}
 
-	void setExperimentsLabel(int numberOfExperiments);
+		void onShowFibreData();
+	}
 
 	void setSidePanel(IsWidget view);
 }

@@ -1,9 +1,5 @@
 package pl.ismop.web.client.widgets.root;
 
-import org.gwtbootstrap3.client.ui.AnchorListItem;
-
-import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -20,6 +16,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
+import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
+
 public class RootPanel extends Composite implements IRootPanelView, ReverseViewInterface<IRootPresenter> {
 	private static RootPanelUiBinder uiBinder = GWT.create(RootPanelUiBinder.class);
 	interface RootPanelUiBinder extends UiBinder<Widget, RootPanel> {}
@@ -30,7 +28,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@UiField HTMLPanel sidePanel;
 	@UiField FormPanel logoutForm;
 	@UiField Hidden csrf;
-	@UiField AnchorListItem experiments;
 	@UiField RootPanelMessages messages;
 
 	public RootPanel() {
@@ -51,9 +48,9 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 		Window.Location.assign("/login?logout");
 	}
 	
-	@UiHandler("experiments")
-	void showExperiments(ClickEvent event) {
-		getPresenter().onShowExperiments();
+	@UiHandler("fibre")
+	void showFibreData(ClickEvent event) {
+		getPresenter().onShowFibreData();
 	}
 	
 	@UiHandler("weather")
@@ -69,11 +66,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@Override
 	public IRootPresenter getPresenter() {
 		return presenter;
-	}
-
-	@Override
-	public void setExperimentsLabel(int numberOfExperiments) {
-		experiments.setText(messages.experimentsLabel(numberOfExperiments));
 	}
 
 	@Override

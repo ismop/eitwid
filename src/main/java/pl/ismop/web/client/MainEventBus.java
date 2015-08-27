@@ -15,6 +15,7 @@ import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.widgets.experiment.ExperimentPresenter;
 import pl.ismop.web.client.widgets.experiments.ExperimentsPresenter;
+import pl.ismop.web.client.widgets.fibre.FibrePresenter;
 import pl.ismop.web.client.widgets.maps.google.GoogleMapsPresenter;
 import pl.ismop.web.client.widgets.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.popup.PopupPresenter;
@@ -91,6 +92,6 @@ public interface MainEventBus extends EventBus {
 	@Event(handlers = WeatherStationPresenter.class)
 	void showWeatherStation();
 
-//	@Event(handlers = )
-//	void showNewExperimentDialog();
+	@Event(handlers = FibrePresenter.class)
+	void showFibrePanel();
 }
