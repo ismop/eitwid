@@ -2,9 +2,13 @@ package pl.ismop.web.client.widgets.sidepanel;
 
 import java.util.List;
 
+import org.gwtbootstrap3.client.ui.Description;
+import org.gwtbootstrap3.client.ui.DescriptionData;
+import org.gwtbootstrap3.client.ui.DescriptionTitle;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
 import org.gwtbootstrap3.extras.select.client.ui.Select;
+import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -14,6 +18,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,10 +43,10 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 
 	@UiField
 	FlowPanel leveeBusyPanel, leveePanel, sectionPanel, sectionBusyPanel, sectionDetails, profilePanel, profileBusyPanel, sensorPanel, sensorBusyPanel,
-			plotContainer, sensorListPanel;
+			plotContainer, sensorListPanel, experimentPlanDetails, experimentPlanChart;
 	
 	@UiField
-	Label noLeveesLabel, noSectionsLabel, noProfilesLabel, noSensorsLabel;
+	Label noLeveesLabel, noSectionsLabel, noProfilesLabel, noSensorsLabel, noExperimentPlansLabel;
 	
 	public SidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -62,10 +67,10 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 		getPresenter().onDeviceChanged(sensors.getAllSelectedValues());
 	}
 	
-//	@UiHandler("addExperiment")
-//	void addExperiment(ClickEvent event) {
-//		getPresenter().onAddExperiment();
-//	}
+	@UiHandler("addExperiment")
+	void addExperiment(ClickEvent event) {
+		getPresenter().onAddExperiment();
+	}
 
 	@Override
 	public void addLeveeValue(String leveeId, String leveeName) {
@@ -256,5 +261,45 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	@Override
 	public void setSelectedDevices(List<String> deviceIds) {
 		sensors.setValues(deviceIds.toArray(new String[0]));
+	}
+
+	@Override
+	public HasVisibility getNoExperimentPlansVisibility() {
+		return noExperimentPlansLabel;
+	}
+
+	@Override
+	public void setExperimentPlanName(String name) {
+		experimentPlanDetails.add(createDescription(messages.getExperimentPlanNameLabel(), name));
+	}
+
+	@Override
+	public void setExperimentPlanStartDate(String startDate) {
+		experimentPlanDetails.add(createDescription(messages.getExperimentPlanNameStartDate(), startDate));
+	}
+
+	@Override
+	public void setExperimentPlanMargin(String margin) {
+		experimentPlanDetails.add(createDescription(messages.getExperimentPlanNameDeviation(), margin));
+	}
+
+	private Description createDescription(String titleValue, String dataValue) {
+		Description description = new Description();
+		description.setHorizontal(true);
+		
+		DescriptionTitle title = new DescriptionTitle();
+		title.setText(titleValue);
+		description.add(title);
+		
+		DescriptionData data = new DescriptionData();
+		data.setText(dataValue);
+		description.add(data);
+		
+		return description;
+	}
+
+	@Override
+	public void setExperimentPlanChart(Chart chart) {
+		experimentPlanChart.add(chart);
 	}
 }

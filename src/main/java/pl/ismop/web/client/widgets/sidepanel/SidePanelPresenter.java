@@ -1,12 +1,20 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.moxieapps.gwt.highcharts.client.AxisTitle;
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Series.Type;
+
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.Window;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -29,6 +37,7 @@ import pl.ismop.web.client.widgets.plot.PlotPresenter;
 import pl.ismop.web.client.widgets.section.SectionPresenter;
 import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
+import pl.ismop.web.domain.ExperimentPlan;
 
 @Presenter(view = SidePanelView.class)
 public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventBus> implements ISidePanelPresenter {
@@ -87,6 +96,49 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			
 			@Override
 			public void processExperimentPlans(List<ExperimentPlanBean> experimentPlans) {
+				if(experimentPlans.size() > 0) {
+					ExperimentPlanBean experimentPlan = experimentPlans.get(0);
+					view.setExperimentPlanName(experimentPlan.getName());
+					view.setExperimentPlanStartDate(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(experimentPlan.getStartDate()));
+					view.setExperimentPlanMargin("+/- " + String.valueOf(experimentPlan.getMargin()) + " m");
+					
+					String[] entries = experimentPlan.getWave().split(";");
+					Number[][] values = new Number[entries.length][2];
+					Number[][] range = new Number[entries.length][3];
+					int index = 0;
+					
+					for(String entry : entries) {
+						String[] bothValues = entry.split(",");
+						float time = Float.parseFloat(bothValues[0]);
+						float height = Float.parseFloat(bothValues[1]);
+						values[index][0] = time;
+						values[index][1] = height;
+						
+						range[index][0] = time;
+						range[index][1] = height - experimentPlan.getMargin();
+						range[index][2] = height + experimentPlan.getMargin();
+						
+						index++;
+					}
+					
+					Chart chart = new Chart()
+							.setChartTitle(new ChartTitle().setText("Przebieg fali"));
+					chart.getYAxis(0)
+							.setAxisTitle(new AxisTitle().setText("Wysokość [m]"));
+					chart.addSeries(chart.createSeries()
+							.setName("Odchyłka [m]")
+							.setType(Type.AREA_RANGE)
+							.setYAxis(0)
+							.setPoints(range));
+					chart.addSeries(chart.createSeries()
+							.setName("Czas [h]")
+							.setType(Type.LINE)
+							.setYAxis(0)
+							.setPoints(values));
+					view.setExperimentPlanChart(chart);
+				} else {
+					view.getNoExperimentPlansVisibility().setVisible(true);
+				}
 			}
 		});
 	}
@@ -195,7 +247,7 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 	
 	@Override
 	public void onAddExperiment() {
-//		eventBus.showNewExperimentDialog();
+		eventBus.showExperiment();
 	}
 
 	private void loadLeveeStatus(Levee levee) {

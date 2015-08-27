@@ -1,15 +1,21 @@
 package pl.ismop.web.client.widgets.experiment;
 
-import com.google.gwt.user.client.ui.FlowPanel;
+import org.moxieapps.gwt.highcharts.client.Chart;
+
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IExperimentView extends IsWidget {
 	interface IExperimentPresenter {
-		void showPlot();
+		void addChartPoint(int time, double height);
+
+		void removeLastPoint();
 	}
 
 	String getMainTitle();
-	void addAnalysis(IsWidget view);
-	void addPlot(FlowPanel panel);
+	
 	void showFirstWave();
+	
+	void showModal(boolean show);
+
+	void setChart(Chart chart);
 }

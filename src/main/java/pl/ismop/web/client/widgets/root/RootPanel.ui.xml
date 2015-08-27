@@ -17,7 +17,6 @@
 				<b:NavbarBrand href="/">ISMOP</b:NavbarBrand>
 					<b:NavbarNav>
 						<b:AnchorListItem ui:field="experiments"></b:AnchorListItem>
-						<b:AnchorListItem ui:field="experiment"><ui:text from="{messages.experimentLabel}"/></b:AnchorListItem>
 						<b:AnchorListItem ui:field="weather"><ui:text from="{messages.weatherLabel}"/></b:AnchorListItem>
 					</b:NavbarNav>
 					<b:NavbarText pull="RIGHT">

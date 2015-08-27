@@ -9,8 +9,6 @@ public class ExperimentPlanBean {
 	
 	private Date startDate;
 	
-	private Date endDate;
-	
 	private String wave;
 	
 	private Float margin;
@@ -37,14 +35,6 @@ public class ExperimentPlanBean {
 
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
-	}
-
-	public Date getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
 	}
 
 	public String getWave() {

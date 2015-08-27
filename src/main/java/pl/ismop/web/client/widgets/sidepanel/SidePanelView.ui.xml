@@ -30,13 +30,15 @@
 		<g:Label ui:field="noLeveesLabel" text="{messages.noLevees}" visible="false"/>
 		<g:FlowPanel ui:field="leveePanel" addStyleNames="{style.summary}"/>
 		
-		<!--
-		<g:FlowPanel addStyleNames="clearfix">
-			<b:Heading size="H4" text="{messages.experimentPlansHeader}" addStyleNames="pull-left"/>
-			<b:Button ui:field="addExperiment" type="SUCCESS" icon="PLUS" size="SMALL" title="{messages.addNewExperiment}" addStyleNames="pull-right"/>
-		</g:FlowPanel>
-		<g:Label ui:field="noExperimentPlansLabel" text="{messages.noExperimentPlans}" visible="false"/>
-		-->
+		<b:Well>
+			<g:FlowPanel addStyleNames="clearfix">
+				<b:Heading size="H4" text="{messages.experimentPlansHeader}" addStyleNames="pull-left"/>
+				<b:Button ui:field="addExperiment" type="SUCCESS" icon="ELLIPSIS_H" size="SMALL" title="{messages.addNewExperiment}" addStyleNames="pull-right"/>
+			</g:FlowPanel>
+			<g:Label ui:field="noExperimentPlansLabel" text="{messages.noExperimentPlans}" visible="false"/>
+			<g:FlowPanel ui:field="experimentPlanDetails"/>
+			<g:FlowPanel ui:field="experimentPlanChart"/>
+		</b:Well>
 		
 		<g:FlowPanel ui:field="sectionPanel" visible="false">
 			<b:Heading size="H4" text="{messages.sectionHeader}"/>

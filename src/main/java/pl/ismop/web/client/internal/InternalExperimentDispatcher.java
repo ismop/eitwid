@@ -1,5 +1,7 @@
 package pl.ismop.web.client.internal;
 
+import static java.util.Arrays.asList;
+
 import org.fusesource.restygwt.client.Dispatcher;
 import org.fusesource.restygwt.client.Method;
 
@@ -13,7 +15,7 @@ public class InternalExperimentDispatcher implements Dispatcher {
 	
 	@Override
 	public Request send(Method method, RequestBuilder builder) throws RequestException {
-		if(builder.getHTTPMethod().equalsIgnoreCase("put")) {
+		if(asList("put", "post", "delete").contains(builder.getHTTPMethod().toLowerCase())) {
 			String csrfHeaderName = DOM.getElementById("csrfHeaderName").getAttribute("content");
 			String csrfToken = DOM.getElementById("csrfToken").getAttribute("content");
 			builder.setHeader(csrfHeaderName, csrfToken);

@@ -99,6 +99,7 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 		data.setText(value + " " + unit);
 		description.add(data);
 		data.setTitle(timestamp);
+		
 		return description;
 	}
 }

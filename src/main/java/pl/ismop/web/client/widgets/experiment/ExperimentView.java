@@ -4,19 +4,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.gwtbootstrap3.client.shared.event.ShownEvent;
-import org.gwtbootstrap3.client.ui.BlockQuote;
-import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.ListBox;
-import org.gwtbootstrap3.client.ui.PanelBody;
+import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.TextBox;
-import org.gwtbootstrap3.client.ui.html.Paragraph;
-import org.gwtbootstrap3.client.ui.html.Small;
-
-import pl.ismop.web.client.widgets.experiment.IExperimentView.IExperimentPresenter;
+import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,37 +16,37 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
+
+import pl.ismop.web.client.widgets.experiment.IExperimentView.IExperimentPresenter;
 
 public class ExperimentView extends Composite implements IExperimentView, ReverseViewInterface<IExperimentPresenter> {
 	private static ExperimentViewUiBinder uiBinder = GWT.create(ExperimentViewUiBinder.class);
 	interface ExperimentViewUiBinder extends UiBinder<Widget, ExperimentView> {}
 	
 	private IExperimentPresenter presenter;
+	
 	private Map<Integer, Double> levels;
+	
 	private String currentExperiment;
+	
 	private boolean pompsActive;
+	
 	private Map<Integer, Double> secondPomp;
 	
 	@UiField ExperimentMessages messages;
-	@UiField PanelBody analysisBody;
-	@UiField ListBox sensors;
-	@UiField FlowPanel plot;
-	@UiField FlowPanel blog;
-	@UiField ListBox type;
-	@UiField TextBox message;
+	
 	@UiField FlowPanel wave;
+	
 	@UiField TextBox time;
+	
 	@UiField TextBox height;
-	@UiField ListBox experimentSelector;
-	@UiField Button showPomps;
+	
+	@UiField Modal modal;
 
 	public ExperimentView() {
 		initWidget(uiBinder.createAndBindUi(this));
-		fillInSensors();
-		plot.getElement().setAttribute("id", "singlePlot");
 		wave.getElement().setAttribute("id", "wave");
 		levels = new LinkedHashMap<>();
 		currentExperiment = "1";
@@ -63,41 +55,19 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 	
 	@UiHandler("addPoint")
 	void addPoint(ClickEvent event) {
-		addLevelPoint(Integer.parseInt(time.getValue()), Double.parseDouble(height.getValue()));
+		getPresenter().addChartPoint(Integer.parseInt(time.getValue()), Double.parseDouble(height.getValue()));
 		time.setValue("");
 		height.setValue("");
 	}
 	
 	@UiHandler("removePoint")
 	void removePoint(ClickEvent event) {
-		Integer last = null;
-		
-		for(Integer key : levels.keySet()) {
-			last = key;
-		}
-		
-		if(last != null && levels.size() > 0) {
-			levels.remove(last);
-		}
-		
-		regenerateWave(createData());
+		getPresenter().removeLastPoint();
 	}
 	
-	@UiHandler("experimentSelector")
-	void experimentSelected(ChangeEvent event) {
-		currentExperiment = experimentSelector.getSelectedValue();
-		checkGraph();
-	}
-	
-	@UiHandler("showPomps")
-	void showPompsClicked(ClickEvent event) {
-		if(showPomps.isActive()) {
-			pompsActive = false;
-		} else {
-			pompsActive = true;
-		}
-		
-		checkGraph();
+	@UiHandler("save")
+	void save(ClickEvent event) {
+		Window.alert("To be implemented");
 	}
 
 	private void checkGraph() {
@@ -229,50 +199,9 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 		   );
 	}-*/;
 
-	@UiHandler("plotCollapse")
-	void plotShowed(ShownEvent event) {
-		getPresenter().showPlot();
-	}
-	
-	@UiHandler("add")
-	void add(ClickEvent event) {
-		if(message.getValue().trim().isEmpty()) {
-			Window.alert("Wiadomosc nie moze byc pusta");
-		} else {
-			BlockQuote block = new BlockQuote();
-			Paragraph p = new Paragraph();
-			p.setText(type.getSelectedItemText() + ": " + message.getText());
-			block.add(p);
-			
-			Small s = new Small();
-			s.setText("Jan Nowak dnia 23.03.2015 o godzinie 15:" + Math.round(60 * Math.random()));
-			block.add(s);
-			blog.add(block);
-			type.setSelectedIndex(0);
-			message.setText("");
-		}
-	}
-
 	@Override
 	public String getMainTitle() {
 		return messages.mainTitle();
-	}
-
-	@Override
-	public void addAnalysis(IsWidget view) {
-		analysisBody.clear();
-		analysisBody.add(view);
-	}
-	
-	private void fillInSensors() {
-		for(int i = 1; i < 6; i++) {
-			sensors.addItem(messages.getSensorLabel(i));
-		}
-	}
-
-	@Override
-	public void addPlot(FlowPanel panel) {
-		plot.add(panel);
 	}
 
 	@Override
@@ -292,6 +221,11 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 		addLevelPoint(108, 0.0);
 	};
 	
+	@Override
+	public void showModal(boolean show) {
+		modal.show();
+	}
+
 	private void showSecondWave() {
 		addLevelPoint(0, 0.0);
 		addLevelPoint(48, 4.0);
@@ -304,5 +238,10 @@ public class ExperimentView extends Composite implements IExperimentView, Revers
 		addLevelPoint(36, 4.0);
 		addLevelPoint(156, 4.0);
 		addLevelPoint(228, 0.0);
+	}
+
+	@Override
+	public void setChart(Chart chart) {
+		wave.add(chart);
 	}
 }

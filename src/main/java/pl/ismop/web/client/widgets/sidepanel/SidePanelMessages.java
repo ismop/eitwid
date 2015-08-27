@@ -28,4 +28,10 @@ public interface SidePanelMessages extends Messages {
 	String addNewExperiment();
 	
 	String noExperimentPlans();
+
+	String getExperimentPlanNameLabel();
+
+	String getExperimentPlanNameStartDate();
+
+	String getExperimentPlanNameDeviation();
 }

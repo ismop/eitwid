@@ -1,8 +1,13 @@
 package pl.ismop.web.client.widgets.sidepanel;
 
+import java.util.Date;
 import java.util.List;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
+
+import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.UIObject;
 
 public interface ISidePanelView extends IsWidget {
 	interface ISidePanelPresenter {
@@ -80,4 +85,14 @@ public interface ISidePanelView extends IsWidget {
 	void setSelectedProfile(String profileId);
 
 	void setSelectedDevices(List<String> deviceIds);
+
+	HasVisibility getNoExperimentPlansVisibility();
+
+	void setExperimentPlanName(String name);
+
+	void setExperimentPlanStartDate(String startDate);
+
+	void setExperimentPlanMargin(String margin);
+
+	void setExperimentPlanChart(Chart chart);
 }

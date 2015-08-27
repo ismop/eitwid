@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.StockChart;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
@@ -127,7 +128,9 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 																	
 																	List<Readings> readings = createReadings(devices, PlotPresenter.this.parameters,
 																			PlotPresenter.this.timelines, measurements);
-																	chart = new StockChart().setType(Series.Type.LINE);
+																	chart = new StockChart().setType(Series.Type.LINE)
+																			.setToolTip(new ToolTip()
+																					.setPointFormat("<span style=\"color: {point.color};\">\u25CF</span> {series.name}: <b>{point.y:.2f}</b><br/>"));
 																	
 																	int axisIndex = 0;
 																	
