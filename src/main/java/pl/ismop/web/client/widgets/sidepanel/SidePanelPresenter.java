@@ -37,7 +37,6 @@ import pl.ismop.web.client.widgets.plot.PlotPresenter;
 import pl.ismop.web.client.widgets.section.SectionPresenter;
 import pl.ismop.web.client.widgets.sidepanel.ISidePanelView.ISidePanelPresenter;
 import pl.ismop.web.client.widgets.summary.LeveeSummaryPresenter;
-import pl.ismop.web.domain.ExperimentPlan;
 
 @Presenter(view = SidePanelView.class)
 public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventBus> implements ISidePanelPresenter {
@@ -141,6 +140,13 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 				}
 			}
 		});
+		
+		ExperimentPlanBean experimentPlanBean = new ExperimentPlanBean();
+		experimentPlanBean.setMargin(0.2f);
+		experimentPlanBean.setName("Pierwszy eksperyment zalewania");
+		experimentPlanBean.setStartDate(new Date());
+		experimentPlanBean.setWave("0,0.5;1,0.5;4,3.5;10,3.5;15,1;18,1");
+		internalExperimentController.addExperimentPlan(experimentPlanBean);
 	}
 	
 	public void onSectionSelectedOnMap(String sectionId) {
