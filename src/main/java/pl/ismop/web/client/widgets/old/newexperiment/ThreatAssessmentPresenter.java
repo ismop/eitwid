@@ -7,6 +7,7 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.hypgen.HypgenController;
 import pl.ismop.web.client.hypgen.HypgenController.ExperimentCallback;
@@ -38,8 +39,8 @@ public class ThreatAssessmentPresenter extends BasePresenter<IThreatAssessmentVi
 //		eventBus.setTitleAndShow(view.title(), view, false);
 		dapController.getSections(top, left, bottom, right, new SectionsCallback() {
 			@Override
-			public void onError(int code, String message) {
-				Window.alert("Error: " + message);
+			public void onError(ErrorDetails errorDetails) {
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override

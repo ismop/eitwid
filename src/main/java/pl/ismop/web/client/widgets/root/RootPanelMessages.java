@@ -4,8 +4,8 @@ import com.google.gwt.i18n.client.Messages;
 
 public interface RootPanelMessages extends Messages {
 	String logoutLabel();
-	String experimentsLabel(int numberOfExperiments);
-	String experimentLabel();
+	
 	String monitoringLabel();
+	
 	String analysisLabel();
 }

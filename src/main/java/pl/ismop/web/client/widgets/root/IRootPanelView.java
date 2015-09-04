@@ -9,9 +9,11 @@ public interface IRootPanelView extends IsWidget {
 		void onAnalysisViewOption();
 	}
 
-	void setSidePanel(IsWidget view);
-
 	void markAnalysisOption(boolean mark);
 
 	void markMonitoringOption(boolean mark);
+
+	void clearPanels();
+
+	void setSidePanelWidget(IsWidget view);
 }

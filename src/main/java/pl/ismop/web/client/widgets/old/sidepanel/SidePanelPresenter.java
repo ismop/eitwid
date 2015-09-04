@@ -29,6 +29,7 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.internal.ExperimentPlanBean;
 import pl.ismop.web.client.internal.InternalExperimentController;
 import pl.ismop.web.client.internal.InternalExperimentController.ExperimentPlansCallback;
@@ -62,9 +63,9 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		view.setLeveeBusyState(true);
 		dapController.getLevees(new LeveesCallback() {
 			@Override
-			public void onError(int code, String message) {
+			public void onError(ErrorDetails errorDetails) {
 				view.setLeveeBusyState(false);
-				Window.alert(message);
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override
@@ -164,9 +165,9 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 			view.setDeviceBusyState(true);
 			dapController.getDevicesRecursively(profileId, new DevicesCallback() {
 				@Override
-				public void onError(int code, String message) {
+				public void onError(ErrorDetails errorDetails) {
 					view.setDeviceBusyState(false);
-					Window.alert(message);
+					Window.alert("Error: " + errorDetails.getMessage());
 				}
 				
 				@Override
@@ -225,8 +226,8 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 	public void onAggregatePicked(String aggregateId) {
 		dapController.getDevicesRecursivelyForAggregate(aggregateId, new DevicesCallback() {
 			@Override
-			public void onError(int code, String message) {
-				Window.alert(message);
+			public void onError(ErrorDetails errorDetails) {
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override
@@ -266,9 +267,9 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		view.setSectionBusyState(true);
 		dapController.getSections(leveeId, new SectionsCallback() {
 			@Override
-			public void onError(int code, String message) {
+			public void onError(ErrorDetails errorDetails) {
 				view.setSectionBusyState(false);
-				Window.alert(message);
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override
@@ -345,8 +346,8 @@ public class SidePanelPresenter extends BasePresenter<ISidePanelView, MainEventB
 		view.showProfileList(false);
 		dapController.getProfiles(sectionId, new ProfilesCallback() {
 			@Override
-			public void onError(int code, String message) {
-				Window.alert(message);
+			public void onError(ErrorDetails errorDetails) {
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override

@@ -41,6 +41,7 @@ import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.old.plot.Readings;
 import pl.ismop.web.client.widgets.old.weather.GroupedReadings.LatestReading;
 import pl.ismop.web.client.widgets.old.weather.IWeatherStationView.IWeatherStationPresenter;
@@ -68,9 +69,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		view.getChartVisibility().setVisible(false);
 		dapController.getDevicesForType("weather_station", new DevicesCallback() {
 			@Override
-			public void onError(int code, String message) {
+			public void onError(ErrorDetails errorDetails) {
 				view.showProgress(false);
-				Window.alert(message);
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override
@@ -95,9 +96,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		
 		dapController.getParameters(deviceIds, new ParametersCallback() {
 			@Override
-			public void onError(int code, String message) {
+			public void onError(ErrorDetails errorDetails) {
 				view.showProgress(false);
-				Window.alert(message);
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override
@@ -113,9 +114,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					
 					dapController.getContext("measurements", new ContextsCallback() {
 						@Override
-						public void onError(int code, String message) {
+						public void onError(ErrorDetails errorDetails) {
 							view.showProgress(false);
-							Window.alert(message);
+							Window.alert("Error: " + errorDetails.getMessage());
 						}
 						
 						@Override
@@ -123,9 +124,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 							if(contexts.size() > 0) {
 								dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
 									@Override
-									public void onError(int code, String message) {
+									public void onError(ErrorDetails errorDetails) {
 										view.showProgress(false);
-										Window.alert(message);
+										Window.alert("Error: " + errorDetails.getMessage());
 									}
 									
 									@Override
@@ -141,9 +142,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 											
 											dapController.getMeasurementsForTimelineIds(timelineIds, new MeasurementsCallback() {
 												@Override
-												public void onError(int code, String message) {
+												public void onError(ErrorDetails errorDetails) {
 													view.showProgress(false);
-													Window.alert(message);
+													Window.alert("Error: " + errorDetails.getMessage());
 												}
 												
 												@Override

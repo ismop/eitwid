@@ -34,6 +34,7 @@ import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.old.plot.IPlotView.IPlotPresenter;
 
 @Presenter(view = PlotView.class, multiple = true)
@@ -65,9 +66,9 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 		if(devices.size() > 0) {
 			dapController.getParameters(new ArrayList<String>(devices.keySet()), new ParametersCallback() {
 				@Override
-				public void onError(int code, String message) {
+				public void onError(ErrorDetails errorDetails) {
 					view.showBusyPanel(false);
-					Window.alert(message);
+					Window.alert("Error: " + errorDetails.getMessage());
 				}
 				
 				@Override
@@ -79,9 +80,9 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 						
 						dapController.getContext("measurements", new ContextsCallback() {
 							@Override
-							public void onError(int code, String message) {
+							public void onError(ErrorDetails errorDetails) {
 								view.showBusyPanel(false);
-								Window.alert(message);
+								Window.alert("Error: " + errorDetails.getMessage());
 							}
 							
 							@Override
@@ -92,9 +93,9 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 									dapController.getTimelinesForParameterIds(context.getId(), new ArrayList<String>(PlotPresenter.this.parameters.keySet()),
 											new TimelinesCallback() {
 												@Override
-												public void onError(int code, String message) {
+												public void onError(ErrorDetails errorDetails) {
 													view.showBusyPanel(false);
-													Window.alert(message);
+													Window.alert("Error: " + errorDetails.getMessage());
 												}
 												
 												@Override
@@ -107,9 +108,9 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 														dapController.getMeasurementsForTimelineIds(new ArrayList<String>(PlotPresenter.this.timelines.keySet()),
 																new MeasurementsCallback() {
 															@Override
-															public void onError(int code, String message) {
+															public void onError(ErrorDetails errorDetails) {
 																view.showBusyPanel(false);
-																Window.alert(message);
+																Window.alert("Error: " + errorDetails.getMessage());
 															}
 															
 															@Override

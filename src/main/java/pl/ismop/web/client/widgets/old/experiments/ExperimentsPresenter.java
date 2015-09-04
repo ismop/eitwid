@@ -15,6 +15,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.ExperimentsCallback;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.widgets.old.experimentitem.ExperimentItemPresenter;
 import pl.ismop.web.client.widgets.old.experiments.IExperimentsView.IExperimentsPresenter;
@@ -68,8 +69,8 @@ public class ExperimentsPresenter extends BasePresenter<IExperimentsView, MainEv
 		} else {
 			dapController.getExperiments(experimentsIds, new ExperimentsCallback() {
 				@Override
-				public void onError(int code, String message) {
-					Window.alert("Error: " + message);
+				public void onError(ErrorDetails errorDetails) {
+					Window.alert("Error: " + errorDetails.getMessage());
 				}
 				
 				@Override

@@ -36,6 +36,7 @@ import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.sensor.Sensor;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.geojson.GeoJsonFeature;
 import pl.ismop.web.client.geojson.GeoJsonFeatures;
 import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
@@ -89,9 +90,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		showProgressIndicator(true);
 		dapController.getSections(leveeId, new SectionsCallback() {
 			@Override
-			public void onError(int code, String message) {
+			public void onError(ErrorDetails errorDetails) {
 				showProgressIndicator(false);
-				Window.alert("Error: " + message);
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 
 			@Override
@@ -228,8 +229,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	public void onMarkAndCompleteProfile(String profileId) {
 		dapController.getDeviceAggregations(profileId, new DeviceAggregationsCallback() {
 			@Override
-			public void onError(int code, String message) {
-				Window.alert("Error: " + message);
+			public void onError(ErrorDetails errorDetails) {
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override
@@ -339,9 +340,9 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		
 		dapController.getSensor(sensorId, new SensorCallback() {
 			@Override
-			public void onError(int code, String message) {
+			public void onError(ErrorDetails errorDetails) {
 				selectSensor(sensorId, false);
-				Window.alert("Error: " + message);
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 
 			@Override
@@ -353,8 +354,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 				
 				dapController.getMeasurements(sensor.getId(), new MeasurementsCallback() {
 					@Override
-					public void onError(int code, String message) {
-						Window.alert("Error: " + message);
+					public void onError(ErrorDetails errorDetails) {
+						Window.alert("Error: " + errorDetails.getMessage());
 					}
 
 					@Override
@@ -420,8 +421,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private void updateSensorDetails(final String sensorId) {
 		dapController.getMeasurements(sensorId, new MeasurementsCallback() {
 			@Override
-			public void onError(int code, String message) {
-				Window.alert("Error: " + message);
+			public void onError(ErrorDetails errorDetails) {
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 
 			@Override

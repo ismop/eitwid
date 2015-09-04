@@ -53,10 +53,14 @@ import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentService;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.dap.timeline.TimelineService;
 import pl.ismop.web.client.dap.timeline.TimelinesResponse;
+import pl.ismop.web.client.error.ErrorCallback;
+import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.error.ErrorUtil;
 import pl.ismop.web.client.hypgen.Experiment;
 
 @Singleton
 public class DapController {
+	private ErrorUtil errorUtil;
 	private LeveeService leveeService;
 	private SensorService sensorService;
 	private MeasurementService measurementService;
@@ -69,10 +73,6 @@ public class DapController {
 	private ParameterService parameterService;
 	private ContextService contextService;
 	private TimelineService timelineService;
-	
-	public interface ErrorCallback {
-		void onError(int code, String message);
-	}
 	
 	public interface LeveesCallback extends ErrorCallback {
 		void processLevees(List<Levee> levees);
@@ -131,10 +131,11 @@ public class DapController {
 	}
 
 	@Inject
-	public DapController(LeveeService leveeService, SensorService sensorService, MeasurementService measurementService, SectionService sectionService,
-			ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService, DeviceService deviceService,
-			DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
+	public DapController(ErrorUtil errorUtil, LeveeService leveeService, SensorService sensorService, MeasurementService measurementService,
+			SectionService sectionService, ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService,
+			DeviceService deviceService, DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
 			TimelineService timelineService) {
+		this.errorUtil = errorUtil;
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
@@ -158,7 +159,7 @@ public class DapController {
 			
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 		});
 	}
@@ -172,7 +173,7 @@ public class DapController {
 		leveeService.changeMode(leveeId, request, new MethodCallback<LeveeResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -185,7 +186,7 @@ public class DapController {
 		leveeService.getLevee(leveeId, new MethodCallback<LeveeResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -198,7 +199,7 @@ public class DapController {
 		sensorService.getSensor(sensorId, new MethodCallback<SensorResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -214,7 +215,7 @@ public class DapController {
 		measurementService.getMeasurements(timelineId, from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -228,7 +229,7 @@ public class DapController {
 		sectionService.getSections(createSelectionQuery(top, left, bottom, right), new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -270,7 +271,7 @@ public class DapController {
 		experimentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ThreatAssessmentResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -298,7 +299,7 @@ public class DapController {
 		sensorService.getSensorsForSection(sectionId, new MethodCallback<SensorsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -312,7 +313,7 @@ public class DapController {
 		profileService.getProfilesForSection(sectionId, new MethodCallback<ProfilesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 	
 			@Override
@@ -327,15 +328,15 @@ public class DapController {
 		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, "Message: " + method.getResponse().getText());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
 				collectDevices(response.getDeviceAggregations(), result, new MutableInteger(0), new DevicesCallback() {
 					@Override
-					public void onError(int code, String message) {
-						callback.onError(code, message);
+					public void onError(ErrorDetails errorDetails) {
+						callback.onError(errorDetails);
 					}
 					
 					@Override
@@ -351,7 +352,7 @@ public class DapController {
 		parameterService.getParameters(deviceIdFilter, new MethodCallback<ParametersResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -365,7 +366,7 @@ public class DapController {
 		parameterService.getParameters(merge(deviceIds, ","), new MethodCallback<ParametersResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -379,7 +380,7 @@ public class DapController {
 		contextService.getContexts(contextType, new MethodCallback<ContextsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -393,7 +394,7 @@ public class DapController {
 		timelineService.getTimelines(contextId, paramterId, new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -407,7 +408,7 @@ public class DapController {
 		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -423,7 +424,7 @@ public class DapController {
 		measurementService.getMeasurements(merge(timelineIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -437,7 +438,7 @@ public class DapController {
 		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -451,7 +452,7 @@ public class DapController {
 		deviceAggregationService.getDeviceAggregationsForIds(aggregateId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -465,7 +466,7 @@ public class DapController {
 		deviceAggregationService.getDeviceAggregationsForType(type, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -479,7 +480,7 @@ public class DapController {
 		deviceService.getDevicesForType(deviceType, new MethodCallback<DevicesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				callback.onError(0, exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -504,7 +505,7 @@ public class DapController {
 						requestCounter.decrement();
 						
 						if(requestCounter.get() == 0) {
-							devicesCallback.onError(0, exception.getMessage());
+							devicesCallback.onError(errorUtil.processErrors(method, exception));
 						}
 					}
 	
@@ -528,7 +529,7 @@ public class DapController {
 							requestCounter.decrement();
 							
 							if(requestCounter.get() == 0) {
-								devicesCallback.onError(0, exception.getMessage());
+								devicesCallback.onError(errorUtil.processErrors(method, exception));
 							}
 						}
 	

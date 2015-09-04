@@ -6,6 +6,7 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveeCallback;
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.old.summary.ILeveeSummaryView.ILeveeSummaryPresenter;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -36,8 +37,8 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 	public void changeMode(String mode) {
 		dapController.changeLeveeMode(levee.getId(), mode, new LeveeCallback() {
 			@Override
-			public void onError(int code, String message) {
-				Window.alert(message);
+			public void onError(ErrorDetails errorDetails) {
+				Window.alert("Error: " + errorDetails.getMessage());
 			}
 
 			@Override
@@ -82,8 +83,8 @@ public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, Main
 					threatTimer = null;
 					dapController.getLevee(levee.getId(), new LeveeCallback() {
 						@Override
-						public void onError(int code, String message) {
-							Window.alert("Could not update threat level: " + message);
+						public void onError(ErrorDetails errorDetails) {
+							Window.alert("Could not update threat level: " + errorDetails.getMessage());
 						}
 
 						@Override

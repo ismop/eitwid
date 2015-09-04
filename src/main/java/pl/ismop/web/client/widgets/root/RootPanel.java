@@ -40,7 +40,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 
 	public RootPanel() {
 		initWidget(uiBinder.createAndBindUi(this));
-		mainPanel.getElement().setId("mainPanel");
 		csrf.setName(DOM.getElementById("csrfParameterName").getAttribute("content"));
 		csrf.setValue(DOM.getElementById("csrfToken").getAttribute("content"));
 	}
@@ -77,12 +76,6 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	}
 
 	@Override
-	public void setSidePanel(IsWidget view) {
-		sidePanel.clear();
-		sidePanel.add(view);
-	}
-
-	@Override
 	public void markAnalysisOption(boolean mark) {
 		analysis.setActive(mark);
 	}
@@ -90,5 +83,16 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@Override
 	public void markMonitoringOption(boolean mark) {
 		monitoring.setActive(mark);
+	}
+
+	@Override
+	public void clearPanels() {
+		mainPanel.clear();
+		sidePanel.clear();
+	}
+
+	@Override
+	public void setSidePanelWidget(IsWidget view) {
+		sidePanel.add(view);
 	}
 }

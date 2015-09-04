@@ -13,6 +13,7 @@ import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.sensor.Sensor;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.old.section.ISectionView.ISectionPresenter;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -48,16 +49,16 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 			selectedSensorId = sensorId;
 			dapController.getSensor(sensorId, new SensorCallback() {
 				@Override
-				public void onError(int code, String message) {
-					Window.alert(message);
+				public void onError(ErrorDetails errorDetails) {
+					Window.alert("Error: " + errorDetails.getMessage());
 				}
 				
 				@Override
 				public void processSensor(final Sensor sensor) {
 					dapController.getMeasurements(sensorId, new MeasurementsCallback() {
 						@Override
-						public void onError(int code, String message) {
-							Window.alert(message);
+						public void onError(ErrorDetails errorDetails) {
+							Window.alert("Error: " + errorDetails.getMessage());
 						}
 						
 						@Override

@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelMessages" field="messages"/>
+	<ui:style>
+		.panel {
+			padding: 5px;
+		}
+		
+		.progress {
+			text-align: center;
+		}
+	</ui:style>
+	<g:HTMLPanel addStyleNames="{style.panel}">
+		<b:Form>
+			<b:FieldSet>
+				<b:FormGroup>
+					<b:FormLabel text="{messages.leveeNameLabel}"/>
+					<b:FormControlStatic ui:field="leveeName" visible="false"/>
+					<b:ListBox ui:field="leveeList" visible="false"/>
+				</b:FormGroup>
+			</b:FieldSet>
+		</b:Form>
+		<g:FlowPanel ui:field="leveeProgress" addStyleNames="{style.progress}" visible="false">
+			<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.leveeProgressTitle}"/>
+		</g:FlowPanel>
+	</g:HTMLPanel>
+</ui:UiBinder>
