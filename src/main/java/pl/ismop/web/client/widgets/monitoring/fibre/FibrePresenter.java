@@ -62,7 +62,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	@Override
-	public void onSliderChanged(double value) {
+	public void onSliderChanged(Double value) {
 		for(Point point : chart.getSeries()[0].getPoints()) {
 			point.update(point.getX(), (point.getY().doubleValue() + value) % 36);
 		}

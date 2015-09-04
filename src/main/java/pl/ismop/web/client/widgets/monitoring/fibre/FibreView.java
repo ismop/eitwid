@@ -20,21 +20,23 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 
 	interface FibreViewUiBinder extends UiBinder<Widget, FibreView> {}
 	
+	private IFibrePresenter presenter;
+	
 	@UiField
 	Modal modal;
 	
 	@UiField
 	FlowPanel chartPanel;
 
-	private IFibrePresenter presenter;
-	
 	public FibreView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 	
 	@UiHandler("slider")
 	void onSlide(SlideEvent<Double> event) {
-		getPresenter().onSliderChanged(event.getValue());
+		//for some reason going through String value was necessary
+		String val = "" + event.getValue();
+		getPresenter().onSliderChanged(Double.parseDouble(val));
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IFibreView extends IsWidget {
 	interface IFibrePresenter {
-		void onSliderChanged(double value);
+		void onSliderChanged(Double value);
 	}
 
 	void showModal(boolean show);
