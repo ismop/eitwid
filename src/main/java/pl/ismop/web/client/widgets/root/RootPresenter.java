@@ -3,7 +3,6 @@ package pl.ismop.web.client.widgets.root;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -15,8 +14,14 @@ import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> implements IRootPresenter{
 	private List<String> experimentIds;
 	
-	public void onStart() {
-		RootLayoutPanel.get().add(view);
+	public void onMonitoringPanel() {
+		view.markAnalysisOption(false);
+		view.markMonitoringOption(true);
+	}
+	
+	public void onAnalysisPanel() {
+		view.markAnalysisOption(true);
+		view.markMonitoringOption(false);
 	}
 	
 	public void onExperimentCreated(Experiment experiment) {
@@ -28,27 +33,12 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	}
 
 	@Override
-	public void onShowSensors(boolean show) {
-		eventBus.showSensors(show);
+	public void onMonitoringViewOption() {
+		eventBus.monitoringPanel();
 	}
 
 	@Override
-	public void onShowExperiments() {
-		eventBus.showExperiments(experimentIds);
-	}
-
-	@Override
-	public void onShowExperiment() {
-		eventBus.showExperiment();
-	}
-
-	@Override
-	public void onShowWeatherStation() {
-		eventBus.showWeatherStation();
-	}
-
-	@Override
-	public void onShowFibreData() {
-		eventBus.showFibrePanel();
+	public void onAnalysisViewOption() {
+		eventBus.analysisPanel();
 	}
 }

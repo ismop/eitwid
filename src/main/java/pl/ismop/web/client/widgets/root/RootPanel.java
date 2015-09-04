@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.root;
 
+import org.gwtbootstrap3.client.ui.AnchorListItem;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -24,11 +26,17 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	
 	private IRootPresenter presenter;
 	
-	@UiField HTMLPanel mainPanel;
-	@UiField HTMLPanel sidePanel;
-	@UiField FormPanel logoutForm;
-	@UiField Hidden csrf;
 	@UiField RootPanelMessages messages;
+	
+	@UiField HTMLPanel mainPanel, sidePanel;
+	
+	@UiField FormPanel logoutForm;
+	
+	@UiField Hidden csrf;
+	
+	@UiField AnchorListItem monitoring;
+	
+	@UiField AnchorListItem analysis;
 
 	public RootPanel() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -48,14 +56,14 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 		Window.Location.assign("/login?logout");
 	}
 	
-	@UiHandler("fibre")
-	void showFibreData(ClickEvent event) {
-		getPresenter().onShowFibreData();
+	@UiHandler("analysis")
+	void analysisClicked(ClickEvent event) {
+		getPresenter().onAnalysisViewOption();
 	}
 	
-	@UiHandler("weather")
-	void showWeatherStation(ClickEvent event) {
-		getPresenter().onShowWeatherStation();
+	@UiHandler("monitoring")
+	void monitoringClicke(ClickEvent event) {
+		getPresenter().onMonitoringViewOption();
 	}
 
 	@Override
@@ -72,5 +80,15 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	public void setSidePanel(IsWidget view) {
 		sidePanel.clear();
 		sidePanel.add(view);
+	}
+
+	@Override
+	public void markAnalysisOption(boolean mark) {
+		analysis.setActive(mark);
+	}
+
+	@Override
+	public void markMonitoringOption(boolean mark) {
+		monitoring.setActive(mark);
 	}
 }

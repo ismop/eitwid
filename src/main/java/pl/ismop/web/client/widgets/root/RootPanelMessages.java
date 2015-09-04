@@ -6,6 +6,6 @@ public interface RootPanelMessages extends Messages {
 	String logoutLabel();
 	String experimentsLabel(int numberOfExperiments);
 	String experimentLabel();
-	String weatherLabel();
-	String fibreLabel();
+	String monitoringLabel();
+	String analysisLabel();
 }

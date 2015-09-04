@@ -16,8 +16,8 @@
 			<b:Navbar>
 				<b:NavbarBrand href="/">ISMOP</b:NavbarBrand>
 					<b:NavbarNav>
-						<b:AnchorListItem ui:field="weather"><ui:text from="{messages.weatherLabel}"/></b:AnchorListItem>
-						<b:AnchorListItem ui:field="fibre"><ui:text from="{messages.fibreLabel}"/></b:AnchorListItem>
+						<b:AnchorListItem ui:field="monitoring"><ui:text from="{messages.monitoringLabel}"/></b:AnchorListItem>
+						<b:AnchorListItem ui:field="analysis"><ui:text from="{messages.analysisLabel}"/></b:AnchorListItem>
 					</b:NavbarNav>
 					<b:NavbarText pull="RIGHT">
 						<b:NavbarLink ui:field="logout" href="/logout" icon="SIGN_OUT" text="{messages.logoutLabel}" addStyleNames="{style.logout}"/>
