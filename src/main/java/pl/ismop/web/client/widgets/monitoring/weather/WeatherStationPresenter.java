@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.weather;
+package pl.ismop.web.client.widgets.monitoring.weather;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,9 +42,9 @@ import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.monitoring.weather.GroupedReadings.LatestReading;
+import pl.ismop.web.client.widgets.monitoring.weather.IWeatherStationView.IWeatherStationPresenter;
 import pl.ismop.web.client.widgets.old.plot.Readings;
-import pl.ismop.web.client.widgets.old.weather.GroupedReadings.LatestReading;
-import pl.ismop.web.client.widgets.old.weather.IWeatherStationView.IWeatherStationPresenter;
 
 @Presenter(view = WeatherStationView.class)
 public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, MainEventBus> implements IWeatherStationPresenter {
@@ -56,7 +56,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		this.dapController = dapController;
 	}
 	
-	public void onShowWeatherStation() {
+	public void onShowWeatherPanel() {
 		view.getChartVisibility().setVisible(false);
 		view.showModal();
 		loadParameters();

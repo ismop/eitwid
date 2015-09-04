@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.weather;
+package pl.ismop.web.client.widgets.monitoring.weather;
 
 import com.google.gwt.i18n.client.Messages;
 

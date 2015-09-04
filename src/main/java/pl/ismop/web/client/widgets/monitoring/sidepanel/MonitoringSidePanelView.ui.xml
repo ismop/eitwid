@@ -25,5 +25,7 @@
 		<g:FlowPanel ui:field="leveeProgress" addStyleNames="{style.progress}" visible="false">
 			<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.leveeProgressTitle}"/>
 		</g:FlowPanel>
+		<b:Button ui:field="showWeather" text="{messages.showWeatherLabel}" block="true"/>
+		<b:Button ui:field="showFibre" text="{messages.showFibreLabel}" block="true"/>
 	</g:HTMLPanel>
 </ui:UiBinder>

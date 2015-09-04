@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.weather;
+package pl.ismop.web.client.widgets.monitoring.weather;
 
 import org.gwtbootstrap3.client.ui.Container;
 import org.gwtbootstrap3.client.ui.Description;

@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.fibre;
+package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 

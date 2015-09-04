@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.fibre;
+package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import java.util.Random;
 
@@ -14,7 +14,7 @@ import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
-import pl.ismop.web.client.widgets.old.fibre.IFibreView.IFibrePresenter;
+import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
@@ -22,7 +22,6 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	
 	public void onShowFibrePanel() {
 		view.showModal(true);
-		
 
 		if(chart != null) {
 			chart.removeAllSeries();

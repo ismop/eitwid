@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.fibre;
+package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.extras.slider.client.ui.base.event.SlideEvent;
@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
-import pl.ismop.web.client.widgets.old.fibre.IFibreView.IFibrePresenter;
+import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 
 public class FibreView extends Composite implements IFibreView, ReverseViewInterface<IFibrePresenter> {
 	private static FibreViewUiBinder uiBinder = GWT.create(FibreViewUiBinder.class);

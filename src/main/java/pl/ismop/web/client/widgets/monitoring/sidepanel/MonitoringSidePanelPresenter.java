@@ -14,9 +14,10 @@ import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.monitoring.sidepanel.IMonitoringSidePanel.IMonitoringSidePanelPresenter;
 
 @Presenter(view = MonitoringSidePanelView.class, multiple = true)
-public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSidePanel, MainEventBus> {
+public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSidePanel, MainEventBus> implements IMonitoringSidePanelPresenter {
 	private DapController dapController;
 
 	@Inject
@@ -29,6 +30,16 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		view.showLeveeList(false);
 		view.showLeveeProgress(true);
 		loadLevees();
+	}
+
+	@Override
+	public void handleShowFibreClick() {
+		eventBus.showFibrePanel();
+	}
+
+	@Override
+	public void handleShowWeatherClick() {
+		eventBus.showWeatherPanel();
 	}
 
 	private void loadLevees() {

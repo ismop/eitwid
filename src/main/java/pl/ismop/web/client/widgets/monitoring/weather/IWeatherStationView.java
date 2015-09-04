@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.weather;
+package pl.ismop.web.client.widgets.monitoring.weather;
 
 import org.moxieapps.gwt.highcharts.client.StockChart;
 

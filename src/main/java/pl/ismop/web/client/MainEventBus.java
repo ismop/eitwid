@@ -7,6 +7,8 @@ import com.mvp4g.client.event.EventBusWithLookup;
 
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
+import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
+import pl.ismop.web.client.widgets.monitoring.weather.WeatherStationPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
 @Events(startPresenter = RootPresenter.class, historyOnStart = true)
@@ -20,4 +22,10 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = ErrorPresenter.class)
 	void showError(ErrorDetails errorDetails);
+
+	@Event(handlers = WeatherStationPresenter.class)
+	void showWeatherPanel();
+
+	@Event(handlers = FibrePresenter.class)
+	void showFibrePanel();
 }

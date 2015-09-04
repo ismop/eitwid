@@ -4,7 +4,9 @@ import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IMonitoringSidePanel extends IsWidget {
 	interface IMonitoringSidePanelPresenter {
-		
+		void handleShowFibreClick();
+
+		void handleShowWeatherClick();
 	}
 
 	void showLeveeName(boolean show);

@@ -8,4 +8,8 @@ public interface MonitoringSidePanelMessages extends Messages {
 	String leveeProgressTitle();
 
 	String noLeveesLabel();
+	
+	String showWeatherLabel();
+	
+	String showFibreLabel();
 }
