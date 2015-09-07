@@ -1,7 +1,6 @@
 To run development environment do the following:
 
-- `mvn compile gwt:compile`,
-- `mvn gwt:run-codeserver`
+- `mvn gwt:run`,
 
 ... and in the second console window:
 
