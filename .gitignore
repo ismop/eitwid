@@ -5,3 +5,5 @@
 /ismop-web.log
 /ismop-db*
 /.gwt/
+/web.iml
+/.idea
