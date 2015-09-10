@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Random;
 
 import com.google.common.eventbus.EventBus;
+import com.google.gwt.core.client.GWT;
 import org.gwtbootstrap3.client.ui.Label;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -56,10 +57,14 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		if (slider == null) {
 			slider = eventBus.addHandler(SliderPresenter.class);
+			slider.setEventsListener(new SliderPresenter.Events() {
+				@Override
+				public void onDateChanged(Date currentDate) {
+					GWT.log("Load fiber data from DAP using following date: " + currentDate);
+				}
+			});
 			view.setSlider(slider.getView());
 		}
-
-		Date currentDate = new Date();
 
 		view.setChart(chart);
 		view.setEmbenkment(status);

@@ -15,10 +15,10 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
     public static final int STEP = 900000; // 15 minutes
     public static final long DAY_IN_MS = 1000 * 60 * 60 * 24;
 
-    public interface Events {
-        void onStartDateChanged(Date startDate);
-        void onEndDateChanged(Date endDate);
-        void onDateChanged(Date currentDate);
+    public static class Events {
+        public void onStartDateChanged(Date startDate) {}
+        public void onEndDateChanged(Date endDate) {}
+        public void onDateChanged(Date currentDate) {}
     }
 
     private Date endDate;
@@ -51,7 +51,6 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
 
     public void setEndDate(Date date) {
         view.setEndDate(date);
-
         onEndDateChanged(date);
     }
 
@@ -92,16 +91,7 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
         this.eventsListener = eventsListener;
         if(eventsListener == null) {
             // NullObject value to not check every time if eventsListener is null.
-            this.eventsListener = new Events() {
-                @Override
-                public void onStartDateChanged(Date startDate) {}
-
-                @Override
-                public void onEndDateChanged(Date endDate) {}
-
-                @Override
-                public void onDateChanged(Date currentDate) {}
-            };
+            this.eventsListener = new Events();
         }
     }
 }
