@@ -6,4 +6,10 @@ public interface IMapView extends IsWidget {
 	interface IMapPresenter {
 		
 	}
+
+	void adjustBounds();
+
+	void addGeoJson(String geoJsonValue);
+
+	void initMap();
 }

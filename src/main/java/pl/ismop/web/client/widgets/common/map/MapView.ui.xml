@@ -3,8 +3,10 @@
 		xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
 		.panel {
+			width: 100%;
+			height: 100%;
 		}
 	</ui:style>
-	<g:HTMLPanel ui:field="panel" addStyleNames="{style.panel}">
-	</g:HTMLPanel>
+	<g:FlowPanel ui:field="panel" addStyleNames="{style.panel}">
+	</g:FlowPanel>
 </ui:UiBinder>

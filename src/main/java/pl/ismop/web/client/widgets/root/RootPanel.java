@@ -26,17 +26,23 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	
 	private IRootPresenter presenter;
 	
-	@UiField RootPanelMessages messages;
+	@UiField
+	RootPanelMessages messages;
 	
-	@UiField HTMLPanel mainPanel, sidePanel;
+	@UiField
+	HTMLPanel mainPanel, sidePanel;
 	
-	@UiField FormPanel logoutForm;
+	@UiField
+	FormPanel logoutForm;
 	
-	@UiField Hidden csrf;
+	@UiField
+	Hidden csrf;
 	
-	@UiField AnchorListItem monitoring;
+	@UiField
+	AnchorListItem monitoring;
 	
-	@UiField AnchorListItem analysis;
+	@UiField
+	AnchorListItem analysis;
 
 	public RootPanel() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -94,5 +100,10 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@Override
 	public void setSidePanelWidget(IsWidget view) {
 		sidePanel.add(view);
+	}
+
+	@Override
+	public void setMainPanelWidget(IsWidget view) {
+		mainPanel.add(view);
 	}
 }
