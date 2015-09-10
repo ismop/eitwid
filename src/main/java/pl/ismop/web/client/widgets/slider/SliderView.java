@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 import org.gwtbootstrap3.extras.datetimepicker.client.ui.DateTimePicker;
 import org.gwtbootstrap3.extras.datetimepicker.client.ui.base.events.ChangeDateEvent;
-import org.gwtbootstrap3.extras.datetimepicker.client.ui.base.events.ChangeDateHandler;
 import org.gwtbootstrap3.extras.slider.client.ui.Slider;
 import org.gwtbootstrap3.extras.slider.client.ui.base.FormatterCallback;
 import org.gwtbootstrap3.extras.slider.client.ui.base.event.SlideStopEvent;
@@ -44,38 +43,37 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
                 return presenter.getLabel(v);
             }
         });
+    }
 
-        startDate.addChangeDateHandler(new ChangeDateHandler() {
-            @Override
-            public void onChangeDate(ChangeDateEvent changeDateEvent) {
-                GWT.log("Start date changed: " + startDate.getValue());
-                presenter.onStartDateChanged(startDate.getValue());
-            }
-        });
+    @UiHandler("startDate")
+    void onStartDateChanged(ChangeDateEvent event) {
+        presenter.onStartDateChanged(startDate.getValue());
+        presenter.onSliderChanged(slider.getValue());
+    }
 
-        endDate.addChangeDateHandler(new ChangeDateHandler() {
-            @Override
-            public void onChangeDate(ChangeDateEvent changeDateEvent) {
-                presenter.onEndDateChanged(endDate.getValue());
-            }
-        });
+    @UiHandler("endDate")
+    void onEndDateChanged(ChangeDateEvent event) {
+        presenter.onEndDateChanged(endDate.getValue());
+        presenter.onSliderChanged(slider.getValue());
     }
 
     @UiHandler("slider")
     void onSlideStop(SlideStopEvent<Double> event) {
         //for some reason going through String value was necessary
         String val = "" + event.getValue();
-        getPresenter().onSliderChanged(Double.parseDouble(val));
+        presenter.onSliderChanged(Double.parseDouble(val));
     }
 
     @Override
     public void setStartDate(Date date) {
         startDate.setValue(date);
+        endDate.setStartDate(date);
     }
 
     @Override
     public void setEndDate(Date date) {
         endDate.setValue(date);
+        startDate.setEndDate(date);
     }
 
     @Override

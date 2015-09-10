@@ -18,7 +18,7 @@
                 <b:Column size="MD_8">
                     <!-- flow panel is needed since s:Slider is buggy and there is not possible to add style -->
                     <g:FlowPanel addStyleNames="{style.slider}">
-                        <s:Slider ui:field="slider" min="0" max="2000000" value="1" step="1" width="100%"/>
+                        <s:Slider ui:field="slider" min="0" max="200" value="1" step="1" width="100%"/>
                     </g:FlowPanel>
                 </b:Column>
                 <b:Column size="MD_2">
