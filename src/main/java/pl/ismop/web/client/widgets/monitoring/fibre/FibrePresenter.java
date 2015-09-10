@@ -1,7 +1,10 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
+import java.util.Date;
 import java.util.Random;
 
+import com.google.common.eventbus.EventBus;
+import org.gwtbootstrap3.client.ui.Label;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -15,10 +18,13 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
+import pl.ismop.web.client.widgets.slider.SliderPresenter;
+import pl.ismop.web.client.widgets.slider.SliderView;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
 	private Chart chart;
+	private SliderPresenter slider;
 	
 	public void onShowFibrePanel() {
 		view.showModal(true);
@@ -29,8 +35,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		}
 		
 		chart = new Chart().
-				setChartTitle(new ChartTitle().
-						setText("Pomiary temperatury światłowodu")).
+				setChartTitle(new ChartTitle()).
 				setWidth(1100);
 		chart.getXAxis().setPlotBands(createPlotBands(chart.getXAxis()));
 		chart.getYAxis().
@@ -39,14 +44,25 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		chart.addSeries(chart.createSeries()
 				.setName("Metr bieżacy światłowodu [m]")
 				.setType(Type.SPLINE));
-		
+
 		Random random = new Random();
-		
+
 		for(int meter = 0; meter < 440; meter = meter + 15) {
 			chart.getSeries()[0].addPoint(meter, random.nextInt(25) + 10);
 		}
-		
+
+		Label status = new Label();
+		status.setText("Testing string");
+
+		if (slider == null) {
+			slider = eventBus.addHandler(SliderPresenter.class);
+			view.setSlider(slider.getView());
+		}
+
+		Date currentDate = new Date();
+
 		view.setChart(chart);
+		view.setEmbenkment(status);
 	}
 
 	private PlotBand[] createPlotBands(XAxis axis) {
@@ -64,7 +80,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	@Override
 	public void onSliderChanged(Double value) {
 		for(Point point : chart.getSeries()[0].getPoints()) {
-			point.update(point.getX(), (point.getY().doubleValue() + value) % 36);
+			point.update(point.getX(), (point.getY().doubleValue() + value) % 36, false);
 		}
+		chart.redraw();
 	}
 }

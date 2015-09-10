@@ -9,7 +9,8 @@
 		<b:Modal ui:field="modal" title="Pomiary światłowodowe" fade="true" width="1200px">
 			<b:ModalBody>
 				<g:FlowPanel ui:field="chartPanel"/>
-				<s:Slider ui:field="slider" min="0" max="200" value="1" step="1" width="1000px"/>
+				<g:FlowPanel ui:field="sliderPanel"/>
+				<g:FlowPanel ui:field="embankmentPanel"/>
 			</b:ModalBody>
 		</b:Modal>
 	</g:HTMLPanel>
