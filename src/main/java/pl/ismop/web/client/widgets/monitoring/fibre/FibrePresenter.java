@@ -80,18 +80,25 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 						.setFormatter(new ToolTipFormatter() {
 							public String format(ToolTipData toolTipData) {
 								Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
-								return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
-										toolTipData.getXAsString() + " metr wału<br/>" +
-										toolTipData.getXAsString() + " metr światłowodu<br/>" +
-										"Sensor: " + selectedDevice.getId();
+								if (selectedDevice != null) {
+									return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
+											toolTipData.getXAsString() + " metr wału<br/>" +
+											toolTipData.getXAsString() + " metr światłowodu<br/>" +
+											"Sensor: " + selectedDevice.getId();
+								}
+								else {
+									return null;
+								}
 							}
 						})
 		);
 
+		chart.addSeries(chart.createSeries().addPoint(0, 1).addPoint(1, 1));
 		chart.showLoading("Getting fibre shape from DAP");
 		fetcher.initialize(new IDataFetcher.InitializeCallback() {
 			@Override
 			public void ready() {
+				chart.removeAllSeries();
 				chart.hideLoading();
 				loadData(slider.getSelectedDate());
 			}
