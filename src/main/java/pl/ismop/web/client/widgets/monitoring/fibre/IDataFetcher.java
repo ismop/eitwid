@@ -18,13 +18,17 @@ public interface IDataFetcher {
         void series(Map<DeviceAggregation, List<ChartPoint>> series);
     }
 
+    interface InitializeCallback extends  ErrorCallback {
+        void ready();
+    }
+
     class ChartPoint {
-        private String deviceId;
+        private Device device;
         private int x;
         private int y;
 
-        public ChartPoint(String deviceId, int x, int y) {
-            this.deviceId = deviceId;
+        public ChartPoint(Device device, int x, int y) {
+            this.device = device;
             this.x = x;
             this.y = y;
         }
@@ -37,12 +41,11 @@ public interface IDataFetcher {
             return y;
         }
 
-        public String getDeviceId() {
-            return deviceId;
+        public Device getDevice() {
+            return device;
         }
     }
 
+    void initialize(InitializeCallback callback);
     void getSeries(Date selectedDate, SeriesCallback callback);
-
-    Device getDevice(String deviceId);
 }

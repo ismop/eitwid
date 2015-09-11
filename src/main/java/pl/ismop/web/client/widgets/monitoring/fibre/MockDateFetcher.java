@@ -13,6 +13,18 @@ import java.util.Random;
  */
 public class MockDateFetcher implements IDataFetcher {
     @Override
+    public void initialize(final InitializeCallback callback) {
+        Timer timer = new Timer() {
+            @Override
+            public void run() {
+                callback.ready();
+            }
+        };
+
+        timer.schedule(new Random().nextInt(4000));
+    }
+
+    @Override
     public void getSeries(Date selectedDate, final SeriesCallback callback) {
         Timer timer = new Timer() {
             @Override
@@ -30,7 +42,9 @@ public class MockDateFetcher implements IDataFetcher {
         for (int i = 0; i < 2; i++) {
             List<ChartPoint> s = new ArrayList<>();
             for (int j = 0; j < 250; j++) {
-                s.add(new ChartPoint(i + "-" + j, j, random.nextInt(25) + 10));
+                Device d = new Device();
+                d.setId((i + 1) + "-" + (j + 1));
+                s.add(new ChartPoint(d, j, random.nextInt(25) + 10));
             }
 
             DeviceAggregation aggregation = new DeviceAggregation();
@@ -39,14 +53,5 @@ public class MockDateFetcher implements IDataFetcher {
         }
 
         return series;
-    }
-
-
-    @Override
-    public Device getDevice(String deviceId) {
-        Device device = new Device();
-        device.setId(deviceId);
-
-        return device;
     }
 }
