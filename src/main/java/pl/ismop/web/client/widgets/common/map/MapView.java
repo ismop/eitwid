@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.common.map;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -33,9 +35,16 @@ public class MapView extends Composite implements IMapView {
 	}
 
 	@Override
-	public void adjustBounds() {
-		// TODO Auto-generated method stub
-		
+	public void adjustBounds(List<List<Double>> points) {
+		if(points.size() > 1) {
+			JavaScriptObject bounds = createLatLngBounds();
+			
+			for(List<Double> point : points) {
+				extendBounds(bounds, point.get(1), point.get(0));
+			}
+			
+			applyBounds(bounds);
+		}
 	}
 
 	@Override
@@ -46,7 +55,6 @@ public class MapView extends Composite implements IMapView {
 	@Override
 	public native void initMap() /*-{
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
-			center: {lat: -34.397, lng: 150.644},
 			zoom: 8,
 			scaleControl: true
 			
@@ -56,5 +64,17 @@ public class MapView extends Composite implements IMapView {
 		var layerData = new $wnd.google.maps.Data();
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer = layerData;
 		layerData.setMap(map);
+	}-*/;
+	
+	private native JavaScriptObject createLatLngBounds() /*-{
+		return new $wnd.google.maps.LatLngBounds();
+	}-*/;
+	
+	private native void extendBounds(JavaScriptObject bounds, Double lat, Double lng) /*-{
+		bounds.extend(new $wnd.google.maps.LatLng(lat, lng));
+	}-*/;
+
+	private native void applyBounds(JavaScriptObject bounds) /*-{
+		this.@pl.ismop.web.client.widgets.common.map.MapView::map.fitBounds(bounds);
 	}-*/;
 }

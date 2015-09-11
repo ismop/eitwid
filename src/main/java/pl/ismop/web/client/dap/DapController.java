@@ -322,6 +322,20 @@ public class DapController {
 			}
 		});
 	}
+	
+	public void getProfiles(List<String> sectionIds, final ProfilesCallback callback) {
+		profileService.getProfilesForSection(merge(sectionIds, ","), new MethodCallback<ProfilesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+	
+			@Override
+			public void onSuccess(Method method, ProfilesResponse response) {
+				callback.processProfiles(response.getProfiles());
+			}
+		});
+	}
 
 	public void getDevicesRecursively(String profileId, final DevicesCallback callback) {
 		final List<Device> result = new ArrayList<>();

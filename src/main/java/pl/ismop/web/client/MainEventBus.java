@@ -5,9 +5,12 @@ import com.mvp4g.client.annotation.Events;
 import com.mvp4g.client.annotation.InitHistory;
 import com.mvp4g.client.event.EventBusWithLookup;
 
+import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
+import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
+import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
 import pl.ismop.web.client.widgets.monitoring.weather.WeatherStationPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
@@ -28,4 +31,10 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = FibrePresenter.class)
 	void showFibrePanel();
+
+	@Event(handlers = MonitoringSidePanelPresenter.class)
+	void leveeNavigatorReady();
+
+	@Event(handlers = LeveeNavigatorPresenter.class)
+	void leveeSelected(Levee levee);
 }

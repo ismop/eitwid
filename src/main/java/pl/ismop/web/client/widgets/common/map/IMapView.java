@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.common.map;
 
+import java.util.List;
+
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IMapView extends IsWidget {
@@ -7,7 +9,7 @@ public interface IMapView extends IsWidget {
 		
 	}
 
-	void adjustBounds();
+	void adjustBounds(List<List<Double>> points);
 
 	void addGeoJson(String geoJsonValue);
 
