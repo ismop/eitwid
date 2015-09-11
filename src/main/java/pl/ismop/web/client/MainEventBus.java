@@ -6,6 +6,8 @@ import com.mvp4g.client.annotation.InitHistory;
 import com.mvp4g.client.event.EventBusWithLookup;
 
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
@@ -37,4 +39,10 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void leveeSelected(Levee levee);
+
+	@Event(handlers = MonitoringSidePanelPresenter.class)
+	void showProfileMetadata(Profile profile, boolean show);
+
+	@Event(handlers = MonitoringSidePanelPresenter.class)
+	void showSectionMetadata(Section section, boolean show);
 }

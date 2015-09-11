@@ -9,15 +9,20 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.mvp4g.client.view.ReverseViewInterface;
 
-public class MapView extends Composite implements IMapView {
+import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
+
+public class MapView extends Composite implements IMapView, ReverseViewInterface<IMapPresenter> {
 	private static MapViewUiBinder uiBinder = GWT.create(MapViewUiBinder.class);
 
 	interface MapViewUiBinder extends UiBinder<Widget, MapView> {}
 	
+	private IMapPresenter presenter;
+	
 	private String elementId;
-	private JavaScriptObject map;
-	private JavaScriptObject layer;
+	
+	private JavaScriptObject map, layer;
 
 	@UiField
 	FlowPanel panel;
@@ -27,6 +32,16 @@ public class MapView extends Composite implements IMapView {
 		
 		elementId = "map-" + hashCode();
 		panel.getElement().setAttribute("id", elementId);
+	}
+	
+	@Override
+	public void setPresenter(IMapPresenter presenter) {
+		this.presenter = presenter;
+	}
+
+	@Override
+	public IMapPresenter getPresenter() {
+		return presenter;
 	}
 	
 	@Override
@@ -62,9 +77,36 @@ public class MapView extends Composite implements IMapView {
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
 		
 		var layerData = new $wnd.google.maps.Data();
+		layerData.setStyle(function(feature) {
+			return {
+				strokeColor: '#aaaaaa',
+				fillOpacity: 0.9,
+				strokeOpacity: 1.0,
+				fillColor: '#aaaaaa',
+				strokeWeight: 2
+			};
+		});
+		
+		var thisObject = this;
+		layerData.addListener('mouseover', function(event) {
+			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureHoverIn(Ljava/lang/String;Ljava/lang/String;)
+					(event.feature.getProperty('type'), event.feature.getProperty('id'));
+		});
+		layerData.addListener('mouseout', function(event) {
+			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureHoverOut(Ljava/lang/String;Ljava/lang/String;)
+					(event.feature.getProperty('type'), event.feature.getProperty('id'));
+		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer = layerData;
 		layerData.setMap(map);
 	}-*/;
+	
+	private void featureHoverIn(String type, String id) {
+		getPresenter().onFeatureHoverIn(type, id);
+	}
+	
+	private void featureHoverOut(String type, String id) {
+		getPresenter().onFeatureHoverOut(type, id);
+	}
 	
 	private native JavaScriptObject createLatLngBounds() /*-{
 		return new $wnd.google.maps.LatLngBounds();

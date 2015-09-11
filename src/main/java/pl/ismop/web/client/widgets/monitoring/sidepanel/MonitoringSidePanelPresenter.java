@@ -13,6 +13,8 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.IMonitoringSidePanel.IMonitoringSidePanelPresenter;
 
@@ -29,6 +31,23 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 	public void onLeveeNavigatorReady() {
 		if(selectedLevee != null) {
 			eventBus.leveeSelected(selectedLevee);
+		}
+	}
+	
+	public void onShowProfileMetadata(Profile profile, boolean show) {
+		view.clearMetadata();
+		
+		if(show) {
+			view.addMetadata(view.getInternalIdLabel(), profile.getId());
+		}
+	}
+	
+	public void onShowSectionMetadata(Section section, boolean show) {
+		view.clearMetadata();
+		
+		if(show) {
+			view.addMetadata(view.getInternalIdLabel(), section.getId());
+			view.addMetadata(view.getNameLabel(), section.getName());
 		}
 	}
 	

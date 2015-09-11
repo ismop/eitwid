@@ -18,6 +18,7 @@ import pl.ismop.web.client.geojson.GeoJsonFeature;
 import pl.ismop.web.client.geojson.GeoJsonFeatures;
 import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
 import pl.ismop.web.client.geojson.LineGeometry;
+import pl.ismop.web.client.geojson.PolygonGeometry;
 import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
 
 @Presenter(view = MapView.class, multiple = true)
@@ -64,13 +65,45 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		
 	}
 
+	@Override
+	public void onFeatureHoverOut(String type, String id) {
+		switch(type) {
+			case "profile":
+				if(profiles.get(id) != null) {
+					eventBus.showProfileMetadata(profiles.get(id), false);
+				}
+			break;
+			case "section":
+				if(sections.get(id) != null) {
+					eventBus.showSectionMetadata(sections.get(id), false);
+				}
+		}
+	}
+
+	@Override
+	public void onFeatureHoverIn(String type, String id) {
+		switch(type) {
+		case "profile":
+			if(profiles.get(id) != null) {
+				eventBus.showProfileMetadata(profiles.get(id), true);
+			}
+		break;
+		case "section":
+			if(sections.get(id) != null) {
+				eventBus.showSectionMetadata(sections.get(id), true);
+			}
+	}
+	}
+
 	private GeoJsonFeatures sectionToGeoJsonFeatures(Section section) {
 		PolygonShape shape = section.getShape();
-		LineGeometry lineGeometry = new LineGeometry();
-		lineGeometry.setCoordinates(shape.getCoordinates());
+		List<List<List<Double>>> polygonCoordinates = new ArrayList<List<List<Double>>>();
+		polygonCoordinates.add(shape.getCoordinates());
+		PolygonGeometry polygonGeometry = new PolygonGeometry();
+		polygonGeometry.setCoordinates(polygonCoordinates);
 		
 		GeoJsonFeature feature = new GeoJsonFeature();
-		feature.setGeometry(lineGeometry);
+		feature.setGeometry(polygonGeometry);
 		feature.setId("section" + section.getId());
 		feature.setProperties(new HashMap<String, String>());
 		feature.getProperties().put("id", section.getId());
@@ -78,7 +111,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		feature.getProperties().put("type", "section");
 		
 		List<GeoJsonFeature> features = new ArrayList<>();
-		features.add(feature);
+
+		if(String.valueOf(polygonCoordinates.get(0).get(0).get(0)).equals(String.valueOf(polygonCoordinates.get(0).get(polygonCoordinates.get(0).size() - 1).get(0)))) {
+			features.add(feature);
+		}
 		
 		return new GeoJsonFeatures(features);
 	}

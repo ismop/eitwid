@@ -1,5 +1,8 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
+import org.gwtbootstrap3.client.ui.Description;
+import org.gwtbootstrap3.client.ui.DescriptionData;
+import org.gwtbootstrap3.client.ui.DescriptionTitle;
 import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.ListBox;
 
@@ -22,13 +25,17 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	
 	private IMonitoringSidePanelPresenter presenter;
 
-	@UiField MonitoringSidePanelMessages messages;
+	@UiField
+	MonitoringSidePanelMessages messages;
 	
-	@UiField FormControlStatic leveeName;
+	@UiField
+	FormControlStatic leveeName;
 	
-	@UiField ListBox leveeList;
+	@UiField
+	ListBox leveeList;
 	
-	@UiField FlowPanel leveeProgress;
+	@UiField
+	FlowPanel leveeProgress, metadataEntries, metadataPanel;
 	
 	public MonitoringSidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -82,5 +89,34 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	@Override
 	public void setLeveeName(String leveeName) {
 		this.leveeName.setText(leveeName);
+	}
+
+	@Override
+	public String getNameLabel() {
+		return messages.nameLabel();
+	}
+
+	@Override
+	public String getInternalIdLabel() {
+		return messages.internalIdLabel();
+	}
+
+	@Override
+	public void addMetadata(String label, String value) {
+		DescriptionTitle title = new DescriptionTitle();
+		title.setText(label);
+		
+		DescriptionData data = new DescriptionData();
+		data.setText(value);
+		
+		Description description = new Description();
+		description.add(title);
+		description.add(data);
+		metadataEntries.add(description);
+	}
+
+	@Override
+	public void clearMetadata() {
+		metadataEntries.clear();
 	}
 }
