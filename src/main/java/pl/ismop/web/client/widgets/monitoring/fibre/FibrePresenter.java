@@ -44,6 +44,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		if(chart != null) {
 			chart.removeAllSeries();
 			chart.removeFromParent();
+			seriesCache.clear();
 		}
 
 		chart = new Chart().
