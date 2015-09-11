@@ -82,6 +82,11 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     }
 
     @Override
+    public Double getSelectedPoint() {
+        return slider.getValue();
+    }
+
+    @Override
     public void setPresenter(ISliderPresenter presenter) {
         this.presenter = presenter;
     }

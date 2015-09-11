@@ -18,7 +18,7 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
     public static class Events {
         public void onStartDateChanged(Date startDate) {}
         public void onEndDateChanged(Date endDate) {}
-        public void onDateChanged(Date currentDate) {}
+        public void onDateChanged(Date selectedDate) {}
     }
 
     private Date endDate;
@@ -52,6 +52,10 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
     public void setEndDate(Date date) {
         view.setEndDate(date);
         onEndDateChanged(date);
+    }
+
+    public Date getSelectedDate() {
+        return getDate(view.getSelectedPoint());
     }
 
     private long calculateNumberOfPoints() {

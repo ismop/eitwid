@@ -1,21 +1,19 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
-import org.gwtbootstrap3.client.ui.Label;
-import org.moxieapps.gwt.highcharts.client.Chart;
-
 import com.google.gwt.user.client.ui.IsWidget;
-import pl.ismop.web.client.widgets.slider.SliderView;
+
+import java.util.Date;
 
 public interface IFibreView extends IsWidget {
 	interface IFibrePresenter {
-		void onSliderChanged(Double value);
+		void onSliderChanged(Date selectedTime);
 	}
 
 	void showModal(boolean show);
 
-	void setChart(Chart chart);
+	void setChart(IsWidget chart);
 
-	void setEmbenkment(Label label);
+	void setEmbenkment(IsWidget label);
 
 	void setSlider(IsWidget slider);
 }

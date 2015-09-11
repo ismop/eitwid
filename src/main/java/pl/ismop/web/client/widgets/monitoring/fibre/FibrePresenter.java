@@ -1,73 +1,97 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
-import java.util.Date;
-import java.util.Random;
-
-import com.google.common.eventbus.EventBus;
 import com.google.gwt.core.client.GWT;
-import org.gwtbootstrap3.client.ui.Label;
-import org.moxieapps.gwt.highcharts.client.AxisTitle;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.PlotBand;
-import org.moxieapps.gwt.highcharts.client.Point;
-import org.moxieapps.gwt.highcharts.client.Series.Type;
-import org.moxieapps.gwt.highcharts.client.XAxis;
-
+import com.google.gwt.user.client.Timer;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-
+import org.gwtbootstrap3.client.ui.Label;
+import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.Series.Type;
+import org.moxieapps.gwt.highcharts.client.events.*;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.slider.SliderPresenter;
-import pl.ismop.web.client.widgets.slider.SliderView;
+
+import java.util.*;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
 	private Chart chart;
 	private SliderPresenter slider;
-	
+	private Label status;
+
+	private IDataFetcher fetcher;
+
+	public FibrePresenter() {
+		fetcher = new MockDateFetcher();
+	}
+
 	public void onShowFibrePanel() {
 		view.showModal(true);
 
+		initSlider();
+		initChart();
+		initLeveeMinimap();
+	}
+
+	private void initChart() {
 		if(chart != null) {
 			chart.removeAllSeries();
 			chart.removeFromParent();
 		}
-		
+
 		chart = new Chart().
 				setChartTitle(new ChartTitle()).
 				setWidth(1100);
-		chart.getXAxis().setPlotBands(createPlotBands(chart.getXAxis()));
-		chart.getYAxis().
-				setAxisTitle(new AxisTitle().
-						setText("Temperarura [\u00B0C]"));
-		chart.addSeries(chart.createSeries()
-				.setName("Metr bieżacy światłowodu [m]")
-				.setType(Type.SPLINE));
+//		chart.getXAxis().setPlotBands(createPlotBands(chart.getXAxis()));
+		chart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
+		chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
 
-		Random random = new Random();
+		chart.setSeriesPlotOptions(new SeriesPlotOptions().
+				setPointClickEventHandler(new PointClickEventHandler() {
+					@Override
+					public boolean onClick(PointClickEvent pointClickEvent) {
+						GWT.log(pointClickEvent.getSeriesName() + " " + pointClickEvent.getXAsString() + ":" + pointClickEvent.getYAsString());
+						return true;
+					}
+				}).
+				setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
+					@Override
+					public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
+						GWT.log("over: " + pointMouseOverEvent.getSeriesName() + " " + pointMouseOverEvent.getXAsString() + ":" + pointMouseOverEvent.getYAsString());
+						return true;
+					}
+				})
+		);
 
-		for(int meter = 0; meter < 440; meter = meter + 15) {
-			chart.getSeries()[0].addPoint(meter, random.nextInt(25) + 10);
-		}
+		loadData(slider.getSelectedDate());
 
-		Label status = new Label();
-		status.setText("Testing string");
+		view.setChart(chart);
+	}
 
+	private void initSlider() {
 		if (slider == null) {
 			slider = eventBus.addHandler(SliderPresenter.class);
 			slider.setEventsListener(new SliderPresenter.Events() {
 				@Override
-				public void onDateChanged(Date currentDate) {
-					GWT.log("Load fiber data from DAP using following date: " + currentDate);
+				public void onDateChanged(Date selectedDate) {
+					onSliderChanged(selectedDate);
 				}
 			});
 			view.setSlider(slider.getView());
 		}
+	}
 
-		view.setChart(chart);
-		view.setEmbenkment(status);
+	private void initLeveeMinimap() {
+		if (status == null) {
+			status = new Label();
+			view.setEmbenkment(status);
+		}
+
+		status.setText("Testing string");
 	}
 
 	private PlotBand[] createPlotBands(XAxis axis) {
@@ -83,10 +107,33 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	@Override
-	public void onSliderChanged(Double value) {
-		for(Point point : chart.getSeries()[0].getPoints()) {
-			point.update(point.getX(), (point.getY().doubleValue() + value) % 36, false);
-		}
-		chart.redraw();
+	public void onSliderChanged(final Date selectedDate) {
+		loadData(selectedDate);
+	}
+
+	private void loadData(Date selectedDate) {
+		chart.showLoading("Loading data from DAP");
+		fetcher.getSeries(selectedDate, new IDataFetcher.SeriesCallback() {
+			@Override
+			public void series(Map<DeviceAggregation, List<IDataFetcher.ChartPoint>> series) {
+				chart.removeAllSeries();
+				for(Map.Entry<DeviceAggregation, List<IDataFetcher.ChartPoint>> points : series.entrySet()) {
+					Series s = chart.createSeries()
+							.setName(points.getKey().getId())
+							.setType(Type.SPLINE);
+					for (IDataFetcher.ChartPoint point : points.getValue()) {
+						s.addPoint(point.getX(), point.getY());
+					}
+
+					chart.addSeries(s);
+					chart.hideLoading();
+				}
+			}
+
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				chart.showLoading("Loading data from DAP failed");
+			}
+		});
 	}
 }

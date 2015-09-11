@@ -54,7 +54,7 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	}
 
 	@Override
-	public void setChart(Chart chart) {
+	public void setChart(IsWidget chart) {
 		chartPanel.add(chart);
 	}
 
@@ -64,7 +64,7 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	}
 
 	@Override
-	public void setEmbenkment(Label label) {
+	public void setEmbenkment(IsWidget label) {
 		embankmentPanel.add(label);
 	}
 
