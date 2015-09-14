@@ -9,6 +9,8 @@ public interface IMapView extends IsWidget {
 		void onFeatureHoverOut(String type, String id);
 
 		void onFeatureHoverIn(String type, String id);
+
+		boolean isHoverListeners();
 	}
 
 	void adjustBounds(List<List<Double>> points);

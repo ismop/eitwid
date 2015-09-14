@@ -32,8 +32,6 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	
 	@Override
 	public void bind() {
-//		mapPresenter = eventBus.addHandler(MapPresenter.class);
-//		view.setMap(mapPresenter.getView());
 		eventBus.leveeNavigatorReady();
 	}
 	
@@ -43,6 +41,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			
 			if(mapPresenter == null) {
 				mapPresenter = eventBus.addHandler(MapPresenter.class);
+				mapPresenter.addHoverListeners();
 			}
 			
 			mapPresenter.reset();

@@ -26,6 +26,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	private GeoJsonFeaturesEncDec geoJsonEncoderDecoder;
 	private Map<String, Section> sections;
 	private Map<String, Profile> profiles;
+	private boolean hoverListeners;
 	
 	@Inject
 	public MapPresenter(GeoJsonFeaturesEncDec geoJsonEncoderDecoder) {
@@ -64,6 +65,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public void addHoverListeners() {
+		hoverListeners = true;
+	}
 
 	@Override
 	public void onFeatureHoverOut(String type, String id) {
@@ -95,6 +100,11 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 	}
 
+	@Override
+	public boolean isHoverListeners() {
+		return hoverListeners;
+	}
+
 	private GeoJsonFeatures sectionToGeoJsonFeatures(Section section) {
 		PolygonShape shape = section.getShape();
 		List<List<List<Double>>> polygonCoordinates = new ArrayList<List<List<Double>>>();
@@ -112,6 +122,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		
 		List<GeoJsonFeature> features = new ArrayList<>();
 
+		//checking if the multipoint shape is closed, if not it is not drawn so there are no map errors
 		if(String.valueOf(polygonCoordinates.get(0).get(0).get(0)).equals(String.valueOf(polygonCoordinates.get(0).get(polygonCoordinates.get(0).size() - 1).get(0)))) {
 			features.add(feature);
 		}

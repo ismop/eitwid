@@ -47,6 +47,10 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	@Override
 	protected void onLoad() {
 		initMap();
+		
+		if(getPresenter().isHoverListeners()) {
+			addHoverHandlers();
+		}
 	}
 
 	@Override
@@ -87,19 +91,22 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			};
 		});
 		
-		var thisObject = this;
-		layerData.addListener('mouseover', function(event) {
-			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureHoverIn(Ljava/lang/String;Ljava/lang/String;)
-					(event.feature.getProperty('type'), event.feature.getProperty('id'));
-		});
-		layerData.addListener('mouseout', function(event) {
-			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureHoverOut(Ljava/lang/String;Ljava/lang/String;)
-					(event.feature.getProperty('type'), event.feature.getProperty('id'));
-		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer = layerData;
 		layerData.setMap(map);
 	}-*/;
 	
+	private native void addHoverHandlers() /*-{
+		var thisObject = this;
+		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addListener('mouseover', function(event) {
+			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureHoverIn(Ljava/lang/String;Ljava/lang/String;)
+					(event.feature.getProperty('type'), event.feature.getProperty('id'));
+		});
+		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addListener('mouseout', function(event) {
+			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureHoverOut(Ljava/lang/String;Ljava/lang/String;)
+					(event.feature.getProperty('type'), event.feature.getProperty('id'));
+		});
+	}-*/;
+
 	private void featureHoverIn(String type, String id) {
 		getPresenter().onFeatureHoverIn(type, id);
 	}

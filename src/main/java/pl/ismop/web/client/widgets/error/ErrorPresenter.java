@@ -20,7 +20,6 @@ public class ErrorPresenter extends BaseEventHandler<MainEventBus> {
 	@Inject
 	public ErrorPresenter(ErrorMessages errorMessages) {
 		this.errorMessages = errorMessages;
-		
 	}
 	
 	public void onShowError(ErrorDetails errorDetails) {
