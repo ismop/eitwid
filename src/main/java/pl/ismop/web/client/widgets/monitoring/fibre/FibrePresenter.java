@@ -90,8 +90,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		}
 
 		chart = new Chart().
-				setChartTitle(new ChartTitle()).
-				setWidth(1100);
+				setChartTitle(new ChartTitle());
 		chart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
 		chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
 

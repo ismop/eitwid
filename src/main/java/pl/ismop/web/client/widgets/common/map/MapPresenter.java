@@ -33,6 +33,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	private Map<String, Device> devices;
 	private Map<String, DeviceAggregation> deviceAggregations;
 	private boolean hoverListeners;
+	private boolean clickListeners;
 	
 	@Inject
 	public MapPresenter(GeoJsonFeaturesEncDec geoJsonEncoderDecoder) {
@@ -53,7 +54,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			
 			if(section.getShape() != null) {
 				view.addGeoJson(geoJsonEncoderDecoder.encode(sectionToGeoJsonFeatures(section)).toString());
-				view.adjustBounds(collectPoints());
+				view.adjustBounds(collectAllPoints());
 			}
 		}
 	}
@@ -68,7 +69,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			
 			if(profile.getShape() != null) {
 				view.addGeoJson(geoJsonEncoderDecoder.encode(profileToGeoJsonFeatures(profile)).toString());
-				view.adjustBounds(collectPoints());
+				view.adjustBounds(collectAllPoints());
 			}
 		}
 	}
@@ -85,25 +86,32 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		hoverListeners = true;
 	}
 	
+	public void addClickListeners() {
+		clickListeners = true;
+	}
+	
 	public void addDevice(Device device) {
 		if(device.getPlacement() != null && !devices.keySet().contains(device.getId())) {
 			devices.put(device.getId(), device);
 			
 			PointShape shape = device.getPlacement();
-			PointGeometry pointGeometry = new PointGeometry();
-			pointGeometry.setCoordinates(shape.getCoordinates());
 			
-			GeoJsonFeature feature = new GeoJsonFeature();
-			feature.setGeometry(pointGeometry);
-			feature.setId("device-" + device.getId());
-			feature.setProperties(new HashMap<String, String>());
-			feature.getProperties().put("id", device.getId());
-			feature.getProperties().put("name", feature.getId());
-			feature.getProperties().put("type", "device");
-			
-			List<GeoJsonFeature> features = new ArrayList<>();
-			features.add(feature);
-			view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+			if(shape != null) {
+				PointGeometry pointGeometry = new PointGeometry();
+				pointGeometry.setCoordinates(shape.getCoordinates());
+				
+				GeoJsonFeature feature = new GeoJsonFeature();
+				feature.setGeometry(pointGeometry);
+				feature.setId("device-" + device.getId());
+				feature.setProperties(new HashMap<String, String>());
+				feature.getProperties().put("id", device.getId());
+				feature.getProperties().put("name", feature.getId());
+				feature.getProperties().put("type", "device");
+				
+				List<GeoJsonFeature> features = new ArrayList<>();
+				features.add(feature);
+				view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+			}
 		}
 	}
 	
@@ -115,24 +123,27 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 	
 	public void addDeviceAggregation(DeviceAggregation deviceAggregation) {
-		if(deviceAggregation.getPlacement() != null && deviceAggregations.keySet().contains(deviceAggregation.getId())) {
+		if(deviceAggregation.getPlacement() != null && !deviceAggregations.keySet().contains(deviceAggregation.getId())) {
 			deviceAggregations.put(deviceAggregation.getId(), deviceAggregation);
 			
 			PointShape shape = deviceAggregation.getPlacement();
-			PointGeometry pointGeometry = new PointGeometry();
-			pointGeometry.setCoordinates(shape.getCoordinates());
 			
-			GeoJsonFeature feature = new GeoJsonFeature();
-			feature.setGeometry(pointGeometry);
-			feature.setId("deviceAggregation-" + deviceAggregation.getId());
-			feature.setProperties(new HashMap<String, String>());
-			feature.getProperties().put("id", deviceAggregation.getId());
-			feature.getProperties().put("name", feature.getId());
-			feature.getProperties().put("type", "deviceAggregation");
-			
-			List<GeoJsonFeature> features = new ArrayList<>();
-			features.add(feature);
-			view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+			if(shape != null) {
+				PointGeometry pointGeometry = new PointGeometry();
+				pointGeometry.setCoordinates(shape.getCoordinates());
+				
+				GeoJsonFeature feature = new GeoJsonFeature();
+				feature.setGeometry(pointGeometry);
+				feature.setId("deviceAggregation-" + deviceAggregation.getId());
+				feature.setProperties(new HashMap<String, String>());
+				feature.getProperties().put("id", deviceAggregation.getId());
+				feature.getProperties().put("name", feature.getId());
+				feature.getProperties().put("type", "deviceAggregation");
+				
+				List<GeoJsonFeature> features = new ArrayList<>();
+				features.add(feature);
+				view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+			}
 		}
 	}
 	
@@ -176,6 +187,36 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	@Override
 	public boolean isHoverListeners() {
 		return hoverListeners;
+	}
+
+	@Override
+	public boolean isClickListeners() {
+		return clickListeners;
+	}
+
+	@Override
+	public void onFeatureClick(String type, String id) {
+		switch(type) {
+			case "profile":
+				if(profiles.get(id) != null) {
+					eventBus.profileClicked(profiles.get(id));
+				}
+			break;
+			case "section":
+				if(sections.get(id) != null) {
+					eventBus.sectionClicked(sections.get(id));
+				}
+		}
+	}
+
+	public void zoomOnSection(Section section) {
+		if(!sections.keySet().contains(section.getId())) {
+			addSection(section);
+		}
+		
+		if(sections.keySet().contains(section.getId())) {
+			view.adjustBounds(section.getShape().getCoordinates());
+		}
 	}
 
 	private GeoJsonFeatures sectionToGeoJsonFeatures(Section section) {
@@ -222,7 +263,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		return new GeoJsonFeatures(features);
 	}
 
-	private List<List<Double>> collectPoints() {
+	private List<List<Double>> collectAllPoints() {
 		List<List<Double>> allPoints = new ArrayList<List<Double>>();
 
 		for(Section section : sections.values()) {

@@ -51,6 +51,10 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		if(getPresenter().isHoverListeners()) {
 			addHoverHandlers();
 		}
+		
+		if(getPresenter().isClickListeners()) {
+			addClickListeners();
+		}
 	}
 
 	@Override
@@ -131,6 +135,10 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		getPresenter().onFeatureHoverOut(type, id);
 	}
 	
+	private void featureClick(String type, String id) {
+		getPresenter().onFeatureClick(type, id);
+	}
+	
 	private int getFeatureColor(String featureId) {
 		if(featureId.startsWith("profile")) {
 			return 6;
@@ -151,6 +159,14 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		});
 	}-*/;
 	
+	private native void addClickListeners() /*-{
+		var thisObject = this;
+		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addListener('click', function(event) {
+			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureClick(Ljava/lang/String;Ljava/lang/String;)
+					(event.feature.getProperty('type'), event.feature.getProperty('id'));
+		});
+	}-*/;
+
 	private native JavaScriptObject createLatLngBounds() /*-{
 		return new $wnd.google.maps.LatLngBounds();
 	}-*/;

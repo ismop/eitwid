@@ -5,13 +5,18 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.DapController.DeviceAggregationsCallback;
+import pl.ismop.web.client.dap.DapController.DevicesCallback;
 import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
+import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
@@ -42,6 +47,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			if(mapPresenter == null) {
 				mapPresenter = eventBus.addHandler(MapPresenter.class);
 				mapPresenter.addHoverListeners();
+				mapPresenter.addClickListeners();
 			}
 			
 			mapPresenter.reset();
@@ -83,6 +89,54 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				}
 			});
 		}
+	}
+	
+	public void onProfileClicked(Profile profile) {
+		GWT.log("Profile clicked with id " + profile.getId());
+	}
+	
+	public void onSectionClicked(Section section) {
+		mapPresenter.zoomOnSection(section);
+		//TODO(DH): add spinner somewhere
+		dapController.getDeviceAggregationsForSectionId(section.getId(), new DeviceAggregationsCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+			
+			@Override
+			public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
+				for(DeviceAggregation deviceAggregation : deviceAggreagations) {
+					mapPresenter.addDeviceAggregation(deviceAggregation);
+				}
+			}
+		});
+		dapController.getFibreDevicesForSection(section.getId(), new DevicesCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+			
+			@Override
+			public void processDevices(List<Device> devices) {
+				for(Device device : devices) {
+					mapPresenter.addDevice(device);
+				}
+			}
+		});
+		dapController.getDevicesForSection(section.getId(), new DevicesCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+			
+			@Override
+			public void processDevices(List<Device> devices) {
+				for(Device device : devices) {
+					mapPresenter.addDevice(device);
+				}
+			}
+		});
 	}
 	
 	private List<String> collectSectionIds(List<Section> sections) {

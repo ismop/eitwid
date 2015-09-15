@@ -478,6 +478,20 @@ public class DapController {
 		});
 	}
 	
+	public void getDeviceAggregationsForSectionId(String sectionIdFilter, final DeviceAggregationsCallback callback) {
+		deviceAggregationService.getDeviceAggregationsForSectionIds(sectionIdFilter, new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				callback.processDeviceAggregations(response.getDeviceAggregations());
+			}
+		});
+	}
+
 	public void getDevicesRecursivelyForAggregate(String aggregateId, final DevicesCallback callback) {
 		deviceAggregationService.getDeviceAggregationsForIds(aggregateId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
@@ -592,6 +606,34 @@ public class DapController {
 		} else {
 			devicesCallback.processDevices(result);
 		}
+	}
+
+	public void getFibreDevicesForSection(String sectionId, final DevicesCallback callback) {
+		deviceService.getDevicesForTypeAndSectionId("fibre", sectionId, new MethodCallback<DevicesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DevicesResponse response) {
+				callback.processDevices(response.getDevices());
+			}
+		});
+	}
+
+	public void getDevicesForSection(String sectionId, final DevicesCallback callback) {
+		deviceService.getDevicesForSectionId(sectionId, new MethodCallback<DevicesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DevicesResponse response) {
+				callback.processDevices(response.getDevices());
+			}
+		});
 	}
 
 	private String merge(List<String> chunks, String delimeter) {

@@ -45,4 +45,10 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showSectionMetadata(Section section, boolean show);
+
+	@Event(handlers = LeveeNavigatorPresenter.class)
+	void profileClicked(Profile profile);
+
+	@Event(handlers = LeveeNavigatorPresenter.class)
+	void sectionClicked(Section section);
 }
