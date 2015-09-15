@@ -12,6 +12,13 @@
 		.progress {
 			text-align: center;
 		}
+		
+		.metadata {
+			position: fixed;
+			bottom: 0px;
+			padding: 5px;
+			height: 30%;
+		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
 		<b:Form>
@@ -28,5 +35,9 @@
 		</g:FlowPanel>
 		<b:Button ui:field="showWeather" text="{messages.showWeatherLabel}" block="true"/>
 		<b:Button ui:field="showFibre" text="{messages.showFibreLabel}" block="true"/>
+		<g:FlowPanel ui:field="metadataPanel" addStyleNames="{style.metadata}">
+			<b:Heading size="H4" text="{messages.metadataHeading}" subText="{messages.metadataHelp}"/>
+			<g:FlowPanel ui:field="metadataEntries"/>
+		</g:FlowPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

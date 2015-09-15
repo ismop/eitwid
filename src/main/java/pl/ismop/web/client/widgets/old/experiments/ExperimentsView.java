@@ -1,8 +1,5 @@
 package pl.ismop.web.client.widgets.old.experiments;
 
-import pl.ismop.web.client.widgets.old.experimentitem.IExperimentItemView;
-import pl.ismop.web.client.widgets.old.experiments.IExperimentsView.IExperimentsPresenter;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -11,6 +8,9 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
+
+import pl.ismop.web.client.widgets.old.experimentitem.IExperimentItemView;
+import pl.ismop.web.client.widgets.old.experiments.IExperimentsView.IExperimentsPresenter;
 
 public class ExperimentsView extends Composite implements IExperimentsView, ReverseViewInterface<IExperimentsPresenter> {
 	private static ExperimentsViewUiBinder uiBinder = GWT.create(ExperimentsViewUiBinder.class);

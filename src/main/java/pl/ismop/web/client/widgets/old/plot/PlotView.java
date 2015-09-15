@@ -1,7 +1,5 @@
 package pl.ismop.web.client.widgets.old.plot;
 
-import org.moxieapps.gwt.highcharts.client.Chart;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

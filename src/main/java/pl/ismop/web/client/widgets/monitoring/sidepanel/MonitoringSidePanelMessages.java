@@ -12,4 +12,12 @@ public interface MonitoringSidePanelMessages extends Messages {
 	String showWeatherLabel();
 	
 	String showFibreLabel();
+	
+	String metadataHeading();
+	
+	String metadataHelp();
+
+	String nameLabel();
+
+	String internalIdLabel();
 }

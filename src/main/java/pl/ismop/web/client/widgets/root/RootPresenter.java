@@ -4,12 +4,14 @@ import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
 import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 
 @Presenter(view = RootPanel.class)
 public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> implements IRootPresenter{
 	private MonitoringSidePanelPresenter monitoringSidePanelPresenter;
+	private LeveeNavigatorPresenter monitoringLeveeNavigator;
 
 	public void onMonitoringPanel() {
 		view.markAnalysisOption(false);
@@ -22,6 +24,12 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		
 		monitoringSidePanelPresenter.reset();
 		view.setSidePanelWidget(monitoringSidePanelPresenter.getView());
+		
+		if(monitoringLeveeNavigator == null) {
+			monitoringLeveeNavigator = eventBus.addHandler(LeveeNavigatorPresenter.class);
+		}
+		
+		view.setMainPanelWidget(monitoringLeveeNavigator.getView());
 	}
 	
 	public void onAnalysisPanel() {

@@ -20,4 +20,12 @@ public interface IMonitoringSidePanel extends IsWidget {
 	void addLeveeOption(String leveeid, String leveeName);
 
 	void setLeveeName(String leveeName);
+
+	String getNameLabel();
+
+	String getInternalIdLabel();
+
+	void addMetadata(String label, String value);
+
+	void clearMetadata();
 }

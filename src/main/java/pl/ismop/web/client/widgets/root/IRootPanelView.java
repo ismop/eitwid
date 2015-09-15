@@ -16,4 +16,6 @@ public interface IRootPanelView extends IsWidget {
 	void clearPanels();
 
 	void setSidePanelWidget(IsWidget view);
+
+	void setMainPanelWidget(IsWidget view);
 }
