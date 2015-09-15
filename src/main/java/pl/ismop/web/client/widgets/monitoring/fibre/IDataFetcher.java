@@ -7,6 +7,7 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorCallback;
 import scala.Array;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +25,14 @@ public interface IDataFetcher {
     }
 
     class ChartPoint {
-        private Device device;
-        private int x;
-        private int y;
+        private final Device device;
+        private final Section section;
+        private final int x;
+        private final int y;
 
-        public ChartPoint(Device device, int x, int y) {
+        public ChartPoint(Device device, Section section, int x, int y) {
             this.device = device;
+            this.section = section;
             this.x = x;
             this.y = y;
         }
@@ -45,9 +48,14 @@ public interface IDataFetcher {
         public Device getDevice() {
             return device;
         }
+
+        public Section getSection() {
+            return section;
+        }
     }
 
     void initialize(InitializeCallback callback);
     void getSeries(Date selectedDate, SeriesCallback callback);
     Section getDeviceSection(Device device);
+    Collection<Section> getSections();
 }

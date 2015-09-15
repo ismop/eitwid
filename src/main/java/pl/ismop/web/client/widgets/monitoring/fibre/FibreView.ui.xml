@@ -5,7 +5,7 @@
 		xmlns:s="urn:import:org.gwtbootstrap3.extras.slider.client.ui">
 	<ui:style>
 		.rightPanel {
-			height: 400px;
+			height: 440px;
 		}
 	</ui:style>
 	<g:HTMLPanel>
@@ -13,10 +13,10 @@
 			<b:ModalBody>
 				<b:Container ui:field="container" fluid="true">
 					<b:Row>
-						<b:Column size="MD_9">
+						<b:Column size="MD_10">
 							<g:FlowPanel ui:field="leftPanel"/>
 						</b:Column>
-						<b:Column size="MD_3">
+						<b:Column size="MD_2">
 							<g:FlowPanel ui:field="rightPanel" addStyleNames="{style.rightPanel}"/>
 						</b:Column>
 					</b:Row>

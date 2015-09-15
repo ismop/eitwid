@@ -53,62 +53,25 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	@Inject
 	public FibrePresenter(DapController dapController) {
 		this.dapController = dapController;
-		fetcher = new MockDateFetcher();
-
-
 	}
 
 	public void onShowFibrePanel(Levee levee) {
-		this.levee = levee;
+		if (this.levee != levee) {
+			this.levee = levee;
+			fetcher = new DataFetcher(dapController, levee);
+		}
 
 		initChart();
 		initSlider();
-		initLeveeMinimap();
+		initializeFetcher();
 
 		view.showModal(true);
-		initialize();
-
-		testRealLoading();
 	}
 
 	@Override
 	public void onModalReady() {
-		map = eventBus.addHandler(MapPresenter.class);
-//		view.addElementToRightPanel(selectStatus);
-//		view.addElementToRightPanel(unselectStatus);
-		view.addElementToRightPanel(map.getView());
-
-		dapController.getSections(levee.getId(), new DapController.SectionsCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				eventBus.showError(errorDetails);
-			}
-
-			public void processSections(final List<Section> sections) {
-				for (Section section : sections) {
-					map.addSection(section);
-				}
-			}
-		});
-	}
-
-	private void testRealLoading() {
-		Levee levee = new Levee();
-		levee.setId("1");
-		IDataFetcher realFetcher = new DataFetcher(dapController, levee);
-
-		final long now = System.currentTimeMillis();
-		realFetcher.initialize(new IDataFetcher.InitializeCallback() {
-			@Override
-			public void ready() {
-				GWT.log("Read data fetcher initialized: " + ((double) System.currentTimeMillis() - now) / 1000 + "s");
-			}
-
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				GWT.log("Error while loading real data" + errorDetails.getMessage());
-			}
-		});
+		initLeveeMinimap();
+		chart.reflow();
 	}
 
 	private void initChart() {
@@ -118,7 +81,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		} else {
 			chart = new Chart().
 					setChartTitle(new ChartTitle()).
-					setWidth(1100);
+					setWidth100();
 
 			chart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
 			chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
@@ -130,14 +93,19 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 								@Override
 								public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-									GWT.log("over: " + pointMouseOverEvent.getSeriesName() + " " + pointMouseOverEvent.getXAsString() + ":" + pointMouseOverEvent.getYAsString());
 									Device selectedDevice = deviceMapping.get(pointMouseOverEvent.getSeriesName() + "::" + pointMouseOverEvent.getXAsString());
-									Section selectedSection = fetcher.getDeviceSection(selectedDevice);
+									Section selectedSection = null;
 									if (selectedDevice != null) {
-										selectStatus.setText("Show device with " + selectedDevice.getId() + " id, show section: " + selectedSection.getId());
+										selectedSection = fetcher.getDeviceSection(selectedDevice);
+										map.highlightSection(selectedSection, true);
+										map.addDevice(selectedDevice);
 									}
-									if (this.selectedDevice != null) {
-										unselectStatus.setText("Unselect device with " + this.selectedDevice.getId() + "id, unshow section: " + this.selectedSection.getId());
+									if (this.selectedSection != null && this.selectedSection != selectedSection) {
+										map.highlightSection(this.selectedSection, false);
+									}
+
+									if (this.selectedDevice != null && this.selectedDevice != selectedDevice) {
+										map.removeDevice(this.selectedDevice);
 									}
 									this.selectedDevice = selectedDevice;
 									this.selectedSection = selectedSection;
@@ -168,8 +136,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		}
 	}
 
-	private void initialize() {
-		chart.addSeries(chart.createSeries().addPoint(0, 1).addPoint(1, 1));
+	private void initializeFetcher() {
 		chart.showLoading("Getting fibre shape from DAP");
 		fetcher.initialize(new IDataFetcher.InitializeCallback() {
 			@Override
@@ -177,6 +144,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				chart.removeAllSeries();
 				chart.hideLoading();
 				loadData(slider.getSelectedDate());
+				for (Section section : fetcher.getSections()) {
+					map.addSection(section);
+				}
 			}
 
 			@Override
@@ -201,29 +171,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void initLeveeMinimap() {
 		if (selectStatus == null) {
-			selectStatus = new Label();
-			unselectStatus = new Label();
-//			map = eventBus.addHandler(MapPresenter.class);
-//			view.addElementToRightPanel(selectStatus);
-//			view.addElementToRightPanel(unselectStatus);
-//			view.addElementToRightPanel(map.getView());
-
-//			dapController.getSections(levee.getId(), new DapController.SectionsCallback() {
-//				@Override
-//				public void onError(ErrorDetails errorDetails) {
-//					eventBus.showError(errorDetails);
-//				}
-//
-//				public void processSections(final List<Section> sections) {
-//					for (Section section : sections) {
-//						map.addSection(section);
-//					}
-//				}
-//			});
+			map = eventBus.addHandler(MapPresenter.class);
+			view.addElementToRightPanel(map.getView());
 		}
-
-		selectStatus.setText("Select status");
-		unselectStatus.setText("Unselect status");
 	}
 
 	@Override
