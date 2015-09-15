@@ -71,6 +71,27 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		testRealLoading();
 	}
 
+	@Override
+	public void onModalReady() {
+		map = eventBus.addHandler(MapPresenter.class);
+//		view.addElementToRightPanel(selectStatus);
+//		view.addElementToRightPanel(unselectStatus);
+		view.addElementToRightPanel(map.getView());
+
+		dapController.getSections(levee.getId(), new DapController.SectionsCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+
+			public void processSections(final List<Section> sections) {
+				for (Section section : sections) {
+					map.addSection(section);
+				}
+			}
+		});
+	}
+
 	private void testRealLoading() {
 		Levee levee = new Levee();
 		levee.setId("1");
@@ -182,23 +203,23 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		if (selectStatus == null) {
 			selectStatus = new Label();
 			unselectStatus = new Label();
-			map = eventBus.addHandler(MapPresenter.class);
+//			map = eventBus.addHandler(MapPresenter.class);
 //			view.addElementToRightPanel(selectStatus);
 //			view.addElementToRightPanel(unselectStatus);
-			view.addElementToRightPanel(map.getView());
+//			view.addElementToRightPanel(map.getView());
 
-			dapController.getSections(levee.getId(), new DapController.SectionsCallback() {
-				@Override
-				public void onError(ErrorDetails errorDetails) {
-					eventBus.showError(errorDetails);
-				}
-
-				public void processSections(final List<Section> sections) {
-					for (Section section : sections) {
-						map.addSection(section);
-					}
-				}
-			});
+//			dapController.getSections(levee.getId(), new DapController.SectionsCallback() {
+//				@Override
+//				public void onError(ErrorDetails errorDetails) {
+//					eventBus.showError(errorDetails);
+//				}
+//
+//				public void processSections(final List<Section> sections) {
+//					for (Section section : sections) {
+//						map.addSection(section);
+//					}
+//				}
+//			});
 		}
 
 		selectStatus.setText("Select status");

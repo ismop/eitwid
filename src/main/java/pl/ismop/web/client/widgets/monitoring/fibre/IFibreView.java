@@ -7,6 +7,8 @@ import java.util.Date;
 public interface IFibreView extends IsWidget {
 	interface IFibrePresenter {
 		void onSliderChanged(Date selectedTime);
+
+		void onModalReady();
 	}
 
 	void showModal(boolean show);

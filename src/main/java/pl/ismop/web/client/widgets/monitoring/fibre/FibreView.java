@@ -1,6 +1,8 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.gwt.user.client.ui.IsWidget;
+
+import org.gwtbootstrap3.client.shared.event.ModalShownEvent;
 import org.gwtbootstrap3.client.ui.Label;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.extras.slider.client.ui.base.event.SlideEvent;
@@ -36,6 +38,11 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 
 	public FibreView() {
 		initWidget(uiBinder.createAndBindUi(this));
+	}
+	
+	@UiHandler("modal")
+	void onPopupReady(ModalShownEvent event) {
+		getPresenter().onModalReady();
 	}
 	
 	@Override
