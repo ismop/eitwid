@@ -133,7 +133,7 @@ public class DataFetcher implements IDataFetcher {
 
     private void setDeviseAggregation(List<DeviceAggregation> deviceAggregations) {
         for (DeviceAggregation d : deviceAggregations) {
-            cache.put(d, new ArrayList<>());
+            cache.put(d, new ArrayList<Device>());
         }
     }
 

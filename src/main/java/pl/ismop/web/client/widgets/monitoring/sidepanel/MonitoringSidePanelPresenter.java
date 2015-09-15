@@ -60,7 +60,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 
 	@Override
 	public void handleShowFibreClick() {
-		eventBus.showFibrePanel();
+		eventBus.showFibrePanel(selectedLevee);
 	}
 
 	@Override

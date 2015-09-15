@@ -32,7 +32,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	void showWeatherPanel();
 
 	@Event(handlers = FibrePresenter.class)
-	void showFibrePanel();
+	void showFibrePanel(Levee levee);
 
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void leveeNavigatorReady();
