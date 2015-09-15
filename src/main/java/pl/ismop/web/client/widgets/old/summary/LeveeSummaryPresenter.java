@@ -2,13 +2,6 @@ package pl.ismop.web.client.widgets.old.summary;
 
 import java.util.Date;
 
-import pl.ismop.web.client.MainEventBus;
-import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.LeveeCallback;
-import pl.ismop.web.client.dap.levee.Levee;
-import pl.ismop.web.client.error.ErrorDetails;
-import pl.ismop.web.client.widgets.old.summary.ILeveeSummaryView.ILeveeSummaryPresenter;
-
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.Timer;
@@ -16,6 +9,13 @@ import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
+import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.DapController.LeveeCallback;
+import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.old.summary.ILeveeSummaryView.ILeveeSummaryPresenter;
 
 @Presenter(view = LeveeSummaryView.class, multiple = true)
 public class LeveeSummaryPresenter extends BasePresenter<ILeveeSummaryView, MainEventBus> implements ILeveeSummaryPresenter {

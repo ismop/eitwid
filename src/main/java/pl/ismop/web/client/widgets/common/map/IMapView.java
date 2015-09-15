@@ -18,4 +18,8 @@ public interface IMapView extends IsWidget {
 	void addGeoJson(String geoJsonValue);
 
 	void initMap();
+
+	void removeFeature(String featureId);
+
+	void highlight(String featureId, boolean highlight);
 }

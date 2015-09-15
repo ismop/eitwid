@@ -3,6 +3,11 @@ package pl.ismop.web.client.widgets.old.newexperiment;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.Window;
+import com.google.inject.Inject;
+import com.mvp4g.client.annotation.Presenter;
+import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
@@ -14,11 +19,6 @@ import pl.ismop.web.client.hypgen.HypgenController.ExperimentCallback;
 import pl.ismop.web.client.internal.InternalExperimentController;
 import pl.ismop.web.client.internal.InternalExperimentController.InternalExperimentCallback;
 import pl.ismop.web.client.widgets.old.newexperiment.IThreatAssessmentView.IThreatAssessmentPresenter;
-
-import com.google.gwt.user.client.Window;
-import com.google.inject.Inject;
-import com.mvp4g.client.annotation.Presenter;
-import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = ThreatAssessmentWidget.class, multiple = true)
 public class ThreatAssessmentPresenter extends BasePresenter<IThreatAssessmentView, MainEventBus> implements IThreatAssessmentPresenter {

@@ -1,13 +1,11 @@
 package pl.ismop.web.client.widgets.old.sidepanel;
 
-import java.util.Date;
 import java.util.List;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.UIObject;
 
 public interface ISidePanelView extends IsWidget {
 	interface ISidePanelPresenter {

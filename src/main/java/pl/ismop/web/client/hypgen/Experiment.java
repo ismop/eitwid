@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.fusesource.restygwt.client.Json;
 
-import pl.ismop.web.client.dap.result.Result;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import pl.ismop.web.client.dap.result.Result;
 
 public class Experiment {
 	private String id;

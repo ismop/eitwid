@@ -8,14 +8,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.inject.Inject;
+import com.mvp4g.client.annotation.Presenter;
+import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.result.Result;
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.widgets.old.experimentitem.IExperimentItemView.IExperimentItemPresenter;
-
-import com.google.inject.Inject;
-import com.mvp4g.client.annotation.Presenter;
-import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = ExperimentItemView.class, multiple = true)
 public class ExperimentItemPresenter extends BasePresenter<IExperimentItemView, MainEventBus> implements IExperimentItemPresenter {

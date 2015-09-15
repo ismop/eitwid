@@ -65,6 +65,31 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			applyBounds(bounds);
 		}
 	}
+	
+	@Override
+	public native void removeFeature(String featureId) /*-{
+		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
+		
+		if(feature) {
+			this.@pl.ismop.web.client.widgets.common.map.MapView::layer.remove(feature);
+		}
+	}-*/;
+
+	@Override
+	public native void highlight(String featureId, boolean highlight) /*-{
+		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
+		
+		if(feature) {
+			if(highlight) {
+				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
+					fillOpacity: 0.9,
+					strokeWeight: 3
+				});
+			} else {
+				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
+			}
+		}
+	}-*/;
 
 	@Override
 	public native void addGeoJson(String geoJsonValue) /*-{
@@ -75,25 +100,44 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	public native void initMap() /*-{
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
 			zoom: 8,
-			scaleControl: true
-			
+			scaleControl: true,
+			rotateControl: true,
+			mapTypeId: $wnd.google.maps.MapTypeId.SATELLITE,
+			heading: 45
 		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
 		
 		var layerData = new $wnd.google.maps.Data();
+		var thisObject = this;
 		layerData.setStyle(function(feature) {
 			return {
 				strokeColor: '#aaaaaa',
-				fillOpacity: 0.9,
+				fillOpacity: 0.6,
 				strokeOpacity: 1.0,
 				fillColor: '#aaaaaa',
-				strokeWeight: 2
+				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureColor(Ljava/lang/String;)(feature.getId())
 			};
 		});
 		
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer = layerData;
 		layerData.setMap(map);
 	}-*/;
+	
+	private void featureHoverIn(String type, String id) {
+		getPresenter().onFeatureHoverIn(type, id);
+	}
+	
+	private void featureHoverOut(String type, String id) {
+		getPresenter().onFeatureHoverOut(type, id);
+	}
+	
+	private int getFeatureColor(String featureId) {
+		if(featureId.startsWith("profile")) {
+			return 6;
+		} else {
+			return 1;
+		}
+	}
 	
 	private native void addHoverHandlers() /*-{
 		var thisObject = this;
@@ -106,14 +150,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 					(event.feature.getProperty('type'), event.feature.getProperty('id'));
 		});
 	}-*/;
-
-	private void featureHoverIn(String type, String id) {
-		getPresenter().onFeatureHoverIn(type, id);
-	}
-	
-	private void featureHoverOut(String type, String id) {
-		getPresenter().onFeatureHoverOut(type, id);
-	}
 	
 	private native JavaScriptObject createLatLngBounds() /*-{
 		return new $wnd.google.maps.LatLngBounds();

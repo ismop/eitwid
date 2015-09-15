@@ -3,6 +3,9 @@ package pl.ismop.web.client.widgets.old.sideprofile;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+
 import thothbot.parallax.core.client.AnimatedScene;
 import thothbot.parallax.core.client.RenderingPanel;
 import thothbot.parallax.core.shared.cameras.PerspectiveCamera;
@@ -21,9 +24,6 @@ import thothbot.parallax.core.shared.math.Vector3;
 import thothbot.parallax.core.shared.objects.Line;
 import thothbot.parallax.core.shared.objects.Mesh;
 import thothbot.parallax.core.shared.scenes.FogExp2;
-
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
 
 public class SideProfileScene extends AnimatedScene {
 	private Mesh mesh;

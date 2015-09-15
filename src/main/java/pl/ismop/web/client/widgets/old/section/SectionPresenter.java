@@ -1,11 +1,11 @@
 package pl.ismop.web.client.widgets.old.section;
 
+import com.mvp4g.client.annotation.Presenter;
+import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.widgets.old.section.ISectionView.ISectionPresenter;
-
-import com.mvp4g.client.annotation.Presenter;
-import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = SectionView.class, multiple = true)
 public class SectionPresenter extends BasePresenter<ISectionView, MainEventBus> implements ISectionPresenter {

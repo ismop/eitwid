@@ -11,6 +11,9 @@ import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.PointShape;
 import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
@@ -18,6 +21,7 @@ import pl.ismop.web.client.geojson.GeoJsonFeature;
 import pl.ismop.web.client.geojson.GeoJsonFeatures;
 import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
 import pl.ismop.web.client.geojson.LineGeometry;
+import pl.ismop.web.client.geojson.PointGeometry;
 import pl.ismop.web.client.geojson.PolygonGeometry;
 import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
 
@@ -26,6 +30,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	private GeoJsonFeaturesEncDec geoJsonEncoderDecoder;
 	private Map<String, Section> sections;
 	private Map<String, Profile> profiles;
+	private Map<String, Device> devices;
+	private Map<String, DeviceAggregation> deviceAggregations;
 	private boolean hoverListeners;
 	
 	@Inject
@@ -33,6 +39,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		this.geoJsonEncoderDecoder = geoJsonEncoderDecoder;
 		sections = new HashMap<>();
 		profiles = new HashMap<>();
+		devices = new HashMap<>();
+		deviceAggregations = new HashMap<>();
 	}
 	
 	public void initializeMap() {
@@ -48,6 +56,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				view.adjustBounds(collectPoints());
 			}
 		}
+	}
+	
+	public void highlightSection(Section section, boolean highlight) {
+		view.highlight("section-" + section.getId(), highlight);
 	}
 
 	public void addProfile(Profile profile) {
@@ -66,8 +78,69 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		
 	}
 	
+	/**
+	 * Has to be invoked before the map widget is added to DOM.
+	 */
 	public void addHoverListeners() {
 		hoverListeners = true;
+	}
+	
+	public void addDevice(Device device) {
+		if(device.getPlacement() != null && !devices.keySet().contains(device.getId())) {
+			devices.put(device.getId(), device);
+			
+			PointShape shape = device.getPlacement();
+			PointGeometry pointGeometry = new PointGeometry();
+			pointGeometry.setCoordinates(shape.getCoordinates());
+			
+			GeoJsonFeature feature = new GeoJsonFeature();
+			feature.setGeometry(pointGeometry);
+			feature.setId("device-" + device.getId());
+			feature.setProperties(new HashMap<String, String>());
+			feature.getProperties().put("id", device.getId());
+			feature.getProperties().put("name", feature.getId());
+			feature.getProperties().put("type", "device");
+			
+			List<GeoJsonFeature> features = new ArrayList<>();
+			features.add(feature);
+			view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+		}
+	}
+	
+	public void removeDevice(Device device) {
+		if(devices.keySet().contains(device.getId())) {
+			view.removeFeature("device-" + device.getId());
+			devices.remove(device.getId());
+		}
+	}
+	
+	public void addDeviceAggregation(DeviceAggregation deviceAggregation) {
+		if(deviceAggregation.getPlacement() != null && deviceAggregations.keySet().contains(deviceAggregation.getId())) {
+			deviceAggregations.put(deviceAggregation.getId(), deviceAggregation);
+			
+			PointShape shape = deviceAggregation.getPlacement();
+			PointGeometry pointGeometry = new PointGeometry();
+			pointGeometry.setCoordinates(shape.getCoordinates());
+			
+			GeoJsonFeature feature = new GeoJsonFeature();
+			feature.setGeometry(pointGeometry);
+			feature.setId("deviceAggregation-" + deviceAggregation.getId());
+			feature.setProperties(new HashMap<String, String>());
+			feature.getProperties().put("id", deviceAggregation.getId());
+			feature.getProperties().put("name", feature.getId());
+			feature.getProperties().put("type", "deviceAggregation");
+			
+			List<GeoJsonFeature> features = new ArrayList<>();
+			features.add(feature);
+			view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+		}
+	}
+	
+	public void removeDeviceAggregation(DeviceAggregation deviceAggregation) {
+		if(deviceAggregations.keySet().contains(deviceAggregation.getId())) {
+			view.removeFeature("deviceAggregation-" + deviceAggregation.getId());
+			deviceAggregations.remove(deviceAggregation).getId();
+		}
 	}
 
 	@Override
@@ -114,7 +187,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		
 		GeoJsonFeature feature = new GeoJsonFeature();
 		feature.setGeometry(polygonGeometry);
-		feature.setId("section" + section.getId());
+		feature.setId("section-" + section.getId());
 		feature.setProperties(new HashMap<String, String>());
 		feature.getProperties().put("id", section.getId());
 		feature.getProperties().put("name", feature.getId());
@@ -137,7 +210,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		
 		GeoJsonFeature feature = new GeoJsonFeature();
 		feature.setGeometry(lineGeometry);
-		feature.setId("profile" + profile.getId());
+		feature.setId("profile-" + profile.getId());
 		feature.setProperties(new HashMap<String, String>());
 		feature.getProperties().put("id", profile.getId());
 		feature.getProperties().put("name", feature.getId());
