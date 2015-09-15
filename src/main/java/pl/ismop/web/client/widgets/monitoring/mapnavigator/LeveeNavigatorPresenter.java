@@ -95,10 +95,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		GWT.log("Profile clicked with id " + profile.getId());
 	}
 	
-	public void onSectionClicked(Section section) {
+	public void onSectionClicked(final Section section) {
 		mapPresenter.zoomOnSection(section);
 		//TODO(DH): add spinner somewhere
-		dapController.getDeviceAggregationsForSectionId(section.getId(), new DeviceAggregationsCallback() {
+		dapController.getDeviceAggregationForType("fiber", new DeviceAggregationsCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
@@ -106,39 +106,58 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			
 			@Override
 			public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
+				List<String> deviceAggregationIds = new ArrayList<>();
+				
 				for(DeviceAggregation deviceAggregation : deviceAggreagations) {
-					mapPresenter.addDeviceAggregation(deviceAggregation);
+					deviceAggregationIds.add(deviceAggregation.getId());
 				}
-			}
-		});
-		dapController.getFibreDevicesForSection(section.getId(), new DevicesCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				eventBus.showError(errorDetails);
-			}
-			
-			@Override
-			public void processDevices(List<Device> devices) {
-				for(Device device : devices) {
-					mapPresenter.addDevice(device);
-				}
-			}
-		});
-		dapController.getDevicesForSection(section.getId(), new DevicesCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				eventBus.showError(errorDetails);
-			}
-			
-			@Override
-			public void processDevices(List<Device> devices) {
-				for(Device device : devices) {
-					mapPresenter.addDevice(device);
-				}
+				
+				dapController.getDevicesRecursivelyForAggregates(deviceAggregationIds, new DevicesCallback() {
+					@Override
+					public void onError(ErrorDetails errorDetails) {
+						eventBus.showError(errorDetails);
+					}
+					
+					@Override
+					public void processDevices(final List<Device> fibreDevices) {
+						dapController.getDevicesForSection(section.getId(), new DevicesCallback() {
+							@Override
+							public void onError(ErrorDetails errorDetails) {
+								eventBus.showError(errorDetails);
+							}
+							
+							@Override
+							public void processDevices(List<Device> devices) {
+								List<Device> filteredDevices = getRepeatingDevices(devices, fibreDevices);
+								
+								for(Device device : filteredDevices) {
+									mapPresenter.addDevice(device);
+								}
+							}
+						});
+						
+					}
+				});
 			}
 		});
 	}
 	
+	private List<Device> getRepeatingDevices(List<Device> devices, List<Device> fibreDevices) {
+		List<Device> result = new ArrayList<>();
+		
+		for(Device device : devices) {
+			for(Device fibreDevice : fibreDevices) {
+				if(device.getId().equals(fibreDevice.getId())) {
+					result.add(device);
+					
+					break;
+				}
+			}
+		}
+		
+		return result;
+	}
+
 	private List<String> collectSectionIds(List<Section> sections) {
 		List<String> result = new ArrayList<>();
 		

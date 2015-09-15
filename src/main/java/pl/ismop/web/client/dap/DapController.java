@@ -506,6 +506,20 @@ public class DapController {
 		});
 	}
 
+	public void getDevicesRecursivelyForAggregates(List<String> deviceAggregationIds, final DevicesCallback callback) {
+		deviceAggregationService.getDeviceAggregationsForIds(merge(deviceAggregationIds, ","), new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				collectDevices(response.getDeviceAggregations(), new ArrayList<Device>(), new MutableInteger(0), callback);
+			}
+		});
+	}
+
 	public void getDeviceAggregationForType(String type, final DeviceAggregationsCallback callback) {
 		deviceAggregationService.getDeviceAggregationsForType(type, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
@@ -547,12 +561,26 @@ public class DapController {
 			}});
 	}
 
+	public void getDevicesForSection(String sectionId, final DevicesCallback callback) {
+		deviceService.getDevicesForSectionId(sectionId, new MethodCallback<DevicesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+	
+			@Override
+			public void onSuccess(Method method, DevicesResponse response) {
+				callback.processDevices(response.getDevices());
+			}
+		});
+	}
+
 	private Date monthEarlier() {
 //		return new Date(new Date().getTime() - 2678400000L);
 		return new Date(new Date().getTime() - 7200000L);
 	}
 
-	public void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
+	private void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
 			final DevicesCallback devicesCallback) {
 		if(deviceAggregations.size() > 0) {
 			for(DeviceAggregation deviceAggregation : deviceAggregations) {
@@ -606,34 +634,6 @@ public class DapController {
 		} else {
 			devicesCallback.processDevices(result);
 		}
-	}
-
-	public void getFibreDevicesForSection(String sectionId, final DevicesCallback callback) {
-		deviceService.getDevicesForTypeAndSectionId("fibre", sectionId, new MethodCallback<DevicesResponse>() {
-			@Override
-			public void onFailure(Method method, Throwable exception) {
-				callback.onError(errorUtil.processErrors(method, exception));
-			}
-
-			@Override
-			public void onSuccess(Method method, DevicesResponse response) {
-				callback.processDevices(response.getDevices());
-			}
-		});
-	}
-
-	public void getDevicesForSection(String sectionId, final DevicesCallback callback) {
-		deviceService.getDevicesForSectionId(sectionId, new MethodCallback<DevicesResponse>() {
-			@Override
-			public void onFailure(Method method, Throwable exception) {
-				callback.onError(errorUtil.processErrors(method, exception));
-			}
-
-			@Override
-			public void onSuccess(Method method, DevicesResponse response) {
-				callback.processDevices(response.getDevices());
-			}
-		});
 	}
 
 	private String merge(List<String> chunks, String delimeter) {

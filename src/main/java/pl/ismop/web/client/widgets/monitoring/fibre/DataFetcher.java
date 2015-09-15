@@ -1,8 +1,17 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.gwt.core.client.GWT;
+
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.MutableInteger;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
 import pl.ismop.web.client.dap.levee.Levee;
@@ -10,8 +19,6 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
-
-import java.util.*;
 
 /**
  * Created by marek on 14.09.15.
@@ -59,7 +66,13 @@ public class DataFetcher implements IDataFetcher {
             @Override
             public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
                 GWT.log(deviceAggreagations.size() + " devise aggregation loaded, loading devices");
-                dapController.collectDevices(deviceAggreagations, new ArrayList<Device>(), new MutableInteger(0), new DapController.DevicesCallback() {
+                List<String> deviceAggregationIds = new ArrayList<>();
+				
+				for(DeviceAggregation deviceAggregation : deviceAggreagations) {
+					deviceAggregationIds.add(deviceAggregation.getId());
+				}
+				
+                dapController.getDevicesRecursivelyForAggregates(deviceAggregationIds, new DapController.DevicesCallback() {
                     @Override
                     public void processDevices(List<Device> devices) {
                         List<String> ids = new ArrayList<>();
