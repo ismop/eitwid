@@ -31,6 +31,7 @@ import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.slider.SliderPresenter;
 
@@ -39,6 +40,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private final DapController dapController;
 	private Chart chart;
 	private SliderPresenter slider;
+	private MapPresenter map;
 
 	private Label selectStatus;
 	private Label unselectStatus;
@@ -46,19 +48,25 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private IDataFetcher fetcher;
 	Map<String, Device> deviceMapping = new HashMap<>();
 	Map<String, Series> seriesCache = new HashMap<>();
+	private Levee levee;
 
 	@Inject
 	public FibrePresenter(DapController dapController) {
 		this.dapController = dapController;
 		fetcher = new MockDateFetcher();
+
+
 	}
 
 	public void onShowFibrePanel(Levee levee) {
-		view.showModal(true);
+		this.levee = levee;
 
-		initSlider();
 		initChart();
+		initSlider();
 		initLeveeMinimap();
+
+		view.showModal(true);
+		initialize();
 
 		testRealLoading();
 	}
@@ -72,7 +80,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		realFetcher.initialize(new IDataFetcher.InitializeCallback() {
 			@Override
 			public void ready() {
-				GWT.log("Read data fetcher initialized: " + ((double)System.currentTimeMillis() - now) / 1000 + "s");
+				GWT.log("Read data fetcher initialized: " + ((double) System.currentTimeMillis() - now) / 1000 + "s");
 			}
 
 			@Override
@@ -85,58 +93,61 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private void initChart() {
 		if(chart != null) {
 			chart.removeAllSeries();
-			chart.removeFromParent();
 			seriesCache.clear();
+		} else {
+			chart = new Chart().
+					setChartTitle(new ChartTitle()).
+					setWidth(1100);
+
+			chart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
+			chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
+
+			chart.setSeriesPlotOptions(new SeriesPlotOptions().
+							setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
+								private Section selectedSection;
+								private Device selectedDevice;
+
+								@Override
+								public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
+									GWT.log("over: " + pointMouseOverEvent.getSeriesName() + " " + pointMouseOverEvent.getXAsString() + ":" + pointMouseOverEvent.getYAsString());
+									Device selectedDevice = deviceMapping.get(pointMouseOverEvent.getSeriesName() + "::" + pointMouseOverEvent.getXAsString());
+									Section selectedSection = fetcher.getDeviceSection(selectedDevice);
+									if (selectedDevice != null) {
+										selectStatus.setText("Show device with " + selectedDevice.getId() + " id, show section: " + selectedSection.getId());
+									}
+									if (this.selectedDevice != null) {
+										unselectStatus.setText("Unselect device with " + this.selectedDevice.getId() + "id, unshow section: " + this.selectedSection.getId());
+									}
+									this.selectedDevice = selectedDevice;
+									this.selectedSection = selectedSection;
+									return true;
+								}
+							})
+			);
+
+			chart.setOption("/chart/zoomType", "x");
+
+			chart.setToolTip(new ToolTip()
+							.setFormatter(new ToolTipFormatter() {
+								public String format(ToolTipData toolTipData) {
+									Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
+									if (selectedDevice != null) {
+										return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
+												toolTipData.getXAsString() + " metr wału<br/>" +
+												toolTipData.getXAsString() + " metr światłowodu<br/>" +
+												"Sensor: " + selectedDevice.getId();
+									} else {
+										return null;
+									}
+								}
+							})
+			);
+
+			view.addElementToLeftPanel(chart);
 		}
+	}
 
-		chart = new Chart().
-				setChartTitle(new ChartTitle()).
-				setWidth(1100);
-		chart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
-		chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
-
-		chart.setSeriesPlotOptions(new SeriesPlotOptions().
-			setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
-				private Section selectedSection;
-				private Device selectedDevice;
-
-				@Override
-				public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-					GWT.log("over: " + pointMouseOverEvent.getSeriesName() + " " + pointMouseOverEvent.getXAsString() + ":" + pointMouseOverEvent.getYAsString());
-					Device selectedDevice = deviceMapping.get(pointMouseOverEvent.getSeriesName() + "::" + pointMouseOverEvent.getXAsString());
-					Section selectedSection = fetcher.getDeviceSection(selectedDevice);
-					if (selectedDevice != null) {
-						selectStatus.setText("Show device with " + selectedDevice.getId() + " id, show section: " + selectedSection.getId());
-					}
-					if (this.selectedDevice != null) {
-						unselectStatus.setText("Unselect device with " + this.selectedDevice.getId() + "id, unshow section: " + this.selectedDevice.getId());
-					}
-					this.selectedDevice = selectedDevice;
-					this.selectedSection = selectedSection;
-					return true;
-				}
-			})
-		);
-
-		chart.setOption("/chart/zoomType", "x");
-
-		chart.setToolTip(new ToolTip()
-						.setFormatter(new ToolTipFormatter() {
-							public String format(ToolTipData toolTipData) {
-								Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
-								if (selectedDevice != null) {
-									return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
-											toolTipData.getXAsString() + " metr wału<br/>" +
-											toolTipData.getXAsString() + " metr światłowodu<br/>" +
-											"Sensor: " + selectedDevice.getId();
-								}
-								else {
-									return null;
-								}
-							}
-						})
-		);
-
+	private void initialize() {
 		chart.addSeries(chart.createSeries().addPoint(0, 1).addPoint(1, 1));
 		chart.showLoading("Getting fibre shape from DAP");
 		fetcher.initialize(new IDataFetcher.InitializeCallback() {
@@ -152,8 +163,6 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				chart.showLoading("Unable to get fibre shape from DAP");
 			}
 		});
-
-		view.setChart(chart);
 	}
 
 	private void initSlider() {
@@ -165,7 +174,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					onSliderChanged(selectedDate);
 				}
 			});
-			view.setSlider(slider.getView());
+			view.addElementToLeftPanel(slider.getView());
 		}
 	}
 
@@ -173,8 +182,23 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		if (selectStatus == null) {
 			selectStatus = new Label();
 			unselectStatus = new Label();
-			view.setEmbenkment(selectStatus);
-			view.setEmbenkment(unselectStatus);
+			map = eventBus.addHandler(MapPresenter.class);
+//			view.addElementToRightPanel(selectStatus);
+//			view.addElementToRightPanel(unselectStatus);
+			view.addElementToRightPanel(map.getView());
+
+			dapController.getSections(levee.getId(), new DapController.SectionsCallback() {
+				@Override
+				public void onError(ErrorDetails errorDetails) {
+					eventBus.showError(errorDetails);
+				}
+
+				public void processSections(final List<Section> sections) {
+					for (Section section : sections) {
+						map.addSection(section);
+					}
+				}
+			});
 		}
 
 		selectStatus.setText("Select status");
