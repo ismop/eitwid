@@ -42,9 +42,6 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private SliderPresenter slider;
 	private MapPresenter map;
 
-	private Label selectStatus;
-	private Label unselectStatus;
-
 	private IDataFetcher fetcher;
 	Map<String, Device> deviceMapping = new HashMap<>();
 	Map<String, Series> seriesCache = new HashMap<>();
@@ -170,7 +167,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void initLeveeMinimap() {
-		if (selectStatus == null) {
+		if (map == null) {
 			map = eventBus.addHandler(MapPresenter.class);
 			view.addElementToRightPanel(map.getView());
 		}
