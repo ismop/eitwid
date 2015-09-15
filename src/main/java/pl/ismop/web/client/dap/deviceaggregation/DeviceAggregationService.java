@@ -23,4 +23,9 @@ public interface DeviceAggregationService extends RestService {
 	@GET
 	@Path("device_aggregations?device_aggregation_type={type}")
 	void getDeviceAggregationsForType(@PathParam("type") String type, MethodCallback<DeviceAggregationsResponse> methodCallback);
+
+	@GET
+	@Path("device_aggregations?device_aggregation_type={type}&levee_id={levee_id}")
+	void getDeviceAggregationsForType(@PathParam("type") String type, @PathParam("levee_id") String leveeId,
+									  MethodCallback<DeviceAggregationsResponse> methodCallback);
 }

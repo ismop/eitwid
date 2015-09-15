@@ -179,7 +179,8 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, LeveeResponse response) {
 				callback.processLevee(response.getLevee());
-			}});
+			}
+		});
 	}
 
 	public void getLevee(String leveeId, final LeveeCallback callback) {
@@ -192,7 +193,8 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, LeveeResponse response) {
 				callback.processLevee(response.getLevee());
-			}});
+			}
+		});
 	}
 
 	public void getSensor(String sensorId, final SensorCallback callback) {
@@ -238,7 +240,21 @@ public class DapController {
 			}
 		});
 	}
-	
+
+	public void getSections(List<String> sectionIds, final SectionsCallback callback) {
+		sectionService.getSectionsById(merge(sectionIds, ","), new MethodCallback<SectionsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, SectionsResponse response) {
+				callback.processSections(response.getSections());
+			}
+		});
+	}
+
 	public void getSections(final SectionsCallback sectionsCallback) {
 		sectionService.getSections(new MethodCallback<SectionsResponse>() {
 			@Override
@@ -315,7 +331,7 @@ public class DapController {
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
-	
+
 			@Override
 			public void onSuccess(Method method, ProfilesResponse response) {
 				callback.processProfiles(response.getProfiles());
@@ -338,7 +354,7 @@ public class DapController {
 					public void onError(ErrorDetails errorDetails) {
 						callback.onError(errorDetails);
 					}
-					
+
 					@Override
 					public void processDevices(List<Device> devices) {
 						callback.processDevices(devices);
@@ -476,6 +492,20 @@ public class DapController {
 		});
 	}
 
+	public void getDeviceAggregationForType(String type, String leveeId, final DeviceAggregationsCallback callback) {
+		deviceAggregationService.getDeviceAggregationsForType(type, leveeId, new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				callback.processDeviceAggregations(response.getDeviceAggregations());
+			}
+		});
+	}
+
 	public void getDevicesForType(String deviceType, final DevicesCallback callback) {
 		deviceService.getDevicesForType(deviceType, new MethodCallback<DevicesResponse>() {
 			@Override
@@ -494,7 +524,7 @@ public class DapController {
 		return new Date(new Date().getTime() - 7200000L);
 	}
 
-	private void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
+	public void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
 			final DevicesCallback devicesCallback) {
 		if(deviceAggregations.size() > 0) {
 			for(DeviceAggregation deviceAggregation : deviceAggregations) {

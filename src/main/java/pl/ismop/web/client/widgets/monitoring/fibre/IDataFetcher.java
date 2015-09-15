@@ -3,6 +3,7 @@ package pl.ismop.web.client.widgets.monitoring.fibre;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
 import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorCallback;
 import scala.Array;
 
@@ -48,4 +49,5 @@ public interface IDataFetcher {
 
     void initialize(InitializeCallback callback);
     void getSeries(Date selectedDate, SeriesCallback callback);
+    Section getDeviceSection(Device device);
 }

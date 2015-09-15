@@ -1,7 +1,7 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Timer;
+import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import org.gwtbootstrap3.client.ui.Label;
@@ -10,8 +10,11 @@ import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.events.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.levee.Levee;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.slider.SliderPresenter;
@@ -20,15 +23,20 @@ import java.util.*;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
+	private final DapController dapController;
 	private Chart chart;
 	private SliderPresenter slider;
-	private Label status;
+
+	private Label selectStatus;
+	private Label unselectStatus;
 
 	private IDataFetcher fetcher;
 	Map<String, Device> deviceMapping = new HashMap<>();
 	Map<String, Series> seriesCache = new HashMap<>();
 
-	public FibrePresenter() {
+	@Inject
+	public FibrePresenter(DapController dapController) {
+		this.dapController = dapController;
 		fetcher = new MockDateFetcher();
 	}
 
@@ -38,6 +46,27 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		initSlider();
 		initChart();
 		initLeveeMinimap();
+
+		testRealLoading();
+	}
+
+	private void testRealLoading() {
+		Levee levee = new Levee();
+		levee.setId("1");
+		IDataFetcher realFetcher = new DataFetcher(dapController, levee);
+
+		final long now = System.currentTimeMillis();
+		realFetcher.initialize(new IDataFetcher.InitializeCallback() {
+			@Override
+			public void ready() {
+				GWT.log("Read data fetcher initialized: " + ((double)System.currentTimeMillis() - now) / 1000 + "s");
+			}
+
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				GWT.log("Error while loading real data" + errorDetails.getMessage());
+			}
+		});
 	}
 
 	private void initChart() {
@@ -54,24 +83,26 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
 
 		chart.setSeriesPlotOptions(new SeriesPlotOptions().
-						setPointClickEventHandler(new PointClickEventHandler() {
-							@Override
-							public boolean onClick(PointClickEvent pointClickEvent) {
-								GWT.log(pointClickEvent.getSeriesName() + " " + pointClickEvent.getXAsString() + ":" + pointClickEvent.getYAsString());
-								return true;
-							}
-						}).
-						setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
-							@Override
-							public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-								GWT.log("over: " + pointMouseOverEvent.getSeriesName() + " " + pointMouseOverEvent.getXAsString() + ":" + pointMouseOverEvent.getYAsString());
-								Device selectedDevice = deviceMapping.get(pointMouseOverEvent.getSeriesName() + "::" + pointMouseOverEvent.getXAsString());
-								if (selectedDevice != null) {
-									status.setText("Show device with " + selectedDevice.getId() + " id.");
-								}
-								return true;
-							}
-						})
+			setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
+				private Section selectedSection;
+				private Device selectedDevice;
+
+				@Override
+				public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
+					GWT.log("over: " + pointMouseOverEvent.getSeriesName() + " " + pointMouseOverEvent.getXAsString() + ":" + pointMouseOverEvent.getYAsString());
+					Device selectedDevice = deviceMapping.get(pointMouseOverEvent.getSeriesName() + "::" + pointMouseOverEvent.getXAsString());
+					Section selectedSection = fetcher.getDeviceSection(selectedDevice);
+					if (selectedDevice != null) {
+						selectStatus.setText("Show device with " + selectedDevice.getId() + " id, show section: " + selectedSection.getId());
+					}
+					if (this.selectedDevice != null) {
+						unselectStatus.setText("Unselect device with " + this.selectedDevice.getId() + "id, unshow section: " + this.selectedDevice.getId());
+					}
+					this.selectedDevice = selectedDevice;
+					this.selectedSection = selectedSection;
+					return true;
+				}
+			})
 		);
 
 		chart.setOption("/chart/zoomType", "x");
@@ -126,12 +157,15 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void initLeveeMinimap() {
-		if (status == null) {
-			status = new Label();
-			view.setEmbenkment(status);
+		if (selectStatus == null) {
+			selectStatus = new Label();
+			unselectStatus = new Label();
+			view.setEmbenkment(selectStatus);
+			view.setEmbenkment(unselectStatus);
 		}
 
-		status.setText("Testing string");
+		selectStatus.setText("Select status");
+		unselectStatus.setText("Unselect status");
 	}
 
 	@Override

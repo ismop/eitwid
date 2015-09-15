@@ -4,6 +4,7 @@ import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.Timer;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.section.Section;
 
 import java.util.*;
 import java.util.Random;
@@ -34,6 +35,14 @@ public class MockDateFetcher implements IDataFetcher {
         };
 
         timer.schedule(new Random().nextInt(2000));
+    }
+
+    @Override
+    public Section getDeviceSection(Device device) {
+        Section section = new Section();
+        section.setId(device.getId());
+        section.setName("Section with device " + device.getId());
+        return section;
     }
 
     private Map<DeviceAggregation, List<ChartPoint>> generateSeries() {

@@ -64,8 +64,8 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	}
 
 	@Override
-	public void setEmbenkment(IsWidget label) {
-		embankmentPanel.add(label);
+	public void setEmbenkment(IsWidget widget) {
+		embankmentPanel.add(widget);
 	}
 
 	@Override
