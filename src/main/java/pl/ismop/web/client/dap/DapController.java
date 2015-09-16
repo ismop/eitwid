@@ -73,7 +73,7 @@ public class DapController {
 	private ParameterService parameterService;
 	private ContextService contextService;
 	private TimelineService timelineService;
-	
+
 	public interface LeveesCallback extends ErrorCallback {
 		void processLevees(List<Levee> levees);
 	}
@@ -130,6 +130,24 @@ public class DapController {
 		void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations);
 	}
 
+	private class MeasurementsRestCallback implements MethodCallback<MeasurementsResponse> {
+		private final MeasurementsCallback callback;
+
+		public MeasurementsRestCallback(MeasurementsCallback callback) {
+			this.callback = callback;
+		}
+
+		@Override
+		public void onFailure(Method method, Throwable exception) {
+			callback.onError(errorUtil.processErrors(method, exception));
+		}
+
+		@Override
+		public void onSuccess(Method method, MeasurementsResponse response) {
+			callback.processMeasurements(response.getMeasurements());
+		}
+	}
+
 	@Inject
 	public DapController(ErrorUtil errorUtil, LeveeService leveeService, SensorService sensorService, MeasurementService measurementService,
 			SectionService sectionService, ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService,
@@ -156,7 +174,7 @@ public class DapController {
 			public void onSuccess(Method method, LeveesResponse response) {
 				callback.processLevees(response.getLevees());
 			}
-			
+
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -212,21 +230,20 @@ public class DapController {
 	}
 
 	public void getMeasurements(String timelineId, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
-		measurementService.getMeasurements(timelineId, from, until, new MethodCallback<MeasurementsResponse>() {
-			@Override
-			public void onFailure(Method method, Throwable exception) {
-				callback.onError(errorUtil.processErrors(method, exception));
-			}
-
-			@Override
-			public void onSuccess(Method method, MeasurementsResponse response) {
-				callback.processMeasurements(response.getMeasurements());
-			}
-		});
+		getMeasurements(timelineId, monthEarlier(), new Date(), callback);
 	}
-	
+
+	public void getMeasurements(String timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
+		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(endDate);
+		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(startDate);
+		measurementService.getMeasurements(timelineId, from, until, new MeasurementsRestCallback(callback));
+	}
+
+	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
+		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date);
+		measurementService.getLastMeasurements(merge(timelineIds, ","), until, new MeasurementsRestCallback(callback));
+	}
+
 	public void getSections(float top, float left, float bottom, float right, final SectionsCallback callback) {
 		sectionService.getSections(createSelectionQuery(top, left, bottom, right), new MethodCallback<SectionsResponse>() {
 			@Override
@@ -463,6 +480,8 @@ public class DapController {
 			}
 		});
 	}
+
+
 
 	public void getDeviceAggregations(String profileId, final DeviceAggregationsCallback callback) {
 		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {

@@ -15,6 +15,8 @@ public interface ISliderView extends IsWidget {
         void onStartDateChanged(Date date);
         void onEndDateChanged(Date date);
         String getLabel(double point);
+        Date getStartDate();
+        Date getEndDate();
     }
 
     void setStartDate(Date date);

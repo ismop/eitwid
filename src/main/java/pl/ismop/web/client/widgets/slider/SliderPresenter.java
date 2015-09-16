@@ -91,6 +91,16 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
         return getDate(point).toString();
     }
 
+    @Override
+    public Date getStartDate() {
+        return new Date(startDate.getTime());
+    }
+
+    @Override
+    public Date getEndDate() {
+        return new Date(endDate.getTime());
+    }
+
     public void setEventsListener(Events eventsListener) {
         this.eventsListener = eventsListener;
         if(eventsListener == null) {
