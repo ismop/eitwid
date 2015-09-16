@@ -7,13 +7,15 @@ import java.util.Date;
 public interface IFibreView extends IsWidget {
 	interface IFibrePresenter {
 		void onSliderChanged(Date selectedTime);
+
+		void onModalReady();
 	}
 
 	void showModal(boolean show);
 
-	void setChart(IsWidget chart);
+	void addElementToLeftPanel(IsWidget widget);
 
-	void setEmbenkment(IsWidget label);
+	void addElementToRightPanel(IsWidget widget);
 
-	void setSlider(IsWidget slider);
+	int getLeftPanelWidth();
 }

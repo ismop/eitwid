@@ -1,6 +1,8 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.gwt.user.client.ui.IsWidget;
+
+import org.gwtbootstrap3.client.shared.event.ModalShownEvent;
 import org.gwtbootstrap3.client.ui.Label;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.extras.slider.client.ui.base.event.SlideEvent;
@@ -29,43 +31,38 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	Modal modal;
 	
 	@UiField
-	FlowPanel chartPanel;
+	FlowPanel leftPanel;
 
 	@UiField
-	FlowPanel embankmentPanel;
-
-	@UiField
-	FlowPanel sliderPanel;
+	FlowPanel rightPanel;
 
 	public FibreView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 	
-//	@UiHandler("slider")
-//	void onSlide(SlideEvent<Double> event) {
-//		//for some reason going through String value was necessary
-//		String val = "" + event.getValue();
-//		getPresenter().onSliderChanged(Double.parseDouble(val));
-//	}
-
+	@UiHandler("modal")
+	void onPopupReady(ModalShownEvent event) {
+		getPresenter().onModalReady();
+	}
+	
 	@Override
 	public void showModal(boolean show) {
 		modal.show();
 	}
 
 	@Override
-	public void setChart(IsWidget chart) {
-		chartPanel.add(chart);
+	public void addElementToLeftPanel(IsWidget widget) {
+		leftPanel.add(widget);
 	}
 
 	@Override
-	public void setSlider(IsWidget slider) {
-		sliderPanel.add(slider);
+	public void addElementToRightPanel(IsWidget widget) {
+		rightPanel.add(widget);
 	}
 
 	@Override
-	public void setEmbenkment(IsWidget widget) {
-		embankmentPanel.add(widget);
+	public int getLeftPanelWidth() {
+		return getOffsetWidth();
 	}
 
 	@Override

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.gwtbootstrap3.client.ui.Label;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -19,7 +18,6 @@ import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
-import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -31,6 +29,7 @@ import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.slider.SliderPresenter;
 
@@ -39,104 +38,100 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private final DapController dapController;
 	private Chart chart;
 	private SliderPresenter slider;
-
-	private Label selectStatus;
-	private Label unselectStatus;
+	private MapPresenter map;
 
 	private IDataFetcher fetcher;
 	Map<String, Device> deviceMapping = new HashMap<>();
 	Map<String, Series> seriesCache = new HashMap<>();
+	private Levee levee;
 
 	@Inject
 	public FibrePresenter(DapController dapController) {
 		this.dapController = dapController;
-		fetcher = new MockDateFetcher();
 	}
 
 	public void onShowFibrePanel(Levee levee) {
-		view.showModal(true);
+		if (this.levee != levee) {
+			this.levee = levee;
+			fetcher = new DataFetcher(dapController, levee);
+		}
 
-		initSlider();
 		initChart();
-		initLeveeMinimap();
+		initSlider();
+		initializeFetcher();
 
-		testRealLoading();
+		view.showModal(true);
 	}
 
-	private void testRealLoading() {
-		Levee levee = new Levee();
-		levee.setId("1");
-		IDataFetcher realFetcher = new DataFetcher(dapController, levee);
-
-		final long now = System.currentTimeMillis();
-		realFetcher.initialize(new IDataFetcher.InitializeCallback() {
-			@Override
-			public void ready() {
-				GWT.log("Read data fetcher initialized: " + ((double)System.currentTimeMillis() - now) / 1000 + "s");
-			}
-
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				GWT.log("Error while loading real data" + errorDetails.getMessage());
-			}
-		});
+	@Override
+	public void onModalReady() {
+		initLeveeMinimap();
+		chart.reflow();
 	}
 
 	private void initChart() {
 		if(chart != null) {
 			chart.removeAllSeries();
-			chart.removeFromParent();
 			seriesCache.clear();
+		} else {
+			chart = new Chart().
+					setChartTitle(new ChartTitle()).
+					setWidth100();
+
+			chart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
+			chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
+
+			chart.setSeriesPlotOptions(new SeriesPlotOptions().
+							setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
+								private Section selectedSection;
+								private Device selectedDevice;
+
+								@Override
+								public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
+									Device selectedDevice = deviceMapping.get(pointMouseOverEvent.getSeriesName() + "::" + pointMouseOverEvent.getXAsString());
+									Section selectedSection = null;
+									if (selectedDevice != null) {
+										selectedSection = fetcher.getDeviceSection(selectedDevice);
+										map.highlightSection(selectedSection, true);
+										map.addDevice(selectedDevice);
+									}
+									if (this.selectedSection != null && this.selectedSection != selectedSection) {
+										map.highlightSection(this.selectedSection, false);
+									}
+
+									if (this.selectedDevice != null && this.selectedDevice != selectedDevice) {
+										map.removeDevice(this.selectedDevice);
+									}
+									this.selectedDevice = selectedDevice;
+									this.selectedSection = selectedSection;
+									return true;
+								}
+							})
+			);
+
+			chart.setOption("/chart/zoomType", "x");
+
+			chart.setToolTip(new ToolTip()
+							.setFormatter(new ToolTipFormatter() {
+								public String format(ToolTipData toolTipData) {
+									Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
+									if (selectedDevice != null) {
+										return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
+												toolTipData.getXAsString() + " metr wału<br/>" +
+												toolTipData.getXAsString() + " metr światłowodu<br/>" +
+												"Sensor: " + selectedDevice.getId();
+									} else {
+										return null;
+									}
+								}
+							})
+			);
+
+			view.addElementToLeftPanel(chart);
 		}
+	}
 
-		chart = new Chart().
-				setChartTitle(new ChartTitle());
-		chart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
-		chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
-
-		chart.setSeriesPlotOptions(new SeriesPlotOptions().
-			setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
-				private Section selectedSection;
-				private Device selectedDevice;
-
-				@Override
-				public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-					GWT.log("over: " + pointMouseOverEvent.getSeriesName() + " " + pointMouseOverEvent.getXAsString() + ":" + pointMouseOverEvent.getYAsString());
-					Device selectedDevice = deviceMapping.get(pointMouseOverEvent.getSeriesName() + "::" + pointMouseOverEvent.getXAsString());
-					Section selectedSection = fetcher.getDeviceSection(selectedDevice);
-					if (selectedDevice != null) {
-						selectStatus.setText("Show device with " + selectedDevice.getId() + " id, show section: " + selectedSection.getId());
-					}
-					if (this.selectedDevice != null) {
-						unselectStatus.setText("Unselect device with " + this.selectedDevice.getId() + "id, unshow section: " + this.selectedDevice.getId());
-					}
-					this.selectedDevice = selectedDevice;
-					this.selectedSection = selectedSection;
-					return true;
-				}
-			})
-		);
-
-		chart.setOption("/chart/zoomType", "x");
-
-		chart.setToolTip(new ToolTip()
-						.setFormatter(new ToolTipFormatter() {
-							public String format(ToolTipData toolTipData) {
-								Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
-								if (selectedDevice != null) {
-									return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
-											toolTipData.getXAsString() + " metr wału<br/>" +
-											toolTipData.getXAsString() + " metr światłowodu<br/>" +
-											"Sensor: " + selectedDevice.getId();
-								}
-								else {
-									return null;
-								}
-							}
-						})
-		);
-
-		chart.addSeries(chart.createSeries().addPoint(0, 1).addPoint(1, 1));
+	private void initializeFetcher() {
 		chart.showLoading("Getting fibre shape from DAP");
 		fetcher.initialize(new IDataFetcher.InitializeCallback() {
 			@Override
@@ -144,6 +139,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				chart.removeAllSeries();
 				chart.hideLoading();
 				loadData(slider.getSelectedDate());
+				for (Section section : fetcher.getSections()) {
+					map.addSection(section);
+				}
 			}
 
 			@Override
@@ -151,8 +149,6 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				chart.showLoading("Unable to get fibre shape from DAP");
 			}
 		});
-
-		view.setChart(chart);
 	}
 
 	private void initSlider() {
@@ -164,20 +160,15 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					onSliderChanged(selectedDate);
 				}
 			});
-			view.setSlider(slider.getView());
+			view.addElementToLeftPanel(slider.getView());
 		}
 	}
 
 	private void initLeveeMinimap() {
-		if (selectStatus == null) {
-			selectStatus = new Label();
-			unselectStatus = new Label();
-			view.setEmbenkment(selectStatus);
-			view.setEmbenkment(unselectStatus);
+		if (map == null) {
+			map = eventBus.addHandler(MapPresenter.class);
+			view.addElementToRightPanel(map.getView());
 		}
-
-		selectStatus.setText("Select status");
-		unselectStatus.setText("Unselect status");
 	}
 
 	@Override

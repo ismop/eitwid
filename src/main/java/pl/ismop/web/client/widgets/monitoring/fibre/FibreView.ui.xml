@@ -4,13 +4,23 @@
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
 		xmlns:s="urn:import:org.gwtbootstrap3.extras.slider.client.ui">
 	<ui:style>
+		.rightPanel {
+			height: 440px;
+		}
 	</ui:style>
 	<g:HTMLPanel>
-		<b:Modal ui:field="modal" title="Pomiary światłowodowe" fade="true" width="1200px">
+		<b:Modal ui:field="modal" title="Pomiary światłowodowe" fade="true" width="95%">
 			<b:ModalBody>
-				<g:FlowPanel ui:field="chartPanel"/>
-				<g:FlowPanel ui:field="sliderPanel"/>
-				<g:FlowPanel ui:field="embankmentPanel"/>
+				<b:Container ui:field="container" fluid="true">
+					<b:Row>
+						<b:Column size="MD_10">
+							<g:FlowPanel ui:field="leftPanel"/>
+						</b:Column>
+						<b:Column size="MD_2">
+							<g:FlowPanel ui:field="rightPanel" addStyleNames="{style.rightPanel}"/>
+						</b:Column>
+					</b:Row>
+				</b:Container>
 			</b:ModalBody>
 		</b:Modal>
 	</g:HTMLPanel>
