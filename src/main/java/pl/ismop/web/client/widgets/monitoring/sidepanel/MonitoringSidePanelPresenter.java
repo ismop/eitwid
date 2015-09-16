@@ -12,6 +12,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.LeveesCallback;
+import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
@@ -48,6 +49,15 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		if(show) {
 			view.addMetadata(view.getInternalIdLabel(), section.getId());
 			view.addMetadata(view.getNameLabel(), section.getName());
+		}
+	}
+	
+	public void onShowDeviceMetadata(Device device, boolean show) {
+		view.clearMetadata();
+		
+		if(show) {
+			view.addMetadata(view.getInternalIdLabel(), device.getId());
+			view.addMetadata(view.getNameLabel(), device.getCustomId());
 		}
 	}
 	

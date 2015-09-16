@@ -166,22 +166,32 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				if(sections.get(id) != null) {
 					eventBus.showSectionMetadata(sections.get(id), false);
 				}
+			break;
+			case "device":
+				if(devices.get(id) != null) {
+					eventBus.showDeviceMetadata(devices.get(id), false);
+				}
 		}
 	}
 
 	@Override
 	public void onFeatureHoverIn(String type, String id) {
 		switch(type) {
-		case "profile":
-			if(profiles.get(id) != null) {
-				eventBus.showProfileMetadata(profiles.get(id), true);
-			}
-		break;
-		case "section":
-			if(sections.get(id) != null) {
-				eventBus.showSectionMetadata(sections.get(id), true);
-			}
-	}
+			case "profile":
+				if(profiles.get(id) != null) {
+					eventBus.showProfileMetadata(profiles.get(id), true);
+				}
+			break;
+			case "section":
+				if(sections.get(id) != null) {
+					eventBus.showSectionMetadata(sections.get(id), true);
+				}
+			break;
+			case "device":
+				if(devices.get(id) != null) {
+					eventBus.showDeviceMetadata(devices.get(id), true);
+				}
+		}
 	}
 
 	@Override
@@ -205,6 +215,16 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			case "section":
 				if(sections.get(id) != null) {
 					eventBus.sectionClicked(sections.get(id));
+				}
+			break;
+			case "device":
+				if(devices.get(id) != null) {
+					eventBus.deviceClicked(devices.get(id));
+				}
+			break;
+			case "deviceAggregate":
+				if(deviceAggregations.get(id) != null) {
+					eventBus.deviceAggregateClicked(deviceAggregations.get(id));
 				}
 		}
 	}

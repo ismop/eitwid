@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.client.Window;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -29,10 +29,14 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	private MapPresenter mapPresenter;
 	private Levee displayedLevee;
 	private DapController dapController;
+	private List<Device> displayedDevices;
+	private List<DeviceAggregation> displayedDeviceAggregations;
 
 	@Inject
 	public LeveeNavigatorPresenter(DapController dapController) {
 		this.dapController = dapController;
+		displayedDevices = new ArrayList<>();
+		displayedDeviceAggregations = new ArrayList<>();
 	}
 	
 	@Override
@@ -92,67 +96,83 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	}
 	
 	public void onProfileClicked(Profile profile) {
-		GWT.log("Profile clicked with id " + profile.getId());
+		Window.alert("To be implemented. Profile view will be shown in the main panel.");
 	}
 	
 	public void onSectionClicked(final Section section) {
+		if(displayedDevices.size() > 0) {
+			for(Device device : displayedDevices) {
+				mapPresenter.removeDevice(device);
+			}
+			
+			displayedDevices.clear();
+		}
+		
+		if(displayedDeviceAggregations.size() > 0) {
+			for(DeviceAggregation deviceAggregation : displayedDeviceAggregations) {
+				mapPresenter.removeDeviceAggregation(deviceAggregation);
+			}
+			
+			displayedDeviceAggregations.clear();
+		}
+		
 		mapPresenter.zoomOnSection(section);
 		//TODO(DH): add spinner somewhere
-		dapController.getDeviceAggregationForType("fiber", new DeviceAggregationsCallback() {
+		dapController.getDevicesForSectionAndType(section.getId(), "fiber_optic_node",new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
 			}
 			
 			@Override
-			public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
-				List<String> deviceAggregationIds = new ArrayList<>();
+			public void processDevices(List<Device> devices) {
+				displayedDevices.addAll(devices);
 				
-				for(DeviceAggregation deviceAggregation : deviceAggreagations) {
-					deviceAggregationIds.add(deviceAggregation.getId());
+				for(Device device : devices) {
+					mapPresenter.addDevice(device);
 				}
-				
-				dapController.getDevicesRecursivelyForAggregates(deviceAggregationIds, new DevicesCallback() {
+			}
+		});
+		dapController.getProfiles(section.getId(), new ProfilesCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+			
+			@Override
+			public void processProfiles(List<Profile> profiles) {
+				dapController.getDeviceAggregations(collectProfileIds(profiles), new DeviceAggregationsCallback() {
 					@Override
 					public void onError(ErrorDetails errorDetails) {
 						eventBus.showError(errorDetails);
 					}
 					
 					@Override
-					public void processDevices(final List<Device> fibreDevices) {
-						dapController.getDevicesForSection(section.getId(), new DevicesCallback() {
-							@Override
-							public void onError(ErrorDetails errorDetails) {
-								eventBus.showError(errorDetails);
-							}
-							
-							@Override
-							public void processDevices(List<Device> devices) {
-								List<Device> filteredDevices = getRepeatingDevices(devices, fibreDevices);
-								
-								for(Device device : filteredDevices) {
-									mapPresenter.addDevice(device);
-								}
-							}
-						});
+					public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
+						displayedDeviceAggregations.addAll(deviceAggreagations);
 						
+						for(DeviceAggregation deviceAggregation : deviceAggreagations) {
+							mapPresenter.addDeviceAggregation(deviceAggregation);
+						}
 					}
 				});
 			}
 		});
 	}
 	
-	private List<Device> getRepeatingDevices(List<Device> devices, List<Device> fibreDevices) {
-		List<Device> result = new ArrayList<>();
+	public void onDeviceClicked(Device device) {
+		Window.alert("TODO");
+	}
+	
+	public void onDeviceAggregateClicked(DeviceAggregation deviceAggregation) {
+		Window.alert("TODO");
+	}
+
+	private List<String> collectProfileIds(List<Profile> profiles) {
+		List<String> result = new ArrayList<>();
 		
-		for(Device device : devices) {
-			for(Device fibreDevice : fibreDevices) {
-				if(device.getId().equals(fibreDevice.getId())) {
-					result.add(device);
-					
-					break;
-				}
-			}
+		for(Profile profile : profiles) {
+			result.add(profile.getId());
 		}
 		
 		return result;

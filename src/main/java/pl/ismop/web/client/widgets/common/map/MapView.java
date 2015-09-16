@@ -114,12 +114,21 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		var layerData = new $wnd.google.maps.Data();
 		var thisObject = this;
 		layerData.setStyle(function(feature) {
+			var icon = {
+				anchor: {
+					x: 6,
+					y: 6
+				},
+				url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureIcon(Ljava/lang/String;)(feature.getId())
+			};
+		
 			return {
 				strokeColor: '#aaaaaa',
 				fillOpacity: 0.6,
 				strokeOpacity: 1.0,
 				fillColor: '#aaaaaa',
-				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureColor(Ljava/lang/String;)(feature.getId())
+				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureColor(Ljava/lang/String;)(feature.getId()),
+				icon: icon
 			};
 		});
 		
@@ -145,6 +154,10 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		} else {
 			return 1;
 		}
+	}
+	
+	private String getFeatureIcon(String featureId) {
+		return "/icons/device-fiber.png";
 	}
 	
 	private native void addHoverHandlers() /*-{
