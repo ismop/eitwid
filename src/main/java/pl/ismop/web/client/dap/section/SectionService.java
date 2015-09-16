@@ -26,5 +26,5 @@ public interface SectionService extends RestService {
 
 	@GET
 	@Path("sections?id={id}")
-	void getSectionsById(@PathParam("selection") String id, MethodCallback<SectionsResponse> callback);
+	void getSectionsById(@PathParam("id") String id, MethodCallback<SectionsResponse> callback);
 }
