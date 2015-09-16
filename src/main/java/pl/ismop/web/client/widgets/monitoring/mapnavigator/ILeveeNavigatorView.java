@@ -12,4 +12,6 @@ public interface ILeveeNavigatorView extends IsWidget {
 	void showMap(boolean show);
 
 	void showProgress(boolean show);
+
+	String getZoomOutLabel();
 }
