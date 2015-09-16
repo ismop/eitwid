@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.gwtbootstrap3.client.ui.Label;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -19,7 +18,6 @@ import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
-import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -38,7 +36,8 @@ import pl.ismop.web.client.widgets.slider.SliderPresenter;
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
 	private final DapController dapController;
-	private Chart chart;
+	private Chart fibreChart;
+	private Chart deviceChart;
 	private SliderPresenter slider;
 	private MapPresenter map;
 
@@ -58,7 +57,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			fetcher = new DataFetcher(dapController, levee);
 		}
 
-		initChart();
+		initFibreChart();
 		initSlider();
 		initializeFetcher();
 
@@ -68,22 +67,22 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	@Override
 	public void onModalReady() {
 		initLeveeMinimap();
-		chart.reflow();
+		fibreChart.reflow();
 	}
 
-	private void initChart() {
-		if(chart != null) {
-			chart.removeAllSeries();
+	private void initFibreChart() {
+		if(fibreChart != null) {
+			fibreChart.removeAllSeries();
 			seriesCache.clear();
 		} else {
-			chart = new Chart().
+			fibreChart = new Chart().
 					setChartTitle(new ChartTitle()).
 					setWidth100();
 
-			chart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
-			chart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
+			fibreChart.getYAxis().setAxisTitle(new AxisTitle().setText("Temperarura [\u00B0C]"));
+			fibreChart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
 
-			chart.setSeriesPlotOptions(new SeriesPlotOptions().
+			fibreChart.setSeriesPlotOptions(new SeriesPlotOptions().
 							setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
 								private Section selectedSection;
 								private Device selectedDevice;
@@ -111,15 +110,15 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 							})
 			);
 
-			chart.setOption("/chart/zoomType", "x");
+			fibreChart.setOption("/chart/zoomType", "x");
 
-			chart.setToolTip(new ToolTip()
+			fibreChart.setToolTip(new ToolTip()
 							.setFormatter(new ToolTipFormatter() {
 								public String format(ToolTipData toolTipData) {
 									Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
 									if (selectedDevice != null) {
 										return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
-												toolTipData.getXAsString() + " metr wału<br/>" +
+												selectedDevice.getLeveeDistanceMarker() + " metr wału<br/>" +
 												toolTipData.getXAsString() + " metr światłowodu<br/>" +
 												"Sensor: " + selectedDevice.getId();
 									} else {
@@ -129,17 +128,17 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 							})
 			);
 
-			view.addElementToLeftPanel(chart);
+			view.addElementToLeftPanel(fibreChart);
 		}
 	}
 
 	private void initializeFetcher() {
-		chart.showLoading("Getting fibre shape from DAP");
+		fibreChart.showLoading("Getting fibre shape from DAP");
 		fetcher.initialize(new IDataFetcher.InitializeCallback() {
 			@Override
 			public void ready() {
-				chart.removeAllSeries();
-				chart.hideLoading();
+				fibreChart.removeAllSeries();
+				fibreChart.hideLoading();
 				loadData(slider.getSelectedDate());
 				for (Section section : fetcher.getSections()) {
 					map.addSection(section);
@@ -148,7 +147,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			@Override
 			public void onError(ErrorDetails errorDetails) {
-				chart.showLoading("Unable to get fibre shape from DAP");
+				fibreChart.showLoading("Unable to get fibre shape from DAP");
 			}
 		});
 	}
@@ -179,7 +178,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void loadData(Date selectedDate) {
-		chart.showLoading("Loading data from DAP");
+		fibreChart.showLoading("Loading data from DAP");
 		fetcher.getSeries(selectedDate, new IDataFetcher.SeriesCallback() {
 			@Override
 			public void series(Map<DeviceAggregation, List<IDataFetcher.ChartPoint>> series) {
@@ -192,16 +191,16 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					upateSeries(s, points);
 				}
 				for (Series s : seriesCache.values()) {
-					chart.removeSeries(s, false);
+					fibreChart.removeSeries(s, false);
 				}
 				seriesCache = newSeriesCache;
-				chart.hideLoading();
-				chart.redraw();
+				fibreChart.hideLoading();
+				fibreChart.redraw();
 			}
 
 			@Override
 			public void onError(ErrorDetails errorDetails) {
-				chart.showLoading("Loading data from DAP failed");
+				fibreChart.showLoading("Loading data from DAP failed");
 			}
 		});
 	}
@@ -209,7 +208,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private Series getSeries(DeviceAggregation aggregation) {
 		Series s = seriesCache.remove(aggregation.getId());
 		if (s == null) {
-			s = chart.createSeries().
+			s = fibreChart.createSeries().
 					setName(aggregation.getId()).
 					setType(Type.SPLINE);
 		}
@@ -235,7 +234,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				s.addPoint(point.getX(), point.getY());
 				deviceMapping.put(aggregation.getId() + "::" + point.getX(), point.getDevice());
 			}
-			chart.addSeries(s, false, true);
+			fibreChart.addSeries(s, false, true);
 		}
 	}
 

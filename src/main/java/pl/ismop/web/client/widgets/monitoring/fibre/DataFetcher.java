@@ -153,13 +153,18 @@ public class DataFetcher implements IDataFetcher {
             Collections.sort(devices, new Comparator<Device>() {
                 @Override
                 public int compare(Device o1, Device o2) {
-                    return o1.getCustomId().compareTo(o2.getCustomId());
+                    return o1.getLeveeDistanceMarker().
+                            compareTo(o2.getLeveeDistanceMarker());
                 }
             });
 
             List<ChartPoint> chartPoints = new ArrayList<>();
             for (Device d : devices) {
-                chartPoints.add(new ChartPoint(d, idToSections.get(d.getSectionId()), i++, random.nextInt(25) + 10));
+                ChartPoint point = new ChartPoint(d, idToSections.get(d.getSectionId()),
+                                                  d.getLeveeDistanceMarker(),
+                                                  random.nextInt(25) + 10);
+
+                chartPoints.add(point);
             }
 
             series.put(da, chartPoints);

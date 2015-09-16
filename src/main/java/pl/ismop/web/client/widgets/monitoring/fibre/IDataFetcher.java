@@ -27,21 +27,21 @@ public interface IDataFetcher {
     class ChartPoint {
         private final Device device;
         private final Section section;
-        private final int x;
-        private final int y;
+        private final float x;
+        private final float y;
 
-        public ChartPoint(Device device, Section section, int x, int y) {
+        public ChartPoint(Device device, Section section, float x, float y) {
             this.device = device;
             this.section = section;
             this.x = x;
             this.y = y;
         }
 
-        public int getX() {
+        public float getX() {
             return x;
         }
 
-        public int getY() {
+        public float getY() {
             return y;
         }
 

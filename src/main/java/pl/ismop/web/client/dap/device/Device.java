@@ -1,6 +1,7 @@
 package pl.ismop.web.client.dap.device;
 
 import java.util.List;
+import java.util.Map;
 
 import org.fusesource.restygwt.client.Json;
 
@@ -40,6 +41,9 @@ public class Device {
 	
 	@Json(name = "parameter_ids")
 	private List<String> parameterIds;
+
+	@Json(name = "metadata")
+	private Map<String, String> metadata;
 
 	public String getId() {
 		return id;
@@ -135,5 +139,22 @@ public class Device {
 
 	public void setParameterIds(List<String> parameterIds) {
 		this.parameterIds = parameterIds;
+	}
+
+	public Map<String, String> getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(Map<String, String> metadata) {
+		this.metadata = metadata;
+	}
+
+	public Float getLeveeDistanceMarker() {
+		String leveeDistanceMarker = getMetadata().get("levee_distance_marker");
+		if(leveeDistanceMarker != null) {
+			return Float.parseFloat(leveeDistanceMarker);
+		} else {
+			return new Float(0);
+		}
 	}
 }
