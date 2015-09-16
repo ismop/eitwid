@@ -15,6 +15,8 @@ public interface IMapView extends IsWidget {
 		boolean isClickListeners();
 
 		void onFeatureClick(String type, String id);
+
+		void onZoomOut(String sectionId);
 	}
 
 	void adjustBounds(List<List<Double>> points);
@@ -26,4 +28,8 @@ public interface IMapView extends IsWidget {
 	void removeFeature(String featureId);
 
 	void highlight(String featureId, boolean highlight);
+
+	void addButton(String id, String label);
+
+	void removeButton(String id);
 }

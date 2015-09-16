@@ -62,4 +62,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void deviceAggregateClicked(DeviceAggregation deviceAggregation);
+
+	@Event(handlers = LeveeNavigatorPresenter.class)
+	void zoomOut(String sectionId);
 }

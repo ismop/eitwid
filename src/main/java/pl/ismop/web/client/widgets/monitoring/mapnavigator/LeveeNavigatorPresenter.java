@@ -68,7 +68,6 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				public void processSections(final List<Section> sections) {
 					List<String> sectionIds = collectSectionIds(sections);
 					dapController.getProfiles(sectionIds, new ProfilesCallback() {
-						
 						@Override
 						public void onError(ErrorDetails errorDetails) {
 							view.showProgress(false);
@@ -100,23 +99,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	}
 	
 	public void onSectionClicked(final Section section) {
-		if(displayedDevices.size() > 0) {
-			for(Device device : displayedDevices) {
-				mapPresenter.removeDevice(device);
-			}
-			
-			displayedDevices.clear();
-		}
-		
-		if(displayedDeviceAggregations.size() > 0) {
-			for(DeviceAggregation deviceAggregation : displayedDeviceAggregations) {
-				mapPresenter.removeDeviceAggregation(deviceAggregation);
-			}
-			
-			displayedDeviceAggregations.clear();
-		}
+		removeDevicesAndAggregates();
 		
 		mapPresenter.zoomOnSection(section);
+		mapPresenter.addAction(section.getId(), view.getZoomOutLabel());
 		//TODO(DH): add spinner somewhere
 		dapController.getDevicesForSectionAndType(section.getId(), "fiber_optic_node",new DevicesCallback() {
 			@Override
@@ -159,13 +145,19 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			}
 		});
 	}
-	
+
 	public void onDeviceClicked(Device device) {
 		Window.alert("TODO");
 	}
 	
 	public void onDeviceAggregateClicked(DeviceAggregation deviceAggregation) {
 		Window.alert("TODO");
+	}
+	
+	public void onZoomOut(String sectionId) {
+		removeDevicesAndAggregates();
+		mapPresenter.zoomToAllSections();
+		mapPresenter.removeAction(sectionId);
 	}
 
 	private List<String> collectProfileIds(List<Profile> profiles) {
@@ -186,5 +178,23 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		}
 		
 		return result;
+	}
+
+	private void removeDevicesAndAggregates() {
+		if(displayedDevices.size() > 0) {
+			for(Device device : displayedDevices) {
+				mapPresenter.removeDevice(device);
+			}
+			
+			displayedDevices.clear();
+		}
+		
+		if(displayedDeviceAggregations.size() > 0) {
+			for(DeviceAggregation deviceAggregation : displayedDeviceAggregations) {
+				mapPresenter.removeDeviceAggregation(deviceAggregation);
+			}
+			
+			displayedDeviceAggregations.clear();
+		}
 	}
 }

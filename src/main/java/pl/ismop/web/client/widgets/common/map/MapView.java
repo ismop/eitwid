@@ -6,6 +6,11 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -70,6 +75,26 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		}
 	}
 	
+	@Override
+	public void addButton(final String id, String label) {
+		Button button = new Button(label);
+		DOM.sinkEvents(button.getElement(), Event.ONCLICK);
+		DOM.setEventListener(button.getElement(), new EventListener() {
+			@Override
+			public void onBrowserEvent(Event event) {
+				if(DOM.eventGetType(event) == Event.ONCLICK) {
+					getPresenter().onZoomOut(id);
+				}
+			}
+		});
+		addMiddleButton(button.getElement());
+	}
+
+	@Override
+	public native void removeButton(String id) /*-{
+		this.@pl.ismop.web.client.widgets.common.map.MapView::map.controls[$wnd.google.maps.ControlPosition.TOP_RIGHT].clear();
+	}-*/;
+
 	@Override
 	public native void removeFeature(String featureId) /*-{
 		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
@@ -190,5 +215,12 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 
 	private native void applyBounds(JavaScriptObject bounds) /*-{
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map.fitBounds(bounds);
+	}-*/;
+
+	private native void addMiddleButton(Element element) /*-{
+		var container = $doc.createElement('div');
+		container.style.padding = '5px';
+		container.appendChild(element);
+		this.@pl.ismop.web.client.widgets.common.map.MapView::map.controls[$wnd.google.maps.ControlPosition.TOP_RIGHT].push(container);
 	}-*/;
 }

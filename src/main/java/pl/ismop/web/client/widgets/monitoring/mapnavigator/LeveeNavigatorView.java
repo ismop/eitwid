@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sun.mail.handlers.message_rfc822;
 
 public class LeveeNavigatorView extends Composite implements ILeveeNavigatorView {
 	private static LeveeNavigatorViewUiBinder uiBinder = GWT.create(LeveeNavigatorViewUiBinder.class);
@@ -14,10 +15,10 @@ public class LeveeNavigatorView extends Composite implements ILeveeNavigatorView
 	interface LeveeNavigatorViewUiBinder extends UiBinder<Widget, LeveeNavigatorView> {}
 
 	@UiField
-	FlowPanel loadingProgress;
+	LeveeNavigatorMessages messages;
 	
 	@UiField
-	FlowPanel mapContainer;
+	FlowPanel loadingProgress, mapContainer;
 	
 	public LeveeNavigatorView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -36,5 +37,10 @@ public class LeveeNavigatorView extends Composite implements ILeveeNavigatorView
 	@Override
 	public void showProgress(boolean show) {
 		loadingProgress.setVisible(show);
+	}
+
+	@Override
+	public String getZoomOutLabel() {
+		return messages.zoomOutLabel();
 	}
 }

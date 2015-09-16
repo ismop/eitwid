@@ -86,6 +86,9 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		hoverListeners = true;
 	}
 	
+	/**
+	 * Has to be invoked before the map widget is added to DOM.
+	 */
 	public void addClickListeners() {
 		clickListeners = true;
 	}
@@ -152,6 +155,14 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			view.removeFeature("deviceAggregation-" + deviceAggregation.getId());
 			deviceAggregations.remove(deviceAggregation).getId();
 		}
+	}
+	
+	public void addAction(String id, String label) {
+		view.addButton(id, label);
+	}
+
+	public void removeAction(String id) {
+		view.removeButton(id);
 	}
 
 	@Override
@@ -237,6 +248,15 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		if(sections.keySet().contains(section.getId())) {
 			view.adjustBounds(section.getShape().getCoordinates());
 		}
+	}
+
+	public void zoomToAllSections() {
+		view.adjustBounds(collectAllPoints());
+	}
+
+	@Override
+	public void onZoomOut(String sectionId) {
+		eventBus.zoomOut(sectionId);
 	}
 
 	private GeoJsonFeatures sectionToGeoJsonFeatures(Section section) {
