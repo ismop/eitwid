@@ -119,8 +119,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									if (selectedDevice != null) {
 										return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
 												selectedDevice.getLeveeDistanceMarker() + " metr wału<br/>" +
-												toolTipData.getXAsString() + " metr światłowodu<br/>" +
-												"Sensor: " + selectedDevice.getId();
+												selectedDevice.getCableDistanceMarker() + " metr światłowodu<br/>" +
+												"Sensor: " + selectedDevice.getCustomId();
 									} else {
 										return null;
 									}

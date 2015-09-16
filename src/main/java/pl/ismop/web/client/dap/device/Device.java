@@ -150,11 +150,18 @@ public class Device {
 	}
 
 	public Float getLeveeDistanceMarker() {
-		String leveeDistanceMarker = getMetadata().get("levee_distance_marker");
-		if(leveeDistanceMarker != null) {
-			return Float.parseFloat(leveeDistanceMarker);
+		return getFloat(getMetadata().get("levee_distance_marker"), 0f);
+	}
+
+	public Float getCableDistanceMarker() {
+		return getFloat(getMetadata().get("cable_distance_marker"), 0f);
+	}
+
+	private Float getFloat(String stringValue, Float defaultValue) {
+		if (stringValue != null) {
+			return Float.parseFloat(stringValue);
 		} else {
-			return new Float(0);
+			return defaultValue;
 		}
 	}
 }
