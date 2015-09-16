@@ -114,7 +114,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 										map.highlightSection(this.selectedSection, false);
 									}
 
-									if (this.selectedDevice != null && this.selectedDevice != selectedDevice) {
+									if (this.selectedDevice != null && this.selectedDevice != selectedDevice &&
+											this.selectedDevice != FibrePresenter.this.selectedDevice) {
 										map.removeDevice(this.selectedDevice);
 									}
 									this.selectedDevice = selectedDevice;
@@ -147,7 +148,13 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void selectDevice(final Device selectedDevice) {
+		if(this.selectedDevice != null) {
+			map.removeDevice(this.selectedDevice);
+		}
+		GWT.log("Selecting device " + selectedDevice.getCustomId());
+		map.addDevice(selectedDevice);
 		this.selectedDevice = selectedDevice;
+
 		deviceChart.setTitle("Wartość sensora " + selectedDevice.getCustomId());
 		deviceChart.showLoading("Ładuje wartości sensora " + selectedDevice.getCustomId() + " z DAP");
 		fetcher.getMeasurements(selectedDevice, slider.getStartDate(), slider.getEndDate(), new IDataFetcher.DateSeriesCallback() {
