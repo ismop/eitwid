@@ -26,10 +26,53 @@ import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
+import pl.ismop.web.client.error.ErrorCallback;
 import pl.ismop.web.client.error.ErrorDetails;
 
 public class DataFetcher implements IDataFetcher {
 
+    private class ErrorCallbackDelegator implements ErrorCallback {
+        ErrorCallback errorCallback;
+
+        public ErrorCallbackDelegator(ErrorCallback errorCallback) {
+            this.errorCallback = errorCallback;
+        }
+
+        @Override
+        public void onError(ErrorDetails errorDetails) {
+            errorCallback.onError(errorDetails);
+        }
+    }
+
+    private abstract class DeviceAggregationsCallback extends ErrorCallbackDelegator implements DapController.DeviceAggregationsCallback {
+        public DeviceAggregationsCallback(ErrorCallback callback) {
+            super(callback);
+        }
+    }
+
+    private abstract class DevicesCallback extends ErrorCallbackDelegator implements DapController.DevicesCallback {
+        public DevicesCallback(ErrorCallback errorCallback) {
+            super(errorCallback);
+        }
+    }
+
+    private abstract class SectionsCallback extends ErrorCallbackDelegator implements DapController.SectionsCallback {
+        public SectionsCallback(ErrorCallback errorCallback) {
+            super(errorCallback);
+        }
+    }
+
+    private abstract class ParametersCallback extends ErrorCallbackDelegator implements DapController.ParametersCallback {
+        public ParametersCallback(ErrorCallback errorCallback) {
+            super(errorCallback);
+        }
+    }
+
+    private abstract class TimelinesCallback extends ErrorCallbackDelegator implements DapController.TimelinesCallback {
+        public TimelinesCallback(ErrorCallback errorCallback) {
+            super(errorCallback);
+        }
+    }
 
     private final Levee levee;
     private final DapController dapController;
@@ -60,18 +103,17 @@ public class DataFetcher implements IDataFetcher {
 
     public void performInitialization(final InitializeCallback callback) {
         GWT.log("Loading device aggregations");
-        dapController.getDeviceAggregationForType("fiber", levee.getId(), new DapController.DeviceAggregationsCallback() {
+        dapController.getDeviceAggregationForType("fiber", levee.getId(), new DeviceAggregationsCallback(callback) {
             @Override
             public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
                 GWT.log(deviceAggreagations.size() + " devise aggregation loaded, loading devices");
                 List<String> deviceAggregationIds = new ArrayList<>();
-				
 				for(DeviceAggregation deviceAggregation : deviceAggreagations) {
 					deviceAggregationIds.add(deviceAggregation.getId());
                     idToDeviceAggregation.put(deviceAggregation.getId(), deviceAggregation);
 				}
 				
-                dapController.getDevicesRecursivelyForAggregates(deviceAggregationIds, new DapController.DevicesCallback() {
+                dapController.getDevicesRecursivelyForAggregates(deviceAggregationIds, new DevicesCallback(callback) {
                     @Override
                     public void processDevices(List<Device> devices) {
                         final List<String> ids = new ArrayList<>();
@@ -84,7 +126,7 @@ public class DataFetcher implements IDataFetcher {
                         }
 
                         GWT.log(devices.size() + " devices loaded, loading sections");
-                        dapController.getSections(Arrays.asList(sectionIds.toArray(new String[0])), new DapController.SectionsCallback() {
+                        dapController.getSections(Arrays.asList(sectionIds.toArray(new String[0])), new SectionsCallback(callback) {
                             @Override
                             public void processSections(List<Section> sections) {
                                 for (Section s : sections) {
@@ -92,7 +134,7 @@ public class DataFetcher implements IDataFetcher {
                                 }
 
                                 GWT.log(sections.size() + " sections loaded, loading parameters");
-                                dapController.getParameters(ids, new DapController.ParametersCallback() {
+                                dapController.getParameters(ids, new ParametersCallback(callback) {
                                     @Override
                                     public void processParameters(List<Parameter> parameters) {
                                         List<String> ids = new ArrayList<>();
@@ -104,7 +146,7 @@ public class DataFetcher implements IDataFetcher {
                                         setXAxisTitle(parameters.get(0));
 
                                         GWT.log(parameters.size() + " parameters loaded, loading timelines");
-                                        dapController.getTimelinesForParameterIds(contextId, ids, new DapController.TimelinesCallback() {
+                                        dapController.getTimelinesForParameterIds(contextId, ids, new TimelinesCallback(callback) {
                                             @Override
                                             public void processTimelines(List<Timeline> timelines) {
                                                 GWT.log(timelines.size() + " timelines loaded");
@@ -118,40 +160,13 @@ public class DataFetcher implements IDataFetcher {
 
                                                 callback.ready();
                                             }
-
-                                            @Override
-                                            public void onError(ErrorDetails errorDetails) {
-                                                callback.onError(errorDetails);
-                                            }
                                         });
-//
-                                    }
-
-                                    //
-                                    @Override
-                                    public void onError(ErrorDetails errorDetails) {
-                                        callback.onError(errorDetails);
                                     }
                                 });
                             }
-
-                            @Override
-                            public void onError(ErrorDetails errorDetails) {
-                                callback.onError(errorDetails);
-                            }
                         });
                     }
-
-                    @Override
-                    public void onError(ErrorDetails errorDetails) {
-                        callback.onError(errorDetails);
-                    }
                 });
-            }
-
-            @Override
-            public void onError(ErrorDetails errorDetails) {
-                callback.onError(errorDetails);
             }
         });
     }
