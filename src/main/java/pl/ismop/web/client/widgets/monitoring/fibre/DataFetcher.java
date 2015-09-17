@@ -167,11 +167,11 @@ public class DataFetcher implements IDataFetcher {
 
     @Override
     public void getSeries(Date selectedDate, SeriesCallback callback) {
-//        if (mock) {
+        if (mock) {
             getMockedSeries(selectedDate, callback);
-//        } else {
-//            getRealSeries(selectedDate, callback);
-//        }
+        } else {
+            getRealSeries(selectedDate, callback);
+        }
     }
 
     private void getRealSeries(Date selectedDate, final SeriesCallback callback) {
@@ -213,10 +213,11 @@ public class DataFetcher implements IDataFetcher {
 
             List<ChartPoint> chartPoints = new ArrayList<>();
             for (Device d : devices) {
-                ChartPoint point = new ChartPoint(d, idToSections.get(d.getSectionId()),
-                        d.getLeveeDistanceMarker(),
-                        deviceIdToMeasurement.get(d).getValue());
+                Measurement measurement = deviceIdToMeasurement.get(d);
+                double value = measurement != null ? measurement.getValue() : 0d;
 
+                ChartPoint point = new ChartPoint(d, idToSections.get(d.getSectionId()),
+                        d.getLeveeDistanceMarker(), value);
                 chartPoints.add(point);
             }
 

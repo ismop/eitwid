@@ -1,28 +1,13 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gwt.core.client.GWT;
-import org.moxieapps.gwt.highcharts.client.AxisTitle;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.Point;
-import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.*;
-import org.moxieapps.gwt.highcharts.client.Series.Type;
-import org.moxieapps.gwt.highcharts.client.events.PointClickEvent;
-import org.moxieapps.gwt.highcharts.client.events.PointClickEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
-import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
-
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-
+import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.Series.Type;
+import org.moxieapps.gwt.highcharts.client.events.*;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
@@ -33,6 +18,11 @@ import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.slider.SliderPresenter;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
@@ -92,7 +82,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 							setPointClickEventHandler(new PointClickEventHandler() {
 								@Override
 								public boolean onClick(PointClickEvent pointClickEvent) {
-									Device selectedDevice = deviceMapping.get(pointClickEvent.getSeriesName() + "::" + pointClickEvent.getXAsString());
+									Device selectedDevice = getDiviceForPoint(pointClickEvent);
 									selectDevice(selectedDevice);
 									return true;
 								}
@@ -103,7 +93,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 								@Override
 								public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-									Device selectedDevice = deviceMapping.get(pointMouseOverEvent.getSeriesName() + "::" + pointMouseOverEvent.getXAsString());
+									Device selectedDevice = getDiviceForPoint(pointMouseOverEvent);
 									Section selectedSection = null;
 									if (selectedDevice != null) {
 										selectedSection = fetcher.getDeviceSection(selectedDevice);
@@ -145,6 +135,10 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			view.addElementToLeftPanel(fibreChart);
 		}
+	}
+
+	private Device getDiviceForPoint(PointEvent point) {
+		return deviceMapping.get(point.getSeriesName() + "::" + point.getXAsString());
 	}
 
 	private void selectDevice(final Device selectedDevice) {
@@ -218,6 +212,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			@Override
 			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
 				fibreChart.showLoading("Unable to get fibre shape from DAP");
 			}
 		});
@@ -286,6 +281,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			@Override
 			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
 				fibreChart.showLoading("Loading data from DAP failed");
 			}
 		});

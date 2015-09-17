@@ -241,7 +241,12 @@ public class DapController {
 
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date);
-		measurementService.getLastMeasurements(merge(timelineIds, ","), until, new MeasurementsRestCallback(callback));
+		String from = DateTimeFormat.
+						getFormat(PredefinedFormat.ISO_8601).
+						format(new Date(date.getTime() - 3600000L));
+
+		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
+				                               new MeasurementsRestCallback(callback));
 	}
 
 	public void getSections(float top, float left, float bottom, float right, final SectionsCallback callback) {
@@ -362,7 +367,7 @@ public class DapController {
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
-	
+
 			@Override
 			public void onSuccess(Method method, ProfilesResponse response) {
 				callback.processProfiles(response.getProfiles());
@@ -591,7 +596,8 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, DevicesResponse response) {
 				callback.processDevices(response.getDevices());
-			}});
+			}
+		});
 	}
 
 	public void getDevicesForSection(String sectionId, final DevicesCallback callback) {
@@ -600,7 +606,7 @@ public class DapController {
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
-	
+
 			@Override
 			public void onSuccess(Method method, DevicesResponse response) {
 				callback.processDevices(response.getDevices());
@@ -614,7 +620,7 @@ public class DapController {
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
-	
+
 			@Override
 			public void onSuccess(Method method, DevicesResponse response) {
 				callback.processDevices(response.getDevices());
