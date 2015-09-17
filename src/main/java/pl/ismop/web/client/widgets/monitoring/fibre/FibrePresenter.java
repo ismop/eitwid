@@ -7,6 +7,8 @@ import com.mvp4g.client.presenter.BasePresenter;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.events.*;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
+import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -34,6 +36,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	Map<String, Series> seriesCache = new HashMap<>();
 	private Levee levee;
 	private Device selectedDevice;
+	private PlotBand selectedDeviceBand;
 
 	private FibreMessages messages;
 
@@ -134,7 +137,15 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 										map.removeDevice(this.selectedDevice);
 									}
 								}
-							})
+							}).
+							setMarker(new Marker().
+										setSelectState(new Marker().
+//														setFillColor("red").
+														setRadius(10).
+														setLineWidth(0)
+										)
+							).
+							setAllowPointSelect(true)
 			);
 
 			fibreChart.setOption("/chart/zoomType", "x");
@@ -166,6 +177,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private void selectDevice(final Device selectedDevice) {
 		selectNewDeviceOnMinimap(selectedDevice);
 		loadDeviceValues(selectedDevice);
+		drawDeviceBand(selectedDevice);
 
 		this.selectedDevice = selectedDevice;
 	}
@@ -200,6 +212,19 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			map.removeDevice(this.selectedDevice);
 		}
 		map.addDevice(newSelectedDevice);
+	}
+
+	private void drawDeviceBand(Device selectedDevice) {
+		if(selectedDeviceBand != null) {
+			fibreChart.getXAxis().removePlotBand(selectedDeviceBand);
+		}
+
+		selectedDeviceBand = fibreChart.getXAxis().createPlotBand().
+				setFrom(selectedDevice.getLeveeDistanceMarker() - 0.1).
+				setTo(selectedDevice.getLeveeDistanceMarker() + 0.1).
+				setColor("red");
+
+		fibreChart.getXAxis().addPlotBands(selectedDeviceBand);
 	}
 
 	private void initDeviceChart() {
