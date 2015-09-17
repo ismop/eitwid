@@ -38,6 +38,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private Levee levee;
 	private Device selectedDevice;
 
+	private FibreMessages messages;
+
 	@Inject
 	public FibrePresenter(DapController dapController) {
 		this.dapController = dapController;
@@ -49,6 +51,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			fetcher = new DataFetcher(dapController, levee);
 			fetcher.setMock(false);
 		}
+
+		messages = view.getMessages();
 
 		initSlider();
 		initFibreChart();
@@ -73,10 +77,11 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			seriesCache.clear();
 		} else {
 			fibreChart = new Chart().
-					setChartTitle(new ChartTitle().setText("Wartości temperatury światłowodu w wybranym punkcie czasowym")).
+					setChartTitle(new ChartTitle().setText(messages.fibreChartTitle())).
 					setWidth100();
 
-			fibreChart.getXAxis().setAxisTitle(new AxisTitle().setText("Metr bieżacy wału [m]"));
+			fibreChart.getXAxis().
+					setAxisTitle(new AxisTitle().setText(messages.firbreChartXAxisTitle()));
 
 			fibreChart.setSeriesPlotOptions(new SeriesPlotOptions().
 							setPointClickEventHandler(new PointClickEventHandler() {
@@ -145,12 +150,12 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		if(this.selectedDevice != null) {
 			map.removeDevice(this.selectedDevice);
 		}
-		GWT.log("Selecting device " + selectedDevice.getCustomId());
 		map.addDevice(selectedDevice);
+
 		this.selectedDevice = selectedDevice;
 
-		deviceChart.setTitle("Wartość sensora " + selectedDevice.getCustomId());
-		deviceChart.showLoading("Ładuje wartości sensora " + selectedDevice.getCustomId() + " z DAP");
+		deviceChart.setTitle(messages.deviceChartSelectTitle(selectedDevice.getCustomId()));
+		deviceChart.showLoading(messages.loadingDeviceValues(selectedDevice.getCustomId()));
 		fetcher.getMeasurements(selectedDevice, slider.getStartDate(), slider.getEndDate(), new IDataFetcher.DateSeriesCallback() {
 			@Override
 			public void series(List<IDataFetcher.DateChartPoint> series) {
@@ -167,7 +172,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			@Override
 			public void onError(ErrorDetails errorDetails) {
-				deviceChart.showLoading("Bląd ładowania danych z DAP");
+				deviceChart.showLoading(messages.errorLoadingDataFromDap());
 				eventBus.showError(errorDetails);
 			}
 		});
@@ -178,7 +183,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			deviceChart.removeAllSeries();
 		} else {
 			deviceChart = new Chart().
-					setChartTitle(new ChartTitle().setText("Wartości zaznaczonego sensora w wybranym przedziale czasowym")).
+					setChartTitle(new ChartTitle().setText(messages.deviceChartInitTitle())).
 					setWidth100();
 
 			deviceChart.setOption("/chart/zoomType", "x");
@@ -195,7 +200,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void initializeFetcher() {
-		fibreChart.showLoading("Getting fibre shape from DAP");
+		fibreChart.showLoading(messages.loadingFibreShare());
 		fetcher.initialize(new IDataFetcher.InitializeCallback() {
 			@Override
 			public void ready() {
@@ -213,7 +218,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
-				fibreChart.showLoading("Unable to get fibre shape from DAP");
+				fibreChart.showLoading(messages.errorLoadingDataFromDap());
 			}
 		});
 	}
@@ -258,11 +263,10 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void loadData(Date selectedDate) {
-		fibreChart.showLoading("Loading data from DAP");
+		fibreChart.showLoading(messages.loadingData());
 		fetcher.getSeries(selectedDate, new IDataFetcher.SeriesCallback() {
 			@Override
 			public void series(Map<DeviceAggregation, List<IDataFetcher.ChartPoint>> series) {
-				GWT.log("Series " + series.keySet().size());
 				deviceMapping.clear();
 				Map<String, Series> newSeriesCache = new HashMap<>();
 				for (Map.Entry<DeviceAggregation, List<IDataFetcher.ChartPoint>> points : series.entrySet()) {
@@ -282,7 +286,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
-				fibreChart.showLoading("Loading data from DAP failed");
+				fibreChart.showLoading(messages.errorLoadingDataFromDap());
 			}
 		});
 	}

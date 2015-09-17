@@ -3,6 +3,7 @@
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
 		xmlns:s="urn:import:org.gwtbootstrap3.extras.slider.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.monitoring.fibre.FibreMessages" field="messages"/>
 	<ui:style>
 		.rightPanel {
 			height: 840px;
