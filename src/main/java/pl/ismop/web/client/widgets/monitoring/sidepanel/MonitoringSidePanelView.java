@@ -1,16 +1,19 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Description;
 import org.gwtbootstrap3.client.ui.DescriptionData;
 import org.gwtbootstrap3.client.ui.DescriptionTitle;
 import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.ListBox;
+import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -35,7 +38,10 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	ListBox leveeList;
 	
 	@UiField
-	FlowPanel leveeProgress, metadataEntries, metadataPanel;
+	FlowPanel leveeProgress, metadataEntries, metadataPanel, chart;
+	
+	@UiField
+	Button expand;
 	
 	public MonitoringSidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -118,5 +124,21 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	@Override
 	public void clearMetadata() {
 		metadataEntries.clear();
+	}
+
+	@Override
+	public void setChart(Chart chart) {
+		this.chart.clear();
+		this.chart.add(chart);
+	}
+
+	@Override
+	public Number getChartContainerHeight() {
+		return chart.getOffsetHeight() - 40;
+	}
+
+	@Override
+	public void showChartExpandButton(boolean show) {
+		expand.setVisible(show);
 	}
 }

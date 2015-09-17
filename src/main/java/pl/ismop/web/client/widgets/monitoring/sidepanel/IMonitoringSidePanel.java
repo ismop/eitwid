@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
+
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IMonitoringSidePanel extends IsWidget {
@@ -28,4 +30,10 @@ public interface IMonitoringSidePanel extends IsWidget {
 	void addMetadata(String label, String value);
 
 	void clearMetadata();
+
+	void setChart(Chart chart);
+
+	Number getChartContainerHeight();
+
+	void showChartExpandButton(boolean show);
 }

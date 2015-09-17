@@ -32,4 +32,6 @@ public interface IMapView extends IsWidget {
 	void addButton(String id, String label);
 
 	void removeButton(String id);
+
+	void selectFeature(String featureId, boolean select);
 }

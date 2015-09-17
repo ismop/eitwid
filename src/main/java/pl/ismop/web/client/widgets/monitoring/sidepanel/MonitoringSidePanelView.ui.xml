@@ -7,6 +7,11 @@
 	<ui:style>
 		.panel {
 			padding: 5px;
+			position: absolute;
+			bottom: 0px;
+			top: 0px;
+			left: 0px;
+			right: 0px;
 		}
 		
 		.progress {
@@ -14,37 +19,64 @@
 		}
 		
 		.metadata {
-			position: fixed;
+			position: absolute;
 			bottom: 0px;
 			padding: 5px;
 			height: 30%;
 		}
 		
-		.chart {
-			position: fixed;
+		.chartContainer {
+			position: absolute;
 			bottom: 30%;
 			padding: 5px;
 			height: 30%;
+			right: 0px;
+			left: 0px;
+		}
+		
+		.chart {
+			position: absolute;
+			bottom: 0px;
+			left: 0px;
+			right: 0px;
+			height: 100%;
+			padding-top: 40px;
+			z-index: 1;
+		}
+		
+		.chartHeader {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			padding-left: 5px;
+			padding-right: 5px;
+			z-index: 2;
 		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
-		<b:Form>
-			<b:FieldSet>
-				<b:FormGroup>
-					<b:FormLabel text="{messages.leveeNameLabel}"/>
-					<b:FormControlStatic ui:field="leveeName" visible="false"/>
-					<b:ListBox ui:field="leveeList" visible="false"/>
-				</b:FormGroup>
-			</b:FieldSet>
-		</b:Form>
-		<g:FlowPanel ui:field="leveeProgress" addStyleNames="{style.progress}" visible="false">
-			<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.leveeProgressTitle}"/>
+		<g:FlowPanel>
+			<b:Form>
+				<b:FieldSet>
+					<b:FormGroup>
+						<b:FormLabel text="{messages.leveeNameLabel}"/>
+						<b:FormControlStatic ui:field="leveeName" visible="false"/>
+						<b:ListBox ui:field="leveeList" visible="false"/>
+					</b:FormGroup>
+				</b:FieldSet>
+			</b:Form>
+			<g:FlowPanel ui:field="leveeProgress" addStyleNames="{style.progress}" visible="false">
+				<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.leveeProgressTitle}"/>
+			</g:FlowPanel>
+			<b:Button ui:field="showWeather" text="{messages.showWeatherLabel}" block="true"/>
+			<b:Button ui:field="showFibre" text="{messages.showFibreLabel}" block="true"/>
 		</g:FlowPanel>
-		<b:Button ui:field="showWeather" text="{messages.showWeatherLabel}" block="true"/>
-		<b:Button ui:field="showFibre" text="{messages.showFibreLabel}" block="true"/>
-		<g:FlowPanel ui:field="chartPanel" addStyleNames="{style.chart}">
-			<!-- <b:Heading size="H4" text="{messages.chartHeading}" subText="{messages.chartHelp}"/> -->
-			<g:FlowPanel ui:field="chart"/>
+		<g:FlowPanel ui:field="chartPanel" addStyleNames="{style.chartContainer}">
+			<g:FlowPanel ui:field="chart" addStyleNames="{style.chart}"/>
+			<g:FlowPanel addStyleNames="clearfix {style.chartHeader}">
+				<b:Heading size="H4" text="{messages.chartHeading}" subText="{messages.chartHelp}" addStyleNames="pull-left"/>
+				<b:Button ui:field="expand" addStyleNames="pull-right" size="SMALL" icon="EXPAND" type="PRIMARY" visible="false"/>
+			</g:FlowPanel>
 		</g:FlowPanel>
 		<g:FlowPanel ui:field="metadataPanel" addStyleNames="{style.metadata}">
 			<b:Heading size="H4" text="{messages.metadataHeading}" subText="{messages.metadataHelp}"/>

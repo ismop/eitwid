@@ -6,6 +6,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Legend;
+import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -61,6 +68,51 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		}
 	}
 	
+	public void onDeviceSelected(Device device, boolean selected) {
+		//TODO
+		
+		final Chart chart = new Chart()  
+	            .setType(Series.Type.LINE)  
+	            .setMarginRight(130)  
+	            .setMarginBottom(25)   
+	            .setLegend(new Legend()  
+	                .setLayout(Legend.Layout.VERTICAL)  
+	                .setAlign(Legend.Align.RIGHT)  
+	                .setVerticalAlign(Legend.VerticalAlign.TOP)  
+	                .setX(-10)  
+	                .setY(100)  
+	                .setBorderWidth(0)  
+	            )  
+	            .setToolTip(new ToolTip()  
+	                .setFormatter(new ToolTipFormatter() {  
+	                    public String format(ToolTipData toolTipData) {  
+	                        return "<b>" + toolTipData.getSeriesName() + "</b><br/>" +  
+	                            toolTipData.getXAsString() + ": " + toolTipData.getYAsDouble() + "Â°C";  
+	                    }  
+	                })  
+	            );  
+	  
+	        chart.getXAxis()  
+	            .setCategories(  
+	                "Jan", "Feb", "Mar", "Apr", "May", "Jun",  
+	                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"  
+	            );  
+	  
+	        chart.getYAxis()  
+	            .setAxisTitleText("Temperature Â°C");  
+	  
+	        chart.addSeries(chart.createSeries()  
+	            .setName("Tokyo")  
+	            .setPoints(new Number[]{  
+	                7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6  
+	            })  
+	        );
+	        chart.setHeight(view.getChartContainerHeight());
+	        
+	        view.setChart(chart);
+	        view.showChartExpandButton(true);
+	}
+
 	public void reset() {
 		view.showLeveeName(false);
 		view.showLeveeList(false);
