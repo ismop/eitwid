@@ -16,6 +16,8 @@ import java.util.Map;
  * Created by marek on 11.09.15.
  */
 public interface IDataFetcher {
+    Collection<DeviceAggregation> getDeviceAggregations();
+
     interface SeriesCallback extends ErrorCallback {
         void series(Map<DeviceAggregation, List<ChartPoint>> series);
     }

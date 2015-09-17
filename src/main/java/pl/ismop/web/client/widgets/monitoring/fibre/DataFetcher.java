@@ -360,4 +360,9 @@ public class DataFetcher implements IDataFetcher {
     public void setMock(boolean mock) {
         this.mock = mock;
     }
+
+    @Override
+    public Collection<DeviceAggregation> getDeviceAggregations() {
+        return idToDeviceAggregation.values();
+    }
 }

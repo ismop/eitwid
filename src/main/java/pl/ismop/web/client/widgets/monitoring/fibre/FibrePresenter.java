@@ -232,6 +232,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				fibreChart.hideLoading();
 				loadData(slider.getSelectedDate());
 				showSections(fetcher.getSections());
+				showDeviceAggregations();
 			}
 
 			private void showSections(Collection<Section> sections) {
@@ -246,6 +247,12 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				fibreChart.showLoading(messages.errorLoadingDataFromDap());
 			}
 		});
+	}
+
+	private void showDeviceAggregations() {
+		for(DeviceAggregation da : fetcher.getDeviceAggregations()) {
+			map.addDeviceAggregation(da);
+		}
 	}
 
 	private void initSlider() {
