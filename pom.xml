@@ -135,7 +135,13 @@
 			<artifactId>restygwt</artifactId>
 			<version>1.5</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava-gwt</artifactId>
+			<version>18.0</version>
+		</dependency>
+
+
 		<!-- GWT Bootstrap dependencies -->
 		<dependency>
 			<groupId>org.gwtbootstrap3</groupId>

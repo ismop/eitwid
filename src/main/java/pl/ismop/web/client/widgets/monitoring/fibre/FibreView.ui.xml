@@ -3,9 +3,10 @@
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
 		xmlns:s="urn:import:org.gwtbootstrap3.extras.slider.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.monitoring.fibre.FibreMessages" field="messages"/>
 	<ui:style>
 		.rightPanel {
-			height: 440px;
+			height: 840px;
 		}
 	</ui:style>
 	<g:HTMLPanel>
@@ -13,10 +14,10 @@
 			<b:ModalBody>
 				<b:Container ui:field="container" fluid="true">
 					<b:Row>
-						<b:Column size="MD_10">
+						<b:Column size="MD_9">
 							<g:FlowPanel ui:field="leftPanel"/>
 						</b:Column>
-						<b:Column size="MD_2">
+						<b:Column size="MD_3">
 							<g:FlowPanel ui:field="rightPanel" addStyleNames="{style.rightPanel}"/>
 						</b:Column>
 					</b:Row>

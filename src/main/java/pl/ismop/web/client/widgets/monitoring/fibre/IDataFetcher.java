@@ -16,8 +16,14 @@ import java.util.Map;
  * Created by marek on 11.09.15.
  */
 public interface IDataFetcher {
+    Collection<DeviceAggregation> getDeviceAggregations();
+
     interface SeriesCallback extends ErrorCallback {
         void series(Map<DeviceAggregation, List<ChartPoint>> series);
+    }
+
+    interface DateSeriesCallback extends ErrorCallback {
+        void series(List<DateChartPoint> series);
     }
 
     interface InitializeCallback extends  ErrorCallback {
@@ -27,21 +33,21 @@ public interface IDataFetcher {
     class ChartPoint {
         private final Device device;
         private final Section section;
-        private final int x;
-        private final int y;
+        private final double x;
+        private final double y;
 
-        public ChartPoint(Device device, Section section, int x, int y) {
+        public ChartPoint(Device device, Section section, double x, double y) {
             this.device = device;
             this.section = section;
             this.x = x;
             this.y = y;
         }
 
-        public int getX() {
+        public double getX() {
             return x;
         }
 
-        public int getY() {
+        public double getY() {
             return y;
         }
 
@@ -54,8 +60,30 @@ public interface IDataFetcher {
         }
     }
 
+    class DateChartPoint {
+        private final Date x;
+        private final double y;
+
+        public DateChartPoint(Date x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public Date getX() {
+            return x;
+        }
+
+        public double getY() {
+            return y;
+        }
+    }
+
     void initialize(InitializeCallback callback);
+
+    String getXAxisTitle();
+
     void getSeries(Date selectedDate, SeriesCallback callback);
     Section getDeviceSection(Device device);
     Collection<Section> getSections();
+    void getMeasurements(Device device, Date startDate, Date endDate, DateSeriesCallback callback);
 }

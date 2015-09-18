@@ -26,7 +26,10 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	interface FibreViewUiBinder extends UiBinder<Widget, FibreView> {}
 	
 	private IFibrePresenter presenter;
-	
+
+	@UiField
+	FibreMessages messages;
+
 	@UiField
 	Modal modal;
 	
@@ -73,5 +76,10 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	@Override
 	public IFibrePresenter getPresenter() {
 		return presenter;
+	}
+
+	@Override
+	public FibreMessages getMessages() {
+		return messages;
 	}
 }

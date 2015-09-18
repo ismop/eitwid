@@ -12,6 +12,7 @@
 	<inherits name="org.gwtbootstrap3.extras.slider.Slider"/>
 	<inherits name="org.gwtbootstrap3.extras.notify.Notify"/>
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
+	<inherits name="com.google.common.collect.Collect"/>
 	
 	<entry-point class='pl.ismop.web.client.IsmopWebEntryPoint'/>
 	<source path="client"/>
