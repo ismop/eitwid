@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.fusesource.restygwt.client.Json;
 
+import pl.ismop.web.client.geojson.Geometry;
+
 public class DeviceAggregation {
 	private String id;
 	
@@ -14,8 +16,6 @@ public class DeviceAggregation {
 	private List<String> childernIds;
 	
 	private String type;
-	
-	private PointShape placement;
 	
 	@Json(name = "profile_id")
 	private String profileId;
@@ -28,6 +28,8 @@ public class DeviceAggregation {
 	
 	@Json(name = "device_ids")
 	private List<String> deviceIds;
+	
+	private Geometry shape;
 
 	public String getId() {
 		return id;
@@ -61,14 +63,6 @@ public class DeviceAggregation {
 		this.type = type;
 	}
 
-	public PointShape getPlacement() {
-		return placement;
-	}
-
-	public void setPlacement(PointShape placement) {
-		this.placement = placement;
-	}
-
 	public String getProfileId() {
 		return profileId;
 	}
@@ -99,5 +93,13 @@ public class DeviceAggregation {
 
 	public void setDeviceIds(List<String> deviceIds) {
 		this.deviceIds = deviceIds;
+	}
+
+	public Geometry getShape() {
+		return shape;
+	}
+
+	public void setShape(Geometry shape) {
+		this.shape = shape;
 	}
 }

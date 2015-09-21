@@ -20,6 +20,7 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.geojson.GeoJsonFeature;
 import pl.ismop.web.client.geojson.GeoJsonFeatures;
 import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
+import pl.ismop.web.client.geojson.Geometry;
 import pl.ismop.web.client.geojson.LineGeometry;
 import pl.ismop.web.client.geojson.PointGeometry;
 import pl.ismop.web.client.geojson.PolygonGeometry;
@@ -126,17 +127,14 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 	
 	public void addDeviceAggregation(DeviceAggregation deviceAggregation) {
-		if(deviceAggregation.getPlacement() != null && !deviceAggregations.keySet().contains(deviceAggregation.getId())) {
+		if(deviceAggregation.getShape() != null && !deviceAggregations.keySet().contains(deviceAggregation.getId())) {
 			deviceAggregations.put(deviceAggregation.getId(), deviceAggregation);
 			
-			PointShape shape = deviceAggregation.getPlacement();
+			Geometry shape = deviceAggregation.getShape();
 			
 			if(shape != null) {
-				PointGeometry pointGeometry = new PointGeometry();
-				pointGeometry.setCoordinates(shape.getCoordinates());
-				
 				GeoJsonFeature feature = new GeoJsonFeature();
-				feature.setGeometry(pointGeometry);
+				feature.setGeometry(shape);
 				feature.setId("deviceAggregation-" + deviceAggregation.getId());
 				feature.setProperties(new HashMap<String, String>());
 				feature.getProperties().put("id", deviceAggregation.getId());

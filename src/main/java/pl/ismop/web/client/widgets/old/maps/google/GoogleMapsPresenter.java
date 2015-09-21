@@ -41,7 +41,6 @@ import pl.ismop.web.client.geojson.GeoJsonFeature;
 import pl.ismop.web.client.geojson.GeoJsonFeatures;
 import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
 import pl.ismop.web.client.geojson.LineGeometry;
-import pl.ismop.web.client.geojson.PointGeometry;
 import pl.ismop.web.client.widgets.old.maps.MapMessages;
 import pl.ismop.web.client.widgets.old.newexperiment.ThreatAssessmentPresenter;
 import pl.ismop.web.client.widgets.old.sideprofile.SideProfilePresenter;
@@ -239,12 +238,8 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 					List<GeoJsonFeature> features = new ArrayList<>();
 					
 					for(DeviceAggregation deviceAggregation : deviceAggreagations) {
-						
-						PointGeometry pointGeometry = new PointGeometry();
-						pointGeometry.setCoordinates(deviceAggregation.getPlacement().getCoordinates());
-						
 						GeoJsonFeature feature = new GeoJsonFeature();
-						feature.setGeometry(pointGeometry);
+						feature.setGeometry(deviceAggregation.getShape());
 						feature.setId(String.valueOf(featureIdGenerator++));
 						feature.setProperties(new HashMap<String, String>());
 						feature.getProperties().put("id", deviceAggregation.getId());
