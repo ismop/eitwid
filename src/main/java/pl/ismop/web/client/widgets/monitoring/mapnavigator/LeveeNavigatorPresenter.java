@@ -1,7 +1,9 @@
 package pl.ismop.web.client.widgets.monitoring.mapnavigator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -31,7 +33,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	private DapController dapController;
 	private List<Device> displayedDevices;
 	private List<DeviceAggregation> displayedDeviceAggregations;
-	private List<Device> selectedDevices;
+	private Map<String, Device> selectedDevices;
 	private Section selectedSection;
 
 	@Inject
@@ -39,7 +41,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		this.dapController = dapController;
 		displayedDevices = new ArrayList<>();
 		displayedDeviceAggregations = new ArrayList<>();
-		selectedDevices = new ArrayList<>();
+		selectedDevices = new HashMap<>();
 	}
 	
 	@Override
@@ -127,6 +129,11 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				
 				for(Device device : devices) {
 					mapPresenter.addDevice(device);
+					
+					if(selectedDevices.containsKey(device.getId())) {
+						mapPresenter.selectDevice(device, true);
+						selectedDevices.put(device.getId(), device);
+					}
 				}
 			}
 		});
@@ -158,13 +165,13 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	}
 
 	public void onDeviceClicked(Device device) {
-		if(selectedDevices.contains(device)) {
+		if(selectedDevices.containsKey(device.getId())) {
 			mapPresenter.selectDevice(device, false);
-			selectedDevices.remove(device);
+			selectedDevices.remove(device.getId());
 			eventBus.deviceSelected(device, false);
 		} else {
 			mapPresenter.selectDevice(device, true);
-			selectedDevices.add(device);
+			selectedDevices.put(device.getId(), device);
 			eventBus.deviceSelected(device, true);
 		}
 	}

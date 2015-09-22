@@ -6,7 +6,6 @@ import org.gwtbootstrap3.client.ui.DescriptionData;
 import org.gwtbootstrap3.client.ui.DescriptionTitle;
 import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.ListBox;
-import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,6 +15,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
@@ -55,6 +55,11 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	@UiHandler("showFibre")
 	void showFibre(ClickEvent event) {
 		getPresenter().handleShowFibreClick();
+	}
+	
+	@UiHandler("expand")
+	void expandChart(ClickEvent event) {
+		getPresenter().onExpandChart();
 	}
 	
 	@Override
@@ -127,13 +132,18 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	}
 
 	@Override
-	public void setChart(Chart chart) {
-		this.chart.clear();
-		this.chart.add(chart);
+	public void showNoMeasurementsForDeviceMessage() {
+		Window.alert(messages.noMeasurementsForDevice());
 	}
 
 	@Override
-	public Number getChartContainerHeight() {
+	public void setChart(IsWidget view) {
+		chart.add(view);
+	}
+
+	@Override
+	public int getChartHeight() {
+		//offset height minus padding
 		return chart.getOffsetHeight() - 40;
 	}
 

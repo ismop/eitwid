@@ -1,7 +1,5 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
-import org.moxieapps.gwt.highcharts.client.Chart;
-
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IMonitoringSidePanel extends IsWidget {
@@ -9,6 +7,8 @@ public interface IMonitoringSidePanel extends IsWidget {
 		void handleShowFibreClick();
 
 		void handleShowWeatherClick();
+
+		void onExpandChart();
 	}
 
 	void showLeveeName(boolean show);
@@ -31,9 +31,11 @@ public interface IMonitoringSidePanel extends IsWidget {
 
 	void clearMetadata();
 
-	void setChart(Chart chart);
+	void showNoMeasurementsForDeviceMessage();
 
-	Number getChartContainerHeight();
+	void setChart(IsWidget view);
+
+	int getChartHeight();
 
 	void showChartExpandButton(boolean show);
 }
