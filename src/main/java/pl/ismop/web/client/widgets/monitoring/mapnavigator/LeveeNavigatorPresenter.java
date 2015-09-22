@@ -1,7 +1,9 @@
 package pl.ismop.web.client.widgets.monitoring.mapnavigator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -31,12 +33,15 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	private DapController dapController;
 	private List<Device> displayedDevices;
 	private List<DeviceAggregation> displayedDeviceAggregations;
+	private Map<String, Device> selectedDevices;
+	private Section selectedSection;
 
 	@Inject
 	public LeveeNavigatorPresenter(DapController dapController) {
 		this.dapController = dapController;
 		displayedDevices = new ArrayList<>();
 		displayedDeviceAggregations = new ArrayList<>();
+		selectedDevices = new HashMap<>();
 	}
 	
 	@Override
@@ -99,10 +104,18 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	}
 	
 	public void onSectionClicked(final Section section) {
-		removeDevicesAndAggregates();
+		if(selectedSection == section) {
+			return;
+		}
 		
+		if(selectedSection != null) {
+			mapPresenter.removeAction(selectedSection.getId());
+		}
+		
+		selectedSection = section;
+		removeDevicesAndAggregates();
 		mapPresenter.zoomOnSection(section);
-		mapPresenter.addAction(section.getId(), view.getZoomOutLabel());
+		mapPresenter.addAction(selectedSection.getId(), view.getZoomOutLabel());
 		//TODO(DH): add spinner somewhere
 		dapController.getDevicesForSectionAndType(section.getId(), "fiber_optic_node",new DevicesCallback() {
 			@Override
@@ -116,6 +129,11 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				
 				for(Device device : devices) {
 					mapPresenter.addDevice(device);
+					
+					if(selectedDevices.containsKey(device.getId())) {
+						mapPresenter.selectDevice(device, true);
+						selectedDevices.put(device.getId(), device);
+					}
 				}
 			}
 		});
@@ -147,7 +165,15 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	}
 
 	public void onDeviceClicked(Device device) {
-		Window.alert("TODO");
+		if(selectedDevices.containsKey(device.getId())) {
+			mapPresenter.selectDevice(device, false);
+			selectedDevices.remove(device.getId());
+			eventBus.deviceSelected(device, false);
+		} else {
+			mapPresenter.selectDevice(device, true);
+			selectedDevices.put(device.getId(), device);
+			eventBus.deviceSelected(device, true);
+		}
 	}
 	
 	public void onDeviceAggregateClicked(DeviceAggregation deviceAggregation) {
@@ -158,6 +184,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		removeDevicesAndAggregates();
 		mapPresenter.zoomToAllSections();
 		mapPresenter.removeAction(sectionId);
+		selectedSection = null;
 	}
 
 	private List<String> collectProfileIds(List<Profile> profiles) {

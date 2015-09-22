@@ -252,6 +252,15 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		view.adjustBounds(collectAllPoints());
 	}
 
+	public void selectDevice(Device device, boolean select) {
+		if(!devices.keySet().contains(device.getId())) {
+			addDevice(device);
+		}
+		
+		String featureId = "device-" + device.getId();
+		view.selectFeature(featureId, select);
+	}
+
 	@Override
 	public void onZoomOut(String sectionId) {
 		eventBus.zoomOut(sectionId);

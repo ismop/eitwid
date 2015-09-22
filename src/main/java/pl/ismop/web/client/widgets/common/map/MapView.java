@@ -161,6 +161,29 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		layerData.setMap(map);
 	}-*/;
 	
+	@Override
+	public native void selectFeature(String featureId, boolean select) /*-{
+		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
+		
+		if(feature) {
+			if(select) {
+				var thisObject = this;
+				var icon = {
+					anchor: {
+						x: 6,
+						y: 6
+					},
+					url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getSelectedFeatureIcon(Ljava/lang/String;)(feature.getId())
+				};
+				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
+					icon: icon
+				});
+			} else {
+				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
+			}
+		}
+	}-*/;
+
 	private void featureHoverIn(String type, String id) {
 		getPresenter().onFeatureHoverIn(type, id);
 	}
@@ -183,6 +206,10 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	
 	private String getFeatureIcon(String featureId) {
 		return "/icons/device-fiber.png";
+	}
+	
+	private String getSelectedFeatureIcon(String featureId) {
+		return "/icons/device-fiber-selected.png";
 	}
 	
 	private native void addHoverHandlers() /*-{

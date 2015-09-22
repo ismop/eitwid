@@ -7,6 +7,8 @@ public interface IMonitoringSidePanel extends IsWidget {
 		void handleShowFibreClick();
 
 		void handleShowWeatherClick();
+
+		void onExpandChart();
 	}
 
 	void showLeveeName(boolean show);
@@ -28,4 +30,12 @@ public interface IMonitoringSidePanel extends IsWidget {
 	void addMetadata(String label, String value);
 
 	void clearMetadata();
+
+	void showNoMeasurementsForDeviceMessage();
+
+	void setChart(IsWidget view);
+
+	int getChartHeight();
+
+	void showChartExpandButton(boolean show);
 }
