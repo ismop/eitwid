@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.client.Window;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -110,7 +109,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 
 	@Override
 	public void onExpandChart() {
-		Window.alert("TODO");
+		eventBus.showExpandedReadings(chartPresenter.getSeries());
 	}
 
 	private void addChartSeries(Device device) {

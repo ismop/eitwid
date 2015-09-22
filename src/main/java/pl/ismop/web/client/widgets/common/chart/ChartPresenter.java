@@ -1,6 +1,8 @@
 package pl.ismop.web.client.widgets.common.chart;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
@@ -82,6 +84,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 
 	public int getSeriesCount() {
 		return dataSeriesMap.size();
+	}
+
+	public List<ChartSeries> getSeries() {
+		return new ArrayList<>(dataSeriesMap.values());
 	}
 
 	private Number getYAxisIndex(ChartSeries series) {

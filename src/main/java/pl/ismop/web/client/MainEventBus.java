@@ -1,5 +1,7 @@
 package pl.ismop.web.client;
 
+import java.util.List;
+
 import com.mvp4g.client.annotation.Event;
 import com.mvp4g.client.annotation.Events;
 import com.mvp4g.client.annotation.InitHistory;
@@ -11,9 +13,11 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
+import pl.ismop.web.client.widgets.monitoring.readings.ReadingPresenter;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
 import pl.ismop.web.client.widgets.monitoring.weather.WeatherStationPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
@@ -68,4 +72,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void deviceSelected(Device device, boolean selected);
+
+	@Event(handlers = ReadingPresenter.class)
+	void showExpandedReadings(List<ChartSeries> series);
 }
