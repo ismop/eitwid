@@ -13,7 +13,7 @@ import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
@@ -328,8 +328,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void showDeviceAggregations() {
-		for(DeviceAggregation da : fetcher.getDeviceAggregations()) {
-			map.addDeviceAggregation(da);
+		for(DeviceAggregate da : fetcher.getDeviceAggregations()) {
+			map.addDeviceAggregate(da);
 		}
 	}
 
@@ -403,11 +403,11 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		fibreChart.showLoading(messages.loadingData());
 		fetcher.getSeries(selectedDate, new SeriesCallback() {
 			@Override
-			public void series(Map<DeviceAggregation, List<IDataFetcher.ChartPoint>> series) {
+			public void series(Map<DeviceAggregate, List<IDataFetcher.ChartPoint>> series) {
 				deviceMapping.clear();
 				Map<String, Series> newSeriesCache = new HashMap<>();
-				for (Map.Entry<DeviceAggregation, List<IDataFetcher.ChartPoint>> points : series.entrySet()) {
-					DeviceAggregation aggregation = points.getKey();
+				for (Map.Entry<DeviceAggregate, List<IDataFetcher.ChartPoint>> points : series.entrySet()) {
+					DeviceAggregate aggregation = points.getKey();
 					Series s = getSeries(aggregation);
 					newSeriesCache.put(aggregation.getId(), s);
 					upateSeries(s, points);
@@ -428,7 +428,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		});
 	}
 
-	private Series getSeries(DeviceAggregation aggregation) {
+	private Series getSeries(DeviceAggregate aggregation) {
 		Series s = seriesCache.remove(aggregation.getId());
 		if (s == null) {
 			s = fibreChart.createSeries().
@@ -439,8 +439,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		return s;
 	}
 
-	private void upateSeries(Series s, Map.Entry<DeviceAggregation, List<IDataFetcher.ChartPoint>> points) {
-		DeviceAggregation aggregation = points.getKey();
+	private void upateSeries(Series s, Map.Entry<DeviceAggregate, List<IDataFetcher.ChartPoint>> points) {
+		DeviceAggregate aggregation = points.getKey();
 		List<IDataFetcher.ChartPoint> newPoints = points.getValue();
 
 		if (theSameX(s.getPoints(), newPoints)) {

@@ -6,7 +6,7 @@ import com.mvp4g.client.annotation.InitHistory;
 import com.mvp4g.client.event.EventBusWithLookup;
 
 import pl.ismop.web.client.dap.device.Device;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
@@ -61,7 +61,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	void deviceClicked(Device device);
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
-	void deviceAggregateClicked(DeviceAggregation deviceAggregation);
+	void deviceAggregateClicked(DeviceAggregate deviceAggregation);
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void zoomOut(String sectionId);
