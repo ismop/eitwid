@@ -1,7 +1,7 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import pl.ismop.web.client.dap.device.Device;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorCallback;
@@ -16,10 +16,10 @@ import java.util.Map;
  * Created by marek on 11.09.15.
  */
 public interface IDataFetcher {
-    Collection<DeviceAggregation> getDeviceAggregations();
+    Collection<DeviceAggregate> getDeviceAggregations();
 
     interface SeriesCallback extends ErrorCallback {
-        void series(Map<DeviceAggregation, List<ChartPoint>> series);
+        void series(Map<DeviceAggregate, List<ChartPoint>> series);
     }
 
     interface DateSeriesCallback extends ErrorCallback {

@@ -6,7 +6,7 @@ import org.fusesource.restygwt.client.Json;
 
 import pl.ismop.web.client.geojson.Geometry;
 
-public class DeviceAggregation {
+public class DeviceAggregate {
 	private String id;
 	
 	@Json(name = "parent_id")

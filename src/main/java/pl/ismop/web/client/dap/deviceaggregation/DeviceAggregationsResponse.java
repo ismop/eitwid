@@ -6,13 +6,13 @@ import org.fusesource.restygwt.client.Json;
 
 public class DeviceAggregationsResponse {
 	@Json(name = "device_aggregations")
-	private List<DeviceAggregation> deviceAggregations;
+	private List<DeviceAggregate> deviceAggregations;
 
-	public List<DeviceAggregation> getDeviceAggregations() {
+	public List<DeviceAggregate> getDeviceAggregations() {
 		return deviceAggregations;
 	}
 
-	public void setDeviceAggregations(List<DeviceAggregation> deviceAggregations) {
+	public void setDeviceAggregations(List<DeviceAggregate> deviceAggregations) {
 		this.deviceAggregations = deviceAggregations;
 	}
 }
