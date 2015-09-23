@@ -1,8 +1,6 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -24,6 +22,8 @@ import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.slider.SliderPresenter;
 
 import java.util.*;
+
+import static pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.*;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
@@ -69,6 +69,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		this.properties = properties;
 	}
 
+	@SuppressWarnings("unused")
 	public void onShowFibrePanel(Levee levee) {
 		if (this.levee != levee) {
 			this.levee = levee;
@@ -254,7 +255,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void loadDeviceValues(final Device selectedDevice) {
 		deviceChart.showLoading(messages.loadingDeviceValues(selectedDevice.getCustomId()));
-		fetcher.getMeasurements(selectedDevice, slider.getStartDate(), slider.getEndDate(), new IDataFetcher.DateSeriesCallback() {
+		fetcher.getMeasurements(selectedDevice, slider.getStartDate(), slider.getEndDate(), new DateSeriesCallback() {
 			@Override
 			public void series(List<IDataFetcher.DateChartPoint> series) {
 				deviceChart.hideLoading();
@@ -263,7 +264,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					Series measurements = deviceChart.createSeries().
 							setName(selectedDevice.getCustomId()).
 							setType(Type.SPLINE);
-					for (IDataFetcher.DateChartPoint point : series) {
+					for (DateChartPoint point : series) {
 						measurements.addPoint(point.getX().getTime(), point.getY());
 					}
 					deviceChart.addSeries(measurements);
@@ -300,7 +301,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void initializeFetcher() {
 		fibreChart.showLoading(messages.loadingFibreShare());
-		fetcher.initialize(new IDataFetcher.InitializeCallback() {
+		fetcher.initialize(new InitializeCallback() {
 			@Override
 			public void ready() {
 				fibreChart.getYAxis().setAxisTitle(new AxisTitle().setText(fetcher.getXAxisTitle()));
@@ -358,7 +359,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private void updateSelectedDevicesSeries() {
 		deviceChart.showLoading(messages.loadingDevicesValues());
 		Collection<Device> selected = selectedDevices.keySet();
-		fetcher.getMeasurements(selected, slider.getStartDate(), slider.getEndDate(), new IDataFetcher.DevicesDateSeriesCallback() {
+		fetcher.getMeasurements(selected, slider.getStartDate(), slider.getEndDate(), new DevicesDateSeriesCallback() {
 			@Override
 			public void series(Map<Device, List<IDataFetcher.DateChartPoint>> series) {
 				deviceChart.hideLoading();
@@ -370,7 +371,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 						Series measurements = deviceChart.createSeries().
 								setName(s.getKey().getCustomId()).
 								setType(Type.SPLINE);
-						for (IDataFetcher.DateChartPoint point : s.getValue()) {
+						for (DateChartPoint point : s.getValue()) {
 							measurements.addPoint(point.getX().getTime(), point.getY());
 						}
 						deviceChart.addSeries(measurements);
@@ -400,7 +401,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void loadData(Date selectedDate) {
 		fibreChart.showLoading(messages.loadingData());
-		fetcher.getSeries(selectedDate, new IDataFetcher.SeriesCallback() {
+		fetcher.getSeries(selectedDate, new SeriesCallback() {
 			@Override
 			public void series(Map<DeviceAggregation, List<IDataFetcher.ChartPoint>> series) {
 				deviceMapping.clear();
@@ -446,13 +447,13 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			Point[] seriesPoints = s.getPoints();
 			for (int i = 0; i < newPoints.size(); i++) {
 				Point seriesPoint = seriesPoints[i];
-				IDataFetcher.ChartPoint newPoint = newPoints.get(i);
+				ChartPoint newPoint = newPoints.get(i);
 				seriesPoint.update(newPoint.getX(), newPoint.getY(), false);
 				deviceMapping.put(aggregation.getId() + "::" + newPoint.getX(), newPoint.getDevice());
 			}
 		} else {
 			s.remove();
-			for (IDataFetcher.ChartPoint point : newPoints) {
+			for (ChartPoint point : newPoints) {
 				s.addPoint(point.getX(), point.getY());
 				deviceMapping.put(aggregation.getId() + "::" + point.getX(), point.getDevice());
 			}
