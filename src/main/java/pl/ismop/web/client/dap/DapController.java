@@ -239,6 +239,10 @@ public class DapController {
 		measurementService.getMeasurements(timelineId, from, until, new MeasurementsRestCallback(callback));
 	}
 
+	public void getMeasurements(List<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
+		getMeasurements(merge(timelineId, ","), startDate, endDate, callback);
+	}
+
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date);
 		String from = DateTimeFormat.

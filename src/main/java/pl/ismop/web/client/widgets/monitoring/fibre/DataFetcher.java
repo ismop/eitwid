@@ -74,6 +74,12 @@ public class DataFetcher implements IDataFetcher {
         }
     }
 
+    private abstract class MeasurementsCallback extends ErrorCallbackDelegator implements DapController.MeasurementsCallback {
+        public MeasurementsCallback(ErrorCallback errorCallback) {
+            super(errorCallback);
+        }
+    }
+
     private final Levee levee;
     private final DapController dapController;
     private final String contextId;
@@ -190,16 +196,12 @@ public class DataFetcher implements IDataFetcher {
     }
 
     private void getRealSeries(Date selectedDate, final SeriesCallback callback) {
-        dapController.getLastMeasurements(new ArrayList<>(timelineIdToDevice.keySet()), selectedDate, new DapController.MeasurementsCallback() {
+        dapController.getLastMeasurements(new ArrayList<>(timelineIdToDevice.keySet()),
+                selectedDate, new MeasurementsCallback(callback) {
             @Override
             public void processMeasurements(List<Measurement> measurements) {
                 GWT.log("number of loaded measurements: " + measurements.size());
                 callback.series(getSeries(measurements));
-            }
-
-            @Override
-            public void onError(ErrorDetails errorDetails) {
-                callback.onError(errorDetails);
             }
         });
     }
@@ -307,6 +309,35 @@ public class DataFetcher implements IDataFetcher {
         }
     }
 
+    @Override
+    public void getMeasurements(Collection<Device> devices,
+                                Date startDate, Date endDate,
+                                final DevicesDateSeriesCallback callback) {
+        List<String> timelineIds = new ArrayList<>();
+        BiMap<Device, String> deviceToTimelineId = timelineIdToDevice.inverse();
+        for (Device d : devices) {
+            timelineIds.add(deviceToTimelineId.get(d));
+        }
+        dapController.getMeasurements(timelineIds, startDate, endDate, new MeasurementsCallback(callback) {
+            @Override
+            public void processMeasurements(List<Measurement> measurements) {
+                DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
+                Map<Device, List<DateChartPoint>> results = new HashMap<Device, List<DateChartPoint>>();
+                for (Measurement m : measurements) {
+                    Device device = timelineIdToDevice.get(m.getTimelineId());
+                    List<DateChartPoint> series = results.get(device);
+                    if(series == null) {
+                        series = new ArrayList<DateChartPoint>();
+                        results.put(device, series);
+                    }
+                    Date date = format.parse(m.getTimestamp());
+                    series.add(new DateChartPoint(date, m.getValue()));
+                }
+                callback.series(results);
+            }
+        });
+    }
+
     private void getMockedMeasurements(final Device device,
                                 final Date startDate, final Date endDate,
                                 final DateSeriesCallback callback) {
@@ -323,13 +354,7 @@ public class DataFetcher implements IDataFetcher {
     private void getRealMeasurements(Device device, Date startDate, Date endDate, final DateSeriesCallback callback) {
         GWT.log("From " + startDate + " to " + endDate);
         dapController.getMeasurements
-                (timelineIdToDevice.inverse().get(device), startDate, endDate, new DapController.MeasurementsCallback() {
-
-                    @Override
-                    public void onError(ErrorDetails errorDetails) {
-                        callback.onError(errorDetails);
-                    }
-
+                (timelineIdToDevice.inverse().get(device), startDate, endDate, new MeasurementsCallback(callback) {
                     @Override
                     public void processMeasurements(List<Measurement> measurements) {
                         DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);

@@ -6,11 +6,10 @@ public interface FibreMessages extends Messages {
     String fibreChartTitle();
     String firbreChartXAxisTitle();
     String deviceChartInitTitle();
-    String deviceChartSelectTitle(String sensorName);
     String loadingDeviceValues(String sensorName);
+    String loadingDevicesValues();
     String loadingFibreShare();
     String loadingData();
 
     String errorLoadingDataFromDap();
-
 }

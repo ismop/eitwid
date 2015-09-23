@@ -2,10 +2,8 @@ package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
-import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorCallback;
-import scala.Array;
 
 import java.util.Collection;
 import java.util.Date;
@@ -24,6 +22,10 @@ public interface IDataFetcher {
 
     interface DateSeriesCallback extends ErrorCallback {
         void series(List<DateChartPoint> series);
+    }
+
+    interface DevicesDateSeriesCallback extends ErrorCallback {
+        void series(Map<Device, List<DateChartPoint>> series);
     }
 
     interface InitializeCallback extends  ErrorCallback {
@@ -85,5 +87,7 @@ public interface IDataFetcher {
     void getSeries(Date selectedDate, SeriesCallback callback);
     Section getDeviceSection(Device device);
     Collection<Section> getSections();
+
     void getMeasurements(Device device, Date startDate, Date endDate, DateSeriesCallback callback);
+    void getMeasurements(Collection<Device> devices, Date startDate, Date endDate, DevicesDateSeriesCallback callback);
 }
