@@ -125,14 +125,11 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addGeoJson(JSON.parse(geoJsonValue));
 	}-*/;
 
-	@Override
-	public native void initMap() /*-{
+	private native void initMap() /*-{
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
 			zoom: 8,
 			scaleControl: true,
-			rotateControl: true,
-			mapTypeId: $wnd.google.maps.MapTypeId.SATELLITE,
-			heading: 45
+			rotateControl: true
 		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
 		

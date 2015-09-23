@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
+import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -36,10 +37,11 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 	public void addChartSeries(ChartSeries series) {
 		if(chart == null) {
 			chart = new Chart()
-					.setType(Series.Type.LINE)
+					.setType(Series.Type.SPLINE)
 					.setTitle(
 							new ChartTitle().setText(view.getChartTitle()),
-							new ChartSubtitle());
+							new ChartSubtitle())
+					.setZoomType(ZoomType.X);
 			chart.getXAxis().setType(Type.DATE_TIME);
 			
 			if(height > 0) {
@@ -67,7 +69,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 	}
 
 	public void removeChartSeriesForDevice(Device device) {
-		for(String chartSeriesKey : dataSeriesMap.keySet()) {
+		for(String chartSeriesKey : new ArrayList<>(dataSeriesMap.keySet())) {
 			if(dataSeriesMap.get(chartSeriesKey).getDeviceId().equals(device.getId())) {
 				dataSeriesMap.remove(chartSeriesKey);
 				chart.removeSeries(chartSeriesMap.remove(chartSeriesKey));
@@ -88,6 +90,19 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 
 	public List<ChartSeries> getSeries() {
 		return new ArrayList<>(dataSeriesMap.values());
+	}
+
+	public void reset() {
+		for(String chartSeriesKey : new ArrayList<>(dataSeriesMap.keySet())) {
+			dataSeriesMap.remove(chartSeriesKey);
+			chart.removeSeries(chartSeriesMap.remove(chartSeriesKey));
+		}
+		
+		yAxisMap.clear();
+		
+		if(chart != null) {
+			chart.removeAllSeries();
+		}
 	}
 
 	private Number getYAxisIndex(ChartSeries series) {

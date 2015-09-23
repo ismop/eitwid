@@ -4,11 +4,45 @@
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.monitoring.readings.ReadingsMessages" field="messages"/>
 	<ui:style>
+		@external .modal-dialog, .modal-content, .modal-body;
+		
+		.modal .modal-dialog {
+			height: 90%;
+		}
+		
+		.modal .modal-content {
+			height: 100%;
+		}
+		
+		.modal .modal-body {
+			height: literal("calc(100% - 60px)");
+			overflow-y: auto;
+		}
+		
+		.row, .column, .map {
+			height: 100%;
+		}
+		
+		.chart {
+			height: 80%;
+		}
+		
+		.misc {
+			height: 20%;
+		}
 	</ui:style>
 	<g:HTMLPanel>
-		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="95%">
+		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="95%" addStyleNames="{style.modal}">
 			<b:ModalBody>
-				
+				<b:Row addStyleNames="{style.row}">
+					<b:Column size="MD_9" addStyleNames="{style.column}">
+						<g:FlowPanel ui:field="chartContainer" addStyleNames="{style.chart}"/>
+						<g:FlowPanel ui:field="miscContainer" addStyleNames="{style.misc}"/>
+					</b:Column>
+					<b:Column size="MD_3" addStyleNames="{style.column}">
+						<g:FlowPanel ui:field="mapContainer" addStyleNames="{style.map}"/>
+					</b:Column>
+				</b:Row>
 			</b:ModalBody>
 		</b:Modal>
 	</g:HTMLPanel>

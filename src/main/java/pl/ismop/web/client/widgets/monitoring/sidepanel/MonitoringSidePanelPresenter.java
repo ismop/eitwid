@@ -109,7 +109,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 
 	@Override
 	public void onExpandChart() {
-		eventBus.showExpandedReadings(chartPresenter.getSeries());
+		eventBus.showExpandedReadings(selectedLevee, chartPresenter.getSeries());
 	}
 
 	private void addChartSeries(Device device) {

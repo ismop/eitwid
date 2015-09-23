@@ -45,10 +45,6 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		deviceAggregations = new HashMap<>();
 	}
 	
-	public void initializeMap() {
-		view.initMap();
-	}
-	
 	public void addSection(Section section) {
 		if(!sections.keySet().contains(section.getId())) {
 			sections.put(section.getId(), section);
@@ -75,9 +71,24 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 	}
 
-	public void reset() {
-		// TODO Auto-generated method stub
+	public void reset(boolean leaveSections) {
+		if(!leaveSections) {
+			for(String sectionId : new ArrayList<>(sections.keySet())) {
+				removeSection(sections.get(sectionId));
+			}
+		}
 		
+		for(String profileId : new ArrayList<>(profiles.keySet())) {
+			removeProfile(profiles.get(profileId));
+		}
+		
+		for(String deviceId : new ArrayList<>(devices.keySet())) {
+			removeDevice(devices.get(deviceId));
+		}
+		
+		for(String deviceAggregateId : new ArrayList<>(deviceAggregations.keySet())) {
+			removeDeviceAggregation(deviceAggregations.get(deviceAggregateId));
+		}
 	}
 	
 	/**
@@ -123,6 +134,20 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		if(devices.keySet().contains(device.getId())) {
 			view.removeFeature("device-" + device.getId());
 			devices.remove(device.getId());
+		}
+	}
+	
+	public void removeSection(Section section) {
+		if(sections.keySet().contains(section.getId())) {
+			view.removeFeature("section-" + section.getId());
+			sections.remove(section.getId());
+		}
+	}
+	
+	public void removeProfile(Profile profile) {
+		if(profiles.keySet().contains(profile.getId())) {
+			view.removeFeature("profile-" + profile.getId());
+			profiles.remove(profile.getId());
 		}
 	}
 	
