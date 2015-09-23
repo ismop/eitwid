@@ -8,4 +8,8 @@ public interface IsmopProperties extends Constants {
 	
 	@DefaultStringValue("asd324de3")
 	String dapToken();
+
+
+	@DefaultStringValue("#f5ea6f")
+	String selectionColor();
 }

@@ -11,6 +11,7 @@ import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.events.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
@@ -48,6 +49,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private final DapController dapController;
+	private final IsmopProperties properties;
 	private Chart fibreChart;
 	private Chart deviceChart;
 	private SliderPresenter slider;
@@ -62,8 +64,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private FibreMessages messages;
 
 	@Inject
-	public FibrePresenter(DapController dapController) {
+	public FibrePresenter(DapController dapController, IsmopProperties properties) {
 		this.dapController = dapController;
+		this.properties = properties;
 	}
 
 	public void onShowFibrePanel(Levee levee) {
@@ -153,7 +156,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 							}).
 							setMarker(new Marker().
 										setSelectState(new Marker().
-														setFillColor("red").
+														setFillColor(properties.selectionColor()).
 														setRadius(5).
 														setLineWidth(0)
 										)
@@ -231,7 +234,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void selectDeviceOnMinimap(Device device) {
-		map.addDevice(device);
+		map.selectDevice(device, true);
 	}
 
 	private void unselectDeviceOnMinimap(Device device) {
@@ -242,7 +245,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		PlotBand selectedDeviceBand = fibreChart.getXAxis().createPlotBand().
 				setFrom(selectedDevice.getLeveeDistanceMarker() - 0.1).
 				setTo(selectedDevice.getLeveeDistanceMarker() + 0.1).
-				setColor("red");
+				setColor(properties.selectionColor());
 
 		fibreChart.getXAxis().addPlotBands(selectedDeviceBand);
 
