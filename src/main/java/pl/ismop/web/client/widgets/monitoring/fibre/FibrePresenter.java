@@ -186,10 +186,10 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 								public String format(ToolTipData toolTipData) {
 									Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
 									if (selectedDevice != null) {
-										return "<b>" + toolTipData.getYAsString() + "\u00B0C</b><br/>" +
-												selectedDevice.getLeveeDistanceMarker() + " metr wału<br/>" +
-												selectedDevice.getCableDistanceMarker() + " metr światłowodu<br/>" +
-												"Sensor: " + selectedDevice.getCustomId();
+										return messages.deviceTooltip(toolTipData.getYAsString(),
+																	selectedDevice.getLeveeDistanceMarker() + "",
+																	selectedDevice.getCableDistanceMarker() + "",
+																	selectedDevice.getCustomId());
 									} else {
 										return null;
 									}
