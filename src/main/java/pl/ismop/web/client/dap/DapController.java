@@ -20,7 +20,7 @@ import pl.ismop.web.client.dap.context.ContextsResponse;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.device.DeviceService;
 import pl.ismop.web.client.dap.device.DevicesResponse;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationService;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationsResponse;
 import pl.ismop.web.client.dap.levee.Levee;
@@ -126,8 +126,8 @@ public class DapController {
 		void processTimelines(List<Timeline> timelines);
 	}
 	
-	public interface DeviceAggregationsCallback extends ErrorCallback {
-		void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations);
+	public interface DeviceAggregatesCallback extends ErrorCallback {
+		void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations);
 	}
 
 	private class MeasurementsRestCallback implements MethodCallback<MeasurementsResponse> {
@@ -237,6 +237,10 @@ public class DapController {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(endDate);
 		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(startDate);
 		measurementService.getMeasurements(timelineId, from, until, new MeasurementsRestCallback(callback));
+	}
+
+	public void getMeasurements(List<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
+		getMeasurements(merge(timelineId, ","), startDate, endDate, callback);
 	}
 
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
@@ -488,7 +492,7 @@ public class DapController {
 
 
 
-	public void getDeviceAggregations(String profileId, final DeviceAggregationsCallback callback) {
+	public void getDeviceAggregations(String profileId, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -502,7 +506,7 @@ public class DapController {
 		});
 	}
 	
-	public void getDeviceAggregations(List<String> profileIds, final DeviceAggregationsCallback callback) {
+	public void getDeviceAggregations(List<String> profileIds, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregations(merge(profileIds, ","), new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -516,7 +520,7 @@ public class DapController {
 		});
 	}
 
-	public void getDeviceAggregationsForSectionId(String sectionIdFilter, final DeviceAggregationsCallback callback) {
+	public void getDeviceAggregationsForSectionId(String sectionIdFilter, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregationsForSectionIds(sectionIdFilter, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -558,7 +562,7 @@ public class DapController {
 		});
 	}
 
-	public void getDeviceAggregationForType(String type, final DeviceAggregationsCallback callback) {
+	public void getDeviceAggregationForType(String type, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregationsForType(type, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -572,7 +576,7 @@ public class DapController {
 		});
 	}
 
-	public void getDeviceAggregationForType(String type, String leveeId, final DeviceAggregationsCallback callback) {
+	public void getDeviceAggregationForType(String type, String leveeId, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregationsForType(type, leveeId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -629,14 +633,13 @@ public class DapController {
 	}
 
 	private Date monthEarlier() {
-//		return new Date(new Date().getTime() - 2678400000L);
-		return new Date(new Date().getTime() - 7200000L);
+		return new Date(new Date().getTime() - 2678400000L);
 	}
 
-	private void collectDevices(List<DeviceAggregation> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
+	private void collectDevices(List<DeviceAggregate> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
 			final DevicesCallback devicesCallback) {
 		if(deviceAggregations.size() > 0) {
-			for(DeviceAggregation deviceAggregation : deviceAggregations) {
+			for(DeviceAggregate deviceAggregation : deviceAggregations) {
 				requestCounter.increment();
 				deviceService.getDevices(deviceAggregation.getId(), new MethodCallback<DevicesResponse>() {
 					@Override

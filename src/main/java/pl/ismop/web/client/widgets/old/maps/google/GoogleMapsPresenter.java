@@ -27,11 +27,11 @@ import com.mvp4g.client.event.BaseEventHandler;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.DeviceAggregationsCallback;
+import pl.ismop.web.client.dap.DapController.DeviceAggregatesCallback;
 import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.DapController.SensorCallback;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.section.Section;
@@ -226,18 +226,18 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	}
 	
 	public void onMarkAndCompleteProfile(String profileId) {
-		dapController.getDeviceAggregations(profileId, new DeviceAggregationsCallback() {
+		dapController.getDeviceAggregations(profileId, new DeviceAggregatesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
 			@Override
-			public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
+			public void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations) {
 				if(deviceAggreagations.size() > 0) {
 					List<GeoJsonFeature> features = new ArrayList<>();
 					
-					for(DeviceAggregation deviceAggregation : deviceAggreagations) {
+					for(DeviceAggregate deviceAggregation : deviceAggreagations) {
 						GeoJsonFeature feature = new GeoJsonFeature();
 						feature.setGeometry(deviceAggregation.getShape());
 						feature.setId(String.valueOf(featureIdGenerator++));

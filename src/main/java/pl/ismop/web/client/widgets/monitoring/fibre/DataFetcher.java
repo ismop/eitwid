@@ -20,7 +20,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
@@ -44,7 +44,7 @@ public class DataFetcher implements IDataFetcher {
         }
     }
 
-    private abstract class DeviceAggregationsCallback extends ErrorCallbackDelegator implements DapController.DeviceAggregationsCallback {
+    private abstract class DeviceAggregationsCallback extends ErrorCallbackDelegator implements DapController.DeviceAggregatesCallback {
         public DeviceAggregationsCallback(ErrorCallback callback) {
             super(callback);
         }
@@ -74,13 +74,19 @@ public class DataFetcher implements IDataFetcher {
         }
     }
 
+    private abstract class MeasurementsCallback extends ErrorCallbackDelegator implements DapController.MeasurementsCallback {
+        public MeasurementsCallback(ErrorCallback errorCallback) {
+            super(errorCallback);
+        }
+    }
+
     private final Levee levee;
     private final DapController dapController;
     private final String contextId;
     private boolean mock;
 
     private Map<String, Section> idToSections = new HashMap<>();
-    private Map<String, DeviceAggregation> idToDeviceAggregation = new HashMap<>();
+    private Map<String, DeviceAggregate> idToDeviceAggregation = new HashMap<>();
     private Map<String, Device> idToDevice = new HashMap<>();
     private BiMap<String, Device> timelineIdToDevice;
     private boolean initialized = false;
@@ -105,10 +111,10 @@ public class DataFetcher implements IDataFetcher {
         GWT.log("Loading device aggregations");
         dapController.getDeviceAggregationForType("fiber", levee.getId(), new DeviceAggregationsCallback(callback) {
             @Override
-            public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
+            public void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations) {
                 GWT.log(deviceAggreagations.size() + " devise aggregation loaded, loading devices");
                 List<String> deviceAggregationIds = new ArrayList<>();
-				for(DeviceAggregation deviceAggregation : deviceAggreagations) {
+				for(DeviceAggregate deviceAggregation : deviceAggreagations) {
 					deviceAggregationIds.add(deviceAggregation.getId());
                     idToDeviceAggregation.put(deviceAggregation.getId(), deviceAggregation);
 				}
@@ -190,28 +196,24 @@ public class DataFetcher implements IDataFetcher {
     }
 
     private void getRealSeries(Date selectedDate, final SeriesCallback callback) {
-        dapController.getLastMeasurements(new ArrayList<>(timelineIdToDevice.keySet()), selectedDate, new DapController.MeasurementsCallback() {
+        dapController.getLastMeasurements(new ArrayList<>(timelineIdToDevice.keySet()),
+                selectedDate, new MeasurementsCallback(callback) {
             @Override
             public void processMeasurements(List<Measurement> measurements) {
                 GWT.log("number of loaded measurements: " + measurements.size());
                 callback.series(getSeries(measurements));
             }
-
-            @Override
-            public void onError(ErrorDetails errorDetails) {
-                callback.onError(errorDetails);
-            }
         });
     }
 
-    private Map<DeviceAggregation, List<ChartPoint>> getSeries(List<Measurement> measurements) {
+    private Map<DeviceAggregate, List<ChartPoint>> getSeries(List<Measurement> measurements) {
         Map<Device, Measurement> deviceIdToMeasurement = new HashMap<>();
         for(Measurement m : measurements) {
             deviceIdToMeasurement.put(timelineIdToDevice.get(m.getTimelineId()), m);
         }
 
-        Map<DeviceAggregation, List<ChartPoint>> series = new HashMap<>();
-        for (DeviceAggregation da : idToDeviceAggregation.values()) {
+        Map<DeviceAggregate, List<ChartPoint>> series = new HashMap<>();
+        for (DeviceAggregate da : idToDeviceAggregation.values()) {
 
             List<Device> devices = new ArrayList<>();
             for(String deviceId : da.getDeviceIds()) {
@@ -255,10 +257,10 @@ public class DataFetcher implements IDataFetcher {
         timer.schedule(new Random().nextInt(2000));
     }
 
-    private Map<DeviceAggregation, List<ChartPoint>> generateSeries() {
-        Map<DeviceAggregation, List<ChartPoint>> series = new HashMap<>();
+    private Map<DeviceAggregate, List<ChartPoint>> generateSeries() {
+        Map<DeviceAggregate, List<ChartPoint>> series = new HashMap<>();
         Random random = new Random();
-        for (DeviceAggregation da : idToDeviceAggregation.values()) {
+        for (DeviceAggregate da : idToDeviceAggregation.values()) {
 
             List<Device> devices = new ArrayList<>();
             for(String deviceId : da.getDeviceIds()) {
@@ -307,6 +309,35 @@ public class DataFetcher implements IDataFetcher {
         }
     }
 
+    @Override
+    public void getMeasurements(Collection<Device> devices,
+                                Date startDate, Date endDate,
+                                final DevicesDateSeriesCallback callback) {
+        List<String> timelineIds = new ArrayList<>();
+        BiMap<Device, String> deviceToTimelineId = timelineIdToDevice.inverse();
+        for (Device d : devices) {
+            timelineIds.add(deviceToTimelineId.get(d));
+        }
+        dapController.getMeasurements(timelineIds, startDate, endDate, new MeasurementsCallback(callback) {
+            @Override
+            public void processMeasurements(List<Measurement> measurements) {
+                DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
+                Map<Device, List<DateChartPoint>> results = new HashMap<Device, List<DateChartPoint>>();
+                for (Measurement m : measurements) {
+                    Device device = timelineIdToDevice.get(m.getTimelineId());
+                    List<DateChartPoint> series = results.get(device);
+                    if(series == null) {
+                        series = new ArrayList<DateChartPoint>();
+                        results.put(device, series);
+                    }
+                    Date date = format.parse(m.getTimestamp());
+                    series.add(new DateChartPoint(date, m.getValue()));
+                }
+                callback.series(results);
+            }
+        });
+    }
+
     private void getMockedMeasurements(final Device device,
                                 final Date startDate, final Date endDate,
                                 final DateSeriesCallback callback) {
@@ -323,13 +354,7 @@ public class DataFetcher implements IDataFetcher {
     private void getRealMeasurements(Device device, Date startDate, Date endDate, final DateSeriesCallback callback) {
         GWT.log("From " + startDate + " to " + endDate);
         dapController.getMeasurements
-                (timelineIdToDevice.inverse().get(device), startDate, endDate, new DapController.MeasurementsCallback() {
-
-                    @Override
-                    public void onError(ErrorDetails errorDetails) {
-                        callback.onError(errorDetails);
-                    }
-
+                (timelineIdToDevice.inverse().get(device), startDate, endDate, new MeasurementsCallback(callback) {
                     @Override
                     public void processMeasurements(List<Measurement> measurements) {
                         DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
@@ -362,7 +387,7 @@ public class DataFetcher implements IDataFetcher {
     }
 
     @Override
-    public Collection<DeviceAggregation> getDeviceAggregations() {
+    public Collection<DeviceAggregate> getDeviceAggregations() {
         return idToDeviceAggregation.values();
     }
 }

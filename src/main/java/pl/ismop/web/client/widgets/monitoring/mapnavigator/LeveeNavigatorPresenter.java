@@ -13,12 +13,12 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.DeviceAggregationsCallback;
+import pl.ismop.web.client.dap.DapController.DeviceAggregatesCallback;
 import pl.ismop.web.client.dap.DapController.DevicesCallback;
 import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.device.Device;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
@@ -32,9 +32,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	private Levee displayedLevee;
 	private DapController dapController;
 	private List<Device> displayedDevices;
-	private List<DeviceAggregation> displayedDeviceAggregations;
+	private List<DeviceAggregate> displayedDeviceAggregations;
 	private Map<String, Device> selectedDevices;
 	private Section selectedSection;
+	private Map<String, DeviceAggregate> selectedDeviceAggregates;
 
 	@Inject
 	public LeveeNavigatorPresenter(DapController dapController) {
@@ -42,6 +43,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		displayedDevices = new ArrayList<>();
 		displayedDeviceAggregations = new ArrayList<>();
 		selectedDevices = new HashMap<>();
+		selectedDeviceAggregates = new HashMap<>();
 	}
 	
 	@Override
@@ -145,18 +147,23 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			
 			@Override
 			public void processProfiles(List<Profile> profiles) {
-				dapController.getDeviceAggregations(collectProfileIds(profiles), new DeviceAggregationsCallback() {
+				dapController.getDeviceAggregations(collectProfileIds(profiles), new DeviceAggregatesCallback() {
 					@Override
 					public void onError(ErrorDetails errorDetails) {
 						eventBus.showError(errorDetails);
 					}
 					
 					@Override
-					public void processDeviceAggregations(List<DeviceAggregation> deviceAggreagations) {
-						displayedDeviceAggregations.addAll(deviceAggreagations);
+					public void processDeviceAggregations(List<DeviceAggregate> deviceAggreagates) {
+						displayedDeviceAggregations.addAll(deviceAggreagates);
 						
-						for(DeviceAggregation deviceAggregation : deviceAggreagations) {
-							mapPresenter.addDeviceAggregation(deviceAggregation);
+						for(DeviceAggregate deviceAggregate : deviceAggreagates) {
+							mapPresenter.addDeviceAggregate(deviceAggregate);
+							
+							if(selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
+								mapPresenter.selectDeviceAggregate(deviceAggregate, true);
+								selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
+							}
 						}
 					}
 				});
@@ -176,8 +183,33 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		}
 	}
 	
-	public void onDeviceAggregateClicked(DeviceAggregation deviceAggregation) {
-		Window.alert("TODO");
+	public void onDeviceAggregateClicked(final DeviceAggregate deviceAggregate) {
+		//TODO(DH): add spinner somewhere
+		dapController.getDevicesRecursivelyForAggregate(deviceAggregate.getId(), new DevicesCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+			
+			@Override
+			public void processDevices(List<Device> devices) {
+				if(selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
+					mapPresenter.selectDeviceAggregate(deviceAggregate, false);
+					selectedDeviceAggregates.remove(deviceAggregate.getId());
+					
+					for(Device device : devices) {
+						eventBus.deviceSelected(device, false);
+					}
+				} else {
+					mapPresenter.selectDeviceAggregate(deviceAggregate, true);
+					selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
+					
+					for(Device device : devices) {
+						eventBus.deviceSelected(device, true);
+					}
+				}
+			}
+		});
 	}
 	
 	public void onZoomOut(String sectionId) {
@@ -217,8 +249,8 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		}
 		
 		if(displayedDeviceAggregations.size() > 0) {
-			for(DeviceAggregation deviceAggregation : displayedDeviceAggregations) {
-				mapPresenter.removeDeviceAggregation(deviceAggregation);
+			for(DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
+				mapPresenter.removeDeviceAggregate(deviceAggregate);
 			}
 			
 			displayedDeviceAggregations.clear();

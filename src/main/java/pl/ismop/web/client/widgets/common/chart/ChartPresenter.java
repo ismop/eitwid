@@ -13,6 +13,7 @@ import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Series;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -112,8 +113,14 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			return yAxisMap.get(yAxisLabel);
 		} else {
 			int index = yAxisMap.size();
+			
+			if(index == 0) {
+				chart.getYAxis().setAxisTitle(new AxisTitle().setText(yAxisLabel));
+			} else {
+				addAxis(chart.getNativeChart(), index, yAxisLabel);
+			}
+			
 			yAxisMap.put(yAxisLabel, index);
-			chart.getYAxis(index).setAxisTitle(new AxisTitle().setText(yAxisLabel));
 			
 			return index;
 		}
@@ -122,4 +129,12 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 	private String createKey(ChartSeries series) {
 		return series.getDeviceId() + series.getParameterId();
 	}
+
+	private native void addAxis(JavaScriptObject nativeChart, int index, String yAxisLabel) /*-{
+		nativeChart.addAxis({
+			title: {
+				text: yAxisLabel
+			}
+		});
+	}-*/;
 }

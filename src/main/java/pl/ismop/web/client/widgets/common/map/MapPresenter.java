@@ -12,7 +12,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.device.Device;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregation;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.deviceaggregation.PointShape;
 import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.dap.profile.Profile;
@@ -32,7 +32,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	private Map<String, Section> sections;
 	private Map<String, Profile> profiles;
 	private Map<String, Device> devices;
-	private Map<String, DeviceAggregation> deviceAggregations;
+	private Map<String, DeviceAggregate> deviceAggregates;
 	private boolean hoverListeners;
 	private boolean clickListeners;
 	
@@ -42,7 +42,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		sections = new HashMap<>();
 		profiles = new HashMap<>();
 		devices = new HashMap<>();
-		deviceAggregations = new HashMap<>();
+		deviceAggregates = new HashMap<>();
 	}
 	
 	public void addSection(Section section) {
@@ -86,8 +86,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			removeDevice(devices.get(deviceId));
 		}
 		
-		for(String deviceAggregateId : new ArrayList<>(deviceAggregations.keySet())) {
-			removeDeviceAggregation(deviceAggregations.get(deviceAggregateId));
+		for(String deviceAggregateId : new ArrayList<>(deviceAggregates.keySet())) {
+			removeDeviceAggregate(deviceAggregates.get(deviceAggregateId));
 		}
 	}
 	
@@ -151,20 +151,20 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 	}
 	
-	public void addDeviceAggregation(DeviceAggregation deviceAggregation) {
-		if(deviceAggregation.getShape() != null && !deviceAggregations.keySet().contains(deviceAggregation.getId())) {
-			deviceAggregations.put(deviceAggregation.getId(), deviceAggregation);
+	public void addDeviceAggregate(DeviceAggregate deviceAggregate) {
+		if(deviceAggregate.getShape() != null && !deviceAggregates.keySet().contains(deviceAggregate.getId())) {
+			deviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
 			
-			Geometry shape = deviceAggregation.getShape();
+			Geometry shape = deviceAggregate.getShape();
 			
 			if(shape != null) {
 				GeoJsonFeature feature = new GeoJsonFeature();
 				feature.setGeometry(shape);
-				feature.setId("deviceAggregation-" + deviceAggregation.getId());
+				feature.setId("deviceAggregate-" + deviceAggregate.getId());
 				feature.setProperties(new HashMap<String, String>());
-				feature.getProperties().put("id", deviceAggregation.getId());
+				feature.getProperties().put("id", deviceAggregate.getId());
 				feature.getProperties().put("name", feature.getId());
-				feature.getProperties().put("type", "deviceAggregation");
+				feature.getProperties().put("type", "deviceAggregate");
 				
 				List<GeoJsonFeature> features = new ArrayList<>();
 				features.add(feature);
@@ -173,10 +173,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 	}
 	
-	public void removeDeviceAggregation(DeviceAggregation deviceAggregation) {
-		if(deviceAggregations.keySet().contains(deviceAggregation.getId())) {
-			view.removeFeature("deviceAggregation-" + deviceAggregation.getId());
-			deviceAggregations.remove(deviceAggregation).getId();
+	public void removeDeviceAggregate(DeviceAggregate deviceAggregate) {
+		if(deviceAggregates.containsKey(deviceAggregate.getId())) {
+			view.removeFeature("deviceAggregate-" + deviceAggregate.getId());
+			deviceAggregates.remove(deviceAggregate.getId());
 		}
 	}
 	
@@ -257,8 +257,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				}
 			break;
 			case "deviceAggregate":
-				if(deviceAggregations.get(id) != null) {
-					eventBus.deviceAggregateClicked(deviceAggregations.get(id));
+				if(deviceAggregates.get(id) != null) {
+					eventBus.deviceAggregateClicked(deviceAggregates.get(id));
 				}
 		}
 	}
@@ -278,11 +278,20 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void selectDevice(Device device, boolean select) {
-		if(!devices.keySet().contains(device.getId())) {
+		if(!devices.containsKey(device.getId())) {
 			addDevice(device);
 		}
 		
 		String featureId = "device-" + device.getId();
+		view.selectFeature(featureId, select);
+	}
+
+	public void selectDeviceAggregate(DeviceAggregate deviceAggregate, boolean select) {
+		if(!deviceAggregates.containsKey(deviceAggregate.getId())) {
+			addDeviceAggregate(deviceAggregate);
+		}
+		
+		String featureId = "deviceAggregate-" + deviceAggregate.getId();
 		view.selectFeature(featureId, select);
 	}
 

@@ -18,6 +18,4 @@ public interface IFibreView extends IsWidget {
 	void addElementToLeftPanel(IsWidget widget);
 
 	void addElementToRightPanel(IsWidget widget);
-
-	int getLeftPanelWidth();
 }

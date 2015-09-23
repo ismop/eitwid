@@ -64,11 +64,6 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	}
 
 	@Override
-	public int getLeftPanelWidth() {
-		return getOffsetWidth();
-	}
-
-	@Override
 	public void setPresenter(IFibrePresenter presenter) {
 		this.presenter = presenter;
 	}
