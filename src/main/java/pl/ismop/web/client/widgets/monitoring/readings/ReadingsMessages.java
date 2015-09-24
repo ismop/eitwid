@@ -4,4 +4,10 @@ import com.google.gwt.i18n.client.Messages;
 
 public interface ReadingsMessages extends Messages {
 	String modalTitle();
+	
+	String additionalReadingsLabel();
+
+	String pickAdditionalReadingsLabel();
+
+	String noAdditionalReadingsLabel();
 }

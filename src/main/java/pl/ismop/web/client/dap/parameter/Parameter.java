@@ -11,7 +11,7 @@ public class Parameter {
 	private String customId;
 	
 	@Json(name = "parameter_name")
-	private String paramterName;
+	private String parameterName;
 	
 	@Json(name = "device_id")
 	private String deviceId;
@@ -41,12 +41,12 @@ public class Parameter {
 		this.customId = customId;
 	}
 
-	public String getParamterName() {
-		return paramterName;
+	public String getParameterName() {
+		return parameterName;
 	}
 
-	public void setParamterName(String paramterName) {
-		this.paramterName = paramterName;
+	public void setParameterName(String parameterName) {
+		this.parameterName = parameterName;
 	}
 
 	public String getDeviceId() {

@@ -215,7 +215,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					}
 				}
 				
-				readings.getMeasurements().put(parameter.getParamterName(), values);
+				readings.getMeasurements().put(parameter.getParameterName(), values);
 			}
 		}
 		

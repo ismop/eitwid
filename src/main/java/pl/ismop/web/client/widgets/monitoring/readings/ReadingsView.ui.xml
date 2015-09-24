@@ -3,7 +3,7 @@
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.monitoring.readings.ReadingsMessages" field="messages"/>
-	<ui:style>
+	<ui:style type="pl.ismop.web.client.widgets.monitoring.readings.ReadingsView.Style">
 		@external .modal-dialog, .modal-content, .modal-body;
 		
 		.modal .modal-dialog {
@@ -24,11 +24,40 @@
 		}
 		
 		.chart {
-			height: 80%;
+			height: 90%;
 		}
 		
 		.misc {
-			height: 20%;
+			height: 10%;
+		}
+		
+		.well {
+			height: 100%;
+			margin: 0px;
+		}
+		
+		.form {
+			position: absolute;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			padding-left: 15px;
+			padding-right: 15px;
+		}
+		
+		.group {
+			margin: 0px;
+		}
+		
+		.label {
+			margin-right: 5px;
+			margin-top: 5px;
+			float: left;
+		}
+		
+		.icon {
+			margin-left: 3px;
+			cursor: pointer;
 		}
 	</ui:style>
 	<g:HTMLPanel>
@@ -37,7 +66,23 @@
 				<b:Row addStyleNames="{style.row}">
 					<b:Column size="MD_9" addStyleNames="{style.column}">
 						<g:FlowPanel ui:field="chartContainer" addStyleNames="{style.chart}"/>
-						<g:FlowPanel ui:field="miscContainer" addStyleNames="{style.misc}"/>
+						<g:FlowPanel ui:field="miscContainer" addStyleNames="{style.misc}">
+							<b:Row addStyleNames="{style.row}">
+								<b:Column size="MD_5" addStyleNames="{style.column}">
+									<b:Form addStyleNames="{style.form}">
+										<b:FieldSet>
+											<b:FormGroup addStyleNames="{style.group}">
+												<b:FormLabel for="additionalReadings" text="{messages.additionalReadingsLabel}"/>
+												<b:ListBox b:id="additionalReadings" ui:field="additionalReadings"/>
+											</b:FormGroup>
+										</b:FieldSet>
+									</b:Form>
+								</b:Column>
+								<b:Column size="MD_7" addStyleNames="{style.column}">
+									<b:Well ui:field="additionalLabels" size="SMALL" addStyleNames="{style.well}"/>
+								</b:Column>
+							</b:Row>
+						</g:FlowPanel>
 					</b:Column>
 					<b:Column size="MD_3" addStyleNames="{style.column}">
 						<g:FlowPanel ui:field="mapContainer" addStyleNames="{style.map}"/>

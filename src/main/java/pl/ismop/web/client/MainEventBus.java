@@ -75,4 +75,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = ReadingsPresenter.class)
 	void showExpandedReadings(Levee levee, List<ChartSeries> series);
+
+	@Event(handlers = ReadingsPresenter.class)
+	void deviceSeriesHover(String deviceId, boolean hover);
 }
