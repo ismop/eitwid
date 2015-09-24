@@ -1,6 +1,7 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -83,6 +84,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		initFibreChart();
 		initDeviceChart();
 
+		clearOldSelection();
 
 		view.showModal(true);
 	}
@@ -94,6 +96,81 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		deviceChart.reflow();
 
 		initializeFetcher();
+	}
+
+	private void clearOldSelection() {
+		for(DeviceData dd : selectedDevices.values()) {
+			fibreChart.getXAxis().removePlotBand(dd.getPlotBand());
+		}
+		selectedDevices.clear();
+		if (map != null) {
+			map.reset(true);
+		}
+
+
+		if (fibreChart.getNativeChart() != null) {
+			zoomOut(fibreChart.getNativeChart());
+			zoomOut(deviceChart.getNativeChart());
+		}
+	}
+
+	private native void zoomOut(JavaScriptObject nativeChart) /*-{
+        nativeChart.zoomOut();
+    }-*/;
+
+	private class OverAndOutEvenHandler implements PointMouseOverEventHandler, PointMouseOutEventHandler {
+		private Section selectedSection;
+		private Device selectedDevice;
+
+		@Override
+		public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
+			selectedDevice = getDiviceForPoint(pointMouseOverEvent);
+			Section oldSection = selectedSection;
+
+			if (selectedDevice != null) {
+				selectedSection = fetcher.getDeviceSection(selectedDevice);
+				selectDeviceAndSection(selectedDevice, selectedSection);
+			}
+			unselectSection(oldSection);
+
+			return true;
+		}
+
+		private void selectDeviceAndSection(Device device, Section section) {
+			if (device != null) {
+				map.addDevice(device);
+				if (section != null) {
+					map.highlightSection(section, true);
+				} else {
+					GWT.log("Device " + device.getCustomId() + " is not assigned to any section");
+				}
+			}
+		}
+
+		@Override
+		public boolean onMouseOut(PointMouseOutEvent pointMouseOutEvent) {
+			Device device = getDiviceForPoint(pointMouseOutEvent);
+			if (device != null) {
+				unselectDeviceAndSection(device);
+			}
+
+			return true;
+		}
+
+		private void unselectSection(Section section) {
+			if (section != null && selectedSection != section) {
+				map.highlightSection(section, false);
+			}
+		}
+
+		private void unselectDeviceAndSection(Device device) {
+			if (device != null && !selectedDevices.keySet().contains(device)) {
+				map.removeDevice(device);
+			}
+			if(selectedDevice == device && selectedSection != null) {
+				map.highlightSection(selectedSection, false);
+			}
+		}
 	}
 
 	private void initFibreChart() {
@@ -108,59 +185,17 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			fibreChart.getXAxis().
 					setAxisTitle(new AxisTitle().setText(messages.firbreChartXAxisTitle()));
 
+			OverAndOutEvenHandler overAndOutEvenHandler = new OverAndOutEvenHandler();
+
 			fibreChart.setSeriesPlotOptions(new SeriesPlotOptions().
-							setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
-								private Section selectedSection;
-								private Device selectedDevice;
-
-								@Override
-								public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-									Device selectedDevice = getDiviceForPoint(pointMouseOverEvent);
-									Section selectedSection = null;
-
-									if (selectedDevice != null) {
-										selectedSection = fetcher.getDeviceSection(selectedDevice);
-										selectDeviceAndSection(selectedDevice, selectedSection);
-									}
-									unselectOldSection(selectedSection);
-									unselectOldDevice(selectedDevice);
-
-									this.selectedDevice = selectedDevice;
-									this.selectedSection = selectedSection;
-
-									return true;
-								}
-
-								private void selectDeviceAndSection(Device device, Section section) {
-									if (device != null) {
-										map.addDevice(device);
-										if (section != null) {
-											map.highlightSection(section, true);
-										} else {
-											GWT.log("Device " + device.getCustomId() + " is not assigned to any section");
-										}
-									}
-								}
-
-								private void unselectOldSection(Section newSelectedSection) {
-									if (this.selectedSection != null && this.selectedSection != newSelectedSection) {
-										map.highlightSection(this.selectedSection, false);
-									}
-								}
-
-								private void unselectOldDevice(Device newSelectedDevice) {
-									if (this.selectedDevice != null && this.selectedDevice != newSelectedDevice &&
-											!selectedDevices.keySet().contains(this.selectedDevice)) {
-										map.removeDevice(this.selectedDevice);
-									}
-								}
-							}).
+							setPointMouseOverEventHandler(overAndOutEvenHandler).
+							setPointMouseOutEventHandler(overAndOutEvenHandler).
 							setMarker(new Marker().
-										setSelectState(new Marker().
-														setFillColor(properties.selectionColor()).
-														setRadius(5).
-														setLineWidth(0)
-										)
+											setSelectState(new Marker().
+															setFillColor(properties.selectionColor()).
+															setRadius(5).
+															setLineWidth(0)
+											)
 							).
 							setAllowPointSelect(true).
 							setPointSelectEventHandler(new PointSelectEventHandler() {
@@ -187,9 +222,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
 									if (selectedDevice != null) {
 										return messages.deviceTooltip(toolTipData.getYAsString(),
-																	selectedDevice.getLeveeDistanceMarker() + "",
-																	selectedDevice.getCableDistanceMarker() + "",
-																	selectedDevice.getCustomId());
+												selectedDevice.getLeveeDistanceMarker() + "",
+												selectedDevice.getCableDistanceMarker() + "",
+												selectedDevice.getCustomId());
 									} else {
 										return null;
 									}
