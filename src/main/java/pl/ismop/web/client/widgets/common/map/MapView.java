@@ -28,9 +28,12 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	private String elementId;
 	
 	private JavaScriptObject map, layer;
+	
+	private boolean initialized;
 
 	@UiField
 	FlowPanel panel;
+
 	
 	public MapView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -51,14 +54,18 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	
 	@Override
 	protected void onLoad() {
-		initMap();
-		
-		if(getPresenter().isHoverListeners()) {
-			addHoverHandlers();
-		}
-		
-		if(getPresenter().isClickListeners()) {
-			addClickListeners();
+		if(!initialized) {
+			initMap();
+			
+			if(getPresenter().isHoverListeners()) {
+				addHoverHandlers();
+			}
+			
+			if(getPresenter().isClickListeners()) {
+				addClickListeners();
+			}
+			
+			initialized = true;
 		}
 	}
 
