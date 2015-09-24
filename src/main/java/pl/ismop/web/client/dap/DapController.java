@@ -632,6 +632,20 @@ public class DapController {
 		});
 	}
 
+	public void getDevices(List<String> deviceIds, final DevicesCallback callback) {
+		deviceService.getDevicesForIds(merge(deviceIds, ","), new MethodCallback<DevicesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DevicesResponse response) {
+				callback.processDevices(response.getDevices());
+			}
+		});
+	}
+
 	private Date monthEarlier() {
 		return new Date(new Date().getTime() - 2678400000L);
 	}

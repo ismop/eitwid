@@ -61,7 +61,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				mapPresenter.addClickListeners();
 			}
 			
-			mapPresenter.reset();
+			mapPresenter.reset(false);
 			view.showMap(false);
 			view.showProgress(true);
 			dapController.getSections(displayedLevee.getId(), new SectionsCallback() {

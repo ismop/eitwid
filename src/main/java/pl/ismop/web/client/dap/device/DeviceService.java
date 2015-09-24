@@ -33,4 +33,8 @@ public interface DeviceService extends RestService {
 	@Path("devices?section_id={sectionId}&device_type={deviceType}")
 	void getDevicesForSectionIdAndType(@PathParam("sectionId") String sectionId, @PathParam("deviceType") String deviceType,
 			MethodCallback<DevicesResponse> methodCallback);
+
+	@GET
+	@Path("devices?id={idFilter}")
+	void getDevicesForIds(@PathParam("idFilter") String idFilter, MethodCallback<DevicesResponse> methodCallback);
 }
