@@ -78,6 +78,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			}
 		}
 		
+		for(String sectionId : new ArrayList<>(sections.keySet())) {
+			highlightSection(sections.get(sectionId), false);
+		}
+		
 		for(String profileId : new ArrayList<>(profiles.keySet())) {
 			removeProfile(profiles.get(profileId));
 		}
