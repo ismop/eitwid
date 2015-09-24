@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.sideprofile;
+package pl.ismop.web.client.widgets.common.profile;
 
 import java.util.List;
 
@@ -9,9 +9,13 @@ public interface ISideProfileView extends IsWidget {
 		void onSensorSelected(String sensorId, boolean selected);
 	}
 
-	void setScene(String profileName, List<String> sensorIds);
+	void setScene(String profileName, List<String> sensorIds, int width, int height);
+	
 	void clearSensors();
+	
 	void showMeasurement(String measurement);
+	
 	void removeMeasurement();
+	
 	String getNoMeasurementLabel();
 }

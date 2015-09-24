@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
+import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -22,8 +22,10 @@ import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
+import pl.ismop.web.client.widgets.common.profile.SideProfilePresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.ILeveeNavigatorView.ILeveeNavigatorPresenter;
 
 @Presenter(view = LeveeNavigatorView.class, multiple = true)
@@ -36,6 +38,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	private Map<String, Device> selectedDevices;
 	private Section selectedSection;
 	private Map<String, DeviceAggregate> selectedDeviceAggregates;
+	private SideProfilePresenter profilePresenter;
 
 	@Inject
 	public LeveeNavigatorPresenter(DapController dapController) {
@@ -102,7 +105,15 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	}
 	
 	public void onProfileClicked(Profile profile) {
-		Window.alert("To be implemented. Profile view will be shown in the main panel.");
+		if(profilePresenter == null) {
+			profilePresenter = eventBus.addHandler(SideProfilePresenter.class);
+			view.showMap(false);
+			view.showProfile(true);
+			profilePresenter.setWidthAndHeight(view.getProfileContainerWidth(), view.getProfileContainerHeight());
+			view.setProfile(profilePresenter.getView());
+		}
+		
+		profilePresenter.setProfileNameAndSensors("profile", new ArrayList<Sensor>());
 	}
 	
 	public void onSectionClicked(final Section section) {

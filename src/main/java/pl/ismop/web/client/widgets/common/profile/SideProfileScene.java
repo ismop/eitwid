@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.sideprofile;
+package pl.ismop.web.client.widgets.common.profile;
 
 import java.util.ArrayList;
 import java.util.List;
