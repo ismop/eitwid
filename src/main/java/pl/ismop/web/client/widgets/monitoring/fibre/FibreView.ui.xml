@@ -10,7 +10,7 @@
 		}
 	</ui:style>
 	<g:HTMLPanel>
-		<b:Modal ui:field="modal" title="Pomiary światłowodowe" fade="true" width="95%">
+		<b:Modal ui:field="modal" title="{messages.title}" fade="true" width="95%">
 			<b:ModalBody>
 				<b:Container ui:field="container" fluid="true">
 					<b:Row>
