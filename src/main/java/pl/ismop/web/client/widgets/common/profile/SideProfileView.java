@@ -232,7 +232,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		waterMesh.position.set(-100, 0, -301);
 		scene.add(waterMesh);
 
-		var renderer = new $wnd.THREE.WebGLRenderer({antialias: true});
+		var renderer = $wnd.Detector.webgl ? new $wnd.THREE.WebGLRenderer({antialias: true}) : new $wnd.THREE.CanvasRenderer();
 		renderer.setSize(width, height);
 		renderer.setClearColor(0xbad7f3);
 		element.appendChild(renderer.domElement);
