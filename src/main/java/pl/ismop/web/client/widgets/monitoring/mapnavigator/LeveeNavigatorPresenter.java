@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -104,7 +103,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		}
 	}
 	
-	public void onProfileClicked(Profile profile) {
+	public void onProfileClicked(final Profile profile) {
 		if(profilePresenter == null) {
 			profilePresenter = eventBus.addHandler(SideProfilePresenter.class);
 			view.showMap(false);
@@ -113,7 +112,17 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			view.setProfile(profilePresenter.getView());
 		}
 		
-		profilePresenter.setProfileNameAndSensors("profile", new ArrayList<Sensor>());
+		dapController.getDevicesRecursively(profile.getId(), new DevicesCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+			
+			@Override
+			public void processDevices(List<Device> devices) {
+				profilePresenter.setProfileAndDevices(profile, devices);
+			}
+		});
 	}
 	
 	public void onSectionClicked(final Section section) {

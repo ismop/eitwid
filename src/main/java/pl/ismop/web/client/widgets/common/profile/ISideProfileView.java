@@ -9,7 +9,7 @@ public interface ISideProfileView extends IsWidget {
 		void onSensorSelected(String sensorId, boolean selected);
 	}
 
-	void setScene(String profileName, List<String> sensorIds, int width, int height);
+	void setScene(String profileName, int width, int height);
 	
 	void clearSensors();
 	
@@ -18,4 +18,6 @@ public interface ISideProfileView extends IsWidget {
 	void removeMeasurement();
 	
 	String getNoMeasurementLabel();
+
+	void drawProfile(List<List<Double>> profileCoordinates);
 }

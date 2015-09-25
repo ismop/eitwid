@@ -6,6 +6,9 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayNumber;
+import com.google.gwt.core.client.JsArrayUtils;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -42,17 +45,12 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	}
 
 	@Override
-	public void setScene(String profileName, List<String> sensorIds, int width, int height) {
+	public void setScene(String profileName, int width, int height) {
 		if(scene == null) {
 			addRenderer(panel.getElement(), width, height);
 		}
 		
 		setProfileName(messages.profileName(profileName));
-		
-		for(int i = 0; i < sensorIds.size(); i++) {
-			String sensorId = sensorIds.get(i);
-			sensorMap.put(addSensor(i, sensorIds.size()), sensorId);
-		}
 	}
 
 	@Override
@@ -71,6 +69,54 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		removeSensors();
 	}
 	
+	@Override
+	public String getNoMeasurementLabel() {
+		return messages.noMeasurementLabel();
+	}
+
+	@Override
+	public void drawProfile(List<List<Double>> profileCoordinates) {
+		JsArray<JsArrayNumber> coordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
+		
+		for(List<Double> cordinatePair : profileCoordinates) {
+			coordinates.push(JsArrayUtils.readOnlyJsArray(new double[] {cordinatePair.get(0), cordinatePair.get(1)}));
+		}
+		
+		drawProfile(coordinates);
+	}
+
+	@Override
+	public native void showMeasurement(String measurement) /*-{
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::removeMeasurement()();
+		
+		var measurementMaterial = new $wnd.THREE.MeshLambertMaterial();
+		measurementMaterial.color.setHex(0x555555);
+		
+		var measurement = new $wnd.THREE.TextGeometry(measurement, {
+			font: 'optimer',
+			size: 7,
+			height: 0.5
+		});
+		var measurementMesh = new $wnd.THREE.Mesh(measurement, measurementMaterial);
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement = measurementMesh;
+		measurementMesh.rotation.x = 270 * $wnd.Math.PI / 180;
+		measurementMesh.position.set(-50, 0, 45);
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(measurementMesh);
+	}-*/;
+
+	@Override
+	public native void removeMeasurement() /*-{
+		if(this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement != null) {
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.remove(
+					this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement);
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement = null;
+		}
+	}-*/;
+
+	private void sensorSelected(boolean selected) {
+		getPresenter().onSensorSelected(sensorMap.get(selectedSensor), selected);
+	}
+
 	private native void removeSensors() /*-{
 		var sensors = this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensors;
 		
@@ -144,7 +190,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensors = new $wnd.Array();
 		
 		var camera = new $wnd.THREE.PerspectiveCamera(70, width/height, 1, 500);
-		camera.position.set(-70, 70, 100);
+		camera.position.set(-20, 20, 20);
 		camera.lookAt(new $wnd.THREE.Vector3(0, 0, 0));
 		
 		//this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::addAxes()();
@@ -156,54 +202,6 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		light.position.set(0, 100, 100);
 		light.intensity = 1.2;
 		scene.add(light);
-		
-		var profileSide = new $wnd.THREE.Shape();
-		profileSide.moveTo(0, 0);
-		profileSide.lineTo(200, 0);
-		profileSide.lineTo(125, 50);
-		profileSide.lineTo(75, 50);
-		profileSide.lineTo(0, 0);
-		
-		var profileMaterial = new $wnd.THREE.MeshLambertMaterial();
-		profileMaterial.color.setHex(0xe1b154);
-		profileMaterial.vertexColors = $wnd.THREE.VertexColors;
-		
-		var profile = profileSide.extrude({
-			amount: 300,
-			steps: 2,
-			bevelEnabled: false
-		});
-		var vertexIndexes = ['a', 'b', 'c', 'd'];
-		for(var i = 0; i < profile.faces.length; i++) {
-			var face = profile.faces[i];
-			var numberOfSides = (face instanceof $wnd.THREE.Face3) ? 3 : 4;
-			for(var j = 0; j < numberOfSides; j++) {
-				var vertexIndex = face[vertexIndexes[j]];
-				var point = profile.vertices[vertexIndex];
-				$wnd.console.log(point);
-				if(point.x == 200) {
-					face.vertexColors[j] = new $wnd.THREE.Color(0x0049e5);
-				} else if(point.x == 125) {
-					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
-				} else if(point.x == 75) {
-					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
-				} else {
-					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
-				}
-			}
-		}
-		mesh = new $wnd.THREE.Mesh(profile, profileMaterial);
-		mesh.position.set(-100, 0, -300);
-		scene.add(mesh);
-		
-		var profile2 = profileSide.extrude({
-			amount: 1000,
-			steps: 2,
-			bevelEnabled: false
-		});
-		mesh2 = new $wnd.THREE.Mesh(profile2, profileMaterial);
-		mesh2.position.set(200, 0, -500);
-		scene.add(mesh2);
 		
 		var planeMaterial = new $wnd.THREE.MeshLambertMaterial();
 		planeMaterial.color.setHex(0xa2e56d);
@@ -324,41 +322,45 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(
 			createAxis(new $wnd.THREE.Vector3(0, 0, -length), new $wnd.THREE.Vector3(0, 0, length), 0x0000ff));
 	}-*/;
-	
-	private void sensorSelected(boolean selected) {
-		getPresenter().onSensorSelected(sensorMap.get(selectedSensor), selected);
-	}
 
-	@Override
-	public native void showMeasurement(String measurement) /*-{
-		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::removeMeasurement()();
+	private native void drawProfile(JsArray<JsArrayNumber> coords) /*-{
+		var profileSide = new $wnd.THREE.Shape();
+		profileSide.moveTo(coords[0][0], coords[0][1]);
+		profileSide.lineTo(coords[1][0], coords[1][1]);
+		profileSide.lineTo(coords[3][0], coords[3][1]);
+		profileSide.lineTo(coords[2][0], coords[2][1]);
+		profileSide.lineTo(coords[0][0], coords[0][1]);
 		
-		var measurementMaterial = new $wnd.THREE.MeshLambertMaterial();
-		measurementMaterial.color.setHex(0x555555);
+		var profileMaterial = new $wnd.THREE.MeshLambertMaterial();
+		profileMaterial.color.setHex(0xe1b154);
+		profileMaterial.vertexColors = $wnd.THREE.VertexColors;
 		
-		var measurement = new $wnd.THREE.TextGeometry(measurement, {
-			font: 'optimer',
-			size: 7,
-			height: 0.5
+		var profile = profileSide.extrude({
+			amount: 300,
+			steps: 2,
+			bevelEnabled: false
 		});
-		var measurementMesh = new $wnd.THREE.Mesh(measurement, measurementMaterial);
-		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement = measurementMesh;
-		measurementMesh.rotation.x = 270 * $wnd.Math.PI / 180;
-		measurementMesh.position.set(-50, 0, 45);
-		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(measurementMesh);
-	}-*/;
-
-	@Override
-	public native void removeMeasurement() /*-{
-		if(this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement != null) {
-			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.remove(
-					this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement);
-			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement = null;
+		var vertexIndexes = ['a', 'b', 'c', 'd'];
+		for(var i = 0; i < profile.faces.length; i++) {
+			var face = profile.faces[i];
+			var numberOfSides = (face instanceof $wnd.THREE.Face3) ? 3 : 4;
+			for(var j = 0; j < numberOfSides; j++) {
+				var vertexIndex = face[vertexIndexes[j]];
+				var point = profile.vertices[vertexIndex];
+				$wnd.console.log(point);
+				if(point.x == 200) {
+					face.vertexColors[j] = new $wnd.THREE.Color(0x0049e5);
+				} else if(point.x == 125) {
+					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
+				} else if(point.x == 75) {
+					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
+				} else {
+					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
+				}
+			}
 		}
+		mesh = new $wnd.THREE.Mesh(profile, profileMaterial);
+		mesh.position.set(0, 0, -300);
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(mesh);
 	}-*/;
-
-	@Override
-	public String getNoMeasurementLabel() {
-		return messages.noMeasurementLabel();
-	}
 }
