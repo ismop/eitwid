@@ -77,23 +77,22 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			fetcher = new DataFetcher(dapController, levee);
 			fetcher.setMock(false);
 		}
-
 		messages = view.getMessages();
-
-		initSlider();
-		initFibreChart();
-		initDeviceChart();
-
-		clearOldSelection();
 
 		view.showModal(true);
 	}
 
 	@Override
 	public void onModalReady() {
+		initSlider();
+		initFibreChart();
+		initSelectedDevicesChart();
 		initLeveeMinimap();
-		fibreChart.reflow();
-		deviceChart.reflow();
+
+		clearOldSelection();
+
+//		fibreChart.reflow();
+//		deviceChart.reflow();
 
 		initializeFetcher();
 	}
@@ -182,6 +181,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					setChartTitle(new ChartTitle().setText(messages.fibreChartTitle())).
 					setWidth100();
 
+			fibreChart.setHeight(view.getFibreDevicesHeight());
+
 			fibreChart.getXAxis().
 					setAxisTitle(new AxisTitle().setText(messages.firbreChartXAxisTitle()));
 
@@ -232,7 +233,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 							})
 			);
 
-			view.addElementToLeftPanel(fibreChart);
+			view.setFibreDevices(fibreChart);
 		}
 	}
 
@@ -315,13 +316,14 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		});
 	}
 
-	private void initDeviceChart() {
+	private void initSelectedDevicesChart() {
 		if(deviceChart != null) {
 			deviceChart.removeAllSeries();
 		} else {
 			deviceChart = new Chart().
 					setChartTitle(new ChartTitle().setText(messages.deviceChartInitTitle())).
 					setWidth100();
+			deviceChart.setHeight(view.getSelectedDevicesHeight());
 			deviceChart.setOption("/chart/zoomType", "x");
 			deviceChart.getXAxis()
 					.setType(Axis.Type.DATE_TIME)
@@ -330,7 +332,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									.setYear("%b")
 					);
 
-			view.addElementToLeftPanel(deviceChart);
+			view.setSelectedDevices(deviceChart);
 		}
 	}
 
@@ -387,7 +389,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					updateSelectedDevicesSeries();
 				}
 			});
-			view.addElementToLeftPanel(slider.getView());
+			view.setSlider(slider.getView());
 		}
 	}
 
@@ -425,7 +427,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private void initLeveeMinimap() {
 		if (map == null) {
 			map = eventBus.addHandler(MapPresenter.class);
-			view.addElementToRightPanel(map.getView());
+			view.setMap(map.getView());
 		}
 	}
 
