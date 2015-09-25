@@ -71,6 +71,16 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	}
 
 	@Override
+	public int getFibreDevicesHeight() {
+		return fibreDevicesPanel.getOffsetHeight();
+	}
+
+	@Override
+	public int getSelectedDevicesHeight() {
+		return fibreDevicesPanel.getOffsetHeight();
+	}
+
+	@Override
 	public void setSelectedDevices(IsWidget widget) {
 		selectedDevicesPanel.add(widget);
 	}

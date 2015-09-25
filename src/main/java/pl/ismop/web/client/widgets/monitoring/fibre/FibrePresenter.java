@@ -77,23 +77,22 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			fetcher = new DataFetcher(dapController, levee);
 			fetcher.setMock(false);
 		}
-
 		messages = view.getMessages();
-
-		initSlider();
-		initFibreChart();
-		initSelectedDevicesChart();
-
-		clearOldSelection();
 
 		view.showModal(true);
 	}
 
 	@Override
 	public void onModalReady() {
+		initSlider();
+		initFibreChart();
+		initSelectedDevicesChart();
 		initLeveeMinimap();
-		fibreChart.reflow();
-		deviceChart.reflow();
+
+		clearOldSelection();
+
+//		fibreChart.reflow();
+//		deviceChart.reflow();
 
 		initializeFetcher();
 	}
@@ -181,6 +180,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			fibreChart = new Chart().
 					setChartTitle(new ChartTitle().setText(messages.fibreChartTitle())).
 					setWidth100();
+
+			fibreChart.setHeight(view.getFibreDevicesHeight());
 
 			fibreChart.getXAxis().
 					setAxisTitle(new AxisTitle().setText(messages.firbreChartXAxisTitle()));
@@ -322,6 +323,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			deviceChart = new Chart().
 					setChartTitle(new ChartTitle().setText(messages.deviceChartInitTitle())).
 					setWidth100();
+			deviceChart.setHeight(view.getSelectedDevicesHeight());
 			deviceChart.setOption("/chart/zoomType", "x");
 			deviceChart.getXAxis()
 					.setType(Axis.Type.DATE_TIME)

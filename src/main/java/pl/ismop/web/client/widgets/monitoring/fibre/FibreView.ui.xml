@@ -4,7 +4,7 @@
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.monitoring.fibre.FibreMessages" field="messages"/>
 	<ui:style>
-		@external .modal-dialog, .modal-content, .modal-body;
+		@external .modal-dialog, .modal-content, .modal-body, .tooltip;
 
 		.rightPanel {
 			height: 100%;
@@ -23,6 +23,10 @@
 			overflow-y: auto;
 		}
 
+		.tooltip {
+			z-index: 2000 !important;
+		}
+
 		.row, .column, .map {
 			height: 100%;
 		}
@@ -38,16 +42,16 @@
 	<g:HTMLPanel>
 		<b:Modal ui:field="modal" title="{messages.title}" fade="true" width="95%" addStyleNames="{style.modal}">
 			<b:ModalBody>
-				<b:Row addStyleNames="{style.row}">
-					<b:Column size="MD_9" addStyleNames="{style.column}">
-						<g:FlowPanel ui:field="sliderPanel" addStyleNames="{style.slider}"/>
-						<g:FlowPanel ui:field="fibreDevicesPanel" addStyleNames="{style.chart}"/>
-						<g:FlowPanel ui:field="selectedDevicesPanel" addStyleNames="{style.chart}"/>
-					</b:Column>
-					<b:Column size="MD_3" addStyleNames="{style.column}">
-						<g:FlowPanel ui:field="mapPanel" addStyleNames="{style.map}"/>
-					</b:Column>
-				</b:Row>
+					<b:Row addStyleNames="{style.row}">
+						<b:Column size="MD_9" addStyleNames="{style.column}">
+							<g:FlowPanel ui:field="sliderPanel" addStyleNames="{style.slider}"/>
+							<g:FlowPanel ui:field="fibreDevicesPanel" addStyleNames="{style.chart}"/>
+							<g:FlowPanel ui:field="selectedDevicesPanel" addStyleNames="{style.chart}"/>
+						</b:Column>
+						<b:Column size="MD_3" addStyleNames="{style.column}">
+							<g:FlowPanel ui:field="mapPanel" addStyleNames="{style.map}"/>
+						</b:Column>
+					</b:Row>
 			</b:ModalBody>
 		</b:Modal>
 	</g:HTMLPanel>
