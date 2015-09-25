@@ -4,6 +4,8 @@ import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
+import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
 import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
@@ -12,6 +14,8 @@ import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> implements IRootPresenter{
 	private MonitoringSidePanelPresenter monitoringSidePanelPresenter;
 	private LeveeNavigatorPresenter monitoringLeveeNavigator;
+	private AnalysisSidePanelPresenter analysisPanelPresenter;
+	private ComparisonPresenter comparisonPresenter;
 
 	public void onMonitoringPanel() {
 		view.markAnalysisOption(false);
@@ -36,6 +40,18 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		view.markAnalysisOption(true);
 		view.markMonitoringOption(false);
 		view.clearPanels();
+		
+		if(analysisPanelPresenter == null) {
+			analysisPanelPresenter = eventBus.addHandler(AnalysisSidePanelPresenter.class);
+		}
+		
+		view.setSidePanelWidget(analysisPanelPresenter.getView());
+		
+		if(comparisonPresenter == null) {
+			comparisonPresenter = eventBus.addHandler(ComparisonPresenter.class);
+		}
+		
+		view.setMainPanelWidget(comparisonPresenter.getView());
 	}
 
 	@Override
