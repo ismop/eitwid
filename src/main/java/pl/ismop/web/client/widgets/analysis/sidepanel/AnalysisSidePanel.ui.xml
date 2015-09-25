@@ -5,10 +5,28 @@
 		.panel {
 			width: 100%;
 			height: 100%;
-			background-color: fuchsia; 
+		}
+
+		.experiments {
+			/*height: 10%;*/
+		}
+
+		.waterWave {
+			height: 30%;
+		}
+
+		.minimap {
+			height: 40%;
+		}
+
+		.actions {
+			height: 20%;
 		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
-		<g:Label>TODO</g:Label>
+		<g:ListBox ui:field="experiments" addStyleNames="{style.experiments}"/>
+		<g:FlowPanel ui:field="waterWavePanel" addStyleNames="{style.waterWave}"/>
+		<g:FlowPanel ui:field="miniMapPanel" addStyleNames="{style.minimap}"/>
+		<g:FlowPanel ui:field="actionsPanel" addStyleNames="{style.actions}"/>
 	</g:HTMLPanel>
 </ui:UiBinder>
