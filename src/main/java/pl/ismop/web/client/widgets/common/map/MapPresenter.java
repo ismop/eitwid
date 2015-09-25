@@ -197,11 +197,13 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		switch(type) {
 			case "profile":
 				if(profiles.get(id) != null) {
+					view.highlight("profile-" + id, false);
 					eventBus.showProfileMetadata(profiles.get(id), false);
 				}
 			break;
 			case "section":
 				if(sections.get(id) != null) {
+					view.highlight("section-" + id, false);
 					eventBus.showSectionMetadata(sections.get(id), false);
 				}
 			break;
@@ -214,14 +216,18 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	@Override
 	public void onFeatureHoverIn(String type, String id) {
+		view.highlight(id, true);
+		
 		switch(type) {
 			case "profile":
 				if(profiles.get(id) != null) {
+					view.highlight("profile-" + id, true);
 					eventBus.showProfileMetadata(profiles.get(id), true);
 				}
 			break;
 			case "section":
 				if(sections.get(id) != null) {
+					view.highlight("section-" + id, true);
 					eventBus.showSectionMetadata(sections.get(id), true);
 				}
 			break;
