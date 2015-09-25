@@ -17,7 +17,7 @@ public class LeveeNavigatorView extends Composite implements ILeveeNavigatorView
 	LeveeNavigatorMessages messages;
 	
 	@UiField
-	FlowPanel loadingProgress, mapContainer;
+	FlowPanel loadingProgress, mapContainer, profileContainer;
 	
 	public LeveeNavigatorView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -41,5 +41,25 @@ public class LeveeNavigatorView extends Composite implements ILeveeNavigatorView
 	@Override
 	public String getZoomOutLabel() {
 		return messages.zoomOutLabel();
+	}
+
+	@Override
+	public void setProfile(IsWidget view) {
+		profileContainer.add(view);
+	}
+
+	@Override
+	public void showProfile(boolean show) {
+		profileContainer.setVisible(show);
+	}
+
+	@Override
+	public int getProfileContainerWidth() {
+		return profileContainer.getOffsetWidth();
+	}
+
+	@Override
+	public int getProfileContainerHeight() {
+		return profileContainer.getOffsetHeight();
 	}
 }

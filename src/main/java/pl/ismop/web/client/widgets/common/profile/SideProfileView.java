@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.sideprofile;
+package pl.ismop.web.client.widgets.common.profile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +28,11 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	private JavaScriptObject name;
 	private JavaScriptObject measurement;
 	
-	@UiField SideProfileViewMessages messages;
-	@UiField HTMLPanel panel;
+	@UiField
+	SideProfileViewMessages messages;
+	
+	@UiField
+	HTMLPanel panel;
 
 	public SideProfileView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -39,9 +42,9 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	}
 
 	@Override
-	public void setScene(String profileName, List<String> sensorIds) {
+	public void setScene(String profileName, List<String> sensorIds, int width, int height) {
 		if(scene == null) {
-			addRenderer(panel.getElement());
+			addRenderer(panel.getElement(), width, height);
 		}
 		
 		setProfileName(messages.profileName(profileName));
@@ -69,14 +72,14 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	}
 	
 	private native void removeSensors() /*-{
-		var sensors = this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensors;
+		var sensors = this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensors;
 		
 		if(sensors != null) {
 			for(var i = 0; i < sensors.length; i++) {
-				this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.remove(sensors[i]);
+				this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.remove(sensors[i]);
 			}
 			
-			this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensors = new $wnd.Array();
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensors = new $wnd.Array();
 		}
 	}-*/;
 
@@ -84,8 +87,8 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		var nameMaterial = new $wnd.THREE.MeshLambertMaterial();
 		nameMaterial.color.setHex(0xaaaaaa);
 		
-		if(this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::name != null) {
-			this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.remove(this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::name);
+		if(this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::name != null) {
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.remove(this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::name);
 		}
 		
 		var name = new $wnd.THREE.TextGeometry(profileName, {
@@ -94,10 +97,10 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 			height: 1
 		});
 		var nameMesh = new $wnd.THREE.Mesh(name, nameMaterial);
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::name = nameMesh;
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::name = nameMesh;
 		nameMesh.rotation.x = 270 * $wnd.Math.PI / 180;
 		nameMesh.position.set(-50, 0, 30);
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.add(nameMesh);
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(nameMesh);
 	}-*/;
 	
 	private native JavaScriptObject addSensor(int index, int numberOfSensors) /*-{
@@ -126,21 +129,21 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		var sensorMesh = new $wnd.THREE.Mesh(sensor, sensorMaterial);
 		var distance = startX + 35 * numberInRow;
 		sensorMesh.position.set(distance, height, 0);
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensors.push(sensorMesh);
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensors.push(sensorMesh);
 		
 		if(height > 0.0) {
-			this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.add(sensorMesh);
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(sensorMesh);
 		}
 		
 		return sensorMesh;
 	}-*/;
 
-	private native void addRenderer(Element element) /*-{
+	private native void addRenderer(Element element, int width, int height) /*-{
 		var scene = new $wnd.THREE.Scene();
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene = scene;
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensors = new $wnd.Array();
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene = scene;
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensors = new $wnd.Array();
 		
-		var camera = new $wnd.THREE.PerspectiveCamera(70, 800/600, 1, 500);
+		var camera = new $wnd.THREE.PerspectiveCamera(70, width/height, 1, 500);
 		camera.position.set(-70, 70, 100);
 		camera.lookAt(new $wnd.THREE.Vector3(0, 0, 0));
 		
@@ -230,7 +233,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		scene.add(waterMesh);
 
 		var renderer = new $wnd.THREE.WebGLRenderer({antialias: true});
-		renderer.setSize(800, 600);
+		renderer.setSize(width, height);
 		renderer.setClearColor(0xbad7f3);
 		element.appendChild(renderer.domElement);
 		
@@ -238,46 +241,46 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		
 		var object = this;
 		element.addEventListener('mousemove', function(event) {
-			object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::mouseX = ((event.clientX - element.getBoundingClientRect().left) / 800 ) * 2 - 1;
-			object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::mouseY = - ((event.clientY - element.getBoundingClientRect().top) / 600 ) * 2 + 1;
+			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX = ((event.clientX - element.getBoundingClientRect().left) / width ) * 2 - 1;
+			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseY = - ((event.clientY - element.getBoundingClientRect().top) / height ) * 2 + 1;
 		}, false);
 		
 		var diff = -0.05;
 
 		var render = function() {
-			if(object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::mouseX < 2.0 &&
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::mouseY < 2.0) {
+			if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX < 2.0 &&
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseY < 2.0) {
 				raycaster.setFromCamera(new $wnd.THREE.Vector2(
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::mouseX,
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::mouseY
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX,
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseY
 				), camera);
 			}
 			
-			var intersects = raycaster.intersectObjects(object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensors);
+			var intersects = raycaster.intersectObjects(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensors);
 			
 			if(intersects.length > 0) {
-				if(object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor != null) {
-					if(object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor != intersects[0].object) {
-						object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor.material.transparent = false;
-						object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor.material.opacity = 1.0;
-						object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensorSelected(Z)(false);
-						object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor = intersects[0].object;
-						object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensorSelected(Z)(true);
+				if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor != null) {
+					if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor != intersects[0].object) {
+						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor.material.transparent = false;
+						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor.material.opacity = 1.0;
+						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensorSelected(Z)(false);
+						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor = intersects[0].object;
+						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensorSelected(Z)(true);
 						intersects[0].object.material.transparent = true;
 						intersects[0].object.material.opacity = 0.7;
 					}
 				} else {
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor = intersects[0].object;
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor = intersects[0].object;
 					intersects[0].object.material.transparent = true;
 					intersects[0].object.material.opacity = 0.7;
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensorSelected(Z)(true);
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensorSelected(Z)(true);
 				}
 			} else {
-				if(object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor != null) {
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor.material.transparent = false;
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor.material.opacity = 1.0;
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::sensorSelected(Z)(false);
-					object.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::selectedSensor = null;
+				if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor != null) {
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor.material.transparent = false;
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor.material.opacity = 1.0;
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::sensorSelected(Z)(false);
+					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedSensor = null;
 				}
 			}
 			
@@ -314,11 +317,11 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		};
 		
 		var length = 1000;
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.add(
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(
 			createAxis(new $wnd.THREE.Vector3(-length, 0, 0), new $wnd.THREE.Vector3(length, 0, 0), 0xff0000));
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.add(
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(
 			createAxis(new $wnd.THREE.Vector3(0, -length, 0), new $wnd.THREE.Vector3(0, length, 0), 0x00ff00));
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.add(
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(
 			createAxis(new $wnd.THREE.Vector3(0, 0, -length), new $wnd.THREE.Vector3(0, 0, length), 0x0000ff));
 	}-*/;
 	
@@ -328,7 +331,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 
 	@Override
 	public native void showMeasurement(String measurement) /*-{
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::removeMeasurement()();
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::removeMeasurement()();
 		
 		var measurementMaterial = new $wnd.THREE.MeshLambertMaterial();
 		measurementMaterial.color.setHex(0x555555);
@@ -339,18 +342,18 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 			height: 0.5
 		});
 		var measurementMesh = new $wnd.THREE.Mesh(measurement, measurementMaterial);
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::measurement = measurementMesh;
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement = measurementMesh;
 		measurementMesh.rotation.x = 270 * $wnd.Math.PI / 180;
 		measurementMesh.position.set(-50, 0, 45);
-		this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.add(measurementMesh);
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(measurementMesh);
 	}-*/;
 
 	@Override
 	public native void removeMeasurement() /*-{
-		if(this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::measurement != null) {
-			this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::scene.remove(
-					this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::measurement);
-			this.@pl.ismop.web.client.widgets.old.sideprofile.SideProfileView::measurement = null;
+		if(this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement != null) {
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.remove(
+					this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement);
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::measurement = null;
 		}
 	}-*/;
 

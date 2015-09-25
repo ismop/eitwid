@@ -17,11 +17,17 @@
 			width: 100%;
 			height: 100%;
 		}
+		
+		.profile {
+			width: 100%;
+			height: 100%;
+		}
 	</ui:style>
 	<g:FlowPanel addStyleNames="{style.panel}">
 		<g:FlowPanel ui:field="loadingProgress" addStyleNames="{style.progress}" visible="false">
 			<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.loadingProgressTitle}"/>
 		</g:FlowPanel>
 		<g:FlowPanel ui:field="mapContainer" addStyleNames="{style.map}"/>
+		<g:FlowPanel ui:field="profileContainer" addStyleNames="{style.profile}"/>
 	</g:FlowPanel>
 </ui:UiBinder>

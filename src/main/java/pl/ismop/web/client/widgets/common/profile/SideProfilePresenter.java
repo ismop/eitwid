@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.sideprofile;
+package pl.ismop.web.client.widgets.common.profile;
 
 import static java.util.Collections.sort;
 
@@ -27,6 +27,8 @@ import pl.ismop.web.client.widgets.old.section.ISectionView.ISectionPresenter;
 public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEventBus> implements ISectionPresenter {
 	private DapController dapController;
 	private String selectedSensorId;
+	private int width;
+	private int height;
 
 	@Inject
 	public SideProfilePresenter(DapController dapController) {
@@ -41,7 +43,7 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		}
 		
 		view.clearSensors();
-		view.setScene(profileName, sensorIds);
+		view.setScene(profileName, sensorIds, width, height);
 	}
 
 	public void onSensorSelected(final String sensorId, boolean selected) {
@@ -92,5 +94,10 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 			view.removeMeasurement();
 			selectedSensorId = null;
 		}
+	}
+
+	public void setWidthAndHeight(int width, int height) {
+		this.width = width;
+		this.height = height;
 	}
 }

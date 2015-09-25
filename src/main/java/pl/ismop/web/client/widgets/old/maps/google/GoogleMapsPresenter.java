@@ -41,9 +41,9 @@ import pl.ismop.web.client.geojson.GeoJsonFeature;
 import pl.ismop.web.client.geojson.GeoJsonFeatures;
 import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
 import pl.ismop.web.client.geojson.LineGeometry;
+import pl.ismop.web.client.widgets.common.profile.SideProfilePresenter;
 import pl.ismop.web.client.widgets.old.maps.MapMessages;
 import pl.ismop.web.client.widgets.old.newexperiment.ThreatAssessmentPresenter;
-import pl.ismop.web.client.widgets.old.sideprofile.SideProfilePresenter;
 
 @EventHandler
 public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {

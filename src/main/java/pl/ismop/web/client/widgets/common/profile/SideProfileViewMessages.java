@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.old.sideprofile;
+package pl.ismop.web.client.widgets.common.profile;
 
 import com.google.gwt.i18n.client.Messages;
 

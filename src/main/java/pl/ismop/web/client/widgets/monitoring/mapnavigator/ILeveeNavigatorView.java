@@ -14,4 +14,12 @@ public interface ILeveeNavigatorView extends IsWidget {
 	void showProgress(boolean show);
 
 	String getZoomOutLabel();
+
+	void setProfile(IsWidget view);
+
+	void showProfile(boolean show);
+
+	int getProfileContainerWidth();
+
+	int getProfileContainerHeight();
 }
