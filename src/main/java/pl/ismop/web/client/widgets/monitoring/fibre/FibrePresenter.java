@@ -82,7 +82,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		initSlider();
 		initFibreChart();
-		initDeviceChart();
+		initSelectedDevicesChart();
 
 		clearOldSelection();
 
@@ -232,7 +232,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 							})
 			);
 
-			view.addElementToLeftPanel(fibreChart);
+			view.setFibreDevices(fibreChart);
 		}
 	}
 
@@ -315,7 +315,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		});
 	}
 
-	private void initDeviceChart() {
+	private void initSelectedDevicesChart() {
 		if(deviceChart != null) {
 			deviceChart.removeAllSeries();
 		} else {
@@ -330,7 +330,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									.setYear("%b")
 					);
 
-			view.addElementToLeftPanel(deviceChart);
+			view.setSelectedDevices(deviceChart);
 		}
 	}
 
@@ -387,7 +387,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					updateSelectedDevicesSeries();
 				}
 			});
-			view.addElementToLeftPanel(slider.getView());
+			view.setSlider(slider.getView());
 		}
 	}
 
@@ -425,7 +425,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private void initLeveeMinimap() {
 		if (map == null) {
 			map = eventBus.addHandler(MapPresenter.class);
-			view.addElementToRightPanel(map.getView());
+			view.setMap(map.getView());
 		}
 	}
 

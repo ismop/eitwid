@@ -3,10 +3,7 @@ package pl.ismop.web.client.widgets.monitoring.fibre;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.gwtbootstrap3.client.shared.event.ModalShownEvent;
-import org.gwtbootstrap3.client.ui.Label;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.extras.slider.client.ui.base.event.SlideEvent;
-import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -18,7 +15,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
-import pl.ismop.web.client.widgets.slider.SliderView;
 
 public class FibreView extends Composite implements IFibreView, ReverseViewInterface<IFibrePresenter> {
 	private static FibreViewUiBinder uiBinder = GWT.create(FibreViewUiBinder.class);
@@ -34,10 +30,16 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	Modal modal;
 	
 	@UiField
-	FlowPanel leftPanel;
+	FlowPanel sliderPanel;
 
 	@UiField
-	FlowPanel rightPanel;
+	FlowPanel fibreDevicesPanel;
+
+	@UiField
+	FlowPanel selectedDevicesPanel;
+
+	@UiField
+	FlowPanel mapPanel;
 
 	public FibreView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -54,13 +56,23 @@ public class FibreView extends Composite implements IFibreView, ReverseViewInter
 	}
 
 	@Override
-	public void addElementToLeftPanel(IsWidget widget) {
-		leftPanel.add(widget);
+	public void setMap(IsWidget widget) {
+		mapPanel.add(widget);
 	}
 
 	@Override
-	public void addElementToRightPanel(IsWidget widget) {
-		rightPanel.add(widget);
+	public void setSlider(IsWidget widget) {
+		sliderPanel.add(widget);
+	}
+
+	@Override
+	public void setFibreDevices(IsWidget widget) {
+		fibreDevicesPanel.add(widget);
+	}
+
+	@Override
+	public void setSelectedDevices(IsWidget widget) {
+		selectedDevicesPanel.add(widget);
 	}
 
 	@Override

@@ -14,8 +14,8 @@ public interface IFibreView extends IsWidget {
 	}
 
 	void showModal(boolean show);
-
-	void addElementToLeftPanel(IsWidget widget);
-
-	void addElementToRightPanel(IsWidget widget);
+	void setMap(IsWidget widget);
+	void setSlider(IsWidget widget);
+	void setFibreDevices(IsWidget widget);
+	void setSelectedDevices(IsWidget widget);
 }
