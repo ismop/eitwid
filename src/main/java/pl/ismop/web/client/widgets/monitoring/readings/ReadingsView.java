@@ -119,6 +119,7 @@ public class ReadingsView extends Composite implements IReadingsView, ReverseVie
 	@Override
 	public void resetAdditionalReadings() {
 		additionalReadings.clear();
+		additionalLabels.clear();
 	}
 
 	@Override

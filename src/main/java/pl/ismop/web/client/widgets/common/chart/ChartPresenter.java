@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
-import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
@@ -146,6 +145,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		
 		if(chart != null) {
 			chart.removeAllSeries();
+			chart.removeFromParent();
+			chart = null;
 		}
 	}
 	
@@ -162,7 +163,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			int index = yAxisMap.size();
 			
 			if(index == 0) {
-				chart.getYAxis().setAxisTitle(new AxisTitle().setText(yAxisLabel));
+				updateFirstYAxis(chart.getNativeChart(), yAxisLabel);
 			} else {
 				addAxis(chart.getNativeChart(), index, yAxisLabel);
 			}
@@ -173,10 +174,24 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		}
 	}
 
+	private native void updateFirstYAxis(JavaScriptObject nativeChart, String yAxisLabel) /*-{
+		nativeChart.yAxis[0].update({
+			title: {
+				text: yAxisLabel
+			},
+			labels: {
+				format: "{value:.2f}"
+			}
+		});
+	}-*/;
+
 	private native void addAxis(JavaScriptObject nativeChart, int index, String yAxisLabel) /*-{
 		nativeChart.addAxis({
 			title: {
 				text: yAxisLabel
+			},
+			labels: {
+				format: "{value:.2f}"
 			}
 		});
 	}-*/;
