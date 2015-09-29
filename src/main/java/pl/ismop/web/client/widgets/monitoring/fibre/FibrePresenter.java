@@ -2,6 +2,7 @@ package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -90,9 +91,6 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		initLeveeMinimap();
 
 		clearOldSelection();
-
-//		fibreChart.reflow();
-//		deviceChart.reflow();
 
 		initializeFetcher();
 	}
@@ -219,10 +217,12 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			fibreChart.setToolTip(new ToolTip()
 							.setFormatter(new ToolTipFormatter() {
+								private NumberFormat formatter = NumberFormat.getFormat("00.00");
+
 								public String format(ToolTipData toolTipData) {
 									Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
 									if (selectedDevice != null) {
-										return messages.deviceTooltip(toolTipData.getYAsString(),
+										return messages.deviceTooltip(formatter.format(Double.valueOf(toolTipData.getYAsString())),
 												selectedDevice.getLeveeDistanceMarker() + "",
 												selectedDevice.getCableDistanceMarker() + "",
 												selectedDevice.getCustomId());
@@ -331,6 +331,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									.setMonth("%e. %b")
 									.setYear("%b")
 					);
+
+			deviceChart.setToolTip(new ToolTip().setPointFormat("{point.y:.2f} \u00B0C"));
 
 			view.setSelectedDevices(deviceChart);
 		}
