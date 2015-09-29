@@ -78,4 +78,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = ReadingsPresenter.class)
 	void deviceSeriesHover(String deviceId, boolean hover);
+
+	@Event(handlers = LeveeNavigatorPresenter.class)
+	void backFromSideProfile();
 }

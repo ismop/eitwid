@@ -1,6 +1,10 @@
 package pl.ismop.web.client.widgets.common.map;
 
+import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
+
 import java.util.List;
+
+import org.gwtbootstrap3.client.ui.Button;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -10,7 +14,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -33,7 +36,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 
 	@UiField
 	FlowPanel panel;
-
 	
 	public MapView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -85,6 +87,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	@Override
 	public void addButton(final String id, String label) {
 		Button button = new Button(label);
+		button.setSize(SMALL);
 		DOM.sinkEvents(button.getElement(), Event.ONCLICK);
 		DOM.setEventListener(button.getElement(), new EventListener() {
 			@Override

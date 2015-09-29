@@ -21,7 +21,6 @@ import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.dap.sensor.Sensor;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.common.profile.SideProfilePresenter;
@@ -106,12 +105,13 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	public void onProfileClicked(final Profile profile) {
 		if(profilePresenter == null) {
 			profilePresenter = eventBus.addHandler(SideProfilePresenter.class);
-			view.showMap(false);
-			view.showProfile(true);
 			profilePresenter.setWidthAndHeight(view.getProfileContainerWidth(), view.getProfileContainerHeight());
 			view.setProfile(profilePresenter.getView());
 		}
 		
+		view.showMap(false);
+		view.showProfile(true);
+		profilePresenter.clear();
 		dapController.getDevicesRecursively(profile.getId(), new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
@@ -237,6 +237,11 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		mapPresenter.zoomToAllSections();
 		mapPresenter.removeAction(sectionId);
 		selectedSection = null;
+	}
+	
+	public void onBackFromSideProfile() {
+		view.showMap(true);
+		view.showProfile(false);
 	}
 
 	private List<String> collectProfileIds(List<Profile> profiles) {
