@@ -46,6 +46,7 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		}
 		
 		view.setSidePanelWidget(analysisPanelPresenter.getView());
+		analysisPanelPresenter.init();
 		
 		if(comparisonPresenter == null) {
 			comparisonPresenter = eventBus.addHandler(ComparisonPresenter.class);
