@@ -280,8 +280,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private PlotBand drawDeviceBand(Device selectedDevice) {
 		PlotBand selectedDeviceBand = fibreChart.getXAxis().createPlotBand().
-				setFrom(selectedDevice.getLeveeDistanceMarker() - 0.1).
-				setTo(selectedDevice.getLeveeDistanceMarker() + 0.1).
+				setFrom(selectedDevice.getLeveeDistanceMarker() - 0.4).
+				setTo(selectedDevice.getLeveeDistanceMarker() + 0.4).
 				setColor(properties.selectionColor());
 
 		fibreChart.getXAxis().addPlotBands(selectedDeviceBand);
