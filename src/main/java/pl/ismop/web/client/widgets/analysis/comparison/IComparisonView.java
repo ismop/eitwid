@@ -6,4 +6,6 @@ public interface IComparisonView extends IsWidget {
 	interface IComparisonPresenter {
 		
 	}
+
+	void setSlider(IsWidget slider);
 }
