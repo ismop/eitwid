@@ -247,7 +247,7 @@ public class DapController {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date);
 		String from = DateTimeFormat.
 						getFormat(PredefinedFormat.ISO_8601).
-						format(new Date(date.getTime() - 300_000L));
+						format(new Date(date.getTime() - 1500_000L));
 
 		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
 				                               new MeasurementsRestCallback(callback));
