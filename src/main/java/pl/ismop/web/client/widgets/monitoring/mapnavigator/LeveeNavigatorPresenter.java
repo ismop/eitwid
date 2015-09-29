@@ -37,6 +37,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	private Section selectedSection;
 	private Map<String, DeviceAggregate> selectedDeviceAggregates;
 	private SideProfilePresenter profilePresenter;
+	private Map<String, Device> profileDevices;
 
 	@Inject
 	public LeveeNavigatorPresenter(DapController dapController) {
@@ -45,6 +46,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		displayedDeviceAggregations = new ArrayList<>();
 		selectedDevices = new HashMap<>();
 		selectedDeviceAggregates = new HashMap<>();
+		profileDevices = new HashMap<>();
 	}
 	
 	@Override
@@ -112,6 +114,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		view.showMap(false);
 		view.showProfile(true);
 		profilePresenter.clear();
+		profileDevices.clear();
 		dapController.getDevicesRecursively(profile.getId(), new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
@@ -121,6 +124,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			@Override
 			public void processDevices(List<Device> devices) {
 				profilePresenter.setProfileAndDevices(profile, devices);
+				
+				for(Device device : devices) {
+					profileDevices.put(device.getId(), device);
+				}
 			}
 		});
 	}
@@ -242,6 +249,24 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	public void onBackFromSideProfile() {
 		view.showMap(true);
 		view.showProfile(false);
+	}
+	
+	public void onDevicesHovered(List<String> deviceIds, boolean hovered) {
+		if(profileDevices.containsKey(deviceIds.get(0))) {
+			eventBus.showDeviceMetadata(profileDevices.get(deviceIds.get(0)), hovered);
+		}
+	}
+	
+	public void onDevicesClicked(List<String> deviceIds) {
+		for(String deviceId : deviceIds) {
+			if(selectedDevices.containsKey(deviceId)) {
+				selectedDevices.remove(deviceId);
+				eventBus.deviceSelected(profileDevices.get(deviceId), false);
+			} else {
+				selectedDevices.put(deviceId, profileDevices.get(deviceId));
+				eventBus.deviceSelected(profileDevices.get(deviceId), true);
+			}
+		}
 	}
 
 	private List<String> collectProfileIds(List<Profile> profiles) {

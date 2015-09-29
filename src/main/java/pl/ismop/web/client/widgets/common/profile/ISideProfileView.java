@@ -7,9 +7,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 
 public interface ISideProfileView extends IsWidget {
 	interface ISideProfilePresenter {
-		void onDeviceSelected(String sensorId, boolean selected);
+		void onDeviceSelected(List<String> deviceIds, boolean selected);
 
 		void onBack();
+
+		void onMouseClicked();
 	}
 
 	void setScene(String profileName, int width, int height);
@@ -24,5 +26,5 @@ public interface ISideProfileView extends IsWidget {
 
 	void removeObjects();
 
-	void drawDevices(Map<String, List<Double>> devicePositions, double xShift);
+	void drawDevices(Map<List<String>, List<Double>> devicePositions, double xShift);
 }

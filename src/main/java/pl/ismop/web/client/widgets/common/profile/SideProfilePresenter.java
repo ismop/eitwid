@@ -33,6 +33,12 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 	
 	private int width, height;
 	
+	private List<String> selectedDeviceIds;
+	
+	public SideProfilePresenter() {
+		selectedDeviceIds = new ArrayList<>();
+	}
+	
 	public void setProfileAndDevices(Profile profile, List<Device> devices) {
 		view.setScene(profile.getId(), width, height);
 		
@@ -47,59 +53,19 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		double xShift = -fullProfile.get(1).get(0) / 2;
 		view.drawProfile(fullProfile, leftBank, xShift);
 		
-		Map<String, List<Double>> devicePositions = collectDevicePositions(getReferencePoint(profile.getShape().getCoordinates()), devices);
+		Map<List<String>, List<Double>> devicePositions = collectDevicePositions(getReferencePoint(profile.getShape().getCoordinates()), devices);
 		view.drawDevices(devicePositions, xShift);
 	}
 
-	public void onDeviceSelected(final String sensorId, boolean selected) {
-			if(selected) {
-				selectedSensorId = sensorId;
-	//			dapController.getSensor(sensorId, new SensorCallback() {
-	//				@Override
-	//				public void onError(ErrorDetails errorDetails) {
-	//					Window.alert("Error: " + errorDetails.getMessage());
-	//				}
-	//				
-	//				@Override
-	//				public void processSensor(final Sensor sensor) {
-	//					dapController.getMeasurements(sensorId, new MeasurementsCallback() {
-	//						@Override
-	//						public void onError(ErrorDetails errorDetails) {
-	//							Window.alert("Error: " + errorDetails.getMessage());
-	//						}
-	//						
-	//						@Override
-	//						public void processMeasurements(List<Measurement> measurements) {
-	//							if(selectedSensorId != null && selectedSensorId.equals(sensorId)) {
-	//								if(measurements != null && measurements.size() > 0) {
-	//									sort(measurements, new Comparator<Measurement>() {
-	//										@Override
-	//										public int compare(Measurement m1, Measurement m2) {
-	//											Date d1 = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).parse(m1.getTimestamp());
-	//											Date d2 = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).parse(m2.getTimestamp());
-	//											
-	//											if(d1.after(d2)) {
-	//												return -1;
-	//											} else {
-	//												return 1;
-	//											}
-	//										}
-	//									});
-	//									double value = Math.round(measurements.get(0).getValue() * 100);
-	//									view.showMeasurement("Sensor " + sensor.getCustomId() + ": " + value / 100 + " " + sensor.getUnit());
-	//								} else {
-	//									view.showMeasurement(view.getNoMeasurementLabel());
-	//								}
-	//							}
-	//						}
-	//					});
-	//				}
-	//			});
-			} else {
-				view.removeMeasurement();
-				selectedSensorId = null;
-			}
+	public void onDeviceSelected(final List<String> deviceIds, boolean selected) {
+		selectedDeviceIds.clear();
+		
+		if(selected) {
+			selectedDeviceIds.addAll(deviceIds);
 		}
+		
+		eventBus.devicesHovered(deviceIds, selected);
+	}
 
 	public void setWidthAndHeight(int width, int height) {
 		this.width = width;
@@ -115,6 +81,13 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		view.removeObjects();
 	}
 
+	@Override
+	public void onMouseClicked() {
+		if(!selectedDeviceIds.isEmpty()) {
+			eventBus.devicesClicked(selectedDeviceIds);
+		}
+	}
+
 	private List<Double> getReferencePoint(List<List<Double>> coordinates) {
 		Collections.sort(coordinates, new Comparator<List<Double>>() {
 			@Override
@@ -126,25 +99,54 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		return coordinates.get(0);
 	}
 
-	private Map<String, List<Double>> collectDevicePositions(List<Double> referencePoint, List<Device> devices) {
-		Map<String, List<Double>> result = new HashMap<>();
+	private Map<List<String>, List<Double>> collectDevicePositions(List<Double> referencePoint, List<Device> devices) {
+		Map<List<String>, List<Double>> result = new HashMap<>();
 		List<List<Double>> referenceSource = new ArrayList<>();
 		referenceSource.add(referencePoint);
 		
 		List<Double> projectedReference = projectCoordinates(referenceSource).get(0);
+		Map<List<String>, List<List<Double>>> similar = findSimilar(devices);
 		
-		for(Device device : devices) {
-			List<List<Double>> coordinates = new ArrayList<List<Double>>();
-			coordinates.add(device.getPlacement().getCoordinates());
-			
-			List<List<Double>> projectedValues = projectCoordinates(coordinates);
+		for(List<String> similarDeviceIds : similar.keySet()) {
+			List<List<Double>> projectedValues = projectCoordinates(similar.get(similarDeviceIds));
 			double distance = sqrt(
 				pow(projectedValues.get(0).get(0) - projectedReference.get(0), 2) +
 				pow(projectedValues.get(0).get(1) - projectedReference.get(1), 2)
 			);
 			
 			//for now let's position the devices half meter above ground
-			result.put(device.getId(), Arrays.asList(distance, 0.5));
+			result.put(similarDeviceIds, Arrays.asList(distance, 0.5));
+		}
+		
+		return result;
+	}
+
+	private Map<List<String>, List<List<Double>>> findSimilar(List<Device> devices) {
+		Map<String, List<Device>> similar = new HashMap<>();
+		
+		for(Device device : devices) {
+			String key = String.valueOf(device.getPlacement().getCoordinates().get(0)) + String.valueOf(device.getPlacement().getCoordinates().get(1));
+			
+			if(!similar.containsKey(key)) {
+				similar.put(key, new ArrayList<Device>());
+			}
+			
+			similar.get(key).add(device);
+		}
+		
+		Map<List<String>, List<List<Double>>> result = new HashMap<>();
+		
+		for(String key : similar.keySet()) {
+			List<Device> similarDevices = similar.get(key);
+			List<String> ids = new ArrayList<>();
+			
+			for(Device device : similarDevices) {
+				ids.add(device.getId());
+			}
+			
+			List<List<Double>> packagedCoordinates = new ArrayList<>();
+			packagedCoordinates.add(similarDevices.get(0).getPlacement().getCoordinates());
+			result.put(ids, packagedCoordinates);
 		}
 		
 		return result;

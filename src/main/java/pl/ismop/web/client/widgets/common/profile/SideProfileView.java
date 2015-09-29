@@ -34,7 +34,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	
 	private double mouseX, mouseY;
 	
-	private Map<JavaScriptObject, String> deviceMap;
+	private Map<JavaScriptObject, List<String>> deviceMap;
 	
 	@UiField
 	SideProfileViewMessages messages;
@@ -91,13 +91,13 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	}
 
 	@Override
-	public void drawDevices(Map<String, List<Double>> devicePositions, double xShift) {
-		for(String deviceId : devicePositions.keySet()) {
+	public void drawDevices(Map<List<String>, List<Double>> devicePositions, double xShift) {
+		for(List<String> similarDeviceIds : devicePositions.keySet()) {
 			JavaScriptObject sensorMesh = addDevice(JsArrayUtils.readOnlyJsArray(new double[] {
-					devicePositions.get(deviceId).get(0),
-					devicePositions.get(deviceId).get(1)
+					devicePositions.get(similarDeviceIds).get(0),
+					devicePositions.get(similarDeviceIds).get(1)
 			}), xShift);
-			deviceMap.put(sensorMesh, deviceId);
+			deviceMap.put(sensorMesh, similarDeviceIds);
 		}
 	}
 
@@ -159,6 +159,10 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		}
 		
 		deviceMap.clear();
+	}
+	
+	private void mouseClicked() {
+		getPresenter().onMouseClicked();
 	}
 
 	private native void removeMesh(JavaScriptObject mesh) /*-{
@@ -231,11 +235,14 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		
 		var object = this;
 		element.addEventListener('mousemove', function(event) {
-			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX = ((event.clientX - element.getBoundingClientRect().left) / width ) * 2 - 1;
-			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseY = - ((event.clientY - element.getBoundingClientRect().top) / height ) * 2 + 1;
+			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX =
+				((event.clientX - element.getBoundingClientRect().left) / width ) * 2 - 1;
+			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseY =
+				-((event.clientY - element.getBoundingClientRect().top) / height ) * 2 + 1;
 		}, false);
-		
-		var diff = -0.05;
+		element.addEventListener('click', function(event) {
+			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseClicked()();
+		});
 
 		var render = function() {
 			if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX < 2.0 &&
