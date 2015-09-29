@@ -469,7 +469,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		Series s = seriesCache.remove(aggregation.getId());
 		if (s == null) {
 			s = fibreChart.createSeries().
-					setName(aggregation.getId()).
+					setName(aggregation.getCustomId()).
 					setType(Type.SPLINE);
 		}
 
@@ -486,13 +486,13 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				Point seriesPoint = seriesPoints[i];
 				ChartPoint newPoint = newPoints.get(i);
 				seriesPoint.update(newPoint.getX(), newPoint.getY(), false);
-				deviceMapping.put(aggregation.getId() + "::" + newPoint.getX(), newPoint.getDevice());
+				deviceMapping.put(aggregation.getCustomId() + "::" + newPoint.getX(), newPoint.getDevice());
 			}
 		} else {
 			s.remove();
 			for (ChartPoint point : newPoints) {
 				s.addPoint(point.getX(), point.getY());
-				deviceMapping.put(aggregation.getId() + "::" + point.getX(), point.getDevice());
+				deviceMapping.put(aggregation.getCustomId() + "::" + point.getX(), point.getDevice());
 			}
 			fibreChart.addSeries(s, false, true);
 		}

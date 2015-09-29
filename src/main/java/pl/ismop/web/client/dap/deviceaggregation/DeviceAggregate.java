@@ -28,6 +28,9 @@ public class DeviceAggregate {
 	
 	@Json(name = "device_ids")
 	private List<String> deviceIds;
+
+	@Json(name = "custom_id")
+	private String customId;
 	
 	private Geometry shape;
 
@@ -101,5 +104,13 @@ public class DeviceAggregate {
 
 	public void setShape(Geometry shape) {
 		this.shape = shape;
+	}
+
+	public String getCustomId() {
+		return customId;
+	}
+
+	public void setCustomId(String customId) {
+		this.customId = customId;
 	}
 }
