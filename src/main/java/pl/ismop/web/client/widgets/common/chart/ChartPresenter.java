@@ -85,7 +85,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		dataSeriesMap.put(chartSeries.getId(), series);
 		
 		chartSeries
-			.setName(series.getDeviceId())
+			.setName(series.getName())
 			.setPoints(series.getValues())
 			.setYAxis(getYAxisIndex(series));
 		chart.addSeries(chartSeries);

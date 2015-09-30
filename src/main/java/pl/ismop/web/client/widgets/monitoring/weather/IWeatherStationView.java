@@ -1,6 +1,6 @@
 package pl.ismop.web.client.widgets.monitoring.weather;
 
-import org.moxieapps.gwt.highcharts.client.StockChart;
+import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasVisibility;
@@ -15,7 +15,7 @@ public interface IWeatherStationView extends IsWidget {
 
 	void showProgress(boolean show);
 
-	void setChart(StockChart firstChart);
+	void setChart(Chart firstChart);
 
 	HasVisibility getChartVisibility();
 

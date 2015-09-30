@@ -208,7 +208,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::devices = new $wnd.Array();
 		
 		var camera = new $wnd.THREE.PerspectiveCamera(70, width/height, 1, 500);
-		camera.position.set(0, 7, 10);
+		camera.position.set(0, 7, 11);
 		camera.lookAt(new $wnd.THREE.Vector3(0, 0, 0));
 		
 		var fog = new $wnd.THREE.FogExp2(0xbebebe, 0.003);

@@ -12,11 +12,12 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
+import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
+import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Legend.Layout;
 import org.moxieapps.gwt.highcharts.client.Legend.VerticalAlign;
 import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.StockChart;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
@@ -49,7 +50,7 @@ import pl.ismop.web.client.widgets.old.plot.Readings;
 @Presenter(view = WeatherStationView.class)
 public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, MainEventBus> implements IWeatherStationPresenter {
 	private DapController dapController;
-	private StockChart chart;
+	private Chart chart;
 
 	@Inject
 	public WeatherStationPresenter(DapController dapController) {
@@ -292,13 +293,14 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			chart.removeFromParent();
 		}
 		
-		chart = new StockChart()
+		chart = new Chart()
 				.setType(Series.Type.LINE)
 				.setLegend(new Legend()
 						.setVerticalAlign(VerticalAlign.BOTTOM)
 						.setLayout(Layout.HORIZONTAL))
 				.setToolTip(new ToolTip()
-						.setPointFormat("<span style=\"color: {point.color};\">\u25CF</span> {series.name}: <b>{point.y:.2f}</b><br/>"));
+						.setPointFormat("<span style=\"color: {point.color};\">\u25CF</span> {series.name}: <b>{point.y:.2f}</b><br/>"))
+				.setZoomType(ZoomType.X);
 		
 		int axisIndex = 0;
 		

@@ -37,14 +37,24 @@ import pl.ismop.web.client.widgets.monitoring.readings.IReadingsView.IReadingsPr
 @Presenter(view = ReadingsView.class)
 public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus> implements IReadingsPresenter {
 	private static final String PICK_VALUE = "pick";
+	
 	private DapController dapController;
+	
 	private MapPresenter mapPresenter;
+	
 	private ChartPresenter chartPresenter ;
+	
 	private Levee levee;
+	
 	private List<ChartSeries> series;
+	
 	private Map<String, Device> displayedDevices;
+	
 	private Map<String, Parameter> additionalParameters;
+	
 	private List<String> chosenAdditionalReadings;
+	
+	private Map<String, Device> additionalDevices;
 
 	@Inject
 	public ReadingsPresenter(DapController dapController) {
@@ -53,6 +63,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 		displayedDevices = new HashMap<>();
 		additionalParameters = new HashMap<>();
 		chosenAdditionalReadings = new ArrayList<>();
+		additionalDevices = new HashMap<>();
 	}
 	
 	public void onShowExpandedReadings(Levee levee, List<ChartSeries> series) {
@@ -168,7 +179,10 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 									public void processMeasurements(List<Measurement> measurements) {
 										if(measurements.size() > 0) {
 											ChartSeries chartSeries = new ChartSeries();
-											chartSeries.setDeviceId(additionalParameters.get(parameterId).getDeviceId());
+											String  additionalDeviceId = additionalParameters.get(parameterId).getDeviceId();
+											chartSeries.setName(additionalDevices.get(additionalDeviceId).getCustomId() +
+													" (" + additionalParameters.get(parameterId).getMeasurementTypeName() + ")");
+											chartSeries.setDeviceId(additionalDeviceId);
 											chartSeries.setParameterId(parameterId);
 											chartSeries.setLabel(additionalParameters.get(parameterId).getMeasurementTypeName());
 											chartSeries.setUnit(additionalParameters.get(parameterId).getMeasurementTypeUnit());
@@ -205,6 +219,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 		view.resetAdditionalReadings();
 		view.showNoAdditionalReadingsLabel(true);
 		view.addAdditionalReadingsOption(PICK_VALUE, view.pickAdditionalReadingLabel());
+		additionalDevices.clear();
 		dapController.getDevicesForType("weather_station", new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
@@ -217,6 +232,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 				
 				for(Device device : devices) {
 					deviceIds.add(device.getId());
+					additionalDevices.put(device.getId(), device);
 				}
 				
 				dapController.getParameters(deviceIds, new ParametersCallback() {

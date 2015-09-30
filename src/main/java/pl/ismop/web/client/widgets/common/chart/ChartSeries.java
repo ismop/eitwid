@@ -1,6 +1,8 @@
 package pl.ismop.web.client.widgets.common.chart;
 
 public class ChartSeries {
+	private String name;
+	
 	private String deviceId;
 	
 	private String parameterId;
@@ -49,5 +51,13 @@ public class ChartSeries {
 
 	public void setValues(Number[][] values) {
 		this.values = values;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

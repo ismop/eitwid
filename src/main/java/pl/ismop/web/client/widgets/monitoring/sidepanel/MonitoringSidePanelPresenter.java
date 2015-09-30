@@ -112,7 +112,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		eventBus.showExpandedReadings(selectedLevee, chartPresenter.getSeries());
 	}
 
-	private void addChartSeries(Device device) {
+	private void addChartSeries(final Device device) {
 		dapController.getParameters(device.getId(), new ParametersCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
@@ -181,6 +181,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 													
 													if(parameterMeasurements.size() > 0) {
 														ChartSeries series = new ChartSeries();
+														series.setName(device.getCustomId() + " (" + parameter.getMeasurementTypeName() + ")");
 														series.setDeviceId(parameter.getDeviceId());
 														series.setParameterId(parameter.getId());
 														series.setLabel(parameter.getMeasurementTypeName());

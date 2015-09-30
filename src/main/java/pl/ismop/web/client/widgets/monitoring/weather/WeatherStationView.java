@@ -6,7 +6,7 @@ import org.gwtbootstrap3.client.ui.DescriptionData;
 import org.gwtbootstrap3.client.ui.DescriptionTitle;
 import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.moxieapps.gwt.highcharts.client.StockChart;
+import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -47,7 +47,7 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	}
 
 	@Override
-	public void setChart(StockChart firstChart) {
+	public void setChart(Chart firstChart) {
 		chartSlot.add(firstChart);
 	}
 
