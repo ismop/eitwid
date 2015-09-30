@@ -27,4 +27,6 @@ public interface ISideProfileView extends IsWidget {
 	void removeObjects();
 
 	void drawDevices(Map<List<String>, List<Double>> devicePositions, double xShift);
+
+	void markDevice(String deviceId, boolean mark);
 }

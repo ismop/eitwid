@@ -33,10 +33,10 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 	
 	private int width, height;
 	
-	private List<String> selectedDeviceIds;
+	private List<String> hoveredDeviceIds;
 	
 	public SideProfilePresenter() {
-		selectedDeviceIds = new ArrayList<>();
+		hoveredDeviceIds = new ArrayList<>();
 	}
 	
 	public void setProfileAndDevices(Profile profile, List<Device> devices) {
@@ -58,10 +58,10 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 	}
 
 	public void onDeviceSelected(final List<String> deviceIds, boolean selected) {
-		selectedDeviceIds.clear();
+		hoveredDeviceIds.clear();
 		
 		if(selected) {
-			selectedDeviceIds.addAll(deviceIds);
+			hoveredDeviceIds.addAll(deviceIds);
 		}
 		
 		eventBus.devicesHovered(deviceIds, selected);
@@ -72,9 +72,8 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		this.height = height;
 	}
 
-	@Override
-	public void onBack() {
-		eventBus.backFromSideProfile();
+	public void markDevice(String deviceId, boolean mark) {
+		view.markDevice(deviceId, mark);
 	}
 
 	public void clear() {
@@ -82,9 +81,14 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 	}
 
 	@Override
+	public void onBack() {
+		eventBus.backFromSideProfile();
+	}
+
+	@Override
 	public void onMouseClicked() {
-		if(!selectedDeviceIds.isEmpty()) {
-			eventBus.devicesClicked(selectedDeviceIds);
+		if(!hoveredDeviceIds.isEmpty()) {
+			eventBus.devicesClicked(hoveredDeviceIds);
 		}
 	}
 

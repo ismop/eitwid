@@ -29,15 +29,22 @@ import pl.ismop.web.client.widgets.monitoring.mapnavigator.ILeveeNavigatorView.I
 @Presenter(view = LeveeNavigatorView.class, multiple = true)
 public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, MainEventBus> implements ILeveeNavigatorPresenter {
 	private MapPresenter mapPresenter;
+	
 	private Levee displayedLevee;
+	
 	private DapController dapController;
+	
 	private List<Device> displayedDevices;
+	
 	private List<DeviceAggregate> displayedDeviceAggregations;
-	private Map<String, Device> selectedDevices;
+	
+	private Map<String, Device> selectedDevices, profileDevices;
+	
 	private Section selectedSection;
+	
 	private Map<String, DeviceAggregate> selectedDeviceAggregates;
+	
 	private SideProfilePresenter profilePresenter;
-	private Map<String, Device> profileDevices;
 
 	@Inject
 	public LeveeNavigatorPresenter(DapController dapController) {
@@ -127,6 +134,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				
 				for(Device device : devices) {
 					profileDevices.put(device.getId(), device);
+					
+					if(selectedDevices.keySet().contains(device.getId())) {
+						profilePresenter.markDevice(device.getId(), true);
+					}
 				}
 			}
 		});
@@ -262,9 +273,11 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			if(selectedDevices.containsKey(deviceId)) {
 				selectedDevices.remove(deviceId);
 				eventBus.deviceSelected(profileDevices.get(deviceId), false);
+				profilePresenter.markDevice(deviceId, false);
 			} else {
 				selectedDevices.put(deviceId, profileDevices.get(deviceId));
 				eventBus.deviceSelected(profileDevices.get(deviceId), true);
+				profilePresenter.markDevice(deviceId, true);
 			}
 		}
 	}

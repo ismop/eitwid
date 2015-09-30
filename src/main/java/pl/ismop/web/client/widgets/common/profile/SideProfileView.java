@@ -22,11 +22,13 @@ import com.mvp4g.client.view.ReverseViewInterface;
 import pl.ismop.web.client.widgets.common.profile.ISideProfileView.ISideProfilePresenter;
 
 public class SideProfileView extends Composite implements ISideProfileView, ReverseViewInterface<ISideProfilePresenter> {
-	private static final double MIDDLE = 49.980428008658;
-	
 	private static ProfileViewUiBinder uiBinder = GWT.create(ProfileViewUiBinder.class);
 	
 	interface ProfileViewUiBinder extends UiBinder<Widget, SideProfileView> {}
+	
+	private static final int DEVICE_COLOR = 0xf44f4f;
+	
+	private static final int DEVICE_SELECTED_COLOR = 0xf5ea6f;
 	
 	private ISideProfilePresenter presenter;
 	
@@ -93,11 +95,26 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	@Override
 	public void drawDevices(Map<List<String>, List<Double>> devicePositions, double xShift) {
 		for(List<String> similarDeviceIds : devicePositions.keySet()) {
-			JavaScriptObject sensorMesh = addDevice(JsArrayUtils.readOnlyJsArray(new double[] {
+			JavaScriptObject deviceMesh = addDevice(JsArrayUtils.readOnlyJsArray(new double[] {
 					devicePositions.get(similarDeviceIds).get(0),
 					devicePositions.get(similarDeviceIds).get(1)
 			}), xShift);
-			deviceMap.put(sensorMesh, similarDeviceIds);
+			deviceMap.put(deviceMesh, similarDeviceIds);
+		}
+	}
+
+	@Override
+	public void markDevice(String deviceId, boolean mark) {
+		for(JavaScriptObject shape : deviceMap.keySet()) {
+			if(deviceMap.get(shape).contains(deviceId)) {
+				if(mark) {
+					setShapeColor(DEVICE_SELECTED_COLOR, shape);
+				} else {
+					setShapeColor(DEVICE_COLOR, shape);
+				}
+				
+				break;
+			}
 		}
 	}
 
@@ -397,5 +414,10 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		mesh.position.set(-(coords[1][0] - coords[0][0]) / 2 + shift, 0, -0.01);
 		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::water = mesh;
 		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(mesh);
+	}-*/;
+
+	private native void setShapeColor(int color, JavaScriptObject shape) /*-{
+		console.log("setting color");
+		shape.material.color.setHex(color);
 	}-*/;
 }
