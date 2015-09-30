@@ -2,6 +2,7 @@ package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -90,9 +91,6 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		initLeveeMinimap();
 
 		clearOldSelection();
-
-//		fibreChart.reflow();
-//		deviceChart.reflow();
 
 		initializeFetcher();
 	}
@@ -219,10 +217,12 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			fibreChart.setToolTip(new ToolTip()
 							.setFormatter(new ToolTipFormatter() {
+								private NumberFormat formatter = NumberFormat.getFormat("00.00");
+
 								public String format(ToolTipData toolTipData) {
 									Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
 									if (selectedDevice != null) {
-										return messages.deviceTooltip(toolTipData.getYAsString(),
+										return messages.deviceTooltip(formatter.format(Double.valueOf(toolTipData.getYAsString())),
 												selectedDevice.getLeveeDistanceMarker() + "",
 												selectedDevice.getCableDistanceMarker() + "",
 												selectedDevice.getCustomId());
@@ -280,8 +280,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private PlotBand drawDeviceBand(Device selectedDevice) {
 		PlotBand selectedDeviceBand = fibreChart.getXAxis().createPlotBand().
-				setFrom(selectedDevice.getLeveeDistanceMarker() - 0.1).
-				setTo(selectedDevice.getLeveeDistanceMarker() + 0.1).
+				setFrom(selectedDevice.getLeveeDistanceMarker() - 0.4).
+				setTo(selectedDevice.getLeveeDistanceMarker() + 0.4).
 				setColor(properties.selectionColor());
 
 		fibreChart.getXAxis().addPlotBands(selectedDeviceBand);
@@ -331,6 +331,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									.setMonth("%e. %b")
 									.setYear("%b")
 					);
+
+			deviceChart.setToolTip(new ToolTip().setPointFormat("{point.y:.2f} \u00B0C"));
 
 			view.setSelectedDevices(deviceChart);
 		}
@@ -469,7 +471,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		Series s = seriesCache.remove(aggregation.getId());
 		if (s == null) {
 			s = fibreChart.createSeries().
-					setName(aggregation.getId()).
+					setName(aggregation.getCustomId()).
 					setType(Type.SPLINE);
 		}
 
@@ -486,13 +488,13 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				Point seriesPoint = seriesPoints[i];
 				ChartPoint newPoint = newPoints.get(i);
 				seriesPoint.update(newPoint.getX(), newPoint.getY(), false);
-				deviceMapping.put(aggregation.getId() + "::" + newPoint.getX(), newPoint.getDevice());
+				deviceMapping.put(aggregation.getCustomId() + "::" + newPoint.getX(), newPoint.getDevice());
 			}
 		} else {
 			s.remove();
 			for (ChartPoint point : newPoints) {
 				s.addPoint(point.getX(), point.getY());
-				deviceMapping.put(aggregation.getId() + "::" + point.getX(), point.getDevice());
+				deviceMapping.put(aggregation.getCustomId() + "::" + point.getX(), point.getDevice());
 			}
 			fibreChart.addSeries(s, false, true);
 		}
