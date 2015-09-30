@@ -232,11 +232,21 @@ public class DapController {
 	public void getMeasurements(String timelineId, final MeasurementsCallback callback) {
 		getMeasurements(timelineId, monthEarlier(), new Date(), callback);
 	}
+	
+	public void getMeasurementsWithQuantity(String timelineId, int quantity, final MeasurementsCallback callback) {
+		getMeasurementsWithQuantity(timelineId, monthEarlier(), new Date(), quantity, callback);
+	}
 
 	public void getMeasurements(String timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(endDate);
 		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(startDate);
 		measurementService.getMeasurements(timelineId, from, until, new MeasurementsRestCallback(callback));
+	}
+	
+	public void getMeasurementsWithQuantity(String timelineId, Date startDate, Date endDate, int quantity, final MeasurementsCallback callback) {
+		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(endDate);
+		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(startDate);
+		measurementService.getMeasurementsWithQuantity(timelineId, from, until, quantity, new MeasurementsRestCallback(callback));
 	}
 
 	public void getMeasurements(List<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
@@ -490,7 +500,21 @@ public class DapController {
 		});
 	}
 
+	public void getMeasurementsForTimelineIdsWithQuantity(List<String> timelineIds, int quantity, final MeasurementsCallback callback) {
+		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
+		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
+		measurementService.getMeasurementsWithQuantity(merge(timelineIds, ","), from, until, quantity, new MethodCallback<MeasurementsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
 
+			@Override
+			public void onSuccess(Method method, MeasurementsResponse response) {
+				callback.processMeasurements(response.getMeasurements());
+			}
+		});
+	}
 
 	public void getDeviceAggregations(String profileId, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {

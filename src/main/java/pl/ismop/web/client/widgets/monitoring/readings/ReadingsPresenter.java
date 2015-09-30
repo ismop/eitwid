@@ -169,7 +169,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 						public void processTimelines(List<Timeline> timelines) {
 							if(timelines.size() > 0) {
 								Timeline timeline = timelines.get(0);
-								dapController.getMeasurements(timeline.getId(), new MeasurementsCallback() {
+								dapController.getMeasurementsWithQuantity(timeline.getId(), 1000, new MeasurementsCallback() {
 									@Override
 									public void onError(ErrorDetails errorDetails) {
 										eventBus.showError(errorDetails);

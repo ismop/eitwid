@@ -150,7 +150,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 										timelineIds.add(timeline.getId());
 									}
 									
-									dapController.getMeasurementsForTimelineIds(timelineIds, new MeasurementsCallback() {
+									dapController.getMeasurementsForTimelineIdsWithQuantity(timelineIds, 1000, new MeasurementsCallback() {
 										@Override
 										public void onError(ErrorDetails errorDetails) {
 											eventBus.showError(errorDetails);
