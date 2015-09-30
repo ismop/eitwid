@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -141,7 +142,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 												timelineMap.put(timeline.getId(), timeline);
 											}
 											
-											dapController.getMeasurementsForTimelineIds(timelineIds, new MeasurementsCallback() {
+											dapController.getMeasurementsForTimelineIdsWithQuantity(timelineIds, 1000, new MeasurementsCallback() {
 												@Override
 												public void onError(ErrorDetails errorDetails) {
 													view.showProgress(false);
@@ -301,6 +302,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 				.setToolTip(new ToolTip()
 						.setPointFormat("<span style=\"color: {point.color};\">\u25CF</span> {series.name}: <b>{point.y:.2f}</b><br/>"))
 				.setZoomType(ZoomType.X);
+		chart.getXAxis().setType(Type.DATE_TIME);
 		
 		int axisIndex = 0;
 		
