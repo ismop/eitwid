@@ -9,6 +9,8 @@ public interface IMonitoringSidePanel extends IsWidget {
 		void handleShowWeatherClick();
 
 		void onExpandChart();
+
+		void onClearChart();
 	}
 
 	void showLeveeName(boolean show);
@@ -37,7 +39,7 @@ public interface IMonitoringSidePanel extends IsWidget {
 
 	int getChartHeight();
 
-	void showChartExpandButton(boolean show);
+	void showChartButtons(boolean show);
 
 	String getProfileTypeLabel();
 

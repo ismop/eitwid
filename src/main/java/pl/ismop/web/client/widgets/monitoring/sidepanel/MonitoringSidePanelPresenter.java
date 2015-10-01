@@ -96,7 +96,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 				chartPresenter.removeChartSeriesForDevice(device);
 				
 				if(chartPresenter.getSeriesCount() == 0) {
-					view.showChartExpandButton(false);
+					view.showChartButtons(false);
 				}
 			}
 		}
@@ -122,6 +122,11 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 	@Override
 	public void onExpandChart() {
 		eventBus.showExpandedReadings(selectedLevee, chartPresenter.getSeries());
+	}
+
+	@Override
+	public void onClearChart() {
+		eventBus.clearSelection();
 	}
 
 	private void addChartSeries(final Device device) {
@@ -225,7 +230,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 														
 														series.setValues(values);
 														chartPresenter.addChartSeries(series);
-														view.showChartExpandButton(true);
+														view.showChartButtons(true);
 													} else {
 														view.showNoMeasurementsForDeviceMessage();
 													}

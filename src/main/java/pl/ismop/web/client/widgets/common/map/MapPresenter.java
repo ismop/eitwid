@@ -318,6 +318,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		eventBus.zoomOut(sectionId);
 	}
 
+	public void setLoadingState(boolean loading) {
+		view.showLoadingPanel(loading);
+	}
+
 	private GeoJsonFeatures sectionToGeoJsonFeatures(Section section) {
 		PolygonShape shape = section.getShape();
 		List<List<List<Double>>> polygonCoordinates = new ArrayList<List<List<Double>>>();

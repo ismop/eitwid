@@ -68,7 +68,7 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	
 	@UiHandler("clearChart")
 	void clearChart(ClickEvent event) {
-		Window.alert("TODO");
+		getPresenter().onClearChart();
 	}
 	
 	@Override
@@ -157,7 +157,7 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	}
 
 	@Override
-	public void showChartExpandButton(boolean show) {
+	public void showChartButtons(boolean show) {
 		chartButtons.setVisible(show);
 	}
 

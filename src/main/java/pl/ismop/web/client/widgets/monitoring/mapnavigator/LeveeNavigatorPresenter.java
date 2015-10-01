@@ -17,6 +17,7 @@ import pl.ismop.web.client.dap.DapController.DeviceAggregatesCallback;
 import pl.ismop.web.client.dap.DapController.DevicesCallback;
 import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
+import pl.ismop.web.client.dap.MutableInteger;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
@@ -162,15 +163,20 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		removeDevicesAndAggregates();
 		mapPresenter.zoomOnSection(section);
 		mapPresenter.addAction(selectedSection.getId(), view.getZoomOutLabel());
-		//TODO(DH): add spinner somewhere
+		mapPresenter.setLoadingState(true);
+		
+		final MutableInteger asyncCalls = new MutableInteger(2);
 		dapController.getDevicesForSectionAndType(section.getId(), "fiber_optic_node",new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
+				checkMapLoadingState(asyncCalls);
 			}
 			
 			@Override
 			public void processDevices(List<Device> devices) {
+				checkMapLoadingState(asyncCalls);
+				mapPresenter.setLoadingState(false);
 				displayedDevices.addAll(devices);
 				
 				for(Device device : devices) {
@@ -187,18 +193,22 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
+				checkMapLoadingState(asyncCalls);
 			}
 			
 			@Override
 			public void processProfiles(List<Profile> profiles) {
+				asyncCalls.increment();
 				dapController.getDeviceAggregations(collectProfileIds(profiles), new DeviceAggregatesCallback() {
 					@Override
 					public void onError(ErrorDetails errorDetails) {
 						eventBus.showError(errorDetails);
+						checkMapLoadingState(asyncCalls);
 					}
 					
 					@Override
 					public void processDeviceAggregations(List<DeviceAggregate> deviceAggreagates) {
+						checkMapLoadingState(asyncCalls);
 						displayedDeviceAggregations.addAll(deviceAggreagates);
 						
 						for(DeviceAggregate deviceAggregate : deviceAggreagates) {
@@ -233,35 +243,38 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	}
 	
 	public void onDeviceAggregateClicked(final DeviceAggregate deviceAggregate) {
-		//TODO(DH): add spinner somewhere
-		dapController.getDevicesRecursivelyForAggregate(deviceAggregate.getId(), new DevicesCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				eventBus.showError(errorDetails);
+		if(selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
+			mapPresenter.selectDeviceAggregate(deviceAggregate, false);
+			selectedDeviceAggregates.remove(deviceAggregate.getId());
+			
+			for(String deviceId : deviceAggregate.getDeviceIds()) {
+				Device device = selectedDevices.get(deviceId);
+				
+				if(device != null) {
+					eventBus.deviceSelected(device, false);
+					selectedDevices.remove(device.getId());
+					profilePresenter.markDevice(device.getId(), false);
+				}
 			}
 			
-			@Override
-			public void processDevices(List<Device> devices) {
-				if(selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
-					mapPresenter.selectDeviceAggregate(deviceAggregate, false);
-					selectedDeviceAggregates.remove(deviceAggregate.getId());
-					
-					for(Device device : devices) {
-						eventBus.deviceSelected(device, false);
-						
-						if(selectedDevices.containsKey(device.getId())) {
-							selectedDevices.remove(device.getId());
-						}
-					}
-					
-					
-					if(selectedSection == null || !profiles.get(deviceAggregate.getProfileId()).getSectionId().equals(selectedSection.getId())) {
-						selectedDeviceAggregates.remove(deviceAggregate.getId());
-						mapPresenter.removeDeviceAggregate(deviceAggregate);
-					}
-				} else {
-					mapPresenter.selectDeviceAggregate(deviceAggregate, true);
-					selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
+			if(selectedSection == null || !profiles.get(deviceAggregate.getProfileId()).getSectionId().equals(selectedSection.getId())) {
+				selectedDeviceAggregates.remove(deviceAggregate.getId());
+				mapPresenter.removeDeviceAggregate(deviceAggregate);
+			}
+		} else {
+			mapPresenter.selectDeviceAggregate(deviceAggregate, true);
+			selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
+			mapPresenter.setLoadingState(true);
+			dapController.getDevicesRecursivelyForAggregate(deviceAggregate.getId(), new DevicesCallback() {
+				@Override
+				public void onError(ErrorDetails errorDetails) {
+					eventBus.showError(errorDetails);
+					mapPresenter.setLoadingState(false);
+				}
+				
+				@Override
+				public void processDevices(List<Device> devices) {
+					mapPresenter.setLoadingState(false);
 					
 					for(Device device : devices) {
 						eventBus.deviceSelected(device, true);
@@ -271,8 +284,8 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 	
 	public void onZoomOut(String sectionId) {
@@ -350,6 +363,16 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			}
 		}
 	}
+	
+	public void onClearSelection() {
+		for(DeviceAggregate deviceAggregate : new ArrayList<>(selectedDeviceAggregates.values())) {
+			onDeviceAggregateClicked(deviceAggregate);
+		}
+		
+		for(Device device : new ArrayList<>(selectedDevices.values())) {
+			onDeviceClicked(device);
+		}
+	}
 
 	private List<String> collectProfileIds(List<Profile> profiles) {
 		List<String> result = new ArrayList<>();
@@ -392,6 +415,14 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 					mapPresenter.removeDeviceAggregate(deviceAggregate);
 				}
 			}
+		}
+	}
+	
+	private void checkMapLoadingState(final MutableInteger asyncCalls) {
+		asyncCalls.decrement();
+		
+		if(asyncCalls.get() == 0) {
+			mapPresenter.setLoadingState(false);
 		}
 	}
 }

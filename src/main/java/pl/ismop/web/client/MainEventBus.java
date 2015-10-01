@@ -91,4 +91,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void devicesClicked(List<String> deviceIds);
 
+	@Event(handlers = LeveeNavigatorPresenter.class)
+	void clearSelection();
+
 }

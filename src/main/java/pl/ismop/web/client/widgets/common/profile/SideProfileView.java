@@ -426,7 +426,6 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	}-*/;
 
 	private native void setShapeColor(int color, JavaScriptObject shape) /*-{
-		console.log("setting color");
 		shape.material.color.setHex(color);
 	}-*/;
 }

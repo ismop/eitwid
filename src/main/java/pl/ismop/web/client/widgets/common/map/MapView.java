@@ -35,13 +35,13 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	private boolean initialized;
 
 	@UiField
-	FlowPanel panel;
+	FlowPanel panel, loadingPanel, mapContainer;
 	
 	public MapView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		elementId = "map-" + hashCode();
-		panel.getElement().setAttribute("id", elementId);
+		mapContainer.getElement().setAttribute("id", elementId);
 	}
 	
 	@Override
@@ -98,6 +98,11 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			}
 		});
 		addMiddleButton(button.getElement());
+	}
+
+	@Override
+	public void showLoadingPanel(boolean show) {
+		loadingPanel.setVisible(show);
 	}
 
 	@Override
