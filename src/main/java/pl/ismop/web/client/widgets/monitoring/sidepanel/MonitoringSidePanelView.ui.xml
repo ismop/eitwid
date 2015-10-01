@@ -75,7 +75,10 @@
 			<g:FlowPanel ui:field="chart" addStyleNames="{style.chart}"/>
 			<g:FlowPanel addStyleNames="clearfix {style.chartHeader}">
 				<b:Heading size="H4" text="{messages.chartHeading}" subText="{messages.chartHelp}" addStyleNames="pull-left"/>
-				<b:Button ui:field="expand" addStyleNames="pull-right" size="SMALL" icon="EXPAND" type="PRIMARY" visible="false"/>
+				<b:ButtonGroup ui:field="chartButtons" addStyleNames="pull-right" visible="false">
+					<b:Button ui:field="expandChart" size="EXTRA_SMALL" icon="EXPAND" type="PRIMARY"/>
+					<b:Button ui:field="clearChart" size="EXTRA_SMALL" icon="REMOVE" type="DANGER"/>
+				</b:ButtonGroup>
 			</g:FlowPanel>
 		</g:FlowPanel>
 		<g:FlowPanel ui:field="metadataPanel" addStyleNames="{style.metadata}">

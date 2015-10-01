@@ -54,6 +54,9 @@ public interface MainEventBus extends EventBusWithLookup {
 	
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showDeviceMetadata(Device device, boolean show);
+	
+	@Event(handlers = MonitoringSidePanelPresenter.class)
+	void showDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show);
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void profileClicked(Profile profile);
@@ -87,4 +90,5 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void devicesClicked(List<String> deviceIds);
+
 }

@@ -9,6 +9,8 @@ import pl.ismop.web.client.dap.levee.PolygonShape;
 public class Profile {
 	private String id;
 	
+	
+	@Json(name = "section_id")
 	private String sectionId;
 	
 	@Json(name = "profile_shape")

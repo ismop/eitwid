@@ -2,6 +2,7 @@ package pl.ismop.web.client.widgets.monitoring.mapnavigator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +46,8 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	private Map<String, DeviceAggregate> selectedDeviceAggregates;
 	
 	private SideProfilePresenter profilePresenter;
+	
+	private Map<String, Profile> profiles;
 
 	@Inject
 	public LeveeNavigatorPresenter(DapController dapController) {
@@ -54,6 +57,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 		selectedDevices = new HashMap<>();
 		selectedDeviceAggregates = new HashMap<>();
 		profileDevices = new HashMap<>();
+		profiles = new HashMap<>();
 	}
 	
 	@Override
@@ -74,6 +78,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			mapPresenter.reset(false);
 			view.showMap(false);
 			view.showProgress(true);
+			profiles.clear();
 			dapController.getSections(displayedLevee.getId(), new SectionsCallback() {
 				@Override
 				public void onError(ErrorDetails errorDetails) {
@@ -103,6 +108,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 							
 							for(Profile profile : profiles) {
 								mapPresenter.addProfile(profile);
+								LeveeNavigatorPresenter.this.profiles.put(profile.getId(), profile);
 							}
 						}
 					});
@@ -214,6 +220,11 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			mapPresenter.selectDevice(device, false);
 			selectedDevices.remove(device.getId());
 			eventBus.deviceSelected(device, false);
+			
+			if(selectedSection == null || !device.getSectionId().equals(selectedSection.getId())) {
+				selectedDevices.remove(device.getId());
+				mapPresenter.removeDevice(device);
+			}
 		} else {
 			mapPresenter.selectDevice(device, true);
 			selectedDevices.put(device.getId(), device);
@@ -237,6 +248,16 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 					
 					for(Device device : devices) {
 						eventBus.deviceSelected(device, false);
+						
+						if(selectedDevices.containsKey(device.getId())) {
+							selectedDevices.remove(device.getId());
+						}
+					}
+					
+					
+					if(selectedSection == null || !profiles.get(deviceAggregate.getProfileId()).getSectionId().equals(selectedSection.getId())) {
+						selectedDeviceAggregates.remove(deviceAggregate.getId());
+						mapPresenter.removeDeviceAggregate(deviceAggregate);
 					}
 				} else {
 					mapPresenter.selectDeviceAggregate(deviceAggregate, true);
@@ -244,6 +265,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 					
 					for(Device device : devices) {
 						eventBus.deviceSelected(device, true);
+						
+						if(!selectedDevices.containsKey(device.getId())) {
+							selectedDevices.put(device.getId(), device);
+						}
 					}
 				}
 			}
@@ -274,10 +299,54 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				selectedDevices.remove(deviceId);
 				eventBus.deviceSelected(profileDevices.get(deviceId), false);
 				profilePresenter.markDevice(deviceId, false);
+				
+				for(DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
+					if(deviceAggregate.getDeviceIds().containsAll(deviceIds) && selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
+						mapPresenter.selectDeviceAggregate(deviceAggregate, false);
+						selectedDeviceAggregates.remove(deviceAggregate.getId());
+						
+						break;
+					}
+				}
 			} else {
 				selectedDevices.put(deviceId, profileDevices.get(deviceId));
 				eventBus.deviceSelected(profileDevices.get(deviceId), true);
 				profilePresenter.markDevice(deviceId, true);
+				
+				boolean found = false;
+				
+				for(DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
+					if(deviceAggregate.getDeviceIds().containsAll(deviceIds)) {
+						found = true;
+						
+						if(!selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
+							mapPresenter.addDeviceAggregate(deviceAggregate);
+							mapPresenter.selectDeviceAggregate(deviceAggregate, true);
+							selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
+							found = true;
+							
+							break;
+						}
+					}
+				}
+				
+				if(!found) {
+					dapController.getDeviceAggregation(profileDevices.get(deviceId).getDeviceAggregationId(), new DeviceAggregatesCallback() {
+						@Override
+						public void onError(ErrorDetails errorDetails) {
+							eventBus.showError(errorDetails);
+						}
+						
+						@Override
+						public void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations) {
+							if(deviceAggreagations.size() > 0) {
+								mapPresenter.addDeviceAggregate(deviceAggreagations.get(0));
+								mapPresenter.selectDeviceAggregate(deviceAggreagations.get(0), true);
+								selectedDeviceAggregates.put(deviceAggreagations.get(0).getId(), deviceAggreagations.get(0));
+							}
+						}
+					});
+				}
 			}
 		}
 	}
@@ -304,19 +373,25 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 
 	private void removeDevicesAndAggregates() {
 		if(displayedDevices.size() > 0) {
-			for(Device device : displayedDevices) {
-				mapPresenter.removeDevice(device);
+			for(Iterator<Device> i = displayedDevices.iterator(); i.hasNext();) {
+				Device device = i.next();
+				
+				if(!selectedDevices.containsKey(device.getId())) {
+					i.remove();
+					mapPresenter.removeDevice(device);
+				}
 			}
-			
-			displayedDevices.clear();
 		}
 		
 		if(displayedDeviceAggregations.size() > 0) {
-			for(DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
-				mapPresenter.removeDeviceAggregate(deviceAggregate);
+			for(Iterator<DeviceAggregate> i = displayedDeviceAggregations.iterator(); i.hasNext();) {
+				DeviceAggregate deviceAggregate = i.next();
+				
+				if(!selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
+					i.remove();
+					mapPresenter.removeDeviceAggregate(deviceAggregate);
+				}
 			}
-			
-			displayedDeviceAggregations.clear();
 		}
 	}
 }

@@ -670,6 +670,20 @@ public class DapController {
 		});
 	}
 
+	public void getDeviceAggregation(String deviceAggregationId, final DeviceAggregatesCallback callback) {
+		deviceAggregationService.getDeviceAggregationsForIds(deviceAggregationId, new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				callback.processDeviceAggregations(response.getDeviceAggregations());
+			}
+		});
+	}
+
 	private Date monthEarlier() {
 		return new Date(new Date().getTime() - 2678400000L);
 	}

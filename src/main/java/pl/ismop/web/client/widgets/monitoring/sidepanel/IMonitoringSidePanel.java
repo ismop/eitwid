@@ -38,4 +38,14 @@ public interface IMonitoringSidePanel extends IsWidget {
 	int getChartHeight();
 
 	void showChartExpandButton(boolean show);
+
+	String getProfileTypeLabel();
+
+	String getTypeLabel();
+
+	String getSectionTypeLabel();
+
+	String getDeviceTypeLabel();
+
+	String getDeviceAggregateTypeLabel();
 }

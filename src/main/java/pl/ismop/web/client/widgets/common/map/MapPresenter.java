@@ -211,6 +211,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				if(devices.get(id) != null) {
 					eventBus.showDeviceMetadata(devices.get(id), false);
 				}
+			case "deviceAggregate":
+				if(deviceAggregates.get(id) != null) {
+					eventBus.showDeviceAggregateMetadata(deviceAggregates.get(id), false);
+				}
 		}
 	}
 
@@ -234,6 +238,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			case "device":
 				if(devices.get(id) != null) {
 					eventBus.showDeviceMetadata(devices.get(id), true);
+				}
+			case "deviceAggregate":
+				if(deviceAggregates.get(id) != null) {
+					eventBus.showDeviceAggregateMetadata(deviceAggregates.get(id), true);
 				}
 		}
 	}

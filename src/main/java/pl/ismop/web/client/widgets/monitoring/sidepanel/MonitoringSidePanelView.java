@@ -1,6 +1,7 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.Description;
 import org.gwtbootstrap3.client.ui.DescriptionData;
 import org.gwtbootstrap3.client.ui.DescriptionTitle;
@@ -41,7 +42,10 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	FlowPanel leveeProgress, metadataEntries, metadataPanel, chart;
 	
 	@UiField
-	Button expand;
+	Button expandChart, clearChart;
+	
+	@UiField
+	ButtonGroup chartButtons;
 	
 	public MonitoringSidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -57,9 +61,14 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 		getPresenter().handleShowFibreClick();
 	}
 	
-	@UiHandler("expand")
+	@UiHandler("expandChart")
 	void expandChart(ClickEvent event) {
 		getPresenter().onExpandChart();
+	}
+	
+	@UiHandler("clearChart")
+	void clearChart(ClickEvent event) {
+		Window.alert("TODO");
 	}
 	
 	@Override
@@ -149,6 +158,31 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 
 	@Override
 	public void showChartExpandButton(boolean show) {
-		expand.setVisible(show);
+		chartButtons.setVisible(show);
+	}
+
+	@Override
+	public String getProfileTypeLabel() {
+		return messages.profileTypeLabel();
+	}
+
+	@Override
+	public String getTypeLabel() {
+		return messages.typeLabel();
+	}
+
+	@Override
+	public String getSectionTypeLabel() {
+		return messages.sectionTypeLabel();
+	}
+
+	@Override
+	public String getDeviceTypeLabel() {
+		return messages.deviceTypeLabel();
+	}
+
+	@Override
+	public String getDeviceAggregateTypeLabel() {
+		return messages.deviceAggregateTypeLabel();
 	}
 }

@@ -26,4 +26,14 @@ public interface MonitoringSidePanelMessages extends Messages {
 	String chartHelp();
 
 	String noMeasurementsForDevice();
+
+	String typeLabel();
+
+	String profileTypeLabel();
+
+	String sectionTypeLabel();
+
+	String deviceTypeLabel();
+
+	String deviceAggregateTypeLabel();
 }

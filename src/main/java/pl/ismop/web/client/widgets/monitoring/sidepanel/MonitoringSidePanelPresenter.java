@@ -22,6 +22,7 @@ import pl.ismop.web.client.dap.DapController.ParametersCallback;
 import pl.ismop.web.client.dap.DapController.TimelinesCallback;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
@@ -54,6 +55,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		view.clearMetadata();
 		
 		if(show) {
+			view.addMetadata(view.getTypeLabel(), view.getProfileTypeLabel());
 			view.addMetadata(view.getInternalIdLabel(), profile.getId());
 		}
 	}
@@ -62,8 +64,8 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		view.clearMetadata();
 		
 		if(show) {
+			view.addMetadata(view.getTypeLabel(), view.getSectionTypeLabel());
 			view.addMetadata(view.getInternalIdLabel(), section.getId());
-			view.addMetadata(view.getNameLabel(), section.getName());
 		}
 	}
 	
@@ -71,8 +73,18 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		view.clearMetadata();
 		
 		if(show) {
+			view.addMetadata(view.getTypeLabel(), view.getDeviceTypeLabel());
 			view.addMetadata(view.getInternalIdLabel(), device.getId());
 			view.addMetadata(view.getNameLabel(), device.getCustomId());
+		}
+	}
+	
+	public void onShowDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show) {
+		view.clearMetadata();
+		
+		if(show) {
+			view.addMetadata(view.getTypeLabel(), view.getDeviceAggregateTypeLabel());
+			view.addMetadata(view.getInternalIdLabel(), deviceAggregate.getId());
 		}
 	}
 	

@@ -32,7 +32,7 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	
 	private ISideProfilePresenter presenter;
 	
-	private JavaScriptObject scene, selectedDevice, name, measurement, profile, water, devices;
+	private JavaScriptObject scene, selectedDevice, name, measurement, profile, water, devices, bottom;
 	
 	private double mouseX, mouseY;
 	
@@ -160,6 +160,13 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 				this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::profile
 			);
 			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::profile = null;
+		}
+		
+		if(this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::bottom != null) {
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.remove(
+				this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::bottom
+			);
+			this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::bottom = null;
 		}
 		
 		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::removeDevices()();
@@ -336,6 +343,27 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 			);
 		}
 		
+		var bottomSide = new $wnd.THREE.Shape();
+		bottomSide.moveTo(coords[0][0], coords[0][1]);
+		bottomSide.lineTo(coords[1][0], coords[1][1]);
+		bottomSide.lineTo(coords[1][0], coords[1][1] + 0.01);
+		bottomSide.lineTo(coords[0][0], coords[0][1] + 0.01);
+		bottomSide.lineTo(coords[0][0], coords[0][1]);
+		
+		var bottomMaterial = new $wnd.THREE.MeshLambertMaterial();
+		bottomMaterial.color.setHex(0xcaf0ac);
+		
+		var bottom = bottomSide.extrude({
+			amount: 1000,
+			steps: 2,
+			bevelEnabled: false
+		});
+		
+		var bottomMesh = new $wnd.THREE.Mesh(bottom, bottomMaterial);
+		bottomMesh.position.set(xShift, 0, -500);
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::bottom = bottomMesh;
+		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(bottomMesh);
+		
 		var profileSide = new $wnd.THREE.Shape();
 		profileSide.moveTo(coords[0][0], coords[0][1]);
 		profileSide.lineTo(coords[1][0], coords[1][1]);
@@ -343,35 +371,16 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 		profileSide.lineTo(coords[2][0], coords[2][1]);
 		profileSide.lineTo(coords[0][0], coords[0][1]);
 		
-		var profileMaterial = new $wnd.THREE.MeshLambertMaterial();
-		profileMaterial.color.setHex(0xe1b154);
-		profileMaterial.vertexColors = $wnd.THREE.VertexColors;
-		
 		var profile = profileSide.extrude({
 			amount: 1,
 			steps: 2,
 			bevelEnabled: false
 		});
-		var vertexIndexes = ['a', 'b', 'c', 'd'];
-		for(var i = 0; i < profile.faces.length; i++) {
-			var face = profile.faces[i];
-			var numberOfSides = (face instanceof $wnd.THREE.Face3) ? 3 : 4;
-			for(var j = 0; j < numberOfSides; j++) {
-				var vertexIndex = face[vertexIndexes[j]];
-				var point = profile.vertices[vertexIndex];
-				$wnd.console.log(point);
-				if(point.x == 200) {
-					face.vertexColors[j] = new $wnd.THREE.Color(0x0049e5);
-				} else if(point.x == 125) {
-					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
-				} else if(point.x == 75) {
-					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
-				} else {
-					face.vertexColors[j] = new $wnd.THREE.Color(0xffe51a);
-				}
-			}
-		}
-		mesh = new $wnd.THREE.Mesh(profile, profileMaterial);
+		
+		var profileMaterial = new $wnd.THREE.MeshLambertMaterial();
+		profileMaterial.color.setHex(0xe1b154);
+		
+		var mesh = new $wnd.THREE.Mesh(profile, profileMaterial);
 		mesh.position.set(xShift, 0, 0);
 		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::profile = mesh;
 		this.@pl.ismop.web.client.widgets.common.profile.SideProfileView::scene.add(mesh);
