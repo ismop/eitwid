@@ -125,10 +125,18 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 	}
 
 	private void addChartSeries(final Device device) {
+		if(chartPresenter == null) {
+			chartPresenter = eventBus.addHandler(ChartPresenter.class);
+			chartPresenter.setHeight(view.getChartHeight());
+			view.setChart(chartPresenter.getView());
+		}
+		
+		chartPresenter.setLoadingState(true);
 		dapController.getParameters(device.getId(), new ParametersCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
+				chartPresenter.setLoadingState(false);
 			}
 			
 			@Override
@@ -137,6 +145,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 					@Override
 					public void onError(ErrorDetails errorDetails) {
 						eventBus.showError(errorDetails);
+						chartPresenter.setLoadingState(false);
 					}
 					
 					@Override
@@ -152,6 +161,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 								@Override
 								public void onError(ErrorDetails errorDetails) {
 									eventBus.showError(errorDetails);
+									chartPresenter.setLoadingState(false);
 								}
 								
 								@Override
@@ -166,10 +176,13 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 										@Override
 										public void onError(ErrorDetails errorDetails) {
 											eventBus.showError(errorDetails);
+											chartPresenter.setLoadingState(false);
 										}
 										
 										@Override
 										public void processMeasurements(List<Measurement> measurements) {
+											chartPresenter.setLoadingState(false);
+											
 											for(Parameter parameter : parameters) {
 												
 												String timelineId = null;
@@ -211,13 +224,6 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 														}
 														
 														series.setValues(values);
-														
-														if(chartPresenter == null) {
-															chartPresenter = eventBus.addHandler(ChartPresenter.class);
-															chartPresenter.setHeight(view.getChartHeight());
-															view.setChart(chartPresenter.getView());
-														}
-														
 														chartPresenter.addChartSeries(series);
 														view.showChartExpandButton(true);
 													} else {

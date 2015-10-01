@@ -150,10 +150,12 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 	}
 
 	private void addAdditionalReadings(final String parameterId) {
+		chartPresenter.setLoadingState(true);
 		dapController.getContext("measurements", new ContextsCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
+				chartPresenter.setLoadingState(false);
 			}
 			
 			@Override
@@ -163,6 +165,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 						@Override
 						public void onError(ErrorDetails errorDetails) {
 							eventBus.showError(errorDetails);
+							chartPresenter.setLoadingState(false);
 						}
 						
 						@Override
@@ -173,10 +176,13 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 									@Override
 									public void onError(ErrorDetails errorDetails) {
 										eventBus.showError(errorDetails);
+										chartPresenter.setLoadingState(false);
 									}
 									
 									@Override
 									public void processMeasurements(List<Measurement> measurements) {
+										chartPresenter.setLoadingState(false);
+										
 										if(measurements.size() > 0) {
 											ChartSeries chartSeries = new ChartSeries();
 											String  additionalDeviceId = additionalParameters.get(parameterId).getDeviceId();

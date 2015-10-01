@@ -154,6 +154,18 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		seriesHoverListener = true;
 	}
 
+	public void setLoadingState(boolean loading) {
+		if(chart != null) {
+			if(loading) {
+				chart.showLoading(view.getLoadingMessage());
+			} else {
+				chart.hideLoading();
+			}
+		} else {
+			view.showLoadingMessage(loading);
+		}
+	}
+
 	private Number getYAxisIndex(ChartSeries series) {
 		String yAxisLabel = series.getLabel() + ", [" + series.getUnit() + "]";
 		

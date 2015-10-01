@@ -12,4 +12,8 @@ public interface IChartView extends IsWidget {
 	void addChart(Chart chart);
 
 	String getChartTitle();
+
+	String getLoadingMessage();
+
+	void showLoadingMessage(boolean show);
 }
