@@ -9,11 +9,13 @@ import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
 import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
+import pl.ismop.web.client.widgets.slider.SliderPresenter;
 
 @Presenter(view = RootPanel.class)
 public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> implements IRootPresenter{
 	private MonitoringSidePanelPresenter monitoringSidePanelPresenter;
 	private LeveeNavigatorPresenter monitoringLeveeNavigator;
+
 	private AnalysisSidePanelPresenter analysisPanelPresenter;
 	private ComparisonPresenter comparisonPresenter;
 
@@ -46,12 +48,14 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		}
 		
 		view.setSidePanelWidget(analysisPanelPresenter.getView());
+		analysisPanelPresenter.init();
 		
 		if(comparisonPresenter == null) {
 			comparisonPresenter = eventBus.addHandler(ComparisonPresenter.class);
 		}
-		
+
 		view.setMainPanelWidget(comparisonPresenter.getView());
+		comparisonPresenter.init();
 	}
 
 	@Override
