@@ -101,7 +101,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             addHorizontalCrossSection = new Button("Add horizontal cross section...", new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent clickEvent) {
-                    Window.alert("TODO: Add horizontal cross section");
+                    eventBus.showHorizontalCrosssectionWizard();
                 }
             });
 

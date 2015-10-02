@@ -13,6 +13,7 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
@@ -94,4 +95,6 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void clearSelection();
 
+	@Event(handlers = HorizontalSliceWizardPresenter.class)
+	void showHorizontalCrosssectionWizard();
 }
