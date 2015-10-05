@@ -4,4 +4,8 @@ import com.google.gwt.i18n.client.Messages;
 
 public interface HorizontalSliceWizardMessages extends Messages {
 	String modalTitle();
+	
+	String pickInfoLabel();
+	
+	String noProfilesLabel();
 }

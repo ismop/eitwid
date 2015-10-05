@@ -59,7 +59,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show);
 
-	@Event(handlers = LeveeNavigatorPresenter.class)
+	@Event(handlers = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
 	void profileClicked(Profile profile);
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
@@ -95,6 +95,9 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void clearSelection();
 
-	@Event(handlers = HorizontalSliceWizardPresenter.class)
+	@Event(handlers = HorizontalSliceWizardPresenter.class, deactivate = LeveeNavigatorPresenter.class)
 	void showHorizontalCrosssectionWizard();
+
+	@Event(activate = LeveeNavigatorPresenter.class)
+	void horizontalCrosssectionWizardHidden();
 }

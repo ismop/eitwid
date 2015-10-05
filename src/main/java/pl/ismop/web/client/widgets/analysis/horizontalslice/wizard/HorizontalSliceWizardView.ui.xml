@@ -4,10 +4,38 @@
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardMessages" field="messages"/>
 	<ui:style>
+		@external .modal-dialog, .modal-content, .modal-body;
+		
+		.modal .modal-dialog {
+			height: 90%;
+		}
+		
+		.modal .modal-content {
+			height: 100%;
+		}
+		
+		.modal .modal-body {
+			height: literal("calc(100% - 60px)");
+			overflow-y: auto;
+		}
+		
+		.row, .column, .map {
+			height: 100%;
+		}
 	</ui:style>
 	<g:HTMLPanel>
-		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="95%">
+		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%" addStyleNames="{style.modal}">
 			<b:ModalBody>
+				<b:Row addStyleNames="{style.row}">
+					<b:Column size="MD_6" addStyleNames="{style.column}">
+						<b:Heading size="H4" text="{messages.pickInfoLabel}"/>
+						<b:Label text="{messages.noProfilesLabel}"/>
+						<g:FlowPanel ui:field="profiles"/>
+					</b:Column>
+					<b:Column size="MD_6" addStyleNames="{style.column}">
+						<g:FlowPanel ui:field="mapContainer" addStyleNames="{style.map}"/>
+					</b:Column>
+				</b:Row>
 			</b:ModalBody>
 		</b:Modal>
 	</g:HTMLPanel>
