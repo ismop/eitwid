@@ -118,8 +118,8 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		if(feature) {
 			if(highlight) {
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
-					fillOpacity: 0.9,
-					strokeWeight: 3
+					fillOpacity: 1.0,
+					strokeOpacity: 1.0
 				});
 			} else {
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
@@ -136,7 +136,11 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
 			zoom: 8,
 			scaleControl: true,
-			rotateControl: true
+			draggable: false,
+			zoomControl: false,
+			streetViewControl: false,
+			scrollwheel: false,
+			disableDoubleClickZoom: true
 		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
 		
@@ -152,11 +156,11 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			};
 		
 			return {
-				strokeColor: '#aaaaaa',
-				fillOpacity: 0.6,
-				strokeOpacity: 1.0,
-				fillColor: '#aaaaaa',
-				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureColor(Ljava/lang/String;)(feature.getId()),
+				strokeColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeColor(Ljava/lang/String;)(feature.getId()),
+				fillOpacity: 0.5,
+				strokeOpacity: 0.7,
+				fillColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureFillColor(Ljava/lang/String;)(feature.getId()),
+				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeWidth(Ljava/lang/String;)(feature.getId()),
 				icon: icon
 			};
 		});
@@ -200,20 +204,52 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		getPresenter().onFeatureClick(type, id);
 	}
 	
-	private int getFeatureColor(String featureId) {
+	private int getFeatureStrokeWidth(String featureId) {
 		if(featureId.startsWith("profile")) {
-			return 6;
+			return 8;
 		} else {
 			return 1;
 		}
 	}
 	
+	private String getFeatureFillColor(String featureId) {
+		if(featureId.startsWith("profile")) {
+			return "#41a7ec";
+		} else if(featureId.startsWith("section")) {
+			return "#afafaf";
+		} else if(featureId.startsWith("deviceAggregate")) {
+			return "#ebf56f";
+		} else {
+			return "#aaaaaa";
+		}
+	}
+	
+	private String getFeatureStrokeColor(String featureId) {
+		if(featureId.startsWith("profile")) {
+			return "#41a7ec";
+		} else if(featureId.startsWith("section")) {
+			return "#626262";
+		} else if(featureId.startsWith("deviceAggregate")) {
+			return "#ebf56f";
+		} else {
+			return "#aaaaaa";
+		}
+	}
+	
 	private String getFeatureIcon(String featureId) {
-		return "/icons/device-fiber.png";
+		if(featureId.startsWith("deviceAggregate")) {
+			return "/icons/aggregate.png";
+		} else {
+			return "/icons/device-fiber.png";
+		}
 	}
 	
 	private String getSelectedFeatureIcon(String featureId) {
-		return "/icons/device-fiber-selected.png";
+		if(featureId.startsWith("deviceAggregate")) {
+			return "/icons/aggregate-selected.png";
+		} else {
+			return "/icons/device-fiber-selected.png";
+		}
 	}
 	
 	private native void addHoverHandlers() /*-{
