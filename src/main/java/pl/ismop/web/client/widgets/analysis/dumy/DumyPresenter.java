@@ -37,4 +37,9 @@ public class DumyPresenter extends BasePresenter<IDumyView, MainEventBus> implem
 
         getView().setTitle(title);
     }
+
+    @SuppressWarnings("unused")
+    public void onDateChanged(Date selectedDate) {
+        setSelectedDate(selectedDate);
+    }
 }

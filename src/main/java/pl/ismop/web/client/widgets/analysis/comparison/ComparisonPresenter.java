@@ -10,6 +10,8 @@ import pl.ismop.web.client.widgets.common.panel.IWindowManager;
 import pl.ismop.web.client.widgets.common.panel.PanelPresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
 
+import java.util.Date;
+
 @Presenter(view = ComparisonView.class, multiple = true)
 public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEventBus>
         implements IComparisonPresenter, IWindowManager {
@@ -19,6 +21,12 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
         if (sliderPresenter == null) {
             sliderPresenter = eventBus.addHandler(SliderPresenter.class);
             sliderPresenter.setAllowEditDateIntervals(false);
+            sliderPresenter.setEventsListener(new SliderPresenter.Events() {
+                @Override
+                public void onDateChanged(Date selectedDate) {
+                    eventBus.dateChanged(selectedDate);
+                }
+            });
             view.setSlider(sliderPresenter.getView());
         }
     }

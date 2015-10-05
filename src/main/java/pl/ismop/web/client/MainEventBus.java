@@ -1,5 +1,6 @@
 package pl.ismop.web.client;
 
+import java.util.Date;
 import java.util.List;
 
 import com.mvp4g.client.annotation.Event;
@@ -15,6 +16,7 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.IPanelContent;
+import pl.ismop.web.client.widgets.analysis.dumy.DumyPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
@@ -83,4 +85,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = ComparisonPresenter.class)
 	void addPanel(String panelTitle, IPanelContent content);
+
+	@Event(handlers = DumyPresenter.class)
+	void dateChanged(Date selectedDate);
 }
