@@ -30,7 +30,7 @@ public class PanelView extends Composite implements IPanelView, ReverseViewInter
     PanelBody panelBody;
 
     public PanelView() {
-        uiBinder.createAndBindUi(this);
+        initWidget(uiBinder.createAndBindUi(this));
     }
 
     @UiHandler("closeButton")
