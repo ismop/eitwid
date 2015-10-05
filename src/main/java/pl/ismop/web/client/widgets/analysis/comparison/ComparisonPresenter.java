@@ -4,6 +4,7 @@ import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.widgets.analysis.comparison.IComparisonView.IComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.dumy.DumyPresenter;
 import pl.ismop.web.client.widgets.common.panel.IWindowManager;
@@ -69,9 +70,12 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @SuppressWarnings("unused")
     public void onAddPanel(String panelTitle, IPanelContent content) {
+        // TODO: Get real selected experiment
+        Experiment dumyExperiment = new Experiment();
+        dumyExperiment.setName("Dumy experiment");
+
         content.setSelectedDate(sliderPresenter.getSelectedDate());
-        // TODO: Get selected experiment
-        content.setSelectedExperiment();
+        content.setSelectedExperiment(dumyExperiment);
 
         PanelPresenter panel = wrapWithPanel(panelTitle, content);
         getView().addPanel(panel.getView());
