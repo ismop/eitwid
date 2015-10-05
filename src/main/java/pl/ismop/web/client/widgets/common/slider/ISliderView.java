@@ -5,9 +5,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 
 import java.util.Date;
 
-/**
- * Created by marek on 09.09.15.
- */
 public interface ISliderView extends IsWidget {
     interface ISliderPresenter {
         void onSliderChanged(Double value);
@@ -22,5 +19,6 @@ public interface ISliderView extends IsWidget {
     void setEndDate(Date date);
     void setNumberOfPoints(long numberOfPoints);
     Double getSelectedPoint();
+    void setAllowEditDateIntervals(boolean enabled);
 }
 

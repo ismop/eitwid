@@ -87,6 +87,12 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     }
 
     @Override
+    public void setAllowEditDateIntervals(boolean enabled) {
+        startDate.setEnabled(enabled);
+        endDate.setEnabled(enabled);
+    }
+
+    @Override
     public void setPresenter(ISliderPresenter presenter) {
         this.presenter = presenter;
     }

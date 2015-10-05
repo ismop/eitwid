@@ -18,7 +18,7 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     public void init() {
         if (sliderPresenter == null) {
             sliderPresenter = eventBus.addHandler(SliderPresenter.class);
-
+            sliderPresenter.setAllowEditDateIntervals(false);
             view.setSlider(sliderPresenter.getView());
         }
     }
