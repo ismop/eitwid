@@ -5,14 +5,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 import pl.ismop.web.client.widgets.common.panel.IPanelView;
-import pl.ismop.web.client.widgets.slider.SliderPresenter;
 
 public class ComparisonView extends Composite implements IComparisonView, ReverseViewInterface<IComparisonView.IComparisonPresenter> {
 	private static ComparisonViewUiBinder uiBinder = GWT.create(ComparisonViewUiBinder.class);

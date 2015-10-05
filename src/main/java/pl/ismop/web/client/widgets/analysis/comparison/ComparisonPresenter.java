@@ -1,17 +1,14 @@
 package pl.ismop.web.client.widgets.analysis.comparison;
 
-import com.google.gwt.user.client.ui.IsWidget;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
-import org.gwtbootstrap3.client.ui.Label;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.widgets.analysis.comparison.IComparisonView.IComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.dumy.DumyPresenter;
-import pl.ismop.web.client.widgets.analysis.dumy.DumyView;
 import pl.ismop.web.client.widgets.common.panel.IWindowManager;
 import pl.ismop.web.client.widgets.common.panel.PanelPresenter;
-import pl.ismop.web.client.widgets.slider.SliderPresenter;
+import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
 
 @Presenter(view = ComparisonView.class, multiple = true)
 public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEventBus>

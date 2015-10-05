@@ -1,7 +1,6 @@
-package pl.ismop.web.client.widgets.slider;
+package pl.ismop.web.client.widgets.common.slider;
 
 
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import java.util.Date;

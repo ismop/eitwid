@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.slider;
+package pl.ismop.web.client.widgets.common.slider;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

@@ -1,6 +1,5 @@
-package pl.ismop.web.client.widgets.slider;
+package pl.ismop.web.client.widgets.common.slider;
 
-import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
