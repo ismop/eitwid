@@ -6,7 +6,7 @@
 		.panel {
 			width: 100%;
 			height: 100%;
-			padding: 0 15px 0 15px;
+			padding: 0 0 0 15px;
 		}
 
 		.experiments {
@@ -29,6 +29,11 @@
 			width: 100%;
 			height: 20%;
 		}
+
+		.bottom {
+			width: 100%;
+			height: 60%;
+		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
 		<g:HTMLPanel tag="h1" addStyleNames="{style.experiments}">
@@ -46,8 +51,6 @@
 		<hr />
 
 		<g:FlowPanel ui:field="waterWavePanel" addStyleNames="{style.waterWave}"/>
-		<g:FlowPanel ui:field="miniMapPanel" addStyleNames="{style.minimap}"/>
-		<hr />
-		<g:FlowPanel ui:field="actionsPanel" addStyleNames="{style.actions}"/>
+		<g:FlowPanel ui:field="miniMapPanel" addStyleNames="{style.bottom}"/>
 	</g:HTMLPanel>
 </ui:UiBinder>

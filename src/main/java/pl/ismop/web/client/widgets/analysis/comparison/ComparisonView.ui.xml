@@ -18,132 +18,30 @@
 		}
 
 		.scroll-panel {
-			height:  literal("calc(100% - 105px)");;
+			height:  literal("calc(100% - 155px)");;
 			width: 100%;
+		}
+
+		.actions {
+			height: 50px;
+			width: 100%;
+			text-align: center;
+		}
+
+		.action-button {
+			margin: 10px;
 		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
 		<g:FlowPanel ui:field="sliderPanel" addStyleNames="{style.slider}" />
 		<hr />
-		<g:ScrollPanel ui:field="panels" addStyleNames="{style.scroll-panel}">
-			<g:FlowPanel addStyleNames="{style.panels}">
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Chart"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Vertical cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-
-				<b:Panel>
-					<b:PanelHeader>
-						<b:Heading size="H3" text="Horizontal cross section"/>
-					</b:PanelHeader>
-					<b:PanelBody>
-						<g:Label text="body" />
-					</b:PanelBody>
-				</b:Panel>
-			</g:FlowPanel>
+		<g:ScrollPanel addStyleNames="{style.scroll-panel}">
+			<g:FlowPanel ui:field="panels" addStyleNames="{style.panels}" />
 		</g:ScrollPanel>
+		<g:FlowPanel addStyleNames="{style.actions}">
+			<b:Button ui:field="addChart" text="Add chart..." icon="PLUS" addStyleNames="{style.action-button}"/>
+			<b:Button ui:field="addHorizontalCS" text="Add horizontal cross section..." icon="PLUS" addStyleNames="{style.action-button}"/>
+			<b:Button ui:field="addVerticalCS" text="Add vertical cross section..." icon="PLUS" addStyleNames="{style.action-button}"/>
+		</g:FlowPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

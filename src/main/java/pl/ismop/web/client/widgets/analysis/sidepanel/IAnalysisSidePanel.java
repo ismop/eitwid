@@ -13,5 +13,4 @@ public interface IAnalysisSidePanel extends IsWidget {
 
 	void setWaterWavePanel(IsWidget widget);
 	void setMinimap(IsWidget widget);
-	void addAction(IsWidget widget);
 }

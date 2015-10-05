@@ -23,9 +23,6 @@ public class AnalysisSidePanel extends Composite implements IAnalysisSidePanel {
 	@UiField
 	FlowPanel miniMapPanel;
 
-	@UiField
-	FlowPanel actionsPanel;
-
 	@Override
 	public void setWaterWavePanel(IsWidget widget) {
 		waterWavePanel.add(widget);
@@ -34,11 +31,6 @@ public class AnalysisSidePanel extends Composite implements IAnalysisSidePanel {
 	@Override
 	public void setMinimap(IsWidget widget) {
 		miniMapPanel.add(widget);
-	}
-
-	@Override
-	public void addAction(IsWidget widget) {
-		actionsPanel.add(widget);
 	}
 
 	@Override

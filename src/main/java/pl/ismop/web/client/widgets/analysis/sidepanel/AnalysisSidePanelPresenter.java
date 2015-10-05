@@ -30,10 +30,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private MapPresenter miniMap;
     private Chart waterWave;
 
-    private Button addChart;
-    private Button addHorizontalCrossSection;
-    private Button addVerticalCrossSection;
-
     @Inject
     public AnalysisSidePanelPresenter(DapController dapController) {
         this.dapController = dapController;
@@ -42,7 +38,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void init() {
         initWaterWave();
         initMinimap();
-        initActionButtons();
 	}
 
     private void initWaterWave() {
@@ -59,11 +54,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             wave.addPoint(0, 0).addPoint(1, 1).addPoint(5, 1).addPoint(6, 0);
             waterWave.addSeries(wave);
             view.setWaterWavePanel(waterWave);
-
-            GWT.log(">>>>" + view.getWaterWavePanelHeight() + ">>> " + view.getWaterWavePanelWidth());
-
-//            waterWave.setWidth(view.getWaterWavePanelWidth());
-//            waterWave.setHeight(view.getWaterWavePanelHeight());
         }
     }
 
@@ -86,35 +76,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                     eventBus.showError(errorDetails);
                 }
             });
-        }
-    }
-
-    private void initActionButtons() {
-        if (addChart == null) {
-            addChart = new Button("Add new chart...", new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent clickEvent) {
-                    Window.alert("TODO: Add chart");
-                }
-            });
-
-            addHorizontalCrossSection = new Button("Add horizontal cross section...", new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent clickEvent) {
-                    Window.alert("TODO: Add horizontal cross section");
-                }
-            });
-
-            addVerticalCrossSection = new Button("Add vertical cross section...", new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent clickEvent) {
-                    Window.alert("TODO: Add vertical cross section");
-                }
-            });
-
-            view.addAction(addChart);
-            view.addAction(addHorizontalCrossSection);
-            view.addAction(addVerticalCrossSection);
         }
     }
 }
