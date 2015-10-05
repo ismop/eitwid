@@ -61,6 +61,10 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @SuppressWarnings("unused")
     public void onAddPanel(String panelTitle, IPanelContent content) {
+        content.setSelectedDate(sliderPresenter.getSelectedDate());
+        // TODO: Get selected experiment
+        content.setSelectedExperiment();
+
         PanelPresenter panel = wrapWithPanel(panelTitle, content);
         getView().addPanel(panel.getView());
     }
