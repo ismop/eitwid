@@ -11,4 +11,6 @@ public interface IPanelView extends IsWidget {
 
     void setTitle(String title);
     void setWidget(IsWidget widget);
+    void setFirst(boolean first);
+    void setLast(boolean last);
 }

@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -52,11 +53,44 @@ public class ComparisonView extends Composite implements IComparisonView, Revers
 	@Override
 	public void addPanel(IPanelView panel) {
 		panels.add(panel);
+		updateFirstAndLast();
 	}
 
 	@Override
 	public void removePanel(IPanelView panel) {
 		panels.remove(panel);
+		updateFirstAndLast();
+	}
+
+	@Override
+	public void movePanelUp(IPanelView panel) {
+		int index = panels.getWidgetIndex(panel);
+
+		changePossition(panel, index > 0 ? index - 1 : index);
+	}
+
+	@Override
+	public void movePanelDown(IPanelView panel) {
+		int index = panels.getWidgetIndex(panel);
+
+		changePossition(panel, index < panels.getWidgetCount() -1 ? index + 1 : index);
+	}
+
+	private void changePossition(IPanelView panel, int newIndex) {
+		panels.remove(panel);
+		panels.insert(panel, newIndex);
+
+		updateFirstAndLast();
+	}
+
+	private void updateFirstAndLast() {
+		int size = panels.getWidgetCount();
+
+		for(int i = 0; i < size; i++) {
+			IPanelView panel = (IPanelView) panels.getWidget(i);
+			panel.setFirst(i == 0);
+			panel.setLast(i == size - 1);
+		}
 	}
 
 	@Override

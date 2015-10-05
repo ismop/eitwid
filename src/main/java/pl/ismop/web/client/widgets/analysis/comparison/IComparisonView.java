@@ -13,4 +13,7 @@ public interface IComparisonView extends IsWidget {
 	void setSlider(IsWidget slider);
 	void addPanel(IPanelView panel);
 	void removePanel(IPanelView panel);
+	void movePanelUp(IPanelView view);
+	void movePanelDown(IPanelView view);
+
 }

@@ -10,20 +10,21 @@ import static pl.ismop.web.client.widgets.common.panel.IPanelView.IPanelPresente
 
 @Presenter(view = PanelView.class, multiple = true)
 public class PanelPresenter extends BasePresenter<IPanelView, MainEventBus> implements IPanelPresenter {
+    IWindowManager windowManager;
 
     @Override
     public void close() {
-        Window.alert("close");
+        windowManager.closePanel(this);
     }
 
     @Override
     public void moveUp() {
-        Window.alert("move up");
+        windowManager.moveUp(this);
     }
 
     @Override
     public void moveDown() {
-        Window.alert("move down");
+        windowManager.moveDown(this);
     }
 
     public void setTitle(String title) {
@@ -32,5 +33,9 @@ public class PanelPresenter extends BasePresenter<IPanelView, MainEventBus> impl
 
     public void setContent(IsWidget widget) {
         getView().setWidget(widget);
+    }
+
+    public void setWindowManager(IWindowManager windowManager) {
+        this.windowManager = windowManager;
     }
 }

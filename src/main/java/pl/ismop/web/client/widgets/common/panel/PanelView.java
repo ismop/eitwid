@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
@@ -28,6 +29,12 @@ public class PanelView extends Composite implements IPanelView, ReverseViewInter
 
     @UiField
     PanelBody panelBody;
+
+    @UiField
+    Button upButton;
+
+    @UiField
+    Button downButton;
 
     public PanelView() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -57,6 +64,16 @@ public class PanelView extends Composite implements IPanelView, ReverseViewInter
     public void setWidget(IsWidget widget) {
         panelBody.clear();
         panelBody.add(widget);
+    }
+
+    @Override
+    public void setFirst(boolean first) {
+        upButton.setVisible(!first);
+    }
+
+    @Override
+    public void setLast(boolean last) {
+        downButton.setVisible(!last);
     }
 
     @Override
