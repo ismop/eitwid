@@ -13,6 +13,8 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
+import pl.ismop.web.client.widgets.analysis.comparison.IPanelContent;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
@@ -78,4 +80,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = ReadingsPresenter.class)
 	void deviceSeriesHover(String deviceId, boolean hover);
+
+	@Event(handlers = ComparisonPresenter.class)
+	void addPanel(String panelTitle, IPanelContent content);
 }

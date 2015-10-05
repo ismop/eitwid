@@ -7,6 +7,8 @@ import com.mvp4g.client.presenter.BasePresenter;
 import org.gwtbootstrap3.client.ui.Label;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.widgets.analysis.comparison.IComparisonView.IComparisonPresenter;
+import pl.ismop.web.client.widgets.analysis.dumy.DumyPresenter;
+import pl.ismop.web.client.widgets.analysis.dumy.DumyView;
 import pl.ismop.web.client.widgets.common.panel.IWindowManager;
 import pl.ismop.web.client.widgets.common.panel.PanelPresenter;
 import pl.ismop.web.client.widgets.slider.SliderPresenter;
@@ -27,36 +29,26 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @Override
     public void addChart() {
-        addPanel("New chart" , new Label("new chart window content"));
+        IPanelContent content = eventBus.addHandler(DumyPresenter.class);
+        eventBus.addPanel("New chart", content);
     }
 
     @Override
     public void addHorizontalCS() {
-        addPanel("New horizontal cross section", new Label("new horizontal cross section"));
+        IPanelContent content = eventBus.addHandler(DumyPresenter.class);
+        eventBus.addPanel("New horizontal cross section", content);
     }
 
     @Override
     public void addVerticalCS() {
-        addPanel("New vertical cross section", new Label("new vertical cross section"));
-    }
-
-    private void addPanel(String title, IsWidget content) {
-        PanelPresenter panel = wrapWithPanel(title , content);
-        getView().addPanel(panel.getView());
-    }
-
-    private PanelPresenter wrapWithPanel(String title, IsWidget content) {
-        PanelPresenter panel = eventBus.addHandler(PanelPresenter.class);
-        panel.setWindowManager(this);
-        panel.setTitle(title);
-        panel.setContent(content);
-
-        return panel;
+        IPanelContent content = eventBus.addHandler(DumyPresenter.class);
+        eventBus.addPanel("New vertical cross section", content);
     }
 
     @Override
     public void closePanel(PanelPresenter panel) {
         getView().removePanel(panel.getView());
+        panel.destroy();
         eventBus.removeHandler(panel);
     }
 
@@ -68,5 +60,20 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     @Override
     public void moveDown(PanelPresenter panel) {
         getView().movePanelDown(panel.getView());
+    }
+
+    @SuppressWarnings("unused")
+    public void onAddPanel(String panelTitle, IPanelContent content) {
+        PanelPresenter panel = wrapWithPanel(panelTitle, content);
+        getView().addPanel(panel.getView());
+    }
+
+    private PanelPresenter wrapWithPanel(String title, IPanelContent content) {
+        PanelPresenter panel = eventBus.addHandler(PanelPresenter.class);
+        panel.setWindowManager(this);
+        panel.setTitle(title);
+        panel.setContent(content);
+
+        return panel;
     }
 }

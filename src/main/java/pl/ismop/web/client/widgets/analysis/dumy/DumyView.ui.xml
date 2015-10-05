@@ -1,0 +1,7 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:b='urn:import:org.gwtbootstrap3.client.ui'>
+    <g:HTMLPanel>
+        <b:Label ui:field="label" text="No experiment and date selected"/>
+    </g:HTMLPanel>
+</ui:UiBinder>
