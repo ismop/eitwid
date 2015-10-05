@@ -23,6 +23,8 @@ import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationService;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationsResponse;
+import pl.ismop.web.client.dap.experiment.ExperimentService;
+import pl.ismop.web.client.dap.experiment.ExperimentsResponse;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.LeveeResponse;
 import pl.ismop.web.client.dap.levee.LeveeService;
@@ -60,12 +62,13 @@ import pl.ismop.web.client.hypgen.Experiment;
 
 @Singleton
 public class DapController {
+	private ExperimentService leveeExperimentService;
 	private ErrorUtil errorUtil;
 	private LeveeService leveeService;
 	private SensorService sensorService;
 	private MeasurementService measurementService;
 	private SectionService sectionService;
-	private ThreatAssessmentService experimentService;
+	private ThreatAssessmentService threatAssessmentService;
 	private ResultService resultService;
 	private ProfileService profileService;
 	private DeviceService deviceService;
@@ -94,7 +97,7 @@ public class DapController {
 		void processSections(List<Section> sections);
 	}
 	
-	public interface ExperimentsCallback extends ErrorCallback {
+	public interface ThreatAssessmentCallback extends ErrorCallback {
 		void processExperiments(List<Experiment> experiments);
 	}
 	
@@ -130,6 +133,10 @@ public class DapController {
 		void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations);
 	}
 
+	public interface ExperimentsCallback extends ErrorCallback {
+		void processExperiments(List<pl.ismop.web.client.dap.experiment.Experiment> experiments);
+	}
+
 	private class MeasurementsRestCallback implements MethodCallback<MeasurementsResponse> {
 		private final MeasurementsCallback callback;
 
@@ -152,13 +159,13 @@ public class DapController {
 	public DapController(ErrorUtil errorUtil, LeveeService leveeService, SensorService sensorService, MeasurementService measurementService,
 			SectionService sectionService, ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService,
 			DeviceService deviceService, DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
-			TimelineService timelineService) {
+			TimelineService timelineService, ExperimentService leveeExperimentService) {
 		this.errorUtil = errorUtil;
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
 		this.sectionService = sectionService;
-		this.experimentService = experimentService;
+		this.threatAssessmentService = experimentService;
 		this.resultService = resultService;
 		this.profileService = profileService;
 		this.deviceService = deviceService;
@@ -166,6 +173,7 @@ public class DapController {
 		this.parameterService = parameterService;
 		this.contextService = contextService;
 		this.timelineService = timelineService;
+		this.leveeExperimentService = leveeExperimentService;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -250,7 +258,7 @@ public class DapController {
 						format(new Date(date.getTime() - 1500_000L));
 
 		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
-				                               new MeasurementsRestCallback(callback));
+				new MeasurementsRestCallback(callback));
 	}
 
 	public void getSections(float top, float left, float bottom, float right, final SectionsCallback callback) {
@@ -309,8 +317,8 @@ public class DapController {
 		});
 	}
 	
-	public void getExperiments(List<String> experimentIds, final ExperimentsCallback callback) {
-		experimentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ThreatAssessmentResponse>() {
+	public void getExperiments(List<String> experimentIds, final ThreatAssessmentCallback callback) {
+		threatAssessmentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ThreatAssessmentResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -642,6 +650,20 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, DevicesResponse response) {
 				callback.processDevices(response.getDevices());
+			}
+		});
+	}
+
+	public void getExperiments(final ExperimentsCallback callback) {
+		leveeExperimentService.getExperiments(new MethodCallback<ExperimentsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ExperimentsResponse experiments) {
+				callback.processExperiments(experiments.getExperiments());
 			}
 		});
 	}
