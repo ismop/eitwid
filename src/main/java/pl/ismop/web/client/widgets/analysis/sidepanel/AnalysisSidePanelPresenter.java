@@ -1,23 +1,27 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
-import java.util.List;
-
-import org.moxieapps.gwt.highcharts.client.AxisTitle;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.Series;
-
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-
+import org.moxieapps.gwt.highcharts.client.*;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.experiment.Experiment;
+import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
+import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
+import pl.ismop.web.client.widgets.delegator.ParametersCallback;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Presenter(view = AnalysisSidePanelView.class, multiple = true)
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
@@ -26,7 +30,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private MapPresenter miniMap;
     private Chart waterWave;
 
-    private List<Experiment> experiments;
     private Experiment selectedExperiment;
 
     @Inject
@@ -60,13 +63,12 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                     setChartTitle(new ChartTitle().setText("Water wave"));
 
             waterWave.getXAxis().
-                    setAxisTitle(new AxisTitle().setText("Time"));
+                    setType(Axis.Type.DATE_TIME).
+                    setAxisTitle(new AxisTitle().setText("Time")).
+                    setDateTimeLabelFormats(new DateTimeLabelFormats().
+                            setMonth("%e. %b").
+                            setYear("%b"));
 
-            Series wave = waterWave.createSeries().
-                    setName("Water wave").
-                    setType(Series.Type.LINE);
-            wave.addPoint(0, 0).addPoint(1, 1).addPoint(5, 1).addPoint(6, 0);
-            waterWave.addSeries(wave);
             view.setWaterWavePanel(waterWave);
         }
     }
@@ -97,5 +99,73 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void selectExperiment(Experiment selectedExperiment) {
         this.selectedExperiment = selectedExperiment;
         eventBus.experimentChanged(selectedExperiment);
+        loadExperimentWaveShape();
+    }
+
+    private void loadExperimentWaveShape() {
+        if (selectedExperiment != null) {
+            waterWave.showLoading("Loading experiment water wave shape...");
+            dapController.getExperimentTimelines(selectedExperiment.getId(), new DapController.TimelinesCallback() {
+                @Override
+                public void processTimelines(final List<Timeline> timelines) {
+                    final Map<String, String> parameterIdToTimelineId = new HashMap<>();
+                    for (Timeline timeline : timelines) {
+                        parameterIdToTimelineId.put(timeline.getParameterId(), timeline.getId());
+                    }
+                    dapController.getParametersById(parameterIdToTimelineId.keySet(), new ParametersCallback(this) {
+                        @Override
+                        public void processParameters(final List<Parameter> parameters) {
+                            final Map<String, Parameter> timelineIdToParameter = new HashMap<>();
+                            for (Parameter parameter : parameters) {
+                                timelineIdToParameter.put(parameterIdToTimelineId.get(parameter.getId()), parameter);
+                            }
+                            dapController.getAllMeasurements(parameterIdToTimelineId.values(), new MeasurementsCallback(this) {
+                                @Override
+                                public void processMeasurements(List<Measurement> measurements) {
+                                    Map<Parameter, List<Measurement>> series = new HashMap<>();
+                                    for (Measurement measurement : measurements) {
+                                        Parameter parameter = timelineIdToParameter.get(measurement.getTimelineId());
+                                        List<Measurement> m = series.get(parameter);
+                                        if (m == null) {
+                                            m = new ArrayList<>();
+                                            series.put(parameter, m);
+                                        }
+                                        m.add(measurement);
+                                    }
+
+                                    showExperimentWaveShape(series);
+                                    waterWave.hideLoading();
+                                }
+                            });
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(ErrorDetails errorDetails) {
+                    eventBus.showError(errorDetails);
+                }
+            });
+        }
+    }
+
+    private void showExperimentWaveShape(Map<Parameter, List<Measurement>> series) {
+        waterWave.removeAllSeries();
+        DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
+        Parameter parameter = null;
+        for (Map.Entry<Parameter, List<Measurement>> entry : series.entrySet()) {
+            parameter = entry.getKey();
+            Series s = waterWave.createSeries().
+                    setType(Series.Type.SPLINE).
+                    setName(parameter.getParameterName());
+            for (Measurement measurement : entry.getValue()) {
+                s.addPoint(format.parse(measurement.getTimestamp()).getTime(), measurement.getValue());
+            }
+            waterWave.addSeries(s);
+        }
+
+        if(parameter != null) {
+            waterWave.getYAxis().setAxisTitleText(parameter.getMeasurementTypeName() + " [" + parameter.getMeasurementTypeUnit() + "]");
+        }
     }
 }

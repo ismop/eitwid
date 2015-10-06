@@ -1,22 +1,8 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import com.google.gwt.core.client.GWT;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
@@ -27,22 +13,14 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorCallback;
-import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.delegator.ErrorCallbackDelegator;
+import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
+import pl.ismop.web.client.widgets.delegator.ParametersCallback;
+import pl.ismop.web.client.widgets.delegator.TimelinesCallback;
+
+import java.util.*;
 
 public class DataFetcher implements IDataFetcher {
-
-    private class ErrorCallbackDelegator implements ErrorCallback {
-        ErrorCallback errorCallback;
-
-        public ErrorCallbackDelegator(ErrorCallback errorCallback) {
-            this.errorCallback = errorCallback;
-        }
-
-        @Override
-        public void onError(ErrorDetails errorDetails) {
-            errorCallback.onError(errorDetails);
-        }
-    }
 
     private abstract class DeviceAggregationsCallback extends ErrorCallbackDelegator implements DapController.DeviceAggregatesCallback {
         public DeviceAggregationsCallback(ErrorCallback callback) {
@@ -58,24 +36,6 @@ public class DataFetcher implements IDataFetcher {
 
     private abstract class SectionsCallback extends ErrorCallbackDelegator implements DapController.SectionsCallback {
         public SectionsCallback(ErrorCallback errorCallback) {
-            super(errorCallback);
-        }
-    }
-
-    private abstract class ParametersCallback extends ErrorCallbackDelegator implements DapController.ParametersCallback {
-        public ParametersCallback(ErrorCallback errorCallback) {
-            super(errorCallback);
-        }
-    }
-
-    private abstract class TimelinesCallback extends ErrorCallbackDelegator implements DapController.TimelinesCallback {
-        public TimelinesCallback(ErrorCallback errorCallback) {
-            super(errorCallback);
-        }
-    }
-
-    private abstract class MeasurementsCallback extends ErrorCallbackDelegator implements DapController.MeasurementsCallback {
-        public MeasurementsCallback(ErrorCallback errorCallback) {
             super(errorCallback);
         }
     }

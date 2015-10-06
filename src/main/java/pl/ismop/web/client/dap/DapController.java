@@ -1,6 +1,7 @@
 package pl.ismop.web.client.dap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -251,6 +252,20 @@ public class DapController {
 		getMeasurements(merge(timelineId, ","), startDate, endDate, callback);
 	}
 
+	public void getAllMeasurements(Collection<String> timelineIds, final MeasurementsCallback callback) {
+		measurementService.getAllLastMeasurements(merge(timelineIds), new MethodCallback<MeasurementsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, MeasurementsResponse measurementsResponse) {
+				callback.processMeasurements(measurementsResponse.getMeasurements());
+			}
+		});
+	}
+
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date);
 		String from = DateTimeFormat.
@@ -440,6 +455,20 @@ public class DapController {
 		});
 	}
 
+	public void getParametersById(Collection<String> ids, final ParametersCallback callback) {
+		parameterService.getParametersById(merge(ids), new MethodCallback<ParametersResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ParametersResponse response) {
+				callback.processParameters(response.getParameters());
+			}
+		});
+	}
+
 	public void getContext(String contextType, final ContextsCallback callback) {
 		contextService.getContexts(contextType, new MethodCallback<ContextsResponse>() {
 			@Override
@@ -470,6 +499,20 @@ public class DapController {
 
 	public void getTimelinesForParameterIds(String contextId, List<String> parameterIds, final TimelinesCallback callback) {
 		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, TimelinesResponse response) {
+				callback.processTimelines(response.getTimelines());
+			}
+		});
+	}
+
+	public void getExperimentTimelines(String experimentId, final TimelinesCallback callback) {
+		timelineService.getExperimentTimelines(experimentId, new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -728,7 +771,7 @@ public class DapController {
 		}
 	}
 
-	private String merge(List<String> chunks, String delimeter) {
+	private String merge(Collection<String> chunks, String delimeter) {
 		StringBuilder result = new StringBuilder();
 		
 		for(String chunk : chunks) {
@@ -740,6 +783,10 @@ public class DapController {
 		}
 		
 		return result.toString();
+	}
+
+	private String merge(Collection<String> chunks) {
+		return merge(chunks, ",");
 	}
 
 	private String createSelectionQuery(double top, double left, double bottom, double right) {
