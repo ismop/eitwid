@@ -62,6 +62,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                     setChartTitle(new ChartTitle().setText("Water wave"));
 
             waterWave.setHeight(view.getWaterWavePanelHeight());
+            waterWave.setOption("/chart/zoomType", "x");
 
             waterWave.getXAxis().
                     setType(Axis.Type.DATE_TIME).
