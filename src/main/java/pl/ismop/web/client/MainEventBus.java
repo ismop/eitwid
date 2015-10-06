@@ -1,5 +1,6 @@
 package pl.ismop.web.client;
 
+import java.util.Date;
 import java.util.List;
 
 import com.mvp4g.client.annotation.Event;
@@ -9,10 +10,14 @@ import com.mvp4g.client.event.EventBusWithLookup;
 
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
+import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
+import pl.ismop.web.client.widgets.analysis.comparison.IPanelContent;
+import pl.ismop.web.client.widgets.analysis.dumy.DumyPresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
@@ -100,4 +105,13 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(activate = LeveeNavigatorPresenter.class)
 	void horizontalCrosssectionWizardHidden();
+
+	@Event(handlers = ComparisonPresenter.class)
+	void addPanel(String panelTitle, IPanelContent content);
+
+	@Event(handlers = DumyPresenter.class)
+	void dateChanged(Date selectedDate);
+
+	@Event(handlers = { DumyPresenter.class, ComparisonPresenter.class })
+	void experimentChanged(Experiment selectedExperiment);
 }

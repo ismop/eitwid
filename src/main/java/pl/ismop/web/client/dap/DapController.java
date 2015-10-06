@@ -1,6 +1,7 @@
 package pl.ismop.web.client.dap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +24,8 @@ import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationService;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationsResponse;
+import pl.ismop.web.client.dap.experiment.ExperimentService;
+import pl.ismop.web.client.dap.experiment.ExperimentsResponse;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.levee.LeveeResponse;
 import pl.ismop.web.client.dap.levee.LeveeService;
@@ -60,12 +63,13 @@ import pl.ismop.web.client.hypgen.Experiment;
 
 @Singleton
 public class DapController {
+	private ExperimentService leveeExperimentService;
 	private ErrorUtil errorUtil;
 	private LeveeService leveeService;
 	private SensorService sensorService;
 	private MeasurementService measurementService;
 	private SectionService sectionService;
-	private ThreatAssessmentService experimentService;
+	private ThreatAssessmentService threatAssessmentService;
 	private ResultService resultService;
 	private ProfileService profileService;
 	private DeviceService deviceService;
@@ -94,7 +98,7 @@ public class DapController {
 		void processSections(List<Section> sections);
 	}
 	
-	public interface ExperimentsCallback extends ErrorCallback {
+	public interface ThreatAssessmentCallback extends ErrorCallback {
 		void processExperiments(List<Experiment> experiments);
 	}
 	
@@ -130,6 +134,10 @@ public class DapController {
 		void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations);
 	}
 
+	public interface ExperimentsCallback extends ErrorCallback {
+		void processExperiments(List<pl.ismop.web.client.dap.experiment.Experiment> experiments);
+	}
+
 	private class MeasurementsRestCallback implements MethodCallback<MeasurementsResponse> {
 		private final MeasurementsCallback callback;
 
@@ -152,13 +160,13 @@ public class DapController {
 	public DapController(ErrorUtil errorUtil, LeveeService leveeService, SensorService sensorService, MeasurementService measurementService,
 			SectionService sectionService, ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService,
 			DeviceService deviceService, DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
-			TimelineService timelineService) {
+			TimelineService timelineService, ExperimentService leveeExperimentService) {
 		this.errorUtil = errorUtil;
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
 		this.measurementService = measurementService;
 		this.sectionService = sectionService;
-		this.experimentService = experimentService;
+		this.threatAssessmentService = experimentService;
 		this.resultService = resultService;
 		this.profileService = profileService;
 		this.deviceService = deviceService;
@@ -166,6 +174,7 @@ public class DapController {
 		this.parameterService = parameterService;
 		this.contextService = contextService;
 		this.timelineService = timelineService;
+		this.leveeExperimentService = leveeExperimentService;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -253,6 +262,20 @@ public class DapController {
 		getMeasurements(merge(timelineId, ","), startDate, endDate, callback);
 	}
 
+	public void getAllMeasurements(Collection<String> timelineIds, final MeasurementsCallback callback) {
+		measurementService.getAllLastMeasurements(merge(timelineIds), new MethodCallback<MeasurementsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, MeasurementsResponse measurementsResponse) {
+				callback.processMeasurements(measurementsResponse.getMeasurements());
+			}
+		});
+	}
+
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date);
 		String from = DateTimeFormat.
@@ -260,7 +283,7 @@ public class DapController {
 						format(new Date(date.getTime() - 1500_000L));
 
 		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
-				                               new MeasurementsRestCallback(callback));
+				new MeasurementsRestCallback(callback));
 	}
 
 	public void getSections(float top, float left, float bottom, float right, final SectionsCallback callback) {
@@ -319,8 +342,8 @@ public class DapController {
 		});
 	}
 	
-	public void getExperiments(List<String> experimentIds, final ExperimentsCallback callback) {
-		experimentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ThreatAssessmentResponse>() {
+	public void getExperiments(List<String> experimentIds, final ThreatAssessmentCallback callback) {
+		threatAssessmentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ThreatAssessmentResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -442,6 +465,20 @@ public class DapController {
 		});
 	}
 
+	public void getParametersById(Collection<String> ids, final ParametersCallback callback) {
+		parameterService.getParametersById(merge(ids), new MethodCallback<ParametersResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ParametersResponse response) {
+				callback.processParameters(response.getParameters());
+			}
+		});
+	}
+
 	public void getContext(String contextType, final ContextsCallback callback) {
 		contextService.getContexts(contextType, new MethodCallback<ContextsResponse>() {
 			@Override
@@ -472,6 +509,20 @@ public class DapController {
 
 	public void getTimelinesForParameterIds(String contextId, List<String> parameterIds, final TimelinesCallback callback) {
 		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, TimelinesResponse response) {
+				callback.processTimelines(response.getTimelines());
+			}
+		});
+	}
+
+	public void getExperimentTimelines(String experimentId, final TimelinesCallback callback) {
+		timelineService.getExperimentTimelines(experimentId, new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -683,6 +734,20 @@ public class DapController {
 			}
 		});
 	}
+	
+	public void getExperiments(final ExperimentsCallback callback) {
+		leveeExperimentService.getExperiments(new MethodCallback<ExperimentsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ExperimentsResponse experiments) {
+				callback.processExperiments(experiments.getExperiments());
+			}
+		});
+	}
 
 	private Date monthEarlier() {
 		return new Date(new Date().getTime() - 2678400000L);
@@ -748,7 +813,7 @@ public class DapController {
 		}
 	}
 
-	private String merge(List<String> chunks, String delimeter) {
+	private String merge(Collection<String> chunks, String delimeter) {
 		StringBuilder result = new StringBuilder();
 		
 		for(String chunk : chunks) {
@@ -760,6 +825,10 @@ public class DapController {
 		}
 		
 		return result.toString();
+	}
+
+	private String merge(Collection<String> chunks) {
+		return merge(chunks, ",");
 	}
 
 	private String createSelectionQuery(double top, double left, double bottom, double right) {

@@ -1,6 +1,5 @@
-package pl.ismop.web.client.widgets.slider;
+package pl.ismop.web.client.widgets.common.slider;
 
-import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
@@ -99,6 +98,10 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
     @Override
     public Date getEndDate() {
         return new Date(endDate.getTime());
+    }
+
+    public void setAllowEditDateIntervals(boolean enabled) {
+        getView().setAllowEditDateIntervals(enabled);
     }
 
     public void setEventsListener(Events eventsListener) {

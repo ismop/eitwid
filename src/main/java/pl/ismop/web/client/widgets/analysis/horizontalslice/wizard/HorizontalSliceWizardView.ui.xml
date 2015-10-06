@@ -28,8 +28,8 @@
 			<b:ModalBody>
 				<b:Row addStyleNames="{style.row}">
 					<b:Column size="MD_6" addStyleNames="{style.column}">
-						<b:Heading size="H4" text="{messages.pickInfoLabel}"/>
-						<b:Label text="{messages.noProfilesLabel}"/>
+						<b:Heading size="H3" text="{messages.pickInfoLabel}"/>
+						<b:Label ui:field="noProfilesPicked" text="{messages.noProfilesLabel}"/>
 						<g:FlowPanel ui:field="profiles"/>
 					</b:Column>
 					<b:Column size="MD_6" addStyleNames="{style.column}">

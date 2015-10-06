@@ -7,13 +7,21 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 		void onModalShown();
 
 		void onModalHide();
+
+		void onRemoveProfile(String profileId);
 	}
 
 	void showModal(boolean show);
 
 	void setMap(IsWidget view);
 
+	void addProfile(String profileId);
+
+	void clearProfiles();
+
 	void showLoadingState(boolean show, String profileId);
 
-	void addProfile(String profileId);
+	void removeProfile(String profileId);
+
+	void addProfileHeight(Double height, String profileId, boolean check);
 }

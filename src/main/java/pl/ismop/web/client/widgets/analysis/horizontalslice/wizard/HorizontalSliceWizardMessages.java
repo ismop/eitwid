@@ -8,4 +8,6 @@ public interface HorizontalSliceWizardMessages extends Messages {
 	String pickInfoLabel();
 	
 	String noProfilesLabel();
+
+	String heightLabel();
 }
