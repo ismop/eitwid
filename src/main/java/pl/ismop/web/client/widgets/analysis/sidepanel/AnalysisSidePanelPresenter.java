@@ -2,11 +2,6 @@ package pl.ismop.web.client.widgets.analysis.sidepanel;
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import org.gwtbootstrap3.client.ui.Button;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -18,17 +13,21 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
-import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanel.IAnalysisSidePanelPresenter;
+import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 
-@Presenter(view = AnalysisSidePanel.class, multiple = true)
-public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel, MainEventBus> implements IAnalysisSidePanelPresenter {
+@Presenter(view = AnalysisSidePanelView.class, multiple = true)
+public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
     private final DapController dapController;
 
     private MapPresenter miniMap;
     private Chart waterWave;
+
+    private List<Experiment> experiments;
+    private Experiment selectedExperiment;
 
     @Inject
     public AnalysisSidePanelPresenter(DapController dapController) {
@@ -36,9 +35,24 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     public void init() {
+        initExperiments();
         initWaterWave();
         initMinimap();
 	}
+
+    private void initExperiments() {
+        dapController.getExperiments(new DapController.ExperimentsCallback() {
+            @Override
+            public void processExperiments(List<Experiment> loadedExperiments) {
+                getView().setExperiments(loadedExperiments);
+            }
+
+            @Override
+            public void onError(ErrorDetails errorDetails) {
+                eventBus.showError(errorDetails);
+            }
+        });
+    }
 
     private void initWaterWave() {
         if (waterWave == null) {
@@ -77,5 +91,11 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                 }
             });
         }
+    }
+
+    @Override
+    public void selectExperiment(Experiment selectedExperiment) {
+        this.selectedExperiment = selectedExperiment;
+        eventBus.experimentChanged(selectedExperiment);
     }
 }

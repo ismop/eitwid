@@ -10,6 +10,7 @@ import com.mvp4g.client.event.EventBusWithLookup;
 
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
+import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
@@ -88,4 +89,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = DumyPresenter.class)
 	void dateChanged(Date selectedDate);
+
+	@Event(handlers = { DumyPresenter.class, ComparisonPresenter.class })
+	void experimentChanged(Experiment selectedExperiment);
 }

@@ -5,7 +5,6 @@ import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.widgets.analysis.comparison.IPanelContent;
-import pl.ismop.web.client.widgets.common.panel.IPanelView;
 
 import java.util.Date;
 
@@ -42,5 +41,10 @@ public class DumyPresenter extends BasePresenter<IDumyView, MainEventBus> implem
     @SuppressWarnings("unused")
     public void onDateChanged(Date selectedDate) {
         setSelectedDate(selectedDate);
+    }
+
+    @SuppressWarnings("unused")
+    public void onExperimentChanged(Experiment selectedExperiment) {
+        setSelectedExperiment(selectedExperiment);
     }
 }

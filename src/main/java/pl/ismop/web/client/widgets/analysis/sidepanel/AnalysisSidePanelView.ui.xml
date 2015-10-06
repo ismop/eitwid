@@ -2,6 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelMessages" field="messages"/>
 	<ui:style>
 		.panel {
 			width: 100%;
@@ -37,13 +38,13 @@
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
 		<g:HTMLPanel tag="h1" addStyleNames="{style.experiments}">
-				<b:DropDown>
-					<b:Anchor dataToggle="DROPDOWN">Select experiment</b:Anchor>
-					<b:DropDownMenu>
-						<b:AnchorListItem>Experiment 1</b:AnchorListItem>
-						<b:AnchorListItem>Experiment 2</b:AnchorListItem>
-						<b:AnchorListItem>Experiment 3</b:AnchorListItem>
-						<b:AnchorListItem>Experiment 4</b:AnchorListItem>
+				<b:DropDown ui:field="dropDown">
+					<b:Anchor ui:field="selectedExperiment" dataToggle="DROPDOWN" />
+					<b:DropDownMenu ui:field="experimentList">
+						<!--<b:AnchorListItem>Experiment 1</b:AnchorListItem>-->
+						<!--<b:AnchorListItem>Experiment 2</b:AnchorListItem>-->
+						<!--<b:AnchorListItem>Experiment 3</b:AnchorListItem>-->
+						<!--<b:AnchorListItem>Experiment 4</b:AnchorListItem>-->
 					</b:DropDownMenu>
 				</b:DropDown>
 		</g:HTMLPanel>

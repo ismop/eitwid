@@ -17,6 +17,7 @@ import java.util.Date;
 public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEventBus>
         implements IComparisonPresenter, IWindowManager {
     private SliderPresenter sliderPresenter;
+    private Experiment selectedExperiment;
 
     public void init() {
         if (sliderPresenter == null) {
@@ -70,12 +71,8 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @SuppressWarnings("unused")
     public void onAddPanel(String panelTitle, IPanelContent content) {
-        // TODO: Get real selected experiment
-        Experiment dumyExperiment = new Experiment();
-        dumyExperiment.setName("Dumy experiment");
-
         content.setSelectedDate(sliderPresenter.getSelectedDate());
-        content.setSelectedExperiment(dumyExperiment);
+        content.setSelectedExperiment(selectedExperiment);
 
         PanelPresenter panel = wrapWithPanel(panelTitle, content);
         getView().addPanel(panel.getView());
@@ -88,5 +85,10 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
         panel.setContent(content);
 
         return panel;
+    }
+
+    @SuppressWarnings("unused")
+    public void onExperimentChanged(Experiment selectedExperiment) {
+        this.selectedExperiment = selectedExperiment;
     }
 }
