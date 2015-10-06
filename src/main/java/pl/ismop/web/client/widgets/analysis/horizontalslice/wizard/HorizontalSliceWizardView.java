@@ -21,6 +21,7 @@ import org.gwtbootstrap3.client.ui.Radio;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -119,7 +120,6 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		controls.add(heading);
 		controls.add(removeButton);
 		
-		
 		FlowPanel profileHeights = new FlowPanel();
 		profileHeightsContainers.put(profileId, profileHeights);
 		
@@ -158,8 +158,13 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 
 	@Override
 	public void addProfileHeight(Double height, String profileId, boolean check) {
-		Radio radio = new Radio(profileId, messages.heightLabel() + " " + String.valueOf(height));
+		Radio radio = new Radio(profileId, messages.heightLabel() + " " + String.valueOf(NumberFormat.getFormat("0.00").format(height)));
 		radio.setValue(check);
 		profileHeightsContainers.get(profileId).add(radio);
+	}
+
+	@Override
+	public void showNoProfileLabel() {
+		noProfilesPicked.setVisible(true);
 	}
 }

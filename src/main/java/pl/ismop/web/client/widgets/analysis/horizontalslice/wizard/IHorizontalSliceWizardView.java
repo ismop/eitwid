@@ -24,4 +24,6 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 	void removeProfile(String profileId);
 
 	void addProfileHeight(Double height, String profileId, boolean check);
+
+	void showNoProfileLabel();
 }

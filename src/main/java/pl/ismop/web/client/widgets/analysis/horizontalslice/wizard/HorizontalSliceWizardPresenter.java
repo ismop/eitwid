@@ -89,51 +89,6 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		}
 	}
 
-	private void computeHeights(List<Device> devices, String profileId) {
-		Map<Double, List<Device>> result = new HashMap<>();
-		
-		if(devices.size() > 0) {
-			for(Iterator<Device> i = devices.iterator(); i.hasNext();) {
-				Device device = i.next();
-				
-				if(device.getPlacement() == null || device.getPlacement().getCoordinates().size() < 2) {
-					i.remove();
-				}
-			}
-			sort(devices, new Comparator<Device>() {
-				@Override
-				public int compare(Device o1, Device o2) {
-					return o1.getPlacement().getCoordinates().get(2).compareTo(o2.getPlacement().getCoordinates().get(2));
-				}
-			});
-			
-			double threshold = HEIGHT_THRESHOLD + devices.get(0).getPlacement().getCoordinates().get(2);
-			
-			for(Device device : devices) {
-				while(device.getPlacement().getCoordinates().get(2) > threshold) {
-					threshold += HEIGHT_THRESHOLD;
-				}
-				
-				if(result.get(threshold) == null) {
-					result.put(threshold, new ArrayList<Device>());
-				}
-				
-				result.get(threshold).add(device);
-			}
-			
-			boolean first = true;
-			
-			for(Double height : result.keySet()) {
-				view.addProfileHeight(height, profileId, first);
-				first = false;
-			}
-		}
-	}
-
-	private void updateParameters(List<Parameter> parameters) {
-		
-	}
-
 	@Override
 	public void onModalShown() {
 		if(mapPresenter == null) {
@@ -191,6 +146,55 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		if(pickedProfiles.containsKey(profileId)) {
 			pickedProfiles.remove(profileId);
 			view.removeProfile(profileId);
+			
+			if(pickedProfiles.size() == 0) {
+				view.showNoProfileLabel();
+			}
 		}
+	}
+
+	private void computeHeights(List<Device> devices, String profileId) {
+		Map<Double, List<Device>> result = new HashMap<>();
+		
+		if(devices.size() > 0) {
+			for(Iterator<Device> i = devices.iterator(); i.hasNext();) {
+				Device device = i.next();
+				
+				if(device.getPlacement() == null || device.getPlacement().getCoordinates().size() < 2) {
+					i.remove();
+				}
+			}
+			sort(devices, new Comparator<Device>() {
+				@Override
+				public int compare(Device o1, Device o2) {
+					return o1.getPlacement().getCoordinates().get(2).compareTo(o2.getPlacement().getCoordinates().get(2));
+				}
+			});
+			
+			double threshold = HEIGHT_THRESHOLD + devices.get(0).getPlacement().getCoordinates().get(2);
+			
+			for(Device device : devices) {
+				while(device.getPlacement().getCoordinates().get(2) > threshold) {
+					threshold += HEIGHT_THRESHOLD;
+				}
+				
+				if(result.get(threshold) == null) {
+					result.put(threshold, new ArrayList<Device>());
+				}
+				
+				result.get(threshold).add(device);
+			}
+			
+			boolean first = true;
+			
+			for(Double height : result.keySet()) {
+				view.addProfileHeight(height, profileId, first);
+				first = false;
+			}
+		}
+	}
+
+	private void updateParameters(List<Parameter> parameters) {
+		
 	}
 }
