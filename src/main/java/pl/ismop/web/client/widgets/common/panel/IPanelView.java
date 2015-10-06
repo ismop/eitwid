@@ -7,6 +7,7 @@ public interface IPanelView extends IsWidget {
         void close();
         void moveUp();
         void moveDown();
+        void edit();
     }
 
     void setTitle(String title);

@@ -4,15 +4,15 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.event.EventBus;
 import com.mvp4g.client.presenter.BasePresenter;
-import com.mvp4g.client.presenter.PresenterInterface;
 import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.widgets.analysis.comparison.IPanelContent;
 
 import static pl.ismop.web.client.widgets.common.panel.IPanelView.IPanelPresenter;
 
 @Presenter(view = PanelView.class, multiple = true)
 public class PanelPresenter extends BasePresenter<IPanelView, MainEventBus> implements IPanelPresenter {
     private IWindowManager windowManager;
-    private PresenterInterface content;
+    private IPanelContent<IsWidget, EventBus> content;
 
     @Override
     public void close() {
@@ -29,11 +29,18 @@ public class PanelPresenter extends BasePresenter<IPanelView, MainEventBus> impl
         windowManager.moveDown(this);
     }
 
+    @Override
+    public void edit() {
+        if (content != null) {
+            content.edit();
+        }
+    }
+
     public void setTitle(String title) {
         getView().setTitle(title);
     }
 
-    public void setContent(PresenterInterface<IsWidget, EventBus> content) {
+    public void setContent(IPanelContent<IsWidget, EventBus> content) {
         this.content = content;
         getView().setWidget(content.getView());
     }

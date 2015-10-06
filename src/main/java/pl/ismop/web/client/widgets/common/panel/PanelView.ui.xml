@@ -11,6 +11,10 @@
             color: darkgreen;
         }
 
+        .edit-button:hover {
+            color: darkgoldenrod;
+        }
+
         .window-buttons {
             margin: -2px -10px 0 0;
         }
@@ -23,6 +27,8 @@
                               size="EXTRA_SMALL" title="{messages.moveUpButtonTooltip}"/>
                     <b:Button ui:field="downButton" icon="ARROW_CIRCLE_DOWN" addStyleNames="{style.move-button}"
                               size="EXTRA_SMALL" title="{messages.moveDownButtonTooltip}"/>
+                    <b:Button ui:field="editButton" icon="EDIT" addStyleNames="{style.edit-button}"
+                              size="EXTRA_SMALL" title="{messages.editButtonTooltip}"/>
                     <b:Button ui:field="closeButton" icon="CLOSE" addStyleNames="{style.close-button}"
                               size="EXTRA_SMALL" title="{messages.closeButtonTooltip}"/>
                 </b:ButtonGroup>

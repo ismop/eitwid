@@ -55,6 +55,11 @@ public class PanelView extends Composite implements IPanelView, ReverseViewInter
         getPresenter().moveDown();
     }
 
+    @UiHandler("editButton")
+    void edit(ClickEvent event) {
+        getPresenter().edit();
+    }
+
     @Override
     public void setTitle(String title) {
         heading.setText(title);

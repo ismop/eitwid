@@ -1,5 +1,6 @@
 package pl.ismop.web.client.widgets.analysis.dumy;
 
+import com.google.gwt.user.client.Window;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
@@ -23,6 +24,11 @@ public class DumyPresenter extends BasePresenter<IDumyView, MainEventBus> implem
     public void setSelectedDate(Date date) {
         this.date = date;
         updateTitle();
+    }
+
+    @Override
+    public void edit() {
+        Window.alert("Edit this view");
     }
 
     private void updateTitle() {

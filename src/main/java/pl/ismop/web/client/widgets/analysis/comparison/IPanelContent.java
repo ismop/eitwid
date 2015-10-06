@@ -9,4 +9,5 @@ import java.util.Date;
 public interface IPanelContent<V, E extends EventBus> extends PresenterInterface<V, E> {
     void setSelectedExperiment(Experiment experiment);
     void setSelectedDate(Date date);
+    void edit();
 }

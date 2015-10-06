@@ -4,6 +4,7 @@ import com.google.gwt.i18n.client.Messages;
 
 public interface PanelMessages extends Messages {
     String closeButtonTooltip();
+    String editButtonTooltip();
     String moveUpButtonTooltip();
     String moveDownButtonTooltip();
 }
