@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
+import org.gwtbootstrap3.client.ui.Button;
 import pl.ismop.web.client.widgets.common.panel.IPanelView;
 
 public class ComparisonView extends Composite implements IComparisonView, ReverseViewInterface<IComparisonView.IComparisonPresenter> {
@@ -27,6 +28,15 @@ public class ComparisonView extends Composite implements IComparisonView, Revers
 
 	@UiField
 	FlowPanel panels;
+
+	@UiField
+	Button addChart;
+
+	@UiField
+	Button addHorizontalCS;
+
+	@UiField
+	Button addVerticalCS;
 
 	@UiHandler("addChart")
 	void addChart(ClickEvent click) {
@@ -99,5 +109,12 @@ public class ComparisonView extends Composite implements IComparisonView, Revers
 	@Override
 	public IComparisonPresenter getPresenter() {
 		return presenter;
+	}
+
+	@Override
+	public void setActionsEnabled(boolean enabled) {
+		addChart.setEnabled(enabled);
+		addHorizontalCS.setEnabled(enabled);
+		addVerticalCS.setEnabled(enabled);
 	}
 }

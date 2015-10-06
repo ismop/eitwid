@@ -31,6 +31,8 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
             });
             view.setSlider(sliderPresenter.getView());
         }
+
+        updateEnabled();
     }
 
 
@@ -90,5 +92,10 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     @SuppressWarnings("unused")
     public void onExperimentChanged(Experiment selectedExperiment) {
         this.selectedExperiment = selectedExperiment;
+        updateEnabled();
+    }
+
+    private void updateEnabled() {
+        getView().setActionsEnabled(selectedExperiment != null);
     }
 }
