@@ -17,7 +17,7 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.IPanelContent;
-import pl.ismop.web.client.widgets.analysis.dumy.DumyPresenter;
+import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
@@ -88,9 +88,56 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ComparisonPresenter.class)
 	void addPanel(String panelTitle, IPanelContent content);
 
-	@Event(handlers = { DumyPresenter.class, AnalysisSidePanelPresenter.class })
+	@Event(handlers = { DummyPresenter.class, AnalysisSidePanelPresenter.class })
 	void dateChanged(Date selectedDate);
 
-	@Event(handlers = { DumyPresenter.class, ComparisonPresenter.class })
+	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })
 	void experimentChanged(Experiment selectedExperiment);
+
+	/**
+	 * Select device on minima. Many devices can be selected on minimap (yellow marker will be used).
+	 * To unselect device use {@link #unselectDevice(Device)}.
+	 *
+	 * @param device Device to be selected.
+	 */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void selectDevice(Device device);
+
+	/**
+	 * Unselect device. To select device use {@link #selectDevice(Device)}.
+	 *
+	 * @param device Device to be unselected
+	 */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void unselectDevice(Device device);
+
+	/**
+	 * Show device. Only one device can be shown on minimap in the same time (red marker will be used).
+	 *
+	 * @param device Device to be shown.
+	 */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void showDevice(Device device);
+
+	/**
+	 * Show section. Only one section can be shown on minimap in the same time.
+	 *
+	 * @param section Section to be shown.
+	 */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void showSection(Section section);
+
+	/**
+	 * Show profile. Only one profile can be shown on minimap in the same time.
+	 *
+	 * @param profile Profile to be shown.
+	 */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void showProfile(Profile profile);
+
+	/**
+	 * Remove all selections and shows from the minimap.
+	 */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void clearMinimap();
 }

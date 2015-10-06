@@ -9,9 +9,11 @@ import org.moxieapps.gwt.highcharts.client.*;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
+import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
@@ -20,11 +22,7 @@ import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Presenter(view = AnalysisSidePanelView.class, multiple = true)
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
@@ -37,6 +35,10 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private Experiment selectedExperiment;
     private AnalysisSidePanelMessages messages;
+    private Device shownDevice;
+    private Set<Device> selectedDevices = new HashSet<>();
+    private Section shownSection;
+    private Profile shownProfile;
 
     @Inject
     public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
@@ -193,5 +195,76 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                     setWidth(2).setColor(properties.selectionColor()).setValue(selectedDate.getTime());
             waterWave.getXAxis().addPlotLines(currentTimePlotLine);
         }
+    }
+
+    @SuppressWarnings("unused")
+    public void onSelectDevice(Device device) {
+        miniMap.selectDevice(device, true);
+        selectedDevices.add(device);
+    }
+
+    @SuppressWarnings("unused")
+    public void onUnselectDevice(Device device) {
+        if (shownDevice == device) {
+            miniMap.selectDevice(device, false);
+        } else {
+            miniMap.removeDevice(device);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void onShowDevice(Device device) {
+        if (shownDevice != null) {
+            if (selectedDevices.contains(shownDevice)) {
+                miniMap.selectDevice(shownDevice, true);
+            } else {
+                miniMap.removeDevice(shownDevice);
+            }
+        }
+        shownDevice = device;
+        miniMap.selectDevice(device, false);
+
+    }
+
+    @SuppressWarnings("unused")
+    public void onShowSection(Section section) {
+        if (shownSection != null) {
+            miniMap.highlightSection(shownSection, false);
+        }
+        shownSection = section;
+        miniMap.highlightSection(section, true);
+    }
+
+    @SuppressWarnings("unused")
+    public void onShowProfile(Profile profile) {
+        GWT.log("Show profile" + profile.getId());
+        if (shownProfile != null) {
+            miniMap.removeProfile(shownProfile);
+        }
+        shownProfile = profile;
+        miniMap.addProfile(profile);
+    }
+
+    @SuppressWarnings("unused")
+    public void onClearMinimap() {
+        if(shownProfile != null) {
+            miniMap.removeProfile(shownProfile);
+            shownProfile = null;
+        }
+
+        if (shownSection != null) {
+            miniMap.highlightSection(shownSection, false);
+            shownSection = null;
+        }
+
+        if (shownDevice != null) {
+            miniMap.removeDevice(shownDevice);
+            shownDevice = null;
+        }
+
+        for (Device selectedDevice : selectedDevices) {
+            miniMap.removeDevice(selectedDevice);
+        }
+        selectedDevices.clear();
     }
 }
