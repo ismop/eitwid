@@ -14,6 +14,8 @@ public interface IAnalysisSidePanelView extends IsWidget {
 
 	void setMinimap(IsWidget widget);
 
+	AnalysisSidePanelMessages getMessages();
+
 	interface IAnalysisSidePanelPresenter {
 		void selectExperiment(Experiment selectedExperiment);
 	}

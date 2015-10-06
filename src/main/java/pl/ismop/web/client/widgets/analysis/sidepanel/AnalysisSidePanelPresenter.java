@@ -31,6 +31,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private Chart waterWave;
 
     private Experiment selectedExperiment;
+    private AnalysisSidePanelMessages messages;
 
     @Inject
     public AnalysisSidePanelPresenter(DapController dapController) {
@@ -38,6 +39,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     public void init() {
+        this.messages = getView().getMessages();
         initExperiments();
         initMinimap();
 	}
@@ -59,14 +61,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private void initWaterWave() {
         if (waterWave == null) {
             waterWave = new Chart().
-                    setChartTitle(new ChartTitle().setText("Water wave"));
+                    setChartTitle(new ChartTitle().setText(messages.waterWaveChartTitle()));
 
             waterWave.setHeight(view.getWaterWavePanelHeight());
             waterWave.setOption("/chart/zoomType", "x");
 
             waterWave.getXAxis().
                     setType(Axis.Type.DATE_TIME).
-                    setAxisTitle(new AxisTitle().setText("Time")).
+                    setAxisTitle(new AxisTitle().setText(messages.time())).
                     setDateTimeLabelFormats(new DateTimeLabelFormats().
                             setMonth("%e. %b").
                             setYear("%b"));
@@ -108,7 +110,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         initWaterWave();
 
         if (selectedExperiment != null) {
-            waterWave.showLoading("Loading experiment water wave shape...");
+            waterWave.showLoading(messages.loadingWaterWave());
             dapController.getExperimentTimelines(selectedExperiment.getId(), new DapController.TimelinesCallback() {
                 @Override
                 public void processTimelines(final List<Timeline> timelines) {

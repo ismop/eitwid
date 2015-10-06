@@ -8,4 +8,7 @@ import com.google.gwt.i18n.client.Messages;
 public interface AnalysisSidePanelMessages extends Messages {
     String selectExperiment();
     String loadingExperiments();
+    String time();
+    String waterWaveChartTitle();
+    String loadingWaterWave();
 }
