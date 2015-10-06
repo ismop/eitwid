@@ -16,7 +16,7 @@ public class Experiment {
     private Date startDate;
 
     @Json(name = "end_date")
-    private Date endtDate;
+    private Date endDate;
 
     @Json(name = "levee_id")
     private Integer leveeId;
@@ -56,12 +56,12 @@ public class Experiment {
         this.startDate = startDate;
     }
 
-    public Date getEndtDate() {
-        return endtDate;
+    public Date getEndDate() {
+        return endDate;
     }
 
-    public void setEndtDate(Date endtDate) {
-        this.endtDate = endtDate;
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
     public Integer getLeveeId() {

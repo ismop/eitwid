@@ -29,7 +29,7 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
                     eventBus.dateChanged(selectedDate);
                 }
             });
-            view.setSlider(sliderPresenter.getView());
+            getView().setSlider(sliderPresenter.getView());
         }
 
         updateEnabled();
@@ -92,7 +92,19 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     @SuppressWarnings("unused")
     public void onExperimentChanged(Experiment selectedExperiment) {
         this.selectedExperiment = selectedExperiment;
+        updateSliderDates();
         updateEnabled();
+    }
+
+    private void updateSliderDates() {
+        if (selectedExperiment != null) {
+            Date previousDate = sliderPresenter.getSelectedDate();
+            sliderPresenter.setStartDate(selectedExperiment.getStartDate());
+            sliderPresenter.setEndDate(selectedExperiment.getEndDate());
+            if (!previousDate.equals(sliderPresenter.getSelectedDate())) {
+                eventBus.dateChanged(sliderPresenter.getSelectedDate());
+            }
+        }
     }
 
     private void updateEnabled() {
