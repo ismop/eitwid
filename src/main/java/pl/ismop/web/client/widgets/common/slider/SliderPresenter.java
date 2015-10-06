@@ -104,6 +104,10 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
         getView().setAllowEditDateIntervals(enabled);
     }
 
+    public void setEnabled(boolean enabled) {
+        getView().setEnabled(enabled);
+    }
+
     public void setEventsListener(Events eventsListener) {
         this.eventsListener = eventsListener;
         if(eventsListener == null) {

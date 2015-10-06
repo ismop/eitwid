@@ -108,6 +108,8 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     }
 
     private void updateEnabled() {
-        getView().setActionsEnabled(selectedExperiment != null);
+        boolean enabled = selectedExperiment != null;
+        getView().setActionsEnabled(enabled);
+        sliderPresenter.setEnabled(enabled);
     }
 }

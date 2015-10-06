@@ -20,5 +20,6 @@ public interface ISliderView extends IsWidget {
     void setNumberOfPoints(long numberOfPoints);
     Double getSelectedPoint();
     void setAllowEditDateIntervals(boolean enabled);
+    void setEnabled(boolean enabled);
 }
 
