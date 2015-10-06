@@ -101,9 +101,11 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     @Override
     public void selectExperiment(Experiment selectedExperiment) {
-        this.selectedExperiment = selectedExperiment;
-        eventBus.experimentChanged(selectedExperiment);
-        loadExperimentWaveShape();
+        if (this.selectedExperiment != selectedExperiment) {
+            this.selectedExperiment = selectedExperiment;
+            eventBus.experimentChanged(selectedExperiment);
+            loadExperimentWaveShape();
+        }
     }
 
     private void loadExperimentWaveShape() {
