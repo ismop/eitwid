@@ -18,6 +18,7 @@ import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.IPanelContent;
 import pl.ismop.web.client.widgets.analysis.dumy.DumyPresenter;
+import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
@@ -87,7 +88,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ComparisonPresenter.class)
 	void addPanel(String panelTitle, IPanelContent content);
 
-	@Event(handlers = DumyPresenter.class)
+	@Event(handlers = { DumyPresenter.class, AnalysisSidePanelPresenter.class })
 	void dateChanged(Date selectedDate);
 
 	@Event(handlers = { DumyPresenter.class, ComparisonPresenter.class })

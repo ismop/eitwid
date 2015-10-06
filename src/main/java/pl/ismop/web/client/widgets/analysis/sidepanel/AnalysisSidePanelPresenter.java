@@ -1,10 +1,12 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import org.moxieapps.gwt.highcharts.client.*;
+import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.experiment.Experiment;
@@ -18,6 +20,7 @@ import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +29,8 @@ import java.util.Map;
 @Presenter(view = AnalysisSidePanelView.class, multiple = true)
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
     private final DapController dapController;
+    private final IsmopProperties properties;
+    private PlotLine currentTimePlotLine;
 
     private MapPresenter miniMap;
     private Chart waterWave;
@@ -34,8 +39,9 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private AnalysisSidePanelMessages messages;
 
     @Inject
-    public AnalysisSidePanelPresenter(DapController dapController) {
+    public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
+        this.properties = properties;
     }
 
     public void init() {
@@ -103,8 +109,8 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void selectExperiment(Experiment selectedExperiment) {
         if (this.selectedExperiment != selectedExperiment) {
             this.selectedExperiment = selectedExperiment;
-            eventBus.experimentChanged(selectedExperiment);
             loadExperimentWaveShape();
+            eventBus.experimentChanged(selectedExperiment);
         }
     }
 
@@ -174,6 +180,18 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
         if(parameter != null) {
             waterWave.getYAxis().setAxisTitleText(parameter.getMeasurementTypeName() + " [" + parameter.getMeasurementTypeUnit() + "]");
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void onDateChanged(Date selectedDate) {
+        if (waterWave != null) {
+            if (currentTimePlotLine != null) {
+                waterWave.getXAxis().removePlotLine(currentTimePlotLine);
+            }
+            currentTimePlotLine = waterWave.getXAxis().createPlotLine().
+                    setWidth(2).setColor(properties.selectionColor()).setValue(selectedDate.getTime());
+            waterWave.getXAxis().addPlotLines(currentTimePlotLine);
         }
     }
 }
