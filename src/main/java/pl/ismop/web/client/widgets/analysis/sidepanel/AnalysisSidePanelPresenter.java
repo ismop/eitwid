@@ -39,7 +39,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     public void init() {
         initExperiments();
-        initWaterWave();
         initMinimap();
 	}
 
@@ -61,6 +60,8 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         if (waterWave == null) {
             waterWave = new Chart().
                     setChartTitle(new ChartTitle().setText("Water wave"));
+
+            waterWave.setHeight(view.getWaterWavePanelHeight());
 
             waterWave.getXAxis().
                     setType(Axis.Type.DATE_TIME).
@@ -103,6 +104,8 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     private void loadExperimentWaveShape() {
+        initWaterWave();
+
         if (selectedExperiment != null) {
             waterWave.showLoading("Loading experiment water wave shape...");
             dapController.getExperimentTimelines(selectedExperiment.getId(), new DapController.TimelinesCallback() {

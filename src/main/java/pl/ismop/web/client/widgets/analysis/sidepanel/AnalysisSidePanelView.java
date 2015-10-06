@@ -56,12 +56,7 @@ public class AnalysisSidePanelView extends Composite
 	public void setMinimap(IsWidget widget) {
 		miniMapPanel.add(widget);
 	}
-
-	@Override
-	public int getWaterWavePanelWidth() {
-		return waterWavePanel.getOffsetWidth();
-	}
-
+	
 	@Override
 	public int getWaterWavePanelHeight() {
 		return waterWavePanel.getOffsetHeight();
