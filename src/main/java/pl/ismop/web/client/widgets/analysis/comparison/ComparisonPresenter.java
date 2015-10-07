@@ -5,6 +5,8 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.experiment.Experiment;
+import pl.ismop.web.client.widgets.analysis.chart.ChartPresenter;
+import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.IComparisonView.IComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
@@ -39,8 +41,13 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @Override
     public void addChart() {
-        IPanelContent content = eventBus.addHandler(DummyPresenter.class);
-        eventBus.addPanel("New chart", content);
+        eventBus.addHandler(ChartWizardPresenter.class).show(new ChartWizardPresenter.ShowResult() {
+            @Override
+            public void ok() {
+                IPanelContent content = eventBus.addHandler(ChartPresenter.class);
+                eventBus.addPanel("New chart", content);
+            }
+        });
     }
 
     @Override

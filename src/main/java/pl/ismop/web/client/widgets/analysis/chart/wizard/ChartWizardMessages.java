@@ -1,0 +1,7 @@
+package pl.ismop.web.client.widgets.analysis.chart.wizard;
+
+import com.google.gwt.i18n.client.Messages;
+
+public interface ChartWizardMessages extends Messages {
+    String modalTitle();
+}

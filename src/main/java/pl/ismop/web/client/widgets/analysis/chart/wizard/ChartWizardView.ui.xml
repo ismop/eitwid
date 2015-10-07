@@ -1,0 +1,16 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:b='urn:import:org.gwtbootstrap3.client.ui'>
+    <ui:with type="pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardMessages" field="messages"/>
+    <g:HTMLPanel>
+        <b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%">
+            <b:ModalBody>
+                <g:HTML>Modal body...</g:HTML>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button ui:field="okButton" type="PRIMARY">Do something</b:Button>
+                <b:Button type="DEFAULT" dataDismiss="MODAL">Close</b:Button>
+            </b:ModalFooter>
+        </b:Modal>
+    </g:HTMLPanel>
+</ui:UiBinder>
