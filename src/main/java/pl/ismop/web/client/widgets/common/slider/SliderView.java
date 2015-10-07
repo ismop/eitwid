@@ -1,4 +1,4 @@
-package pl.ismop.web.client.widgets.slider;
+package pl.ismop.web.client.widgets.common.slider;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -33,6 +33,8 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
 
     @UiField
     Slider slider;
+
+    private boolean allowEditTimeIntervals = true;
 
     public SliderView() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -84,6 +86,19 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     @Override
     public Double getSelectedPoint() {
         return slider.getValue();
+    }
+
+    @Override
+    public void setAllowEditDateIntervals(boolean enabled) {
+        allowEditTimeIntervals = enabled;
+        startDate.setEnabled(enabled);
+        endDate.setEnabled(enabled);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        slider.setEnabled(enabled);
+        setAllowEditDateIntervals(allowEditTimeIntervals && enabled);
     }
 
     @Override

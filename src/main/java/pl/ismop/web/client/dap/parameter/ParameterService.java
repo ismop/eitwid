@@ -15,4 +15,8 @@ public interface ParameterService extends RestService {
 	@GET
 	@Path("parameters?device_id={deviceId}")
 	void getParameters(@PathParam("deviceId") String deviceId, MethodCallback<ParametersResponse> callback);
+
+	@GET
+	@Path("parameters?id={id}")
+	void getParametersById(@PathParam("id") String id, MethodCallback<ParametersResponse> methodCallback);
 }
