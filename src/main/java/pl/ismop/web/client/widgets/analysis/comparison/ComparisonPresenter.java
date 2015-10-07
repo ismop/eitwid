@@ -6,7 +6,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.widgets.analysis.comparison.IComparisonView.IComparisonPresenter;
-import pl.ismop.web.client.widgets.analysis.dumy.DumyPresenter;
+import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
 import pl.ismop.web.client.widgets.common.panel.IWindowManager;
 import pl.ismop.web.client.widgets.common.panel.PanelPresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
@@ -38,18 +38,20 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @Override
     public void addChart() {
-        IPanelContent content = eventBus.addHandler(DumyPresenter.class);
+        IPanelContent content = eventBus.addHandler(DummyPresenter.class);
         eventBus.addPanel("New chart", content);
     }
 
     @Override
     public void addHorizontalCS() {
     	eventBus.showHorizontalCrosssectionWizard();
+//        IPanelContent content = eventBus.addHandler(DummyPresenter.class);
+//        eventBus.addPanel("New horizontal cross section", content);
     }
 
     @Override
     public void addVerticalCS() {
-        IPanelContent content = eventBus.addHandler(DumyPresenter.class);
+        IPanelContent content = eventBus.addHandler(DummyPresenter.class);
         eventBus.addPanel("New vertical cross section", content);
     }
 
@@ -107,6 +109,8 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     }
 
     private void updateEnabled() {
-        getView().setActionsEnabled(selectedExperiment != null);
+        boolean enabled = selectedExperiment != null;
+        getView().setActionsEnabled(enabled);
+        sliderPresenter.setEnabled(enabled);
     }
 }

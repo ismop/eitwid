@@ -34,6 +34,8 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     @UiField
     Slider slider;
 
+    private boolean allowEditTimeIntervals = true;
+
     public SliderView() {
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -88,8 +90,15 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
 
     @Override
     public void setAllowEditDateIntervals(boolean enabled) {
+        allowEditTimeIntervals = enabled;
         startDate.setEnabled(enabled);
         endDate.setEnabled(enabled);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        slider.setEnabled(enabled);
+        setAllowEditDateIntervals(allowEditTimeIntervals && enabled);
     }
 
     @Override

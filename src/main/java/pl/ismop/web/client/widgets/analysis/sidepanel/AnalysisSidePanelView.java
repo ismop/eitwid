@@ -93,4 +93,9 @@ public class AnalysisSidePanelView extends Composite
 	public IAnalysisSidePanelPresenter getPresenter() {
 		return presenter;
 	}
+
+	@Override
+	public AnalysisSidePanelMessages getMessages() {
+		return messages;
+	}
 }
