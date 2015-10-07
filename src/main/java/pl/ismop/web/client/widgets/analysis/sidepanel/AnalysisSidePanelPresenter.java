@@ -49,7 +49,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void init() {
         this.messages = getView().getMessages();
         initExperiments();
-        initMinimap();
 	}
 
     private void initExperiments() {
@@ -96,6 +95,8 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void selectExperiment(Experiment selectedExperiment) {
         if (this.selectedExperiment != selectedExperiment) {
             this.selectedExperiment = selectedExperiment;
+            initWaterWave();
+            initMinimap();
             loadExperimentWaveShape();
             loadExperimentLevee();
             eventBus.experimentChanged(selectedExperiment);
@@ -103,8 +104,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     private void loadExperimentWaveShape() {
-        initWaterWave();
-
         if (selectedExperiment != null) {
             waterWave.showLoading(messages.loadingWaterWave());
             dapController.getExperimentTimelines(selectedExperiment.getId(), new DapController.TimelinesCallback() {

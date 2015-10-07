@@ -7,6 +7,7 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.widgets.analysis.comparison.IComparisonView.IComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
+import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.IWindowManager;
 import pl.ismop.web.client.widgets.common.panel.PanelPresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;

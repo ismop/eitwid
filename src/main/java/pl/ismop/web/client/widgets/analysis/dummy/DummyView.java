@@ -85,11 +85,6 @@ public class DummyView extends Composite implements IDummyView, ReverseViewInter
         getPresenter().showProfile2();
     }
 
-    @UiHandler("clearMinimap")
-    void onClearMinimap(ClickEvent event) {
-        getPresenter().clearMinimap();
-    }
-
     @Override
     public void setPresenter(IDumyPresenter presenter) {
         this.presenter = presenter;

@@ -22,7 +22,7 @@
 
 		.minimap {
 			width: 100%;
-			height: 60%;
+			height: literal("calc(70% - 105px)");
 		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">

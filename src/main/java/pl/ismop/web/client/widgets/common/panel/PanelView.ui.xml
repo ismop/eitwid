@@ -4,36 +4,42 @@
     <ui:with type="pl.ismop.web.client.widgets.common.panel.PanelMessages" field="messages"/>
     <ui:style>
         .close-button:hover {
-            color: darkred;
+            color: red;
         }
 
         .move-button:hover {
-            color: darkgreen;
+            color: white;
         }
 
         .edit-button:hover {
-            color: darkgoldenrod;
+            color: goldenrod;
         }
 
         .window-buttons {
             margin: -2px -10px 0 0;
         }
+
+        .panel:focus {
+            outline: none;
+        }
     </ui:style>
-    <b:Panel>
-        <b:PanelHeader>
-            <b:Heading ui:field="heading" size="H3">
-                <b:ButtonGroup addStyleNames="pull-right {style.window-buttons}">
-                    <b:Button ui:field="upButton" icon="ARROW_CIRCLE_UP" addStyleNames="{style.move-button}"
-                              size="EXTRA_SMALL" title="{messages.moveUpButtonTooltip}"/>
-                    <b:Button ui:field="downButton" icon="ARROW_CIRCLE_DOWN" addStyleNames="{style.move-button}"
-                              size="EXTRA_SMALL" title="{messages.moveDownButtonTooltip}"/>
-                    <b:Button ui:field="editButton" icon="EDIT" addStyleNames="{style.edit-button}"
-                              size="EXTRA_SMALL" title="{messages.editButtonTooltip}"/>
-                    <b:Button ui:field="closeButton" icon="CLOSE" addStyleNames="{style.close-button}"
-                              size="EXTRA_SMALL" title="{messages.closeButtonTooltip}"/>
-                </b:ButtonGroup>
-            </b:Heading>
-        </b:PanelHeader>
-        <b:PanelBody ui:field="panelBody" />
-    </b:Panel>
+    <g:FocusPanel ui:field="panelWrapper" addStyleNames="{style.panel}">
+        <b:Panel ui:field="panel">
+            <b:PanelHeader>
+                <b:Heading ui:field="heading" size="H3">
+                    <b:ButtonGroup addStyleNames="pull-right {style.window-buttons}">
+                        <b:Button ui:field="upButton" icon="ARROW_CIRCLE_UP" addStyleNames="{style.move-button}"
+                                  size="EXTRA_SMALL" title="{messages.moveUpButtonTooltip}"/>
+                        <b:Button ui:field="downButton" icon="ARROW_CIRCLE_DOWN" addStyleNames="{style.move-button}"
+                                  size="EXTRA_SMALL" title="{messages.moveDownButtonTooltip}"/>
+                        <b:Button ui:field="editButton" icon="EDIT" addStyleNames="{style.edit-button}"
+                                  size="EXTRA_SMALL" title="{messages.editButtonTooltip}"/>
+                        <b:Button ui:field="closeButton" icon="CLOSE" addStyleNames="{style.close-button}"
+                                  size="EXTRA_SMALL" title="{messages.closeButtonTooltip}"/>
+                    </b:ButtonGroup>
+                </b:Heading>
+            </b:PanelHeader>
+            <b:PanelBody ui:field="panelBody" />
+        </b:Panel>
+    </g:FocusPanel>
 </ui:UiBinder>

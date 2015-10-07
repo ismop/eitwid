@@ -8,6 +8,8 @@ public interface IPanelView extends IsWidget {
         void moveUp();
         void moveDown();
         void edit();
+        void mouseOut();
+        void mouseOver();
     }
 
     void setTitle(String title);

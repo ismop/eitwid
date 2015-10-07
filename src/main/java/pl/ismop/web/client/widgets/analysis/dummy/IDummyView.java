@@ -14,6 +14,5 @@ public interface IDummyView {
         void showSection2();
         void showProfile1();
         void showProfile2();
-        void clearMinimap();
     }
 }
