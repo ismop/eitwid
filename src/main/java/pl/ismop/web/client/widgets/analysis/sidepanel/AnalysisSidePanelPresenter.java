@@ -88,22 +88,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private void initMinimap() {
         if (miniMap == null) {
             miniMap = eventBus.addHandler(MapPresenter.class);
-
             view.setMinimap(miniMap.getView());
-
-            dapController.getSections("1", new DapController.SectionsCallback() {
-                @Override
-                public void processSections(List<Section> sections) {
-                    for (Section section : sections) {
-                        miniMap.addSection(section);
-                    }
-                }
-
-                @Override
-                public void onError(ErrorDetails errorDetails) {
-                    eventBus.showError(errorDetails);
-                }
-            });
         }
     }
 
@@ -112,6 +97,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         if (this.selectedExperiment != selectedExperiment) {
             this.selectedExperiment = selectedExperiment;
             loadExperimentWaveShape();
+            loadExperimentLevee();
             eventBus.experimentChanged(selectedExperiment);
         }
     }
@@ -163,6 +149,23 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                 }
             });
         }
+    }
+
+    private void loadExperimentLevee() {
+        miniMap.reset(false);
+        dapController.getSections(selectedExperiment.getLeveeId() + "", new DapController.SectionsCallback() {
+            @Override
+            public void processSections(List<Section> sections) {
+                for (Section section : sections) {
+                    miniMap.addSection(section);
+                }
+            }
+
+            @Override
+            public void onError(ErrorDetails errorDetails) {
+                eventBus.showError(errorDetails);
+            }
+        });
     }
 
     private void showExperimentWaveShape(Map<Parameter, List<Measurement>> series) {
