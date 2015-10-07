@@ -18,7 +18,5 @@
 
         <b:Button ui:field="showProfile1" text="Show profile 1" />
         <b:Button ui:field="showProfile2" text="Show profile 2" />
-
-        <b:Button ui:field="clearMinimap" text="Clear minimap" />
     </g:HTMLPanel>
 </ui:UiBinder>

@@ -11,8 +11,9 @@ import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
-import pl.ismop.web.client.widgets.analysis.comparison.IPanelContent;
+import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.analysis.dummy.IDummyView.IDumyPresenter;
+import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -22,17 +23,17 @@ import java.util.List;
 public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
         implements IPanelContent<IDummyView, MainEventBus>, IDumyPresenter {
     private final DapController dapController;
-    Date date;
-    Experiment experiment;
+    private ISelectionManager selectionManager;
+    private Date date;
+    private Experiment experiment;
 
     // dummy 2 devices with hardcoded ids, just for tests.
-    List<Device> devices;
+    private List<Device> devices;
 
     // dummy 2 sections with hardcoded ids, just for tests.
-    List<Section> sections;
-
+    private List<Section> sections;
     // dummy 2 profiles with hardcoded ids, just for tests.
-    List<Profile> profiles;
+    private List<Profile> profiles;
 
     @Inject
     public DummyPresenter(DapController dapController) {
@@ -95,6 +96,11 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
         Window.alert("Edit this view");
     }
 
+    @Override
+    public void setSelectionManager(ISelectionManager selectionManager) {
+        this.selectionManager = selectionManager;
+    }
+
     private void updateTitle() {
         String title = "";
         if (experiment != null) {
@@ -120,56 +126,51 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
 
     @Override
     public void showDevice1() {
-        eventBus.showDevice(devices.get(0));
+        selectionManager.showDevice(devices.get(0));
     }
 
     @Override
     public void showDevice2() {
-        eventBus.showDevice(devices.get(1));
+        selectionManager.showDevice(devices.get(1));
     }
 
     @Override
     public void selectDevice1() {
-        eventBus.selectDevice(devices.get(0));
+        selectionManager.selectDevice(devices.get(0));
     }
 
     @Override
     public void unselectDevice1() {
-        eventBus.unselectDevice(devices.get(0));
+        selectionManager.unselectDevice(devices.get(0));
     }
 
     @Override
     public void selectDevice2() {
-        eventBus.selectDevice(devices.get(1));
+        selectionManager.selectDevice(devices.get(1));
     }
 
     @Override
     public void unselectDevice2() {
-        eventBus.unselectDevice(devices.get(1));
+        selectionManager.unselectDevice(devices.get(1));
     }
 
     @Override
     public void showSection1() {
-        eventBus.showSection(sections.get(0));
+        selectionManager.showSection(sections.get(0));
     }
 
     @Override
     public void showSection2() {
-        eventBus.showSection(sections.get(1));
+        selectionManager.showSection(sections.get(1));
     }
 
     @Override
     public void showProfile1() {
-        eventBus.showProfile(profiles.get(0));
+        selectionManager.showProfile(profiles.get(0));
     }
 
     @Override
     public void showProfile2() {
-        eventBus.showProfile(profiles.get(1));
-    }
-
-    @Override
-    public void clearMinimap() {
-        eventBus.clearMinimap();
+        selectionManager.showProfile(profiles.get(1));
     }
 }
