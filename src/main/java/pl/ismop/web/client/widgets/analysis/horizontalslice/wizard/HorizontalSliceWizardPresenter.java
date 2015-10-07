@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.swing.text.View;
 
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -28,6 +27,7 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.IHorizontalSliceWizardView.IHorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 
@@ -48,6 +48,8 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	private Map<Profile, List<Device>> profileDevicesMap;
 	
 	private Map<String, Parameter> parameterMap;
+	
+	private Map<String, String> pickedHeights;
 
 	@Inject
 	public HorizontalSliceWizardPresenter(DapController dapController) {
@@ -56,6 +58,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		parameterNames = new HashSet<>();
 		profileDevicesMap = new HashMap<>();
 		parameterMap = new HashMap<>();
+		pickedHeights = new HashMap<>();
 	}
 	
 	public void onShowHorizontalCrosssectionWizard() {
@@ -65,6 +68,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		pickedParameterName = null;
 		profileDevicesMap.clear();
 		parameterMap.clear();
+		pickedHeights.clear();
 		view.showModal(true);
 	}
 	
@@ -195,6 +199,34 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		}
 	}
 
+	@Override
+	public void onAddPanel() {
+		if(pickedProfiles.size() == 0 || pickedParameterName == null) {
+			view.showNoProfilePickedError();
+		} else {
+			Map<Profile, String> profileHeights = collectProfileHeights();
+			HorizontalSlicePresenter horizontalSlicePresenter = eventBus.addHandler(HorizontalSlicePresenter.class);
+			horizontalSlicePresenter.setProfileHeights(profileHeights);
+			eventBus.addPanel(view.getFullPanelTitle(), horizontalSlicePresenter);
+			view.showModal(false);
+		}
+	}
+
+	@Override
+	public void onChangePickedHeight(String profileId, String height) {
+		pickedHeights.put(profileId, height);
+	}
+
+	private Map<Profile, String> collectProfileHeights() {
+		Map<Profile, String> result = new HashMap<>();
+		
+		for(Profile profile : pickedProfiles.values()) {
+			result.put(profile, pickedHeights.get(profile.getId()));
+		}
+		
+		return result;
+	}
+
 	private void computeHeights(List<Device> devices, String profileId) {
 		Map<Double, List<Device>> result = new HashMap<>();
 		
@@ -231,6 +263,11 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 			
 			for(Double height : result.keySet()) {
 				view.addProfileHeight(height, profileId, first);
+				
+				if(first) {
+					pickedHeights.put(profileId, String.valueOf(height));
+				}
+				
 				first = false;
 			}
 		}

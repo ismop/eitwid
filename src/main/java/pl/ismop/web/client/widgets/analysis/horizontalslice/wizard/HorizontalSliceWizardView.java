@@ -21,10 +21,13 @@ import org.gwtbootstrap3.client.ui.Radio;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -74,6 +77,11 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@UiHandler("modal")
 	void modalHide(ModalHideEvent event) {
 		getPresenter().onModalHide();
+	}
+	
+	@UiHandler("add")
+	void addPanel(ClickEvent event) {
+		getPresenter().onAddPanel();
 	}
 
 	@Override
@@ -160,9 +168,17 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void addProfileHeight(Double height, String profileId, boolean check) {
+	public void addProfileHeight(final Double height, final String profileId, boolean check) {
 		Radio radio = new Radio(profileId, messages.heightLabel() + " " + String.valueOf(NumberFormat.getFormat("0.00").format(height)));
 		radio.setValue(check);
+		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if(event.getValue()) {
+					getPresenter().onChangePickedHeight(profileId, String.valueOf(height));
+				}
+			}
+		});
 		profileHeightsContainers.get(profileId).add(radio);
 	}
 
@@ -189,5 +205,15 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@Override
 	public void showNoParamtersLabel(boolean show) {
 		noParameters.setVisible(show);
+	}
+
+	@Override
+	public void showNoProfilePickedError() {
+		Window.alert(messages.noProfilePickedError());
+	}
+
+	@Override
+	public String getFullPanelTitle() {
+		return messages.fullPanelTitle();
 	}
 }
