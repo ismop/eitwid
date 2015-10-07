@@ -23,16 +23,6 @@
 
 		.minimap {
 			width: 100%;
-			height: 40%;
-		}
-
-		.actions {
-			width: 100%;
-			height: 20%;
-		}
-
-		.bottom {
-			width: 100%;
 			height: 60%;
 		}
 	</ui:style>
@@ -40,18 +30,13 @@
 		<g:HTMLPanel tag="h1" addStyleNames="{style.experiments}">
 				<b:DropDown ui:field="dropDown">
 					<b:Anchor ui:field="selectedExperiment" dataToggle="DROPDOWN" />
-					<b:DropDownMenu ui:field="experimentList">
-						<!--<b:AnchorListItem>Experiment 1</b:AnchorListItem>-->
-						<!--<b:AnchorListItem>Experiment 2</b:AnchorListItem>-->
-						<!--<b:AnchorListItem>Experiment 3</b:AnchorListItem>-->
-						<!--<b:AnchorListItem>Experiment 4</b:AnchorListItem>-->
-					</b:DropDownMenu>
+					<b:DropDownMenu ui:field="experimentList" />
 				</b:DropDown>
 		</g:HTMLPanel>
 
 		<hr />
 
 		<g:FlowPanel ui:field="waterWavePanel" addStyleNames="{style.waterWave}"/>
-		<g:FlowPanel ui:field="miniMapPanel" addStyleNames="{style.bottom}"/>
+		<g:FlowPanel ui:field="miniMapPanel" addStyleNames="{style.minimap}"/>
 	</g:HTMLPanel>
 </ui:UiBinder>
