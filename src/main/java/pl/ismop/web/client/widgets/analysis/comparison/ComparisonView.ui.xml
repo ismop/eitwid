@@ -18,7 +18,7 @@
 		}
 
 		.scroll-panel {
-			height:  literal("calc(100% - 155px)");;
+			height:  literal("calc(100% - 155px)");
 			width: 100%;
 		}
 
