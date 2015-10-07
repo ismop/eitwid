@@ -45,6 +45,8 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	
 	private Map<String, IsWidget> profileWidgets;
 	
+	private Map<String, IsWidget> parameterWidgets;
+	
 	@UiField
 	HorizontalSliceWizardMessages messages;
 	
@@ -52,15 +54,16 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	Modal modal;
 	
 	@UiField
-	FlowPanel mapContainer, profiles;
+	FlowPanel mapContainer, profiles, parameters;
 	
 	@UiField
-	Label noProfilesPicked;
+	Label noProfilesPicked, noParameters;
 
 	public HorizontalSliceWizardView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		profileHeightsContainers = new HashMap<>();
 		profileWidgets = new HashMap<>();
+		parameterWidgets = new HashMap<>();
 	}
 	
 	@UiHandler("modal")
@@ -166,5 +169,25 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@Override
 	public void showNoProfileLabel() {
 		noProfilesPicked.setVisible(true);
+	}
+
+	@Override
+	public void addParameter(String parameterName, boolean check) {
+		noParameters.setVisible(false);
+		
+		Radio radio = new Radio("parameters", parameterName);
+		radio.setValue(check);
+		parameterWidgets.put(parameterName, radio);
+		parameters.add(radio);
+	}
+
+	@Override
+	public void removeParameter(String parameterName) {
+		parameters.remove(parameterWidgets.remove(parameterName));
+	}
+
+	@Override
+	public void showNoParamtersLabel(boolean show) {
+		noParameters.setVisible(show);
 	}
 }

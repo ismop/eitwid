@@ -50,6 +50,7 @@
 						<g:FlowPanel addStyleNames="{style.parameterPanel}">
 							<b:Heading size="H3" text="{messages.pickParameterLabel}"/>
 							<b:Label ui:field="noParameters" text="{messages.noParametersLabel}"/>
+							<g:FlowPanel ui:field="parameters"/>
 							<g:FlowPanel addStyleNames="{style.buttonsPanel}">
 								<b:Button text="{messages.addPanelLabel}" type="PRIMARY"></b:Button>
 							</g:FlowPanel>
