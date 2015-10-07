@@ -4,15 +4,15 @@
     <ui:with type="pl.ismop.web.client.widgets.common.panel.PanelMessages" field="messages"/>
     <ui:style>
         .close-button:hover {
-            color: darkred;
+            color: red;
         }
 
         .move-button:hover {
-            color: darkgreen;
+            color: white;
         }
 
         .edit-button:hover {
-            color: darkgoldenrod;
+            color: goldenrod;
         }
 
         .window-buttons {
