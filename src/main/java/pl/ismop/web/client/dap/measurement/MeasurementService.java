@@ -23,7 +23,7 @@ public interface MeasurementService  extends RestService {
 	void getLastMeasurements(@PathParam("timelineIds") String timelineIds,
 							 @PathParam("timeFrom") String timeFrom, @PathParam("timeTo") String timeTo,
 						 	 MethodCallback<MeasurementsResponse> callback);
-	
+
 	@GET
 	@Path("measurements?timeline_id={timelineIds}&time_from={timeFrom}&time_to={timeTo}&quantity={quantity}")
 	void getMeasurementsWithQuantity(@PathParam("timelineIds") String timelineIds,
