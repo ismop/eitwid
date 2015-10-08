@@ -155,6 +155,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         dapController.getSections(selectedExperiment.getLeveeId() + "", new DapController.SectionsCallback() {
             @Override
             public void processSections(List<Section> sections) {
+                selectedExperiment.setSections(sections);
                 for (Section section : sections) {
                     miniMap.addSection(section);
                 }

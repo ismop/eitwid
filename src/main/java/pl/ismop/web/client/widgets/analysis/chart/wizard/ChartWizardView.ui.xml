@@ -2,14 +2,71 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:b='urn:import:org.gwtbootstrap3.client.ui'>
     <ui:with type="pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardMessages" field="messages"/>
+    <ui:style>
+        @external .modal-dialog, .modal-content, .modal-body;
+
+        .row, .column {
+            height: 100%;
+        }
+
+
+        .modal .modal-dialog {
+            height: 90%;
+        }
+
+        .modal .modal-content {
+            height: 100%;
+        }
+
+        .modal .modal-body {
+            height: literal("calc(100% - 125px)");
+            overflow-y: auto;
+        }
+
+        .panels {
+            margin: 15px;
+        }
+
+        .scroll-panel {
+            height: 100%;
+            width: 100%;
+        }
+
+        .map {
+            height: literal("calc(100% - 50px)");
+        }
+
+        .actions {
+            height: 50px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .action-button {
+            margin: 10px;
+        }
+    </ui:style>
     <g:HTMLPanel>
-        <b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%">
+        <b:Modal ui:field="modal" title="{messages.title}" fade="true" width="50%" addStyleNames="{style.modal}">
             <b:ModalBody>
-                <g:HTML>Modal body...</g:HTML>
+                <b:Row addStyleNames="{style.row}">
+                    <b:Column size="MD_9" addStyleNames="{style.column}">
+                        <g:ScrollPanel addStyleNames="{style.scroll-panel}">
+                            <g:FlowPanel ui:field="panels" addStyleNames="{style.panels}" />
+                        </g:ScrollPanel>
+                    </b:Column>
+                    <b:Column size="MD_3" addStyleNames="{style.column}">
+                        <g:FlowPanel ui:field="mapPanel" addStyleNames="{style.map}"/>
+                        <g:FlowPanel addStyleNames="{style.actions}">
+                            <b:Button ui:field="addSensorButton" text="{messages.addSensorButtonTitle}"
+                                      icon="PLUS" addStyleNames="{style.action-button}"/>
+                        </g:FlowPanel>
+                    </b:Column>
+                </b:Row>
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button ui:field="okButton" type="PRIMARY">Do something</b:Button>
-                <b:Button type="DEFAULT" dataDismiss="MODAL">Close</b:Button>
+                <b:Button ui:field="okButton" type="PRIMARY" text="{messages.okButtonTitle}" />
+                <b:Button type="DEFAULT" dataDismiss="MODAL" text="{messages.closeButtonTitle}" />
             </b:ModalFooter>
         </b:Modal>
     </g:HTMLPanel>

@@ -14,11 +14,11 @@ import java.util.Date;
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         implements IPanelContent<IChartView, MainEventBus> {
-
+    private Experiment selectedExperiment;
 
     @Override
     public void setSelectedExperiment(Experiment experiment) {
-
+        selectedExperiment = experiment;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     @Override
     public void edit() {
-        eventBus.addHandler(ChartWizardPresenter.class).show(new ChartWizardPresenter.ShowResult() {
+        eventBus.addHandler(ChartWizardPresenter.class).show(selectedExperiment, new ChartWizardPresenter.ShowResult() {
             @Override
             public void ok() {
                 GWT.log("Update tab configuration");
