@@ -173,13 +173,18 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         Parameter parameter = null;
         for (Map.Entry<Parameter, List<Measurement>> entry : series.entrySet()) {
             parameter = entry.getKey();
-            Series s = waterWave.createSeries().
-                    setType(Series.Type.SPLINE).
-                    setName(parameter.getParameterName());
-            for (Measurement measurement : entry.getValue()) {
-                s.addPoint(format.parse(measurement.getTimestamp()).getTime(), measurement.getValue());
+            if (entry.getValue().size() > 0) {
+                Measurement first = entry.getValue().get(0);
+                long delta = selectedExperiment.getStartDate().getTime() - format.parse(first.getTimestamp()).getTime();
+                Series s = waterWave.createSeries().
+                        setType(Series.Type.SPLINE).
+                        setName(parameter.getParameterName());
+                
+                for (Measurement measurement : entry.getValue()) {
+                    s.addPoint(format.parse(measurement.getTimestamp()).getTime() + delta, measurement.getValue());
+                }
+                waterWave.addSeries(s);
             }
-            waterWave.addSeries(s);
         }
 
         if(parameter != null) {
