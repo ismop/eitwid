@@ -27,6 +27,7 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssectionConfiguration;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.IHorizontalSliceWizardView.IHorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
@@ -39,43 +40,35 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	
 	private DapController dapController;
 	
-	private Map<String, Profile> pickedProfiles;
-	
-	private Set<String> parameterNames;
-	
-	private String pickedParameterName;
-	
-	private Map<Profile, List<Device>> profileDevicesMap;
-	
-	private Map<String, Parameter> parameterMap;
-	
-	private Map<String, String> pickedHeights;
+	private boolean configMode;
+
+	private HorizontalCrosssectionConfiguration configuration;
 
 	@Inject
 	public HorizontalSliceWizardPresenter(DapController dapController) {
 		this.dapController = dapController;
-		pickedProfiles = new HashMap<>();
-		parameterNames = new HashSet<>();
-		profileDevicesMap = new HashMap<>();
-		parameterMap = new HashMap<>();
-		pickedHeights = new HashMap<>();
 	}
 	
 	public void onShowHorizontalCrosssectionWizard() {
-		pickedProfiles.clear();
 		view.clearProfiles();
-		parameterNames.clear();
-		pickedParameterName = null;
-		profileDevicesMap.clear();
-		parameterMap.clear();
-		pickedHeights.clear();
+		view.clearParameters();
+		configMode = false;
+		view.showButtonConfigLabel(false);
+		
+		configuration = new HorizontalCrosssectionConfiguration();
 		view.showModal(true);
 	}
 	
+	public void onShowHorizontalCrosssectionWizardWithConfig(HorizontalCrosssectionConfiguration configuration) {
+		onShowHorizontalCrosssectionWizard();
+		this.configuration = configuration;
+		initializeConfigMode();
+	}
+	
 	public void onProfileClicked(final Profile profile) {
-		if(!pickedProfiles.containsKey(profile.getId())) {
+		if(!configuration.getPickedProfiles().containsKey(profile.getId())) {
 			view.addProfile(profile.getId());
-			pickedProfiles.put(profile.getId(), profile);
+			configuration.getPickedProfiles().put(profile.getId(), profile);
 			view.showLoadingState(true, profile.getId());
 			dapController.getDevicesRecursively(profile.getId(), new DevicesCallback() {
 				@Override
@@ -91,11 +84,11 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 					for(Device device : devices) {
 						deviceIds.add(device.getId());
 						
-						if(profileDevicesMap.get(profile) == null) {
-							profileDevicesMap.put(profile, new ArrayList<Device>());
+						if(configuration.getProfileDevicesMap().get(profile) == null) {
+							configuration.getProfileDevicesMap().put(profile, new ArrayList<Device>());
 						}
 						
-						profileDevicesMap.get(profile).add(device);
+						configuration.getProfileDevicesMap().get(profile).add(device);
 					}
 					
 					dapController.getParameters(deviceIds, new ParametersCallback() {
@@ -110,7 +103,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 							view.showLoadingState(false, profile.getId());
 							
 							for(Parameter parameter : parameters) {
-								parameterMap.put(parameter.getId(), parameter);
+								configuration.getParameterMap().put(parameter.getId(), parameter);
 							}
 							
 							computeHeights(devices, profile.getId());
@@ -176,21 +169,23 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 	@Override
 	public void onRemoveProfile(String profileId) {
-		if(pickedProfiles.containsKey(profileId)) {
-			pickedProfiles.remove(profileId);
+		if(configuration.getPickedProfiles().containsKey(profileId)) {
+			Profile removedProfile = configuration.getPickedProfiles().remove(profileId);
+			String pickedHeight = configuration.getPickedHeights().remove(removedProfile);
+			configuration.getHeightDevicesmap().remove(pickedHeight);
 			view.removeProfile(profileId);
 			
-			if(pickedProfiles.size() == 0) {
+			if(configuration.getPickedProfiles().size() == 0) {
 				view.showNoProfileLabel();
 			}
 			
 			//updating parameter list
 			List<Parameter> parameters = new ArrayList<>();
 			
-			for(Profile profile : pickedProfiles.values()) {
-				for(Device device : profileDevicesMap.get(profile)) {
+			for(Profile profile : configuration.getPickedProfiles().values()) {
+				for(Device device : configuration.getProfileDevicesMap().get(profile)) {
 					for(String parameterId : device.getParameterIds()) {
-						parameters.add(parameterMap.get(parameterId));
+						parameters.add(configuration.getParameterMap().get(parameterId));
 					}
 				}
 			}
@@ -200,31 +195,53 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	}
 
 	@Override
-	public void onAddPanel() {
-		if(pickedProfiles.size() == 0 || pickedParameterName == null) {
+	public void onAcceptConfig() {
+		if(configuration.getPickedProfiles().size() == 0 || configuration.getPickedParameterName() == null) {
 			view.showNoProfilePickedError();
 		} else {
-			Map<Profile, String> profileHeights = collectProfileHeights();
-			HorizontalSlicePresenter horizontalSlicePresenter = eventBus.addHandler(HorizontalSlicePresenter.class);
-			horizontalSlicePresenter.setProfileHeights(profileHeights);
-			eventBus.addPanel(view.getFullPanelTitle(), horizontalSlicePresenter);
+			if(configMode) {
+				eventBus.updateHorizontalSliceConfiguration(configuration);
+			} else {
+				HorizontalSlicePresenter horizontalSlicePresenter = eventBus.addHandler(HorizontalSlicePresenter.class);
+				horizontalSlicePresenter.setConfiguration(configuration);
+				eventBus.addPanel(view.getFullPanelTitle(), horizontalSlicePresenter);
+			}
+			
 			view.showModal(false);
 		}
 	}
 
 	@Override
 	public void onChangePickedHeight(String profileId, String height) {
-		pickedHeights.put(profileId, height);
+		configuration.getPickedHeights().put(configuration.getPickedProfiles().get(profileId), height);
 	}
 
-	private Map<Profile, String> collectProfileHeights() {
-		Map<Profile, String> result = new HashMap<>();
+	@Override
+	public void onParameterChanged(String parameterName) {
+		configuration.setPickedParameterName(parameterName);
+	}
+
+	private void initializeConfigMode() {
+		configMode = true;
+		view.showButtonConfigLabel(true);
 		
-		for(Profile profile : pickedProfiles.values()) {
-			result.put(profile, pickedHeights.get(profile.getId()));
+		for(String parameterName : configuration.getParameterNames()) {
+			if(parameterName.equals(configuration.getPickedParameterName())) {
+				view.addParameter(parameterName, true);
+			} else {
+				view.addParameter(parameterName, false);
+			}
 		}
 		
-		return result;
+		for(String profileId : configuration.getPickedProfiles().keySet()) {
+			view.addProfile(profileId);
+			
+			Profile profile = configuration.getPickedProfiles().get(profileId);
+			
+			for(String height : configuration.getProfileHeights().get(profile)) {
+				view.addProfileHeight(Double.parseDouble(height), profileId, configuration.getPickedHeights().get(profile).equals(height));
+			}
+		}
 	}
 
 	private void computeHeights(List<Device> devices, String profileId) {
@@ -260,12 +277,17 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 			}
 			
 			boolean first = true;
+			Profile profile = configuration.getPickedProfiles().get(profileId);
+			configuration.getProfileHeights().put(profile, new ArrayList<String>());
 			
 			for(Double height : result.keySet()) {
+				configuration.getProfileHeights().get(profile).add(String.valueOf(height));
 				view.addProfileHeight(height, profileId, first);
 				
 				if(first) {
-					pickedHeights.put(profileId, String.valueOf(height));
+					String heightValue = String.valueOf(height);
+					configuration.getPickedHeights().put(profile, heightValue);
+					configuration.getHeightDevicesmap().put(heightValue, result.get(height));
 				}
 				
 				first = false;
@@ -280,35 +302,35 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 			result.add(parameter.getMeasurementTypeName());
 		}
 		
-		for(Iterator<String> i = parameterNames.iterator(); i.hasNext();) {
+		for(Iterator<String> i = configuration.getParameterNames().iterator(); i.hasNext();) {
 			String parameterName = i.next();
 			
 			if(!result.contains(parameterName)) {
 				i.remove();
-				parameterNames.remove(parameterName);
+				configuration.getParameterNames().remove(parameterName);
 				view.removeParameter(parameterName);
 				
-				if(pickedParameterName.equals(parameterName)) {
-					pickedParameterName = null;
+				if(configuration.getPickedParameterName().equals(parameterName)) {
+					configuration.setPickedParameterName(null);
 				}
 			}
 		}
 		
 		for(String parameterName : result) {
-			if(!this.parameterNames.contains(parameterName)) {
-				if(pickedParameterName == null) {
+			if(!configuration.getParameterNames().contains(parameterName)) {
+				if(configuration.getPickedParameterName() == null) {
 					view.addParameter(parameterName, true);
-					pickedParameterName = parameterName;
+					configuration.setPickedParameterName(parameterName);
 				} else {
 					view.addParameter(parameterName, false);
 				}
 				
-				this.parameterNames.add(parameterName);
+				configuration.getParameterNames().add(parameterName);
 			}
 		}
 		
 		
-		if(parameterNames.size() == 0) {
+		if(configuration.getParameterNames().size() == 0) {
 			view.showNoParamtersLabel(true);
 		}
 	}

@@ -61,6 +61,9 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	
 	@UiField
 	Label noProfilesPicked, noParameters;
+	
+	@UiField
+	Button add;
 
 	public HorizontalSliceWizardView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -81,7 +84,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	
 	@UiHandler("add")
 	void addPanel(ClickEvent event) {
-		getPresenter().onAddPanel();
+		getPresenter().onAcceptConfig();
 	}
 
 	@Override
@@ -145,6 +148,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	public void clearProfiles() {
 		profiles.clear();
 		profileHeightsContainers.clear();
+		profileWidgets.clear();
 		noProfilesPicked.setVisible(true);
 	}
 
@@ -188,11 +192,19 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void addParameter(String parameterName, boolean check) {
+	public void addParameter(final String parameterName, boolean check) {
 		noParameters.setVisible(false);
 		
 		Radio radio = new Radio("parameters", parameterName);
 		radio.setValue(check);
+		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if(event.getValue()) {
+					getPresenter().onParameterChanged(parameterName);
+				}
+			}
+		});
 		parameterWidgets.put(parameterName, radio);
 		parameters.add(radio);
 	}
@@ -215,5 +227,21 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@Override
 	public String getFullPanelTitle() {
 		return messages.fullPanelTitle();
+	}
+
+	@Override
+	public void clearParameters() {
+		parameters.clear();
+		parameterWidgets.clear();
+		noParameters.setVisible(true);
+	}
+
+	@Override
+	public void showButtonConfigLabel(boolean show) {
+		if(show) {
+			add.setText(messages.updatePanelLabel());
+		} else {
+			add.setText(messages.addPanelLabel());
+		}
 	}
 }

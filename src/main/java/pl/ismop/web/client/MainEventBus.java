@@ -18,6 +18,8 @@ import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
+import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssectionConfiguration;
+import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
@@ -104,6 +106,9 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = HorizontalSliceWizardPresenter.class, deactivate = LeveeNavigatorPresenter.class)
 	void showHorizontalCrosssectionWizard();
 
+	@Event(handlers = HorizontalSliceWizardPresenter.class, deactivate = LeveeNavigatorPresenter.class)
+	void showHorizontalCrosssectionWizardWithConfig(HorizontalCrosssectionConfiguration configuration);
+
 	@Event(activate = LeveeNavigatorPresenter.class)
 	void horizontalCrosssectionWizardHidden();
 
@@ -162,4 +167,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
 	void clearMinimap();
+
+	@Event(handlers = HorizontalSlicePresenter.class)
+	void updateHorizontalSliceConfiguration(HorizontalCrosssectionConfiguration configuration);
 }
