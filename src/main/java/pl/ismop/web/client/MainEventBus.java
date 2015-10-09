@@ -16,13 +16,13 @@ import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
-import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssectionConfiguration;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
+import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
@@ -113,9 +113,9 @@ public interface MainEventBus extends EventBusWithLookup {
 	void horizontalCrosssectionWizardHidden();
 
 	@Event(handlers = ComparisonPresenter.class)
-	void addPanel(String panelTitle, IPanelContent content);
+	void addPanel(String panelTitle, IPanelContent<?, ?> content);
 
-	@Event(handlers = { DummyPresenter.class, AnalysisSidePanelPresenter.class })
+	@Event(handlers = {DummyPresenter.class, AnalysisSidePanelPresenter.class, HorizontalSlicePresenter.class})
 	void dateChanged(Date selectedDate);
 
 	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })

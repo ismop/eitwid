@@ -6,4 +6,8 @@ public interface IHorizontalSliceView extends IsWidget {
 	interface IHorizontalSlicePresenter {
 		
 	}
+
+	void showLoadingState(boolean show);
+
+	void drawCrosssection();
 }
