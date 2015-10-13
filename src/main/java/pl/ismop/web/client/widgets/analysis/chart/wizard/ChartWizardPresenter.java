@@ -114,11 +114,13 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
 
     @Override
     public void addParameter(String parameterName) {
+        Parameter parameter = nameToParameter.get(parameterName);
         SensorPanelPresenter panelPresenter = eventBus.addHandler(SensorPanelPresenter.class);
-        panelPresenter.setParameter(nameToParameter.get(parameterName));
+        panelPresenter.setParameter(parameter);
         getView().addPanel(panelPresenter.getView());
 
         panels.put(parameterName, panelPresenter);
+        miniMap.selectDevice(parameter.getDevice(), true);
     }
 
     @Override
@@ -126,6 +128,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
         SensorPanelPresenter panel = panels.get(parameterName);
         if (panel != null) {
             removePanel(panel);
+            miniMap.removeDevice(panel.getParameter().getDevice());
         }
     }
 
