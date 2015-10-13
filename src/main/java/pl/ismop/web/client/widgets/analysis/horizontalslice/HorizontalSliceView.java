@@ -1,7 +1,11 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayNumber;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -34,6 +38,46 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		drawLegend(0xecf330, 0x307bf3, 15.0, 20.0);
 	};
 	
+	@Override
+	public void drawMuteSections(List<List<List<Double>>> coordinates) {
+		GWT.log(coordinates.toString());
+		
+		for(List<List<Double>> sectionCoordinates : coordinates) {
+			@SuppressWarnings("unchecked")
+			JsArray<JsArrayNumber> nativeCoordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
+			
+			for(List<Double> pointCoordinates : sectionCoordinates) {
+				JsArrayNumber nativePointCoordinates = (JsArrayNumber) JsArray.createArray();
+				
+				for(Double coordinate : pointCoordinates) {
+					nativePointCoordinates.push(coordinate);
+				}
+				
+				nativeCoordinates.push(nativePointCoordinates);
+			}
+			
+			drawSection(nativeCoordinates);
+		}
+	};
+
+	private native void drawSection(JsArray<JsArrayNumber> nativeCoordinates) /*-{
+		var shape = new $wnd.THREE.Shape();
+		shape.moveTo(nativeCoordinates[0][0], nativeCoordinates[0][1], 0);
+		
+		for(var i = 1; i < nativeCoordinates.length; i++) {
+			shape.lineTo(nativeCoordinates[i][0], nativeCoordinates[i][1], 0);
+		}
+		
+		shape.lineTo(nativeCoordinates[0][0], nativeCoordinates[0][1], 0);
+		
+		var geometry = new $wnd.THREE.ShapeGeometry(shape);
+		var mesh = new $wnd.THREE.Mesh(geometry, new $wnd.THREE.MeshBasicMaterial({color: 0x555555}));
+		console.log(mesh);
+		var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
+	}-*/;
+
 	private native void drawLegend(int topColor, int bottomColor, double bottomValue, double topValue) /*-{
 		var bottom = new $wnd.THREE.Color(bottomColor);
 		var top = new $wnd.THREE.Color(topColor);

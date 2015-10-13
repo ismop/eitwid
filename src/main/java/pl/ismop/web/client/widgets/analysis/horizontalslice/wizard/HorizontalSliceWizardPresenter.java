@@ -140,6 +140,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 				for(Section section : sections) {
 					mapPresenter.addSection(section);
 					sectionIds.add(section.getId());
+					configuration.getSections().put(section.getId(), section);
 				}
 				
 				dapController.getProfiles(sectionIds, new ProfilesCallback() {

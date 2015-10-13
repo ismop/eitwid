@@ -9,6 +9,7 @@ import java.util.Set;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.section.Section;
 
 public class HorizontalCrosssectionConfiguration {
 	private Set<String> parameterNames;
@@ -27,6 +28,8 @@ public class HorizontalCrosssectionConfiguration {
 	
 	private Map<Profile, List<String>> profileHeights;
 	
+	private Map<String, Section> sections;
+	
 	public HorizontalCrosssectionConfiguration() {
 		parameterNames = new HashSet<>();
 		pickedProfiles = new HashMap<>();
@@ -35,6 +38,7 @@ public class HorizontalCrosssectionConfiguration {
 		pickedHeights = new HashMap<>();
 		heightDevicesmap = new HashMap<>();
 		profileHeights = new HashMap<>();
+		sections = new HashMap<>();
 	}
 
 	public Set<String> getParameterNames() {
@@ -99,5 +103,13 @@ public class HorizontalCrosssectionConfiguration {
 
 	public void setProfileHeights(Map<Profile, List<String>> profileHeights) {
 		this.profileHeights = profileHeights;
+	}
+
+	public Map<String, Section> getSections() {
+		return sections;
+	}
+
+	public void setSections(Map<String, Section> sections) {
+		this.sections = sections;
 	}
 }

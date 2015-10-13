@@ -553,7 +553,7 @@ public class DapController {
 
 	public void getMeasurementsForTimelineIdsWithQuantity(List<String> timelineIds, int quantity, final MeasurementsCallback callback) {
 		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(threeDaysEarlier());
+		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
 		measurementService.getMeasurementsWithQuantity(merge(timelineIds, ","), from, until, quantity, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -751,10 +751,6 @@ public class DapController {
 
 	private Date monthEarlier() {
 		return new Date(new Date().getTime() - 2678400000L);
-	}
-
-	private Date threeDaysEarlier() {
-		return new Date(new Date().getTime() - 259200000L);
 	}
 
 	private void collectDevices(List<DeviceAggregate> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
