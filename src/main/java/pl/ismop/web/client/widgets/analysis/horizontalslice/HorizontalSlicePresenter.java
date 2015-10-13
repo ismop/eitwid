@@ -1,5 +1,9 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -7,7 +11,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -166,6 +169,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		for(Section section : muteSections) {
 			if(section.getShape() != null) {
 				List<List<Double>> projected = coordinatesUtil.projectCoordinates(section.getShape().getCoordinates());
+				rotate(projected);
 				coordinates.add(projected);
 				
 				for(List<Double> point : projected) {
@@ -196,5 +200,14 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		}
 		
 		view.drawMuteSections(coordinates);
+	}
+
+	private void rotate(List<List<Double>> points) {
+		for(List<Double> point : points) {
+			double newX = point.get(0) * cos(PI / 2) - point.get(1) * sin(PI / 2);
+			double newY = point.get(0) * sin(PI / 2) + point.get(1) * cos(PI / 2);
+			point.set(0, newX);
+			point.set(1, newY);
+		}
 	}
 }
