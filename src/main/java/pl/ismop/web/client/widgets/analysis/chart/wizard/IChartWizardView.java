@@ -6,12 +6,25 @@ import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.common.map.MapView;
 import pl.ismop.web.client.widgets.common.panel.IPanelView;
 
-public interface IChartWizardView {
+import java.util.Collection;
+import java.util.List;
+
+public interface IChartWizardView extends IsWidget {
     void show();
     void removeFromParent();
     void setMiniMap(IMapView minimap);
 
-    void addSensorPanel(IsWidget panel);
+    void addPanel(IsWidget panel);
+
+    void setDevices(Collection<String> names);
+
+    ChartWizardMessages getMessages();
+
+    void setLoading(String text);
+
+    void removePanel(IsWidget panel);
+
+    void unselectParameter(String parameterName);
 
     interface IChartWizardPresenter {
         void onModalReady();
@@ -20,6 +33,8 @@ public interface IChartWizardView {
 
         void modalOk();
 
-        void addSensor();
+        void addParameter(String parameterName);
+
+        void removeParameter(String parameterName);
     }
 }

@@ -7,4 +7,6 @@ public interface ChartWizardMessages extends Messages {
     String okButtonTitle();
     String closeButtonTitle();
     String addSensorButtonTitle();
+    String loadingDevices();
+    String loadingParameters();
 }

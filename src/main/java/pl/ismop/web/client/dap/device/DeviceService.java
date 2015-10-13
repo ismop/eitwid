@@ -37,4 +37,8 @@ public interface DeviceService extends RestService {
 	@GET
 	@Path("devices?id={idFilter}")
 	void getDevicesForIds(@PathParam("idFilter") String idFilter, MethodCallback<DevicesResponse> methodCallback);
+
+	@GET
+	@Path("devices?levee_id={leveeId}")
+	void getLeveeDevices(@PathParam("leveeId") Integer leveeId, MethodCallback<DevicesResponse> methodCallback);
 }

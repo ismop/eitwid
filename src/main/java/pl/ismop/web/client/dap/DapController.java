@@ -60,6 +60,7 @@ import pl.ismop.web.client.error.ErrorCallback;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.error.ErrorUtil;
 import pl.ismop.web.client.hypgen.Experiment;
+import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
 @Singleton
 public class DapController {
@@ -479,6 +480,20 @@ public class DapController {
 		});
 	}
 
+	public void getLeveeParameters(Integer leveeId, final ParametersCallback callback) {
+		parameterService.getLeveeParameters(leveeId, new MethodCallback<ParametersResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ParametersResponse response) {
+				callback.processParameters(response.getParameters());
+			}
+		});
+	}
+
 	public void getContext(String contextType, final ContextsCallback callback) {
 		contextService.getContexts(contextType, new MethodCallback<ContextsResponse>() {
 			@Override
@@ -709,6 +724,20 @@ public class DapController {
 
 	public void getDevices(List<String> deviceIds, final DevicesCallback callback) {
 		deviceService.getDevicesForIds(merge(deviceIds, ","), new MethodCallback<DevicesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DevicesResponse response) {
+				callback.processDevices(response.getDevices());
+			}
+		});
+	}
+
+	public void getLeveeDevices(Integer leveeId, final DevicesCallback callback) {
+		deviceService.getLeveeDevices(leveeId, new MethodCallback<DevicesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));

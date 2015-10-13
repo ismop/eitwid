@@ -19,29 +19,37 @@
         .devices-select {
             margin: -10px 0 -10px -12px !important;
         }
+
+        .row, .column {
+            height: 100%;
+        }
+
+        .well {
+            height: 100%;
+            margin: 0px;
+        }
     </ui:style>
     <g:FocusPanel ui:field="panelWrapper" addStyleNames="{style.panel}">
         <b:Panel ui:field="panel">
             <b:PanelHeader>
-                <b:Heading ui:field="heading" size="H3">
-                    <b:Row>
-                        <b:Column size="MD_8">
-                        <select:Select ui:field="devices" liveSearch="true" addStyleNames="{style.devices-select}">
-                            <select:Option text="Device 1"/>
-                            <select:Option text="Device 2"/>
-                            <select:Option text="Device 3"/>
-                        </select:Select>
-                        </b:Column>
-                        <b:Column size="MD_4">
-                        <b:ButtonGroup addStyleNames="pull-right {style.window-buttons}">
-                            <b:Button ui:field="closeButton" icon="CLOSE" addStyleNames="{style.close-button}"
-                                      size="EXTRA_SMALL" title="{messages.closeButtonTooltip}"/>
-                        </b:ButtonGroup>
-                        </b:Column>
-                    </b:Row>
-                </b:Heading>
+                <b:Heading ui:field="heading" size="H3" />
             </b:PanelHeader>
-            <b:PanelBody ui:field="panelBody" />
+            <b:PanelBody ui:field="panelBody">
+                <b:Row addStyleNames="{style.row}">
+                    <b:Column size="MD_12" addStyleNames="{style.column}">
+                        <select:Select ui:field="readings" liveSearch="true">
+                            <select:Option text="Parameter 1"/>
+                            <select:Option text="Parameter 2"/>
+                            <select:Option text="Parameter 3"/>
+                        </select:Select>
+                    </b:Column>
+                </b:Row>
+                <b:Row addStyleNames="{style.row}">
+                    <b:Column size="MD_12" addStyleNames="{style.column}">
+                        <b:Well ui:field="selectedSeries" size="SMALL" addStyleNames="{style.well}" />
+                    </b:Column>
+                </b:Row>
+            </b:PanelBody>
         </b:Panel>
     </g:FocusPanel>
 </ui:UiBinder>
