@@ -49,6 +49,7 @@ public class ChartView extends Composite implements IChartView {
                                 .setMonth("%e. %b")
                                 .setYear("%b")
                 );
+
         chart.hideLoading();
 
         boolean dataExists = false;

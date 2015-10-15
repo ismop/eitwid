@@ -46,25 +46,12 @@
             width: 100%;
             text-align: center;
         }
-
-        .action-button {
-            margin: 10px;
-        }
-
-        .progress {
-            text-align: center;
-        }
     </ui:style>
     <g:HTMLPanel>
         <b:Modal ui:field="modal" title="{messages.title}" fade="true" width="55%" addStyleNames="{style.modal}">
             <b:ModalBody>
                 <b:Row addStyleNames="{style.row}">
                     <b:Column size="MD_9" addStyleNames="{style.column}">
-                        <g:ScrollPanel addStyleNames="{style.scroll-panel}">
-                            <g:FlowPanel ui:field="panels" addStyleNames="{style.panels}" />
-                        </g:ScrollPanel>
-                    </b:Column>
-                    <b:Column size="MD_3" addStyleNames="{style.column}">
                         <g:FlowPanel addStyleNames="{style.actions}">
                             <b:Row addStyleNames="{style.row}" ui:field="loading">
                                 <b:Column size="MD_12">
@@ -79,6 +66,11 @@
                                 </b:Column>
                             </b:Row>
                         </g:FlowPanel>
+                        <g:ScrollPanel addStyleNames="{style.scroll-panel}">
+                            <g:FlowPanel ui:field="panels" addStyleNames="{style.panels}" />
+                        </g:ScrollPanel>
+                    </b:Column>
+                    <b:Column size="MD_3" addStyleNames="{style.column}">
                         <g:FlowPanel ui:field="mapPanel" addStyleNames="{style.map}"/>
                     </b:Column>
                 </b:Row>
