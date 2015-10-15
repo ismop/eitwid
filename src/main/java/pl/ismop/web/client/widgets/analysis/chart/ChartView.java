@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.moxieapps.gwt.highcharts.client.*;
 import pl.ismop.web.client.dap.parameter.Parameter;
@@ -21,7 +22,10 @@ public class ChartView extends Composite implements IChartView {
     ChartMessages messages;
 
     @UiField
+    FlowPanel chartPanel;
+
     Chart chart;
+
     private PlotLine currentTimePlotLine;
 
     interface ChartViewUiBinder extends UiBinder<Widget, ChartView> {}
@@ -37,19 +41,14 @@ public class ChartView extends Composite implements IChartView {
 
     @Override
     public void showLoading(String message) {
+        initChart();
         chart.showLoading(message);
     }
 
     @Override
     public void setSeries(Map<Timeline, List<DateChartPoint>> timelineToMeasurements) {
-        chart.removeAllSeries();
-        chart.getXAxis()
-                .setType(Axis.Type.DATE_TIME)
-                .setDateTimeLabelFormats(new DateTimeLabelFormats()
-                                .setMonth("%e. %b")
-                                .setYear("%b")
-                );
 
+        chart.removeAllSeries();
         chart.hideLoading();
 
         boolean dataExists = false;
@@ -70,14 +69,31 @@ public class ChartView extends Composite implements IChartView {
         }
     }
 
+    private void initChart() {
+        if (chart == null) {
+            chart = new Chart();
+
+            chart.getXAxis()
+                    .setType(Axis.Type.DATE_TIME)
+                    .setDateTimeLabelFormats(new DateTimeLabelFormats()
+                                    .setMonth("%e. %b")
+                                    .setYear("%b")
+                    );
+        }
+    }
+
     @Override
     public void selectDate(Date selectedDate, String color) {
+        initChart();
+
         if (currentTimePlotLine != null) {
             chart.getXAxis().removePlotLine(currentTimePlotLine);
         }
         currentTimePlotLine = chart.getXAxis().createPlotLine().
                 setWidth(2).setColor(color).setValue(selectedDate.getTime());
         chart.getXAxis().addPlotLines(currentTimePlotLine);
+
+        chartPanel.add(chart);
     }
 
     @Override
