@@ -19,4 +19,9 @@ public interface TimelineService extends RestService {
 	@Path("timelines?experiment_id={experimentId}")
 	void getExperimentTimelines(@PathParam("experimentId") String experimentId,
 								 MethodCallback<TimelinesResponse> callback);
+
+	@GET
+	@Path("timelines?parameter_id={parameterId}")
+	void getParameterTimelines(@PathParam("parameterId") String parameterId,
+							   MethodCallback<TimelinesResponse> callback);
 }

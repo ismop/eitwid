@@ -10,6 +10,7 @@ import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.IChartWizardView.IChartWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel.SensorPanelPresenter;
@@ -32,7 +33,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
     private Map<String, SensorPanelPresenter> panels = new HashMap<>();
 
     public interface ShowResult {
-        void ok();
+        void ok(List<Timeline> selectedTimelines);
     }
 
     private final DapController dapController;
@@ -81,7 +82,11 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
                         nameToParameter = new HashMap<>();
                         for (Parameter parameter : parameters) {
                             parameter.setDevice(idToDevice.get(parameter.getDeviceId()));
-                            nameToParameter.put(parameterName(parameter), parameter);
+                            if (parameter.getDevice() != null) {
+                                nameToParameter.put(parameterName(parameter), parameter);
+                            } else {
+                                GWT.log("Warning: " + parameter.getId() + " parameter without device assigned");
+                            }
                         }
 
                         getView().setDevices(nameToParameter.keySet());
@@ -103,7 +108,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
 
     @Override
     public void modalOk() {
-        showResult.ok();
+        showResult.ok(getSelectedTimelines());
         destroy();
     }
 
@@ -141,5 +146,18 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
 
     private String parameterName(Parameter parameter) {
         return parameter.getDevice().getCustomId() + " (" + parameter.getMeasurementTypeName() + ")";
+    }
+
+    @SuppressWarnings("unused")
+    public void onTimelineSelectionChanged() {
+        getView().setOkEnabled(getSelectedTimelines().size() > 0);
+    }
+
+    public List<Timeline> getSelectedTimelines() {
+        List<Timeline> selectedTimelines = new ArrayList<>();
+        for (SensorPanelPresenter panel : panels.values()) {
+            selectedTimelines.addAll(panel.getSelectedTimelines());
+        }
+        return selectedTimelines;
     }
 }

@@ -15,6 +15,7 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
@@ -162,4 +163,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
 	void clearMinimap();
+
+	@Event(handlers = ChartWizardPresenter.class)
+	void timelineSelectionChanged();
 }

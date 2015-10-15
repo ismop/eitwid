@@ -35,18 +35,15 @@
                 <b:Heading ui:field="heading" size="H3" />
             </b:PanelHeader>
             <b:PanelBody ui:field="panelBody">
-                <b:Row addStyleNames="{style.row}">
-                    <b:Column size="MD_12" addStyleNames="{style.column}">
-                        <select:Select ui:field="readings" liveSearch="true">
-                            <select:Option text="Parameter 1"/>
-                            <select:Option text="Parameter 2"/>
-                            <select:Option text="Parameter 3"/>
-                        </select:Select>
+                <b:Row addStyleNames="{style.row}" ui:field="loading" visible="false">
+                    <b:Column size="MD_12">
+                        <b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
+                        <g:InlineLabel ui:field="loadingLabel" />
                     </b:Column>
                 </b:Row>
-                <b:Row addStyleNames="{style.row}">
+                <b:Row addStyleNames="{style.row}" visible="false" ui:field="timelines">
                     <b:Column size="MD_12" addStyleNames="{style.column}">
-                        <b:Well ui:field="selectedSeries" size="SMALL" addStyleNames="{style.well}" />
+                        <select:Select ui:field="timelinesSelect" liveSearch="true" multiple="true" />
                     </b:Column>
                 </b:Row>
             </b:PanelBody>

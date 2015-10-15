@@ -60,6 +60,7 @@ import pl.ismop.web.client.error.ErrorCallback;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.error.ErrorUtil;
 import pl.ismop.web.client.hypgen.Experiment;
+import pl.ismop.web.client.widgets.delegator.ContextsCallback;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
 @Singleton
@@ -259,8 +260,8 @@ public class DapController {
 		measurementService.getMeasurementsWithQuantity(timelineId, from, until, quantity, new MeasurementsRestCallback(callback));
 	}
 
-	public void getMeasurements(List<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
-		getMeasurements(merge(timelineId, ","), startDate, endDate, callback);
+	public void getMeasurements(Collection<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
+		getMeasurements(merge(timelineId), startDate, endDate, callback);
 	}
 
 	public void getAllMeasurements(Collection<String> timelineIds, final MeasurementsCallback callback) {
@@ -508,6 +509,20 @@ public class DapController {
 		});
 	}
 
+	public void getContexts(List<String> contextIds, final ContextsCallback callback) {
+		contextService.getContextsById(merge(contextIds), new MethodCallback<ContextsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ContextsResponse response) {
+				callback.processContexts(response.getContexts());
+			}
+		});
+	}
+
 	public void getTimeline(String contextId, String paramterId, final TimelinesCallback callback) {
 		timelineService.getTimelines(contextId, paramterId, new MethodCallback<TimelinesResponse>() {
 			@Override
@@ -524,6 +539,20 @@ public class DapController {
 
 	public void getTimelinesForParameterIds(String contextId, List<String> parameterIds, final TimelinesCallback callback) {
 		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, TimelinesResponse response) {
+				callback.processTimelines(response.getTimelines());
+			}
+		});
+	}
+
+	public void getParameterTimelines(String parameterId, final TimelinesCallback callback) {
+		timelineService.getParameterTimelines(parameterId, new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));

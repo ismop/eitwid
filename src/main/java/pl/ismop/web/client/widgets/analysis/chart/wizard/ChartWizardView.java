@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.*;
 import com.mvp4g.client.view.ReverseViewInterface;
 import org.gwtbootstrap3.client.shared.event.ModalHiddenEvent;
 import org.gwtbootstrap3.client.shared.event.ModalShownEvent;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
@@ -55,12 +56,16 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
     @UiField
     Row devices;
 
+    @UiField
+    Button okButton;
+
     private List<String> selected = new ArrayList<>();
 
     private Option defaultOption;
 
     public ChartWizardView() {
         initWidget(uiBinder.createAndBindUi(this));
+        okButton.setEnabled(false);
         devicesSelect.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent changeEvent) {
@@ -69,9 +74,6 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
 
                 List<String> toSelect = new ArrayList<>(devicesSelect.getAllSelectedValues());
                 toSelect.removeAll(selected);
-
-                GWT.log("To select   " + toSelect);
-                GWT.log("To unselect " + toUnselect);
 
                 selected = new ArrayList<>(devicesSelect.getAllSelectedValues());
 
@@ -93,7 +95,6 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
 
     @Override
     public void setMiniMap(IMapView minimap) {
-//        mapPanel.clear();
         mapPanel.add(minimap);
     }
 
@@ -130,7 +131,7 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
 
         devicesSelect.clearHeader();
 
-        List<String> sortedNames = new ArrayList<String>(names);
+        List<String> sortedNames = new ArrayList<>(names);
         Collections.sort(sortedNames);
 
         for(String name : sortedNames) {
@@ -168,5 +169,10 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
     public void unselectParameter(String parameterName) {
         selected.remove(parameterName);
         devicesSelect.setValues(selected.toArray(new String[0]));
+    }
+
+    @Override
+    public void setOkEnabled(boolean enabled) {
+        okButton.setEnabled(enabled);
     }
 }

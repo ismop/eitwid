@@ -56,7 +56,7 @@
         }
     </ui:style>
     <g:HTMLPanel>
-        <b:Modal ui:field="modal" title="{messages.title}" fade="true" width="95%" addStyleNames="{style.modal}">
+        <b:Modal ui:field="modal" title="{messages.title}" fade="true" width="55%" addStyleNames="{style.modal}">
             <b:ModalBody>
                 <b:Row addStyleNames="{style.row}">
                     <b:Column size="MD_9" addStyleNames="{style.column}">

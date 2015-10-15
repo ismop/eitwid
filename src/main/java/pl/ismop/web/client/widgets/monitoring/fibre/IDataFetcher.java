@@ -9,6 +9,7 @@ import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorCallback;
+import pl.ismop.web.client.widgets.common.DateChartPoint;
 
 /**
  * Created by marek on 11.09.15.
@@ -59,24 +60,6 @@ public interface IDataFetcher {
 
         public Section getSection() {
             return section;
-        }
-    }
-
-    class DateChartPoint {
-        private final Date x;
-        private final double y;
-
-        public DateChartPoint(Date x, double y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public Date getX() {
-            return x;
-        }
-
-        public double getY() {
-            return y;
         }
     }
 

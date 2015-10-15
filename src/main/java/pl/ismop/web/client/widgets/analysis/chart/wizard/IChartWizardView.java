@@ -26,6 +26,8 @@ public interface IChartWizardView extends IsWidget {
 
     void unselectParameter(String parameterName);
 
+    void setOkEnabled(boolean enabled);
+
     interface IChartWizardPresenter {
         void onModalReady();
 

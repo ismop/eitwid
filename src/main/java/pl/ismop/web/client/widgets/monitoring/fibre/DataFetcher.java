@@ -13,6 +13,7 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorCallback;
+import pl.ismop.web.client.widgets.common.DateChartPoint;
 import pl.ismop.web.client.widgets.delegator.ErrorCallbackDelegator;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
