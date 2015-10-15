@@ -5,6 +5,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.experiment.Experiment;
@@ -22,14 +23,16 @@ import java.util.*;
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         implements IPanelContent<IChartView, MainEventBus> {
     private final DapController dapController;
+    private final IsmopProperties properties;
     private Experiment selectedExperiment;
     private List<Timeline> timelines;
     ChartMessages messages;
     private ISelectionManager selectionManager;
 
     @Inject
-    public ChartPresenter(DapController dapController) {
+    public ChartPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
+        this.properties = properties;
     }
 
     @Override
@@ -40,11 +43,12 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     @Override
     public void setSelectedExperiment(Experiment experiment) {
         selectedExperiment = experiment;
+        getView().setInterval(experiment.getStartDate(), experiment.getEndDate());
     }
 
     @Override
     public void setSelectedDate(Date date) {
-
+        onDateChanged(date);
     }
 
     @Override
@@ -102,5 +106,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
                 eventBus.showError(errorDetails);
             }
         });
+    }
+
+    @SuppressWarnings("unused")
+    public void onDateChanged(Date selectedDate) {
+        getView().selectDate(selectedDate, properties.selectionColor());
     }
 }

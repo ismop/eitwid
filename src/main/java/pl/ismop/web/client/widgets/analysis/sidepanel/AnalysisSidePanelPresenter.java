@@ -190,7 +190,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                     GWT.log("Warning experiment water wave is longer then experiment");
                     break;
                 }
-                
+
                 s.addPoint(time, measurement.getValue());
             }
             waterWave.addSeries(s);

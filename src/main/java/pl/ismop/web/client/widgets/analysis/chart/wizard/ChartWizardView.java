@@ -19,10 +19,7 @@ import org.gwtbootstrap3.extras.select.client.ui.Select;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.IChartWizardView.IChartWizardPresenter;
 import pl.ismop.web.client.widgets.common.map.IMapView;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ChartWizardView extends Composite implements IChartWizardView, ReverseViewInterface<IChartWizardPresenter>{
     interface ChartWizardUiBinder extends UiBinder<Widget, ChartWizardView> {

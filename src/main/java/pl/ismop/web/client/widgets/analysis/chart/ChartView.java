@@ -5,14 +5,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import org.moxieapps.gwt.highcharts.client.Axis;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.DateTimeLabelFormats;
-import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.*;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +22,13 @@ public class ChartView extends Composite implements IChartView {
 
     @UiField
     Chart chart;
+    private PlotLine currentTimePlotLine;
+
+    interface ChartViewUiBinder extends UiBinder<Widget, ChartView> {}
+
+    public ChartView() {
+        initWidget(uiBinder.createAndBindUi(this));
+    }
 
     @Override
     public ChartMessages getMessages() {
@@ -64,9 +69,19 @@ public class ChartView extends Composite implements IChartView {
         }
     }
 
-    interface ChartViewUiBinder extends UiBinder<Widget, ChartView> {}
+    @Override
+    public void selectDate(Date selectedDate, String color) {
+        if (currentTimePlotLine != null) {
+            chart.getXAxis().removePlotLine(currentTimePlotLine);
+        }
+        currentTimePlotLine = chart.getXAxis().createPlotLine().
+                setWidth(2).setColor(color).setValue(selectedDate.getTime());
+        chart.getXAxis().addPlotLines(currentTimePlotLine);
+    }
 
-    public ChartView() {
-        initWidget(uiBinder.createAndBindUi(this));
+    @Override
+    public void setInterval(Date startDate, Date endDate) {
+        chart.getXAxis().setMin(startDate.getTime());
+        chart.getXAxis().setMax(endDate.getTime());
     }
 }
