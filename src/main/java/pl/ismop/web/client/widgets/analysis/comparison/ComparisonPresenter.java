@@ -72,6 +72,7 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
         getView().removePanel(panel.getView());
         panel.destroy();
         eventBus.removeHandler(panel);
+        eventBus.clearMinimap();
     }
 
     @Override
