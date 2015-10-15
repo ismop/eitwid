@@ -11,7 +11,7 @@ public interface IHorizontalSliceView extends IsWidget {
 
 	void showLoadingState(boolean show);
 
-	void drawCrosssection(String parameterUnit);
+	void drawCrosssection(String parameterUnit, double minValue, double maxValue);
 
 	void drawMuteSections(List<List<List<Double>>> coordinates);
 
@@ -20,4 +20,6 @@ public interface IHorizontalSliceView extends IsWidget {
 	int getHeight();
 
 	void drawScale(double scale, double panX);
+
+	void showNoMeasurementsMessage();
 }

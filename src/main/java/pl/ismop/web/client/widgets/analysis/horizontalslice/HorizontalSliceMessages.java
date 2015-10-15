@@ -4,4 +4,6 @@ import com.google.gwt.i18n.client.Messages;
 
 public interface HorizontalSliceMessages extends Messages {
 	String loadingTitle();
+
+	String noMeasurementsMessage();
 }

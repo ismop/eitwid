@@ -6,10 +6,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayNumber;
+import com.google.gwt.dev.shell.Messages;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -21,6 +23,9 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	
 	private JavaScriptObject scene;
 
+	@UiField
+	HorizontalSliceMessages messages;
+	
 	@UiField
 	FlowPanel loadingPanel, panel;
 	
@@ -34,9 +39,9 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	@Override
-	public void drawCrosssection(String parameterUnit) {
+	public void drawCrosssection(String parameterUnit, double minValue, double maxValue) {
 		addRenderer(panel.getElement(), panel.getOffsetWidth(), panel.getOffsetHeight());
-		drawLegend(0xecf330, 0x307bf3, 15.0, 19.0, parameterUnit);
+		drawLegend(0xecf330, 0x307bf3, minValue, maxValue, parameterUnit);
 	};
 	
 	@Override
@@ -67,6 +72,11 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	@Override
 	public int getHeight() {
 		return panel.getOffsetHeight();
+	}
+
+	@Override
+	public void showNoMeasurementsMessage() {
+		Window.alert(messages.noMeasurementsMessage());
 	}
 
 	@Override

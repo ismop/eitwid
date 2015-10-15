@@ -155,8 +155,24 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 										muteSections.add(section);
 									}
 									
-									view.drawCrosssection(parameterUnit);
-									drawMuteSections(configuration.getSections().values(), muteSections);
+									if(measurements.size() > 0) {
+										double minValue = Double.MAX_VALUE, maxValue = Double.MIN_VALUE;
+										
+										for(Measurement measurement : measurements) {
+											if(measurement.getValue() > maxValue) {
+												maxValue = measurement.getValue();
+											}
+											
+											if(measurement.getValue() < minValue) {
+												minValue = measurement.getValue();
+											}
+										}
+										
+										view.drawCrosssection(parameterUnit, minValue, maxValue);
+										drawMuteSections(configuration.getSections().values(), muteSections);
+									} else {
+										view.showNoMeasurementsMessage();
+									}
 								}
 							});
 						}
