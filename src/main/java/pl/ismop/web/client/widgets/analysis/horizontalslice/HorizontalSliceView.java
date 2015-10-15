@@ -7,6 +7,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayNumber;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -33,15 +34,13 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	@Override
-	public void drawCrosssection() {
+	public void drawCrosssection(String parameterUnit) {
 		addRenderer(panel.getElement(), panel.getOffsetWidth(), panel.getOffsetHeight());
-		drawLegend(0xecf330, 0x307bf3, 15.0, 20.0);
+		drawLegend(0xecf330, 0x307bf3, 15.0, 19.0, parameterUnit);
 	};
 	
 	@Override
 	public void drawMuteSections(List<List<List<Double>>> coordinates) {
-		GWT.log(coordinates.toString());
-		
 		for(List<List<Double>> sectionCoordinates : coordinates) {
 			@SuppressWarnings("unchecked")
 			JsArray<JsArrayNumber> nativeCoordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
@@ -59,6 +58,49 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			drawSection(nativeCoordinates);
 		}
 	};
+	
+	@Override
+	public int getWidth() {
+		return panel.getOffsetWidth();
+	}
+
+	@Override
+	public int getHeight() {
+		return panel.getOffsetHeight();
+	}
+
+	@Override
+	public native void drawScale(double scale, double panX) /*-{
+		var material = new $wnd.THREE.LineBasicMaterial({
+			color: 0x0000ff
+		});
+		
+		var geometry = new $wnd.THREE.Geometry();
+		geometry.vertices.push(
+			new $wnd.THREE.Vector3(panX, 5, 0),
+			new $wnd.THREE.Vector3(panX, 2, 0),
+			new $wnd.THREE.Vector3(panX + scale * 10, 2, 0),
+			new $wnd.THREE.Vector3(panX + scale * 10, 5, 0)
+		);
+		
+		var line = new $wnd.THREE.Line(geometry, material);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(line);
+		
+		var scaleText = new $wnd.THREE.TextGeometry("10 m", {
+			font: 'optimer',
+			size: 12,
+			height: 0.5,
+			curveSegments: 30
+		});
+		var scaleTextMaterial = new $wnd.THREE.MeshLambertMaterial({color: 0x0000ff});
+		var scaleTextMesh = new $wnd.THREE.Mesh(scaleText, scaleTextMaterial);
+		scaleTextMesh.position.set(panX, 10, 0);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(scaleTextMesh);
+	}-*/;
+
+	private String format(double number) {
+		return NumberFormat.getFormat("0.00").format(number);
+	}
 
 	private native void drawSection(JsArray<JsArrayNumber> nativeCoordinates) /*-{
 		var shape = new $wnd.THREE.Shape();
@@ -72,13 +114,12 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		
 		var geometry = new $wnd.THREE.ShapeGeometry(shape);
 		var mesh = new $wnd.THREE.Mesh(geometry, new $wnd.THREE.MeshBasicMaterial({color: 0x555555}));
-		console.log(mesh);
 		var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
 	}-*/;
 
-	private native void drawLegend(int topColor, int bottomColor, double bottomValue, double topValue) /*-{
+	private native void drawLegend(int topColor, int bottomColor, double bottomValue, double topValue, String parameterUnit) /*-{
 		var bottom = new $wnd.THREE.Color(bottomColor);
 		var top = new $wnd.THREE.Color(topColor);
 		var levels = 5;
@@ -87,6 +128,9 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		var moveLeft = 5;
 		var levelHeight = height / levels;
 		var levelWidth = 100
+		var valueStep = (topValue - bottomValue) / levels;
+		var textSpacing = 5;
+		var textSize = 12;
 		
 		for(var i = 0; i < levels; i++) {
 			var geometry = new $wnd.THREE.Geometry();
@@ -115,6 +159,40 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
 			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
 			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
+			
+			var text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(bottomValue + valueStep * i)
+					+ " " + parameterUnit;
+			var tickMaterial = new $wnd.THREE.MeshLambertMaterial();
+			tickMaterial.color.setHex(0x555555);
+			
+			var tick = new $wnd.THREE.TextGeometry(text, {
+				font: 'optimer',
+				size: 12,
+				height: 0.5,
+				curveSegments: 30
+			});
+			var tickMesh = new $wnd.THREE.Mesh(tick, tickMaterial);
+			var textPositionShift = - textSize / 2;
+			
+			if(i == 0) {
+				textPositionShift = 0;
+			}
+			
+			tickMesh.position.set(levelWidth + moveLeft + textSpacing, i * levelHeight + lift + textPositionShift, 0);
+			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(tickMesh);
+			
+			if(i == levels -1) {
+				text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(bottomValue + valueStep * (i + 1))
+					+ " " + parameterUnit;
+				tick = new $wnd.THREE.TextGeometry(text, {
+					font: 'optimer',
+					size: textSize,
+					height: 1
+				});
+				tickMesh = new $wnd.THREE.Mesh(tick, tickMaterial);
+				tickMesh.position.set(levelWidth + moveLeft + textSpacing, (i + 1) * levelHeight + lift - textSize, 0);
+				this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(tickMesh);
+			}
 		}
 	}-*/;
 
@@ -135,57 +213,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		renderer.setSize(width, height);
 		renderer.setClearColor(0xffffff);
 		element.appendChild(renderer.domElement);
-		
-//		var raycaster = new $wnd.THREE.Raycaster();
-//		
-//		var object = this;
-//		element.addEventListener('mousemove', function(event) {
-//			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX =
-//				((event.clientX - element.getBoundingClientRect().left) / width ) * 2 - 1;
-//			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseY =
-//				-((event.clientY - element.getBoundingClientRect().top) / height ) * 2 + 1;
-//		}, false);
-//		element.addEventListener('click', function(event) {
-//			object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseClicked()();
-//		});
 
 		var render = function() {
-//			if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX < 2.0 &&
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseY < 2.0) {
-//				raycaster.setFromCamera(new $wnd.THREE.Vector2(
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseX,
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::mouseY
-//				), camera);
-//			}
-//			
-//			var intersects = raycaster.intersectObjects(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::devices);
-//			
-//			if(intersects.length > 0) {
-//				if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice != null) {
-//					if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice != intersects[0].object) {
-//						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice.material.transparent = false;
-//						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice.material.opacity = 1.0;
-//						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::deviceSelected(Z)(false);
-//						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice = intersects[0].object;
-//						object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::deviceSelected(Z)(true);
-//						intersects[0].object.material.transparent = true;
-//						intersects[0].object.material.opacity = 0.7;
-//					}
-//				} else {
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice = intersects[0].object;
-//					intersects[0].object.material.transparent = true;
-//					intersects[0].object.material.opacity = 0.7;
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::deviceSelected(Z)(true);
-//				}
-//			} else {
-//				if(object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice != null) {
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice.material.transparent = false;
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice.material.opacity = 1.0;
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::deviceSelected(Z)(false);
-//					object.@pl.ismop.web.client.widgets.common.profile.SideProfileView::selectedDevice = null;
-//				}
-//			}
-			
 			$wnd.requestAnimationFrame(render);
 			renderer.render(scene, camera);
 		};

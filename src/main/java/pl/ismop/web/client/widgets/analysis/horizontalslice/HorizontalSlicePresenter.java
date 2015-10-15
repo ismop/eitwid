@@ -1,7 +1,9 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.abs;
 import static java.lang.Math.cos;
+import static java.lang.Math.min;
 import static java.lang.Math.sin;
 
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -23,6 +26,7 @@ import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
@@ -87,6 +91,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		view.showLoadingState(true);
 		
 		final List<String> parameterIds = new ArrayList<>();
+		Parameter parameter = null;
 		
 		for(String height : configuration.getPickedHeights().values()) {
 			for(Device device : configuration.getHeightDevicesmap().get(height)) {
@@ -94,11 +99,13 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					if(configuration.getParameterMap().get(parameterId) != null
 							&& configuration.getParameterMap().get(parameterId).getMeasurementTypeName().equals(configuration.getPickedParameterName())) {
 						parameterIds.add(parameterId);
+						parameter = configuration.getParameterMap().get(parameterId);
 					}
 				}
 			}
 		}
 		
+		final String parameterUnit = parameter != null ? parameter.getMeasurementTypeUnit() : "";
 		dapController.getContext("measurements", new ContextsCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
@@ -148,7 +155,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 										muteSections.add(section);
 									}
 									
-									view.drawCrosssection();
+									view.drawCrosssection(parameterUnit);
 									drawMuteSections(configuration.getSections().values(), muteSections);
 								}
 							});
@@ -199,7 +206,52 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			}
 		}
 		
+		double panX = 200;
+		double scale = computeScale(coordinates, panX, view.getHeight(), view.getWidth());
+		scaleAndShift(coordinates, scale, panX);
+		view.drawScale(scale, panX);
 		view.drawMuteSections(coordinates);
+	}
+
+	private double computeScale(List<List<List<Double>>> coordinates, double panX, double height, double width) {
+		double 	minY = Double.MAX_VALUE,
+				maxY = Double.MIN_VALUE,
+				minX = Double.MAX_VALUE,
+				maxX = Double.MIN_VALUE;
+		
+		for(List<List<Double>> sectionCoordinates : coordinates) {
+			for(List<Double> point : sectionCoordinates) {
+				if(point.get(0) > maxX) {
+					maxX = point.get(0);
+				}
+				
+				if(point.get(0) < minX) {
+					minX = point.get(0);
+				}
+				
+				if(point.get(1) > maxY) {
+					maxY = point.get(1);
+				}
+				
+				if(point.get(1) < minY) {
+					minY = point.get(1);
+				}
+			}
+		}
+		
+		double sectionsHeight = abs(minY) + abs(maxY);
+		double sectionsWidth = abs(minX) + abs(maxX);
+		
+		return min(height / sectionsHeight, (width - panX) / sectionsWidth);
+	}
+
+	private void scaleAndShift(List<List<List<Double>>> coordinates, double scale, double panX) {
+		for(List<List<Double>> sectionCoordinates : coordinates) {
+			for(List<Double> point : sectionCoordinates) {
+				point.set(0, point.get(0) * scale + panX);
+				point.set(1, point.get(1) * scale);
+			}
+		}
 	}
 
 	private void rotate(List<List<Double>> points) {

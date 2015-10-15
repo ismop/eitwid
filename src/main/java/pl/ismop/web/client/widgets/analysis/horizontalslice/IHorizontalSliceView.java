@@ -11,7 +11,13 @@ public interface IHorizontalSliceView extends IsWidget {
 
 	void showLoadingState(boolean show);
 
-	void drawCrosssection();
+	void drawCrosssection(String parameterUnit);
 
 	void drawMuteSections(List<List<List<Double>>> coordinates);
+
+	int getWidth();
+
+	int getHeight();
+
+	void drawScale(double scale, double panX);
 }
