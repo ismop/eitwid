@@ -18,4 +18,8 @@ public interface IChartView {
     void selectDate(Date selectedDate, String color);
 
     void setInterval(Date startDate, Date endDate);
+
+    interface IChartPresenter {
+        void timelineSelected(Timeline timeline);
+    }
 }

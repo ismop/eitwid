@@ -6,17 +6,23 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.mvp4g.client.view.ReverseViewInterface;
 import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEventHandler;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChartView extends Composite implements IChartView {
+public class ChartView extends Composite implements IChartView, ReverseViewInterface<IChartView.IChartPresenter> {
     private static ChartViewUiBinder uiBinder = GWT.create(ChartViewUiBinder.class);
+    interface ChartViewUiBinder extends UiBinder<Widget, ChartView> {}
 
     @UiField
     ChartMessages messages;
@@ -27,8 +33,8 @@ public class ChartView extends Composite implements IChartView {
     Chart chart;
 
     private PlotLine currentTimePlotLine;
-
-    interface ChartViewUiBinder extends UiBinder<Widget, ChartView> {}
+    private IChartPresenter presenter;
+    private Map<String, Timeline> nameToTimeline = new HashMap<>();
 
     public ChartView() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -47,9 +53,9 @@ public class ChartView extends Composite implements IChartView {
 
     @Override
     public void setSeries(Map<Timeline, List<DateChartPoint>> timelineToMeasurements) {
-
         chart.removeAllSeries();
         chart.hideLoading();
+        nameToTimeline.clear();
 
         boolean dataExists = false;
         for (Map.Entry<Timeline, List<DateChartPoint>> timelineListEntry : timelineToMeasurements.entrySet()) {
@@ -58,6 +64,7 @@ public class ChartView extends Composite implements IChartView {
                     timelineListEntry.getKey().getLabel();
 
             Series series = chart.createSeries().setName(name).setType(Series.Type.SPLINE);
+            nameToTimeline.put(name, timelineListEntry.getKey());
             for (DateChartPoint point : timelineListEntry.getValue()) {
                 series.addPoint(point.getX().getTime(), point.getY());
                 dataExists = true;
@@ -78,6 +85,15 @@ public class ChartView extends Composite implements IChartView {
                                     .setMonth("%e. %b")
                                     .setYear("%b")
                     );
+
+            chart.setSeriesPlotOptions(new SeriesPlotOptions().
+                    setSeriesMouseOverEventHandler(new SeriesMouseOverEventHandler() {
+                        @Override
+                        public boolean onMouseOver(SeriesMouseOverEvent seriesMouseOverEvent) {
+                            getPresenter().timelineSelected(nameToTimeline.get(seriesMouseOverEvent.getSeriesName()));
+                            return true;
+                        }
+                    }));
             chartPanel.add(chart);
         }
     }
@@ -98,5 +114,15 @@ public class ChartView extends Composite implements IChartView {
     public void setInterval(Date startDate, Date endDate) {
         chart.getXAxis().setMin(startDate.getTime());
         chart.getXAxis().setMax(endDate.getTime());
+    }
+
+    @Override
+    public void setPresenter(IChartPresenter presenter) {
+        this.presenter = presenter;
+    }
+
+    @Override
+    public IChartPresenter getPresenter() {
+        return presenter;
     }
 }

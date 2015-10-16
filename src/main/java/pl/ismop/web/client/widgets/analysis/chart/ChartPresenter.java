@@ -21,7 +21,7 @@ import java.util.*;
 
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
-        implements IPanelContent<IChartView, MainEventBus> {
+        implements IPanelContent<IChartView, MainEventBus>, IChartView.IChartPresenter {
     private final DapController dapController;
     private final IsmopProperties properties;
     private Experiment selectedExperiment;
@@ -122,5 +122,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     public void setWizard(ChartWizardPresenter wizard) {
         this.wizard = wizard;
+    }
+
+    @Override
+    public void timelineSelected(Timeline timeline) {
+        selectionManager.showDevice(timeline.getParameter().getDevice());
     }
 }
