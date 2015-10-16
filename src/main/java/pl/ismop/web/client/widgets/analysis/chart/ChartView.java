@@ -1,6 +1,8 @@
 package pl.ismop.web.client.widgets.analysis.chart;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -14,6 +16,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
+import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +38,7 @@ public class ChartView extends Composite implements IChartView, ReverseViewInter
     private PlotLine currentTimePlotLine;
     private IChartPresenter presenter;
     private Map<String, Timeline> nameToTimeline = new HashMap<>();
+    private Map<String, Number> parameterToYChar = new HashMap<>();
 
     public ChartView() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -63,7 +67,11 @@ public class ChartView extends Composite implements IChartView, ReverseViewInter
             String name = parameter.getDevice().getCustomId() + " (" + parameter.getMeasurementTypeName() + ") " +
                     timelineListEntry.getKey().getLabel();
 
-            Series series = chart.createSeries().setName(name).setType(Series.Type.SPLINE);
+            Series series = chart.createSeries().
+                    setName(name).
+                    setType(Series.Type.SPLINE).
+                    setYAxis(getYAxisIndex(parameter));
+
             nameToTimeline.put(name, timelineListEntry.getKey());
             for (DateChartPoint point : timelineListEntry.getValue()) {
                 series.addPoint(point.getX().getTime(), point.getY());
@@ -76,6 +84,50 @@ public class ChartView extends Composite implements IChartView, ReverseViewInter
         }
     }
 
+    private Number getYAxisIndex(Parameter parameter) {
+        String yAxisLabel = parameter.getMeasurementTypeName() + ", [" + parameter.getMeasurementTypeUnit() + "]";
+
+        if(parameterToYChar.containsKey(yAxisLabel)) {
+            return parameterToYChar.get(yAxisLabel);
+        } else {
+            int index = parameterToYChar.size();
+
+            if(index == 0) {
+                updateFirstYAxis(chart.getNativeChart(), yAxisLabel);
+            } else {
+                addAxis(chart.getNativeChart(), index, yAxisLabel);
+            }
+
+            parameterToYChar.put(yAxisLabel, index);
+
+            return index;
+        }
+    }
+
+    private native void updateFirstYAxis(JavaScriptObject nativeChart, String yAxisLabel) /*-{
+        nativeChart.yAxis[0].update({
+            showEmpty: false,
+            title: {
+                text: yAxisLabel
+            },
+            labels: {
+                format: "{value:.2f}"
+            }
+        });
+    }-*/;
+
+    private native void addAxis(JavaScriptObject nativeChart, int index, String yAxisLabel) /*-{
+        nativeChart.addAxis({
+            showEmpty: false,
+            title: {
+                text: yAxisLabel
+            },
+            labels: {
+                format: "{value:.2f}"
+            }
+        });
+    }-*/;
+
     private void initChart() {
         if (chart == null) {
             chart = new Chart().setChartTitle(new ChartTitle().setText(null));
@@ -85,6 +137,7 @@ public class ChartView extends Composite implements IChartView, ReverseViewInter
                                     .setMonth("%e. %b")
                                     .setYear("%b")
                     );
+            chart.getYAxis().setAxisTitleText(null);
 
             chart.setSeriesPlotOptions(new SeriesPlotOptions().
                     setSeriesMouseOverEventHandler(new SeriesMouseOverEventHandler() {
@@ -94,6 +147,25 @@ public class ChartView extends Composite implements IChartView, ReverseViewInter
                             return true;
                         }
                     }));
+
+            chart.setToolTip(new ToolTip().setFormatter(new ToolTipFormatter() {
+                private NumberFormat formatter = NumberFormat.getFormat("00.00");
+
+                @Override
+                public String format(ToolTipData toolTipData) {
+                    Timeline timeline = nameToTimeline.get(toolTipData.getSeriesName());
+                    String value = formatter.format(Double.valueOf(toolTipData.getYAsString()));
+                    if (timeline != null) {
+                        Parameter parameter = timeline.getParameter();
+                        return "<b>" + parameter.getDevice().getCustomId() + "</b><br/>" +
+                                parameter.getMeasurementTypeName() + ": " +
+                                value + " " + parameter.getMeasurementTypeUnit();
+                    } else {
+                        GWT.log("Unable to find timeline for series");
+                        return value;
+                    }
+                }
+            }));
             chartPanel.add(chart);
         }
     }
