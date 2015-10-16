@@ -71,8 +71,7 @@ public class ChartView extends Composite implements IChartView {
 
     private void initChart() {
         if (chart == null) {
-            chart = new Chart();
-
+            chart = new Chart().setChartTitle(new ChartTitle().setText(null));
             chart.getXAxis()
                     .setType(Axis.Type.DATE_TIME)
                     .setDateTimeLabelFormats(new DateTimeLabelFormats()
