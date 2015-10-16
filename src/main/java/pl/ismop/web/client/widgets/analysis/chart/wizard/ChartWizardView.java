@@ -172,4 +172,9 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
     public void setOkEnabled(boolean enabled) {
         okButton.setEnabled(enabled);
     }
+
+    @Override
+    public void close() {
+        modal.setVisible(false);
+    }
 }

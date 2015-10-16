@@ -28,6 +28,8 @@ public interface IChartWizardView extends IsWidget {
 
     void setOkEnabled(boolean enabled);
 
+    void close();
+
     interface IChartWizardPresenter {
         void onModalReady();
 

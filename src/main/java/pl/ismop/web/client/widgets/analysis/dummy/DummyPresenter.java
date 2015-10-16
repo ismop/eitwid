@@ -101,6 +101,11 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
         this.selectionManager = selectionManager;
     }
 
+    @Override
+    public void destroy() {
+
+    }
+
     private void updateTitle() {
         String title = "";
         if (experiment != null) {

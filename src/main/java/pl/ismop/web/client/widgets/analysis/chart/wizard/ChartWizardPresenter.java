@@ -52,14 +52,18 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
 
     @Override
     public void onModalReady() {
-        miniMap = eventBus.addHandler(MapPresenter.class);
-        view.setMiniMap(miniMap.getView());
-        for(Section section : selectedExperiment.getSections()) {
-            GWT.log(section.getId());
-            miniMap.addSection(section);
+        if (miniMap == null) {
+            miniMap = eventBus.addHandler(MapPresenter.class);
+            view.setMiniMap(miniMap.getView());
+            for (Section section : selectedExperiment.getSections()) {
+                GWT.log(section.getId());
+                miniMap.addSection(section);
+            }
         }
 
-        loadDevices();
+        if (nameToParameter == null) {
+            loadDevices();
+        }
     }
 
     private void loadDevices() {
@@ -89,7 +93,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
                             }
                         }
 
-                        getView().setDevices(nameToParameter.keySet());
+                        showDevices();
                     }
                 });
             }
@@ -101,18 +105,22 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
         });
     }
 
+    private void showDevices() {
+        getView().setDevices(nameToParameter.keySet());
+    }
+
     @Override
     public void modalCanceled() {
-        destroy();
+        getView().close();
     }
 
     @Override
     public void modalOk() {
         showResult.ok(getSelectedTimelines());
-        destroy();
+        getView().close();
     }
 
-    private void destroy() {
+    public void destroy() {
         eventBus.removeHandler(this);
         getView().removeFromParent();
     }

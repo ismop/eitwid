@@ -43,10 +43,12 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @Override
     public void addChart() {
-        eventBus.addHandler(ChartWizardPresenter.class).show(selectedExperiment, new ChartWizardPresenter.ShowResult() {
+        final ChartWizardPresenter wizard = eventBus.addHandler(ChartWizardPresenter.class);
+        wizard.show(selectedExperiment, new ChartWizardPresenter.ShowResult() {
             @Override
             public void ok(List<Timeline> selectedTimelines) {
                 ChartPresenter content = eventBus.addHandler(ChartPresenter.class);
+                content.setWizard(wizard);
                 eventBus.addPanel("Chart", content);
 
                 content.setTimelines(selectedTimelines);

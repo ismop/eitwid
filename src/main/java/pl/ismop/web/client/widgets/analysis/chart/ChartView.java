@@ -79,6 +79,7 @@ public class ChartView extends Composite implements IChartView {
                                     .setMonth("%e. %b")
                                     .setYear("%b")
                     );
+            chartPanel.add(chart);
         }
     }
 
@@ -92,8 +93,6 @@ public class ChartView extends Composite implements IChartView {
         currentTimePlotLine = chart.getXAxis().createPlotLine().
                 setWidth(2).setColor(color).setValue(selectedDate.getTime());
         chart.getXAxis().addPlotLines(currentTimePlotLine);
-
-        chartPanel.add(chart);
     }
 
     @Override

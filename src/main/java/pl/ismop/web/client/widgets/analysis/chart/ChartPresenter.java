@@ -28,6 +28,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     private List<Timeline> timelines;
     ChartMessages messages;
     private ISelectionManager selectionManager;
+    private ChartWizardPresenter wizard;
 
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
@@ -53,7 +54,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     @Override
     public void edit() {
-        eventBus.addHandler(ChartWizardPresenter.class).show(selectedExperiment, new ChartWizardPresenter.ShowResult() {
+        wizard.show(selectedExperiment, new ChartWizardPresenter.ShowResult() {
             @Override
             public void ok(List<Timeline> selectedTimelines) {
                 setTimelines(selectedTimelines);
@@ -66,11 +67,17 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         this.selectionManager = selectionManager;
     }
 
+    @Override
+    public void destroy() {
+        eventBus.removeHandler(wizard);
+    }
+
     public void setTimelines(List<Timeline> timelines) {
         getView().showLoading(messages.loadingMeasurements());
 
         this.timelines = timelines;
         final Map<String, Timeline> idToTimeline = new HashMap<>();
+        selectionManager.clear();
         for (Timeline timeline : timelines) {
             idToTimeline.put(timeline.getId(), timeline);
             selectionManager.selectDevice(timeline.getParameter().getDevice());
@@ -111,5 +118,9 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     @SuppressWarnings("unused")
     public void onDateChanged(Date selectedDate) {
         getView().selectDate(selectedDate, properties.selectionColor());
+    }
+
+    public void setWizard(ChartWizardPresenter wizard) {
+        this.wizard = wizard;
     }
 }
