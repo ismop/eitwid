@@ -45,4 +45,6 @@ public interface ISelectionManager {
      * @param profile Profile to be shown.
      */
     void showProfile(Profile profile);
+
+    void clear();
 }

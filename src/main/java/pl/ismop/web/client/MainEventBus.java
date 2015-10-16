@@ -1,13 +1,9 @@
 package pl.ismop.web.client;
 
-import java.util.Date;
-import java.util.List;
-
 import com.mvp4g.client.annotation.Event;
 import com.mvp4g.client.annotation.Events;
 import com.mvp4g.client.annotation.InitHistory;
 import com.mvp4g.client.event.EventBusWithLookup;
-
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.experiment.Experiment;
@@ -15,12 +11,14 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.analysis.chart.ChartPresenter;
+import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
-import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
+import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
@@ -28,6 +26,9 @@ import pl.ismop.web.client.widgets.monitoring.readings.ReadingsPresenter;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
 import pl.ismop.web.client.widgets.monitoring.weather.WeatherStationPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
+
+import java.util.Date;
+import java.util.List;
 
 @Events(startPresenter = RootPresenter.class, historyOnStart = true)
 public interface MainEventBus extends EventBusWithLookup {
@@ -110,7 +111,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ComparisonPresenter.class)
 	void addPanel(String panelTitle, IPanelContent content);
 
-	@Event(handlers = { DummyPresenter.class, AnalysisSidePanelPresenter.class })
+	@Event(handlers = { DummyPresenter.class, AnalysisSidePanelPresenter.class, ChartPresenter.class})
 	void dateChanged(Date selectedDate);
 
 	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })
@@ -162,4 +163,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
 	void clearMinimap();
+
+	@Event(handlers = ChartWizardPresenter.class)
+	void timelineSelectionChanged();
 }

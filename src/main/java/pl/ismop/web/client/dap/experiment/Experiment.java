@@ -1,7 +1,9 @@
 package pl.ismop.web.client.dap.experiment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import org.fusesource.restygwt.client.Json;
+import pl.ismop.web.client.dap.section.Section;
 
 import java.util.Date;
 import java.util.List;
@@ -30,6 +32,9 @@ public class Experiment {
 
     @Json(name = "timeline_ids")
     private List<Integer> timelineIds;
+
+    @JsonIgnore
+    private List<Section> sections;
 
     public String getId() {
         return id;
@@ -91,5 +96,13 @@ public class Experiment {
 
     public Date getEndDate() {
         return endDate;
+    }
+
+    public void setSections(List<Section> sections) {
+        this.sections = sections;
+    }
+
+    public List<Section> getSections() {
+        return sections;
     }
 }
