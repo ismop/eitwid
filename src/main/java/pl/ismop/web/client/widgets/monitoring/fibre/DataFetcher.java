@@ -41,7 +41,6 @@ public class DataFetcher implements IDataFetcher {
         }
     }
 
-    private final IsmopConverter converter;
     private final Levee levee;
     private final DapController dapController;
     private final String contextId;
@@ -54,11 +53,10 @@ public class DataFetcher implements IDataFetcher {
     private boolean initialized = false;
     private String yAxisTitle;
 
-    public DataFetcher(DapController dapController, IsmopConverter converter, Levee levee) {
+    public DataFetcher(DapController dapController, Levee levee) {
         this.dapController = dapController;
         this.levee = levee;
         this.contextId = "1";
-        this.converter = converter;
     }
 
     @Override
@@ -292,8 +290,7 @@ public class DataFetcher implements IDataFetcher {
                         series = new ArrayList<DateChartPoint>();
                         results.put(device, series);
                     }
-                    Date date = converter.parse(m.getTimestamp());
-                    series.add(new DateChartPoint(date, m.getValue()));
+                    series.add(new DateChartPoint(m.getTimestamp(), m.getValue()));
                 }
                 callback.series(results);
             }
@@ -321,8 +318,7 @@ public class DataFetcher implements IDataFetcher {
                     public void processMeasurements(List<Measurement> measurements) {
                         List<DateChartPoint> points = new ArrayList<>();
                         for (Measurement m : measurements) {
-                            Date date = converter.parse(m.getTimestamp());
-                            points.add(new DateChartPoint(date, m.getValue()));
+                            points.add(new DateChartPoint(m.getTimestamp(), m.getValue()));
                         }
                         callback.series(points);
                     }

@@ -31,8 +31,6 @@ import static pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.*;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
-	private final IsmopConverter converter;
-
 	private class DeviceData {
 		private PlotBand plotBand;
 		private Series series;
@@ -70,17 +68,16 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private FibreMessages messages;
 
 	@Inject
-	public FibrePresenter(DapController dapController, IsmopProperties properties, IsmopConverter converter) {
+	public FibrePresenter(DapController dapController, IsmopProperties properties) {
 		this.dapController = dapController;
 		this.properties = properties;
-		this.converter = converter;
 	}
 
 	@SuppressWarnings("unused")
 	public void onShowFibrePanel(Levee levee) {
 		if (this.levee != levee) {
 			this.levee = levee;
-			fetcher = new DataFetcher(dapController, converter, levee);
+			fetcher = new DataFetcher(dapController, levee);
 			fetcher.setMock(false);
 		}
 		messages = view.getMessages();

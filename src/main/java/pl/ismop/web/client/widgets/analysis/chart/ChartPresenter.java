@@ -101,8 +101,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
                         timelineToMeasurements.put(timeline, timelineMeasurements);
                     }
 
-                    Date date = formatter.parse(measurement.getTimestamp());
-                    timelineMeasurements.add(new DateChartPoint(date, measurement.getValue()));
+                    timelineMeasurements.add(new DateChartPoint(measurement.getTimestamp(), measurement.getValue()));
                 }
 
                 return timelineToMeasurements;

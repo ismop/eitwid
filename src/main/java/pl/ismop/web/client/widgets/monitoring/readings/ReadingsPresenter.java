@@ -38,7 +38,6 @@ import pl.ismop.web.client.widgets.monitoring.readings.IReadingsView.IReadingsPr
 @Presenter(view = ReadingsView.class)
 public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus> implements IReadingsPresenter {
 	private static final String PICK_VALUE = "pick";
-	private final IsmopConverter converter;
 
 	private DapController dapController;
 	
@@ -59,10 +58,8 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 	private Map<String, Device> additionalDevices;
 
 	@Inject
-	public ReadingsPresenter(DapController dapController, IsmopConverter converter) {
+	public ReadingsPresenter(DapController dapController) {
 		this.dapController = dapController;
-		this.converter = converter;
-
 		series = new ArrayList<>();
 		displayedDevices = new HashMap<>();
 		additionalParameters = new HashMap<>();
@@ -201,8 +198,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 											int index = 0;
 											
 											for(Measurement measurement : measurements) {
-												Date date = converter.parse(measurement.getTimestamp());
-												values[index][0] = date.getTime();
+												values[index][0] = measurement.getTimestamp().getTime();
 												values[index][1] = measurement.getValue();
 												index++;
 											}

@@ -37,15 +37,13 @@ import pl.ismop.web.client.widgets.monitoring.sidepanel.IMonitoringSidePanel.IMo
 
 @Presenter(view = MonitoringSidePanelView.class, multiple = true)
 public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSidePanel, MainEventBus> implements IMonitoringSidePanelPresenter {
-	private final IsmopConverter converter;
 	private DapController dapController;
 	private Levee selectedLevee;
 	private ChartPresenter chartPresenter;
 
 	@Inject
-	public MonitoringSidePanelPresenter(DapController dapController, IsmopConverter converter) {
+	public MonitoringSidePanelPresenter(DapController dapController) {
 		this.dapController = dapController;
-		this.converter = converter;
 	}
 	
 	public void onLeveeNavigatorReady() {
@@ -224,8 +222,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 														int index = 0;
 														
 														for(Measurement measurement : parameterMeasurements) {
-															Date date = converter.parse(measurement.getTimestamp());
-															values[index][0] = date.getTime();
+															values[index][0] = measurement.getTimestamp().getTime();
 															values[index][1] = measurement.getValue();
 															index++;
 														}

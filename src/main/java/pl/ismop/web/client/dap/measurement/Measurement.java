@@ -3,13 +3,15 @@ package pl.ismop.web.client.dap.measurement;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.fusesource.restygwt.client.Json;
 
+import java.util.Date;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Measurement {
 	private String id;
 	
 	private double value;
 	
-	private String timestamp;
+	private Date timestamp;
 	
 	@Json(name = "timeline_id")
 	private String timelineId;
@@ -38,11 +40,11 @@ public class Measurement {
 		this.value = value;
 	}
 	
-	public String getTimestamp() {
+	public Date getTimestamp() {
 		return timestamp;
 	}
 	
-	public void setTimestamp(String timestamp) {
+	public void setTimestamp(Date timestamp) {
 		this.timestamp = timestamp;
 	}
 }

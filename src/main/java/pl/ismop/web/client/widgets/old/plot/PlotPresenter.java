@@ -213,9 +213,7 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 				
 				for(Measurement measurement : measurements) {
 					if(measurement.getTimelineId().equals(timeline.getId())) {
-						DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-						Date date = format.parse(measurement.getTimestamp());
-						measurementValues[index][0] = date.getTime();
+						measurementValues[index][0] = measurement.getTimestamp().getTime();
 						measurementValues[index][1] = measurement.getValue();
 						index++;
 					}
