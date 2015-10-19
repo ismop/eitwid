@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import org.moxieapps.gwt.highcharts.client.*;
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -28,6 +29,7 @@ import java.util.*;
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
     private final DapController dapController;
     private final IsmopProperties properties;
+    private final IsmopConverter converter;
     private PlotLine currentTimePlotLine;
 
     private MapPresenter miniMap;
@@ -41,9 +43,10 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private Profile shownProfile;
 
     @Inject
-    public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
+    public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties, IsmopConverter converter) {
         this.dapController = dapController;
         this.properties = properties;
+        this.converter = converter;
     }
 
     public void init() {
@@ -170,7 +173,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private void showExperimentWaveShape(Map<Parameter, List<Measurement>> series) {
         waterWave.removeAllSeries();
-        DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
         Parameter parameter = null;
         for (Map.Entry<Parameter, List<Measurement>> entry : series.entrySet()) {
             parameter = entry.getKey();
@@ -180,12 +182,12 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
             long diff = 0;
             if(entry.getValue().size() > 0) {
-                diff = format.parse(entry.getValue().get(0).getTimestamp()).getTime() -
+                diff = converter.parse(entry.getValue().get(0).getTimestamp()).getTime() -
                         selectedExperiment.getStartDate().getTime();
             }
 
             for (Measurement measurement : entry.getValue()) {
-                long time = format.parse(measurement.getTimestamp()).getTime() - diff;
+                long time = converter.parse(measurement.getTimestamp()).getTime() - diff;
                 if (time > selectedExperiment.getEndDate().getTime()) {
                     GWT.log("Warning experiment water wave is longer then experiment");
                     break;

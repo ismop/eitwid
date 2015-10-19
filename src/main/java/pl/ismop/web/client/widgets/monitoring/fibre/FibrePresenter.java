@@ -11,6 +11,7 @@ import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.events.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -30,6 +31,8 @@ import static pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.*;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
+	private final IsmopConverter converter;
+
 	private class DeviceData {
 		private PlotBand plotBand;
 		private Series series;
@@ -67,16 +70,17 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private FibreMessages messages;
 
 	@Inject
-	public FibrePresenter(DapController dapController, IsmopProperties properties) {
+	public FibrePresenter(DapController dapController, IsmopProperties properties, IsmopConverter converter) {
 		this.dapController = dapController;
 		this.properties = properties;
+		this.converter = converter;
 	}
 
 	@SuppressWarnings("unused")
 	public void onShowFibrePanel(Levee levee) {
 		if (this.levee != levee) {
 			this.levee = levee;
-			fetcher = new DataFetcher(dapController, levee);
+			fetcher = new DataFetcher(dapController, converter, levee);
 			fetcher.setMock(false);
 		}
 		messages = view.getMessages();

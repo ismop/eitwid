@@ -13,6 +13,7 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.ContextsCallback;
@@ -36,13 +37,15 @@ import pl.ismop.web.client.widgets.monitoring.sidepanel.IMonitoringSidePanel.IMo
 
 @Presenter(view = MonitoringSidePanelView.class, multiple = true)
 public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSidePanel, MainEventBus> implements IMonitoringSidePanelPresenter {
+	private final IsmopConverter converter;
 	private DapController dapController;
 	private Levee selectedLevee;
 	private ChartPresenter chartPresenter;
 
 	@Inject
-	public MonitoringSidePanelPresenter(DapController dapController) {
+	public MonitoringSidePanelPresenter(DapController dapController, IsmopConverter converter) {
 		this.dapController = dapController;
+		this.converter = converter;
 	}
 	
 	public void onLeveeNavigatorReady() {
@@ -221,8 +224,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 														int index = 0;
 														
 														for(Measurement measurement : parameterMeasurements) {
-															DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-															Date date = format.parse(measurement.getTimestamp());
+															Date date = converter.parse(measurement.getTimestamp());
 															values[index][0] = date.getTime();
 															values[index][1] = measurement.getValue();
 															index++;

@@ -13,6 +13,7 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.ContextsCallback;
@@ -37,7 +38,8 @@ import pl.ismop.web.client.widgets.monitoring.readings.IReadingsView.IReadingsPr
 @Presenter(view = ReadingsView.class)
 public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus> implements IReadingsPresenter {
 	private static final String PICK_VALUE = "pick";
-	
+	private final IsmopConverter converter;
+
 	private DapController dapController;
 	
 	private MapPresenter mapPresenter;
@@ -57,8 +59,10 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 	private Map<String, Device> additionalDevices;
 
 	@Inject
-	public ReadingsPresenter(DapController dapController) {
+	public ReadingsPresenter(DapController dapController, IsmopConverter converter) {
 		this.dapController = dapController;
+		this.converter = converter;
+
 		series = new ArrayList<>();
 		displayedDevices = new HashMap<>();
 		additionalParameters = new HashMap<>();
@@ -197,8 +201,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 											int index = 0;
 											
 											for(Measurement measurement : measurements) {
-												DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-												Date date = format.parse(measurement.getTimestamp());
+												Date date = converter.parse(measurement.getTimestamp());
 												values[index][0] = date.getTime();
 												values[index][1] = measurement.getValue();
 												index++;
