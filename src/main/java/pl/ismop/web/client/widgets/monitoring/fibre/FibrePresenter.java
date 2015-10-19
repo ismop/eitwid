@@ -11,7 +11,6 @@ import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.events.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
-import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -22,8 +21,8 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
-import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
+import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 
 import java.util.*;
 

@@ -1,12 +1,10 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import org.moxieapps.gwt.highcharts.client.*;
-import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -29,7 +27,6 @@ import java.util.*;
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
     private final DapController dapController;
     private final IsmopProperties properties;
-    private final IsmopConverter converter;
     private PlotLine currentTimePlotLine;
 
     private MapPresenter miniMap;
@@ -43,10 +40,9 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private Profile shownProfile;
 
     @Inject
-    public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties, IsmopConverter converter) {
+    public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
         this.properties = properties;
-        this.converter = converter;
     }
 
     public void init() {
