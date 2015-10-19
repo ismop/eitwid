@@ -183,12 +183,12 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             long diff = 0;
             if(entry.getValue().size() > 0) {
                 diff = converter.parse(entry.getValue().get(0).getTimestamp()).getTime() -
-                        selectedExperiment.getStartDate().getTime();
+                        selectedExperiment.getStart().getTime();
             }
 
             for (Measurement measurement : entry.getValue()) {
                 long time = converter.parse(measurement.getTimestamp()).getTime() - diff;
-                if (time > selectedExperiment.getEndDate().getTime()) {
+                if (time > selectedExperiment.getEnd().getTime()) {
                     GWT.log("Warning experiment water wave is longer then experiment");
                     break;
                 }

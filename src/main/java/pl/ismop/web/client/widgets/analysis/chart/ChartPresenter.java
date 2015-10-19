@@ -45,7 +45,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     @Override
     public void setSelectedExperiment(Experiment experiment) {
         selectedExperiment = experiment;
-        getView().setInterval(experiment.getStartDate(), experiment.getEndDate());
+        getView().setInterval(experiment.getStart(), experiment.getEnd());
     }
 
     @Override
@@ -84,8 +84,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             selectionManager.selectDevice(timeline.getParameter().getDevice());
         }
 
-        dapController.getMeasurements(idToTimeline.keySet(), selectedExperiment.getStartDate(),
-                selectedExperiment.getEndDate(), new DapController.MeasurementsCallback() {
+        dapController.getMeasurements(idToTimeline.keySet(), selectedExperiment.getStart(),
+                selectedExperiment.getEnd(), new DapController.MeasurementsCallback() {
             @Override
             public void processMeasurements(List<Measurement> measurements) {
                 getView().setSeries(map(measurements));
