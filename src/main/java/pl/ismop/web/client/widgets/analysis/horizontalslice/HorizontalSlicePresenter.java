@@ -182,6 +182,12 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		});
 	}
 	
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void drawMuteSections(Collection<Section> allSections, List<Section> muteSections) {
 		List<List<List<Double>>> coordinates = new ArrayList<>();
 		double 	minX = Double.MAX_VALUE,

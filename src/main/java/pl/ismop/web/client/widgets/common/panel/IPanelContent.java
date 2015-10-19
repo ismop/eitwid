@@ -12,4 +12,5 @@ public interface IPanelContent<V, E extends EventBus> extends PresenterInterface
     void setSelectedDate(Date date);
     void edit();
     void setSelectionManager(ISelectionManager selectionManager);
+    void destroy();
 }

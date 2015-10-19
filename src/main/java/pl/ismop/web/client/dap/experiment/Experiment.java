@@ -1,11 +1,16 @@
 package pl.ismop.web.client.dap.experiment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import org.fusesource.restygwt.client.Json;
+import pl.ismop.web.client.dap.section.Section;
 
 import java.util.Date;
 import java.util.List;
 
 public class Experiment {
+    private static final DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
+
     private String id;
 
     private String name;
@@ -13,9 +18,13 @@ public class Experiment {
     private String description;
 
     @Json(name = "start_date")
-    private Date startDate;
+    private String start;
 
     @Json(name = "end_date")
+    private String end;
+
+    private Date startDate;
+
     private Date endDate;
 
     @Json(name = "levee_id")
@@ -23,6 +32,9 @@ public class Experiment {
 
     @Json(name = "timeline_ids")
     private List<Integer> timelineIds;
+
+    @JsonIgnore
+    private List<Section> sections;
 
     public String getId() {
         return id;
@@ -44,24 +56,22 @@ public class Experiment {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public String getStart() {
+        return start;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public void setStart(String start) {
+        this.start = start;
+        this.startDate = format.parse(start);
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public String getEnd() {
+        return end;
     }
 
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public void setEnd(String end) {
+        this.end = end;
+        this.endDate = format.parse(end);
     }
 
     public Integer getLeveeId() {
@@ -78,5 +88,21 @@ public class Experiment {
 
     public void setTimelineIds(List<Integer> timelineIds) {
         this.timelineIds = timelineIds;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setSections(List<Section> sections) {
+        this.sections = sections;
+    }
+
+    public List<Section> getSections() {
+        return sections;
     }
 }

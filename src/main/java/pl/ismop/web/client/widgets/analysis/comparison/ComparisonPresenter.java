@@ -5,6 +5,9 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.experiment.Experiment;
+import pl.ismop.web.client.dap.timeline.Timeline;
+import pl.ismop.web.client.widgets.analysis.chart.ChartPresenter;
+import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.IComparisonView.IComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
@@ -13,6 +16,7 @@ import pl.ismop.web.client.widgets.common.panel.PanelPresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
 
 import java.util.Date;
+import java.util.List;
 
 @Presenter(view = ComparisonView.class, multiple = true)
 public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEventBus>
@@ -39,8 +43,17 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @Override
     public void addChart() {
-        IPanelContent content = eventBus.addHandler(DummyPresenter.class);
-        eventBus.addPanel("New chart", content);
+        final ChartWizardPresenter wizard = eventBus.addHandler(ChartWizardPresenter.class);
+        wizard.show(selectedExperiment, new ChartWizardPresenter.ShowResult() {
+            @Override
+            public void ok(List<Timeline> selectedTimelines) {
+                ChartPresenter content = eventBus.addHandler(ChartPresenter.class);
+                content.setWizard(wizard);
+                eventBus.addPanel("Chart", content);
+
+                content.setTimelines(selectedTimelines);
+            }
+        });
     }
 
     @Override
@@ -61,6 +74,7 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
         getView().removePanel(panel.getView());
         panel.destroy();
         eventBus.removeHandler(panel);
+        eventBus.clearMinimap();
     }
 
     @Override

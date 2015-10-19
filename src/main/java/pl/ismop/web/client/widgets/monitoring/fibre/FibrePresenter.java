@@ -19,6 +19,7 @@ import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.widgets.common.DateChartPoint;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
@@ -293,7 +294,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		deviceChart.showLoading(messages.loadingDeviceValues(selectedDevice.getCustomId()));
 		fetcher.getMeasurements(selectedDevice, slider.getStartDate(), slider.getEndDate(), new DateSeriesCallback() {
 			@Override
-			public void series(List<IDataFetcher.DateChartPoint> series) {
+			public void series(List<DateChartPoint> series) {
 				deviceChart.hideLoading();
 				DeviceData deviceData = selectedDevices.get(selectedDevice);
 				if (deviceData != null) {
@@ -400,11 +401,11 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		Collection<Device> selected = selectedDevices.keySet();
 		fetcher.getMeasurements(selected, slider.getStartDate(), slider.getEndDate(), new DevicesDateSeriesCallback() {
 			@Override
-			public void series(Map<Device, List<IDataFetcher.DateChartPoint>> series) {
+			public void series(Map<Device, List<DateChartPoint>> series) {
 				deviceChart.hideLoading();
 				deviceChart.removeAllSeries();
 
-				for(Map.Entry<Device, List<IDataFetcher.DateChartPoint>> s : series.entrySet()) {
+				for(Map.Entry<Device, List<DateChartPoint>> s : series.entrySet()) {
 					DeviceData deviceData = selectedDevices.get(s.getKey());
 					if (deviceData != null) {
 						Series measurements = deviceChart.createSeries().

@@ -49,7 +49,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void init() {
         this.messages = getView().getMessages();
         initExperiments();
-	}
+    }
 
     private void initExperiments() {
         dapController.getExperiments(new DapController.ExperimentsCallback() {
@@ -155,6 +155,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         dapController.getSections(selectedExperiment.getLeveeId() + "", new DapController.SectionsCallback() {
             @Override
             public void processSections(List<Section> sections) {
+                selectedExperiment.setSections(sections);
                 for (Section section : sections) {
                     miniMap.addSection(section);
                 }
@@ -176,8 +177,21 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             Series s = waterWave.createSeries().
                     setType(Series.Type.SPLINE).
                     setName(parameter.getParameterName());
+
+            long diff = 0;
+            if(entry.getValue().size() > 0) {
+                diff = format.parse(entry.getValue().get(0).getTimestamp()).getTime() -
+                        selectedExperiment.getStartDate().getTime();
+            }
+
             for (Measurement measurement : entry.getValue()) {
-                s.addPoint(format.parse(measurement.getTimestamp()).getTime(), measurement.getValue());
+                long time = format.parse(measurement.getTimestamp()).getTime() - diff;
+                if (time > selectedExperiment.getEndDate().getTime()) {
+                    GWT.log("Warning experiment water wave is longer then experiment");
+                    break;
+                }
+
+                s.addPoint(time, measurement.getValue());
             }
             waterWave.addSeries(s);
         }
