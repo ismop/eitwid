@@ -21,8 +21,8 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
-import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
+import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 
 import java.util.*;
 

@@ -192,9 +192,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 				
 				for(Measurement measurement : measurements) {
 					if(timelineId.equals(measurement.getTimelineId())) {
-						DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-						Date date = format.parse(measurement.getTimestamp());
-						values[index][0] = date.getTime();
+						values[index][0] = measurement.getTimestamp().getTime();
 						values[index][1] = measurement.getValue();
 						
 						if(index == measurementCount - 1) {
@@ -202,7 +200,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 							Device device = findDevice(deviceMap, parameter.getId());
 							LatestReading latestReading = new LatestReading();
 							latestReading.label = parameter.getMeasurementTypeName();
-							latestReading.timestamp = date;
+							latestReading.timestamp = measurement.getTimestamp();
 							latestReading.unit = parameter.getMeasurementTypeUnit();
 							latestReading.value = measurement.getValue();
 							

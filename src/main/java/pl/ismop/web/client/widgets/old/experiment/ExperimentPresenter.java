@@ -78,9 +78,7 @@ public class ExperimentPresenter extends BasePresenter<IExperimentView, MainEven
 		builder.append("aa|").append(yLabel).append("\n");
 		
 		for(Measurement measurement : measurements) {
-			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-			Date date = format.parse(measurement.getTimestamp());
-			date = new Date(date.getTime() - 7200000);
+			Date date = new Date(measurement.getTimestamp().getTime() - 7200000);
 			builder.append(DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date))
 					.append("|")
 					.append(measurement.getValue())

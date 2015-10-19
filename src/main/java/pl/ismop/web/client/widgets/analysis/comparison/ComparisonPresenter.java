@@ -115,8 +115,8 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     private void updateSliderDates() {
         if (selectedExperiment != null) {
             Date previousDate = sliderPresenter.getSelectedDate();
-            sliderPresenter.setStartDate(selectedExperiment.getStartDate());
-            sliderPresenter.setEndDate(selectedExperiment.getEndDate());
+            sliderPresenter.setStartDate(selectedExperiment.getStart());
+            sliderPresenter.setEndDate(selectedExperiment.getEnd());
             if (!previousDate.equals(sliderPresenter.getSelectedDate())) {
                 eventBus.dateChanged(sliderPresenter.getSelectedDate());
             }
