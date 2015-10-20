@@ -5,15 +5,20 @@ import static java.lang.Math.abs;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.Math.sin;
+import static java.util.Collections.sort;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -46,6 +51,12 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	private DapController dapController;
 
 	private CoordinatesUtil coordinatesUtil;
+	
+	private double shiftX, shiftY;
+
+	private double scale;
+
+	private double panX;
 	
 	@Inject
 	public HorizontalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil) {
@@ -114,7 +125,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			}
 			
 			@Override
-			public void processContexts(List<Context> contexts) {
+			public void processContexts(final List<Context> contexts) {
 				if(contexts.size() > 0) {
 					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
 						@Override
@@ -124,7 +135,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 						}
 						
 						@Override
-						public void processTimelines(List<Timeline> timelines) {
+						public void processTimelines(final List<Timeline> timelines) {
 							List<String> timelineIds = new ArrayList<>();
 							
 							for(Timeline timeline : timelines) {
@@ -168,8 +179,10 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 											}
 										}
 										
-										view.drawCrosssection(parameterUnit, minValue, maxValue);
+										view.init();
 										drawMuteSections(configuration.getSections().values(), muteSections);
+										view.drawCrosssection(parameterUnit, minValue, maxValue,
+												createDeviceLocationsWithValues(measurements, timelines, contexts.get(0)));
 									} else {
 										view.showNoMeasurementsMessage();
 									}
@@ -188,12 +201,109 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		
 	}
 
+	private Map<List<List<Double>>, Map<List<Double>, Double>> createDeviceLocationsWithValues(List<Measurement> measurements, List<Timeline> timelines, Context context) {
+		Map<List<List<Double>>, Map<List<Double>, Double>> result = new HashMap<>();
+		
+		for(Profile profile : configuration.getPickedProfiles().values()) {
+			Map<List<Double>, Double> temp = new LinkedHashMap<>();
+			List<List<Double>> keys = new ArrayList<>();
+			Double value = 0.0;
+			
+			for(Device device : configuration.getProfileDevicesMap().get(profile)) {
+				PARAMETER:
+				for(Parameter parameter : configuration.getParameterMap().values()) {
+					if(device.getParameterIds().contains(parameter.getId())
+							&& parameter.getMeasurementTypeName().equals(configuration.getPickedParameterName())) {
+						for(Timeline timeline : timelines) {
+							if(timeline.getContextId().equals(context.getId()) && parameter.getTimelineIds().contains(timeline.getId())) {
+								for(Measurement measurement : measurements) {
+									if(measurement.getTimelineId().equals(timeline.getId())) {
+										value = measurement.getValue();
+										
+										break PARAMETER;
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				if(device.getPlacement() != null && device.getPlacement().getCoordinates() != null) {
+					List<List<Double>> coordinates = new ArrayList<>();
+					coordinates.add(device.getPlacement().getCoordinates());
+					
+					List<List<Double>> projectedCoordinates = coordinatesUtil.projectCoordinates(coordinates);
+					rotate(projectedCoordinates);
+					
+					for(List<Double> pointCoordinates : projectedCoordinates) {
+						pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
+						pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
+					}
+					
+					List<List<List<Double>>> toBeScaledAndShiftedCoordinates = new ArrayList<>();
+					toBeScaledAndShiftedCoordinates.add(projectedCoordinates);
+					scaleAndShift(toBeScaledAndShiftedCoordinates, scale, panX);
+					temp.put(toBeScaledAndShiftedCoordinates.get(0).get(0), value);
+					keys.add(toBeScaledAndShiftedCoordinates.get(0).get(0));
+				}
+			}
+			
+			sort(keys, new Comparator<List<Double>>() {
+				@Override
+				public int compare(List<Double> o1, List<Double> o2) {
+					return -o1.get(1).compareTo(o2.get(1));
+				}
+			});
+			
+			Map<List<Double>, Double> locationsWithReadings = new LinkedHashMap<>();
+			
+			for(List<Double> key : keys) {
+				locationsWithReadings.put(key, temp.get(key));
+			}
+			
+			Section section = configuration.getSections().get(profile.getSectionId());
+			List<List<Double>> corners = section.getShape().getCoordinates();
+			List<List<Double>> projectedCorners = coordinatesUtil.projectCoordinates(corners);
+			rotate(projectedCorners);
+			
+			for(List<Double> pointCoordinates : projectedCorners) {
+				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
+				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
+			}
+			
+			List<List<List<Double>>> scaledAndShiftedCoordinates = new ArrayList<>();
+			scaledAndShiftedCoordinates.add(projectedCorners);
+			scaleAndShift(scaledAndShiftedCoordinates, scale, panX);
+			List<List<Double>> scaled = scaledAndShiftedCoordinates.get(0);
+			sort(scaled, new Comparator<List<Double>>() {
+				@Override
+				public int compare(List<Double> o1, List<Double> o2) {
+					return -o1.get(1).compareTo(o2.get(1));
+				}
+			});
+			
+			if(scaled.size() > 3) {
+				if(scaled.get(0).get(0) > scaled.get(1).get(0)) {
+					scaled.set(0, scaled.remove(1));
+				}
+				
+				if(scaled.get(2).get(0) < scaled.get(3).get(0)) {
+					scaled.set(2, scaled.remove(3));
+				}
+			}
+			
+			result.put(scaled , locationsWithReadings);
+		}
+		
+		return result;
+	}
+
 	private void drawMuteSections(Collection<Section> allSections, List<Section> muteSections) {
 		List<List<List<Double>>> coordinates = new ArrayList<>();
-		double 	minX = Double.MAX_VALUE,
-				minY = Double.MAX_VALUE,
-				maxX = Double.MIN_VALUE,
+		double	maxX = Double.MIN_VALUE,
 				maxY = Double.MIN_VALUE;
+		shiftX = Double.MAX_VALUE;
+		shiftY = Double.MAX_VALUE;
 		
 		for(Section section : muteSections) {
 			if(section.getShape() != null) {
@@ -206,16 +316,16 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 						maxX = point.get(0);
 					}
 					
-					if(point.get(0) < minX) {
-						minX = point.get(0);
+					if(point.get(0) < shiftX) {
+						shiftX = point.get(0);
 					}
 					
 					if(point.get(1) > maxY) {
 						maxY = point.get(1);
 					}
 					
-					if(point.get(1) < minY) {
-						minY = point.get(1);
+					if(point.get(1) < shiftY) {
+						shiftY = point.get(1);
 					}
 				}
 			}
@@ -223,13 +333,13 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		
 		for(List<List<Double>> sectionCoordinates : coordinates) {
 			for(List<Double> pointCoordinates : sectionCoordinates) {
-				pointCoordinates.set(0, pointCoordinates.get(0) - minX);
-				pointCoordinates.set(1, pointCoordinates.get(1) - minY);
+				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
+				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
 			}
 		}
 		
-		double panX = 200;
-		double scale = computeScale(coordinates, panX, view.getHeight(), view.getWidth());
+		panX = 200;
+		scale = computeScale(coordinates, panX, view.getHeight(), view.getWidth());
 		scaleAndShift(coordinates, scale, panX);
 		view.drawScale(scale, panX);
 		view.drawMuteSections(coordinates);

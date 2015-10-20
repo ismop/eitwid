@@ -12,6 +12,7 @@ import com.google.gwt.core.client.JsArrayUtils;
 @Singleton
 public class CoordinatesUtil {
 	public List<List<Double>> projectCoordinates(List<List<Double>> coordinates) {
+		@SuppressWarnings("unchecked")
 		JsArray<JsArrayNumber> sourceCoordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
 		
 		for(List<Double> cordinatePair : coordinates) {

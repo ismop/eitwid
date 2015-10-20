@@ -1,12 +1,14 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayNumber;
-import com.google.gwt.dev.shell.Messages;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -39,9 +41,48 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	@Override
-	public void drawCrosssection(String parameterUnit, double minValue, double maxValue) {
-		addRenderer(panel.getElement(), panel.getOffsetWidth(), panel.getOffsetHeight());
+	public void drawCrosssection(String parameterUnit, double minValue, double maxValue,
+			Map<List<List<Double>>, Map<List<Double>, Double>> locationsWithValues) {
 		drawLegend(0xecf330, 0x307bf3, minValue, maxValue, parameterUnit);
+		drawDevices(locationsWithValues);
+		
+		for(List<List<Double>> sectionCorners : locationsWithValues.keySet()) {
+			@SuppressWarnings("unchecked")
+			JsArray<JsArrayNumber> coordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
+			List<Double> topLeftCorner = sectionCorners.get(0);
+			List<Double> topRightCorner = sectionCorners.get(1);
+			Iterator<List<Double>> iterator = locationsWithValues.get(sectionCorners).keySet().iterator();
+
+			while(iterator.hasNext()) {
+				List<Double> next = iterator.next();
+				List<Double> bottomLeftCorner = calculateCorner(sectionCorners.get(0), sectionCorners.get(1), next, sectionCorners.get(0));
+				List<Double> bottomRightCorner = calculateCorner(sectionCorners.get(0), sectionCorners.get(1), next, sectionCorners.get(1));
+				JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
+				topLeft.push(topLeftCorner.get(0));
+				topLeft.push(topLeftCorner.get(1));
+				coordinates.push(topLeft);
+				
+				JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
+				topRight.push(topRightCorner.get(0));
+				topRight.push(topRightCorner.get(1));
+				coordinates.push(topRight);
+				
+				JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
+				bottomRight.push(bottomRightCorner.get(0));
+				bottomRight.push(bottomRightCorner.get(1));
+				coordinates.push(bottomRight);
+				
+				JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
+				bottomLeft.push(bottomLeftCorner.get(0));
+				bottomLeft.push(bottomLeftCorner.get(1));
+				coordinates.push(bottomLeft);
+				
+				topLeftCorner = bottomLeftCorner;
+				topRightCorner = bottomRightCorner;
+			}
+			
+			drawHeatSection(coordinates);
+		}
 	};
 	
 	@Override
@@ -80,6 +121,13 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	@Override
+	public void init() {
+		if(scene == null) {
+			addRenderer(panel.getElement(), panel.getOffsetWidth(), panel.getOffsetHeight());
+		}
+	}
+
+	@Override
 	public native void drawScale(double scale, double panX) /*-{
 		var material = new $wnd.THREE.LineBasicMaterial({
 			color: 0x0000ff
@@ -108,9 +156,46 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(scaleTextMesh);
 	}-*/;
 
+	private List<Double> calculateCorner(List<Double> firstPoint, List<Double> secondPoint, List<Double> crossPoint, List<Double> referencePoint) {
+		List<Double> result = new ArrayList<>();
+		//calculating the a coefficient of the first line (y = ax + b)
+		double a = (secondPoint.get(1) - firstPoint.get(1)) / (secondPoint.get(1) - firstPoint.get(0));
+		//calculating d coefficient of the second parallel line (y = ax + d)
+		double d = crossPoint.get(1) - a * crossPoint.get(0);
+		//calculating f coefficient of a perpendicular line to the first one crossing the reference point
+		double f = referencePoint.get(1) + referencePoint.get(0) / a;
+		//calculating the intersection point of the perpendicular and parallel lines
+		result.add((a - 1 / a) / (f - d));
+		result.add(result.get(0) * a + d);
+		
+		return result;
+	}
+
+	private void drawDevices(Map<List<List<Double>>, Map<List<Double>, Double>> locationsWithValues) {
+		for(Map<List<Double>, Double> locationWithValue : locationsWithValues.values()) {
+			for(List<Double> location : locationWithValue.keySet()) {
+				JsArrayNumber coordinates = (JsArrayNumber) JsArrayNumber.createArray();
+				
+				for(Double coordinate : location) {
+					coordinates.push(coordinate);
+				}
+				
+				drawDevice(coordinates);
+			}
+		}
+	}
+
 	private String format(double number) {
 		return NumberFormat.getFormat("0.00").format(number);
 	}
+
+	private native void drawDevice(JsArrayNumber coordinates) /*-{
+		var deviceMaterial = new $wnd.THREE.MeshLambertMaterial({color: 0xf44f4f});
+		var device = new $wnd.THREE.SphereGeometry(3, 12, 12);
+		var deviceMesh = new $wnd.THREE.Mesh(device, deviceMaterial);
+		deviceMesh.position.set(coordinates[0], coordinates[1], 0);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(deviceMesh);
+	}-*/;
 
 	private native void drawSection(JsArray<JsArrayNumber> nativeCoordinates) /*-{
 		var shape = new $wnd.THREE.Shape();
@@ -123,7 +208,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		shape.lineTo(nativeCoordinates[0][0], nativeCoordinates[0][1], 0);
 		
 		var geometry = new $wnd.THREE.ShapeGeometry(shape);
-		var mesh = new $wnd.THREE.Mesh(geometry, new $wnd.THREE.MeshBasicMaterial({color: 0x555555}));
+		var mesh = new $wnd.THREE.Mesh(geometry, new $wnd.THREE.MeshBasicMaterial({color: 0xbebebe}));
 		var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
@@ -137,7 +222,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		var lift = 5;
 		var moveLeft = 5;
 		var levelHeight = height / levels;
-		var levelWidth = 100
+		var levelWidth = 50
 		var valueStep = (topValue - bottomValue) / levels;
 		var textSpacing = 5;
 		var textSize = 12;
@@ -230,5 +315,38 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		};
 
 		render();
+	}-*/;
+
+	private native void drawHeatSection(JsArray<JsArrayNumber> coordinates) /*-{
+		console.log(coordinates);
+		var geometry = new $wnd.THREE.Geometry();
+		
+		for(var i = 0; i < coordinates.length; i = i + 4) {
+			geometry.vertices.push(
+				new $wnd.THREE.Vector3(coordinates[i][0], coordinates[i][1], 0),
+				new $wnd.THREE.Vector3(coordinates[i + 1][0], coordinates[i + 1][1], 0),
+				new $wnd.THREE.Vector3(coordinates[i + 2][0], coordinates[i + 2][1], 0),
+				new $wnd.THREE.Vector3(coordinates[i + 3][0], coordinates[i + 3][1], 0)
+			);
+			
+			var face1 = new $wnd.THREE.Face3(i, i + 1, i + 2);
+			face1.vertexColors[0] = new $wnd.THREE.Color(0x222222);
+			face1.vertexColors[1] = new $wnd.THREE.Color(0x222222);
+			face1.vertexColors[2] = new $wnd.THREE.Color(0x222222);
+			
+			var face2 = new $wnd.THREE.Face3(i + 2, i + 3, i);
+			face2.vertexColors[0] = new $wnd.THREE.Color(0x222222);
+			face2.vertexColors[1] = new $wnd.THREE.Color(0x222222);
+			face2.vertexColors[2] = new $wnd.THREE.Color(0x222222);
+			
+			geometry.faces.push(face1);
+			geometry.faces.push(face2);
+		}
+		
+		var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors});
+		var mesh = new $wnd.THREE.Mesh(geometry, material);
+		var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
 	}-*/;
 }
