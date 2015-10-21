@@ -10,11 +10,10 @@ import javax.inject.Inject;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Singleton;
 
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.context.ContextService;
 import pl.ismop.web.client.dap.context.ContextsResponse;
@@ -60,11 +59,10 @@ import pl.ismop.web.client.error.ErrorCallback;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.error.ErrorUtil;
 import pl.ismop.web.client.hypgen.Experiment;
-import pl.ismop.web.client.widgets.delegator.ContextsCallback;
-import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
 @Singleton
 public class DapController {
+	private final IsmopConverter converter;
 	private ExperimentService leveeExperimentService;
 	private ErrorUtil errorUtil;
 	private LeveeService leveeService;
@@ -162,7 +160,7 @@ public class DapController {
 	public DapController(ErrorUtil errorUtil, LeveeService leveeService, SensorService sensorService, MeasurementService measurementService,
 			SectionService sectionService, ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService,
 			DeviceService deviceService, DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
-			TimelineService timelineService, ExperimentService leveeExperimentService) {
+			TimelineService timelineService, ExperimentService leveeExperimentService, IsmopConverter converter) {
 		this.errorUtil = errorUtil;
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
@@ -177,6 +175,7 @@ public class DapController {
 		this.contextService = contextService;
 		this.timelineService = timelineService;
 		this.leveeExperimentService = leveeExperimentService;
+		this.converter = converter;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -249,14 +248,14 @@ public class DapController {
 	}
 
 	public void getMeasurements(String timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(endDate);
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(startDate);
+		String until = converter.format(endDate);
+		String from = converter.format(startDate);
 		measurementService.getMeasurements(timelineId, from, until, new MeasurementsRestCallback(callback));
 	}
 	
 	public void getMeasurementsWithQuantity(String timelineId, Date startDate, Date endDate, int quantity, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(endDate);
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(startDate);
+		String until = converter.format(endDate);
+		String from = converter.format(startDate);
 		measurementService.getMeasurementsWithQuantity(timelineId, from, until, quantity, new MeasurementsRestCallback(callback));
 	}
 
@@ -279,10 +278,8 @@ public class DapController {
 	}
 
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date);
-		String from = DateTimeFormat.
-						getFormat(PredefinedFormat.ISO_8601).
-						format(new Date(date.getTime() - 1500_000L));
+		String until = converter.format(date);
+		String from = converter.format(new Date(date.getTime() - 1500_000L));
 
 		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
 				new MeasurementsRestCallback(callback));
@@ -580,8 +577,8 @@ public class DapController {
 	}
 
 	public void getMeasurementsForTimelineIds(List<String> timelineIds, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
+		String until = converter.format(new Date());
+		String from = converter.format(monthEarlier());
 		measurementService.getMeasurements(merge(timelineIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -596,8 +593,8 @@ public class DapController {
 	}
 
 	public void getMeasurementsForTimelineIdsWithQuantity(List<String> timelineIds, int quantity, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
+		String until = converter.format(new Date());
+		String from = converter.format(monthEarlier());
 		measurementService.getMeasurementsWithQuantity(merge(timelineIds, ","), from, until, quantity, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {

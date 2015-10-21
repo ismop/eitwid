@@ -3,7 +3,6 @@ package pl.ismop.web.client.widgets.monitoring.fibre;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
@@ -22,7 +21,6 @@ import pl.ismop.web.client.widgets.delegator.TimelinesCallback;
 import java.util.*;
 
 public class DataFetcher implements IDataFetcher {
-
     private abstract class DeviceAggregationsCallback extends ErrorCallbackDelegator implements DapController.DeviceAggregatesCallback {
         public DeviceAggregationsCallback(ErrorCallback callback) {
             super(callback);
@@ -282,7 +280,6 @@ public class DataFetcher implements IDataFetcher {
         dapController.getMeasurements(timelineIds, startDate, endDate, new MeasurementsCallback(callback) {
             @Override
             public void processMeasurements(List<Measurement> measurements) {
-                DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
                 Map<Device, List<DateChartPoint>> results = new HashMap<Device, List<DateChartPoint>>();
                 for (Measurement m : measurements) {
                     Device device = timelineIdToDevice.get(m.getTimelineId());
@@ -291,8 +288,7 @@ public class DataFetcher implements IDataFetcher {
                         series = new ArrayList<DateChartPoint>();
                         results.put(device, series);
                     }
-                    Date date = format.parse(m.getTimestamp());
-                    series.add(new DateChartPoint(date, m.getValue()));
+                    series.add(new DateChartPoint(m.getTimestamp(), m.getValue()));
                 }
                 callback.series(results);
             }
@@ -318,11 +314,9 @@ public class DataFetcher implements IDataFetcher {
                 (timelineIdToDevice.inverse().get(device), startDate, endDate, new MeasurementsCallback(callback) {
                     @Override
                     public void processMeasurements(List<Measurement> measurements) {
-                        DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
                         List<DateChartPoint> points = new ArrayList<>();
                         for (Measurement m : measurements) {
-                            Date date = format.parse(m.getTimestamp());
-                            points.add(new DateChartPoint(date, m.getValue()));
+                            points.add(new DateChartPoint(m.getTimestamp(), m.getValue()));
                         }
                         callback.series(points);
                     }

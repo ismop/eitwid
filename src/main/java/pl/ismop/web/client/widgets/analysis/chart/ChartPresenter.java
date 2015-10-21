@@ -1,7 +1,5 @@
 package pl.ismop.web.client.widgets.analysis.chart;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -44,7 +42,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     @Override
     public void setSelectedExperiment(Experiment experiment) {
         selectedExperiment = experiment;
-        getView().setInterval(experiment.getStartDate(), experiment.getEndDate());
+        getView().setInterval(experiment.getStart(), experiment.getEnd());
     }
 
     @Override
@@ -83,15 +81,14 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             selectionManager.selectDevice(timeline.getParameter().getDevice());
         }
 
-        dapController.getMeasurements(idToTimeline.keySet(), selectedExperiment.getStartDate(),
-                selectedExperiment.getEndDate(), new DapController.MeasurementsCallback() {
+        dapController.getMeasurements(idToTimeline.keySet(), selectedExperiment.getStart(),
+                selectedExperiment.getEnd(), new DapController.MeasurementsCallback() {
             @Override
             public void processMeasurements(List<Measurement> measurements) {
                 getView().setSeries(map(measurements));
             }
 
             private Map<Timeline, List<DateChartPoint>> map(List<Measurement> measurements) {
-                DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
                 Map<Timeline, List<DateChartPoint>> timelineToMeasurements = new HashMap<>();
                 for (Measurement measurement : measurements) {
                     Timeline timeline = idToTimeline.get(measurement.getTimelineId());
@@ -101,8 +98,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
                         timelineToMeasurements.put(timeline, timelineMeasurements);
                     }
 
-                    Date date = format.parse(measurement.getTimestamp());
-                    timelineMeasurements.add(new DateChartPoint(date, measurement.getValue()));
+                    timelineMeasurements.add(new DateChartPoint(measurement.getTimestamp(), measurement.getValue()));
                 }
 
                 return timelineToMeasurements;

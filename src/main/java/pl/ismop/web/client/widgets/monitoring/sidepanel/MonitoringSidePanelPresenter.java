@@ -1,25 +1,10 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.ContextsCallback;
-import pl.ismop.web.client.dap.DapController.LeveesCallback;
-import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
-import pl.ismop.web.client.dap.DapController.ParametersCallback;
-import pl.ismop.web.client.dap.DapController.TimelinesCallback;
+import pl.ismop.web.client.dap.DapController.*;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
@@ -33,6 +18,12 @@ import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.IMonitoringSidePanel.IMonitoringSidePanelPresenter;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 @Presenter(view = MonitoringSidePanelView.class, multiple = true)
 public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSidePanel, MainEventBus> implements IMonitoringSidePanelPresenter {
@@ -221,9 +212,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 														int index = 0;
 														
 														for(Measurement measurement : parameterMeasurements) {
-															DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-															Date date = format.parse(measurement.getTimestamp());
-															values[index][0] = date.getTime();
+															values[index][0] = measurement.getTimestamp().getTime();
 															values[index][1] = measurement.getValue();
 															index++;
 														}

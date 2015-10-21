@@ -11,4 +11,5 @@ public interface AnalysisSidePanelMessages extends Messages {
     String time();
     String waterWaveChartTitle();
     String loadingWaterWave();
+    String confirmExperimentChange();
 }

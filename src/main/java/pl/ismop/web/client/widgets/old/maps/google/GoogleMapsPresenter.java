@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import com.mvp4g.client.annotation.EventHandler;
 import com.mvp4g.client.event.BaseEventHandler;
 
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.DeviceAggregatesCallback;
@@ -48,7 +49,8 @@ import pl.ismop.web.client.widgets.old.newexperiment.ThreatAssessmentPresenter;
 @EventHandler
 public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private static final Logger log = LoggerFactory.getLogger(GoogleMapsPresenter.class);
-	
+	private final IsmopConverter converter;
+
 	private DapController dapController;
 	private String elementId;
 	private MapMessages messages;
@@ -70,10 +72,12 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 	private List<String> aggregateFeatureIds;
 
 	@Inject
-	public GoogleMapsPresenter(DapController dapController, MapMessages messages, GeoJsonFeaturesEncDec jsonFeaturesEncDec) {
+	public GoogleMapsPresenter(DapController dapController, MapMessages messages,
+							   GeoJsonFeaturesEncDec jsonFeaturesEncDec, IsmopConverter converter) {
 		this.dapController = dapController;
 		this.messages = messages;
 		this.jsonFeaturesEncDec = jsonFeaturesEncDec;
+		this.converter = converter;
 		sections = new HashMap<>();
 		sectionColors = new HashMap<>();
 		sectionColors.put("none", "#D9EDF7");
@@ -371,7 +375,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 							double max = Double.MIN_VALUE;
 							
 							for(Measurement measurement : measurements) {
-								push(measurement.getValue(), measurement.getTimestamp(), values);
+								push(measurement.getValue(), converter.format(measurement.getTimestamp()), values);
 								
 								if(measurement.getValue() < min) {
 									min = measurement.getValue();
@@ -441,9 +445,7 @@ public class GoogleMapsPresenter extends BaseEventHandler<MainEventBus> {
 		builder.append("aa|").append(yLabel).append("\n");
 		
 		for(Measurement measurement : measurements) {
-			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-			Date date = format.parse(measurement.getTimestamp());
-			date = new Date(date.getTime() - 7200000);
+			Date date = new Date(measurement.getTimestamp().getTime() - 7200000);
 			builder.append(DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date))
 					.append("|")
 					.append(measurement.getValue())

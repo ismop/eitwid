@@ -1,7 +1,6 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -170,7 +169,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private void showExperimentWaveShape(Map<Parameter, List<Measurement>> series) {
         waterWave.removeAllSeries();
-        DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
         Parameter parameter = null;
         for (Map.Entry<Parameter, List<Measurement>> entry : series.entrySet()) {
             parameter = entry.getKey();
@@ -180,13 +178,12 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
             long diff = 0;
             if(entry.getValue().size() > 0) {
-                diff = format.parse(entry.getValue().get(0).getTimestamp()).getTime() -
-                        selectedExperiment.getStartDate().getTime();
+                diff = entry.getValue().get(0).getTimestamp().getTime() - selectedExperiment.getStart().getTime();
             }
 
             for (Measurement measurement : entry.getValue()) {
-                long time = format.parse(measurement.getTimestamp()).getTime() - diff;
-                if (time > selectedExperiment.getEndDate().getTime()) {
+                long time = measurement.getTimestamp().getTime() - diff;
+                if (time > selectedExperiment.getEnd().getTime()) {
                     GWT.log("Warning experiment water wave is longer then experiment");
                     break;
                 }

@@ -1,26 +1,10 @@
 package pl.ismop.web.client.widgets.monitoring.readings;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.ContextsCallback;
-import pl.ismop.web.client.dap.DapController.DevicesCallback;
-import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
-import pl.ismop.web.client.dap.DapController.ParametersCallback;
-import pl.ismop.web.client.dap.DapController.SectionsCallback;
-import pl.ismop.web.client.dap.DapController.TimelinesCallback;
+import pl.ismop.web.client.dap.DapController.*;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.levee.Levee;
@@ -34,10 +18,16 @@ import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.monitoring.readings.IReadingsView.IReadingsPresenter;
 
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Presenter(view = ReadingsView.class)
 public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus> implements IReadingsPresenter {
 	private static final String PICK_VALUE = "pick";
-	
+
 	private DapController dapController;
 	
 	private MapPresenter mapPresenter;
@@ -197,9 +187,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 											int index = 0;
 											
 											for(Measurement measurement : measurements) {
-												DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-												Date date = format.parse(measurement.getTimestamp());
-												values[index][0] = date.getTime();
+												values[index][0] = measurement.getTimestamp().getTime();
 												values[index][1] = measurement.getValue();
 												index++;
 											}

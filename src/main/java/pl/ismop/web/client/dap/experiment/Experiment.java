@@ -18,14 +18,10 @@ public class Experiment {
     private String description;
 
     @Json(name = "start_date")
-    private String start;
+    private Date start;
 
     @Json(name = "end_date")
-    private String end;
-
-    private Date startDate;
-
-    private Date endDate;
+    private Date end;
 
     @Json(name = "levee_id")
     private Integer leveeId;
@@ -56,22 +52,20 @@ public class Experiment {
         return description;
     }
 
-    public String getStart() {
+    public Date getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(Date start) {
         this.start = start;
-        this.startDate = format.parse(start);
     }
 
-    public String getEnd() {
+    public Date getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(Date end) {
         this.end = end;
-        this.endDate = format.parse(end);
     }
 
     public Integer getLeveeId() {
@@ -88,14 +82,6 @@ public class Experiment {
 
     public void setTimelineIds(List<Integer> timelineIds) {
         this.timelineIds = timelineIds;
-    }
-
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
     }
 
     public void setSections(List<Section> sections) {
