@@ -16,13 +16,16 @@ import pl.ismop.web.client.widgets.common.panel.PanelPresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Presenter(view = ComparisonView.class, multiple = true)
 public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEventBus>
         implements IComparisonPresenter, IWindowManager {
     private SliderPresenter sliderPresenter;
     private Experiment selectedExperiment;
+    private Set<PanelPresenter> panels = new HashSet<>();
 
     public void init() {
         if (sliderPresenter == null) {
@@ -94,6 +97,7 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
         PanelPresenter panel = wrapWithPanel(panelTitle, content);
         getView().addPanel(panel.getView());
+        panels.add(panel);
     }
 
     private PanelPresenter wrapWithPanel(String title, IPanelContent content) {
@@ -108,8 +112,15 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     @SuppressWarnings("unused")
     public void onExperimentChanged(Experiment selectedExperiment) {
         this.selectedExperiment = selectedExperiment;
+        removeAllPanels();
         updateSliderDates();
         updateEnabled();
+    }
+
+    private void removeAllPanels() {
+        for (PanelPresenter panel : panels) {
+            closePanel(panel);
+        }
     }
 
     private void updateSliderDates() {
