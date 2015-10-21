@@ -25,4 +25,6 @@ public interface IHorizontalSliceView extends IsWidget {
 	void showNoMeasurementsMessage();
 
 	void init();
+
+	void clear();
 }

@@ -22,4 +22,6 @@ public interface HorizontalSliceWizardMessages extends Messages {
 	String fullPanelTitle();
 
 	String updatePanelLabel();
+
+	String singleProfilePerSection();
 }

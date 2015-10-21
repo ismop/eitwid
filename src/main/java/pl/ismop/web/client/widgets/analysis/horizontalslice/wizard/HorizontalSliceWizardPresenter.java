@@ -66,6 +66,14 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	}
 	
 	public void onProfileClicked(final Profile profile) {
+		for(Profile pickedProfile : configuration.getPickedProfiles().values()) {
+			if(pickedProfile.getSectionId().equals(profile.getSectionId())) {
+				view.showSingleProfilePerSectionMessage();
+				
+				return;
+			}
+		}
+		
 		if(!configuration.getPickedProfiles().containsKey(profile.getId())) {
 			view.addProfile(profile.getId());
 			configuration.getPickedProfiles().put(profile.getId(), profile);

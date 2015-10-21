@@ -24,6 +24,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	interface HorizontalSliceViewUiBinder extends UiBinder<Widget, HorizontalSliceView> {}
 	
 	private JavaScriptObject scene;
+	
+	private JavaScriptObject meshes;
 
 	@UiField
 	HorizontalSliceMessages messages;
@@ -177,7 +179,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		);
 		
 		var line = new $wnd.THREE.Line(geometry, material);
-		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(line);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(line);
 		
 		var scaleText = new $wnd.THREE.TextGeometry("10 m", {
 			font: 'optimer',
@@ -188,7 +190,19 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		var scaleTextMaterial = new $wnd.THREE.MeshLambertMaterial({color: 0x0000ff});
 		var scaleTextMesh = new $wnd.THREE.Mesh(scaleText, scaleTextMaterial);
 		scaleTextMesh.position.set(panX, 10, 0);
-		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(scaleTextMesh);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(scaleTextMesh);
+	}-*/;
+
+	@Override
+	public native void clear() /*-{
+		if(this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::meshes) {
+			for(var i = 0; i < this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::meshes.length; i++) {
+				this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.remove(
+					this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::meshes[i]);
+			}
+			
+			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::meshes = new Array();
+		}
 	}-*/;
 
 	private List<Double> calculateCorner(List<Double> firstPoint, List<Double> secondPoint, List<Double> crossPoint, List<Double> referencePoint) {
@@ -229,7 +243,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		var device = new $wnd.THREE.SphereGeometry(3, 12, 12);
 		var deviceMesh = new $wnd.THREE.Mesh(device, deviceMaterial);
 		deviceMesh.position.set(coordinates[0], coordinates[1], 0);
-		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(deviceMesh);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(deviceMesh);
 	}-*/;
 
 	private native void drawSection(JsArray<JsArrayNumber> nativeCoordinates) /*-{
@@ -245,8 +259,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		var geometry = new $wnd.THREE.ShapeGeometry(shape);
 		var mesh = new $wnd.THREE.Mesh(geometry, new $wnd.THREE.MeshBasicMaterial({color: 0xbebebe}));
 		var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
-		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
-		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(wireframe);
 	}-*/;
 
 	private native void drawLegend(int topColor, int bottomColor, double bottomValue, double topValue, String parameterUnit) /*-{
@@ -287,8 +301,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors});
 			var mesh = new $wnd.THREE.Mesh(geometry, material);
 			var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
-			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
-			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
+			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
+			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(wireframe);
 			
 			var text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(bottomValue + valueStep * i)
 					+ " " + parameterUnit;
@@ -309,7 +323,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			}
 			
 			tickMesh.position.set(levelWidth + moveLeft + textSpacing, i * levelHeight + lift + textPositionShift, 0);
-			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(tickMesh);
+			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(tickMesh);
 			
 			if(i == levels -1) {
 				text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(bottomValue + valueStep * (i + 1))
@@ -321,7 +335,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 				});
 				tickMesh = new $wnd.THREE.Mesh(tick, tickMaterial);
 				tickMesh.position.set(levelWidth + moveLeft + textSpacing, (i + 1) * levelHeight + lift - textSize, 0);
-				this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(tickMesh);
+				this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(tickMesh);
 			}
 		}
 	}-*/;
@@ -329,6 +343,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	private native void addRenderer(Element element, int width, int height) /*-{
 		var scene = new $wnd.THREE.Scene();
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene = scene;
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::meshes = new Array();
 		
 		var camera = new $wnd.THREE.OrthographicCamera( 0, width, height, 0, 1, 30 );
 		camera.position.set(0, 0, 20);
@@ -382,8 +397,13 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors});
 			var mesh = new $wnd.THREE.Mesh(geometry, material);
 //			var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
-			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
-//			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
+			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
+//			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(wireframe);
 		}
+	}-*/;
+	
+	private native void addMesh(JavaScriptObject mesh) /*-{
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::meshes.push(mesh);
 	}-*/;
 }

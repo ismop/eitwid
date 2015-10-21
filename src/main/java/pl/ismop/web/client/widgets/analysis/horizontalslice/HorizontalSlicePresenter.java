@@ -18,7 +18,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -57,6 +56,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	private double scale;
 
 	private double panX;
+
+	private Date currentDate;
 	
 	@Inject
 	public HorizontalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil) {
@@ -66,12 +67,13 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	
 	public void onUpdateHorizontalSliceConfiguration(HorizontalCrosssectionConfiguration configuration) {
 		if(this.configuration == configuration) {
-			//TODO
+			refreshView();
 		}
 	}
 	
 	public void onDateChanged(Date selectedDate) {
-		processDateChange(selectedDate);
+		this.currentDate = selectedDate;
+		refreshView();
 	}
 
 	@Override
@@ -81,7 +83,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 	@Override
 	public void setSelectedDate(Date date) {
-		processDateChange(date);
+		this.currentDate = date;
+		refreshView();
 	}
 
 	@Override
@@ -98,7 +101,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		this.selectionManager = selectionManager;
 	}
 
-	private void processDateChange(final Date date) {
+	private void refreshView() {
 		view.showLoadingState(true);
 		
 		final List<String> parameterIds = new ArrayList<>();
@@ -142,7 +145,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 								timelineIds.add(timeline.getId());
 							}
 							
-							dapController.getLastMeasurements(timelineIds, date, new MeasurementsCallback() {
+							dapController.getLastMeasurements(timelineIds, currentDate, new MeasurementsCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {
 									view.showLoadingState(false);
@@ -152,6 +155,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 								@Override
 								public void processMeasurements(List<Measurement> measurements) {
 									view.showLoadingState(false);
+									view.clear();
 									
 									List<Section> muteSections = new ArrayList<>();
 									

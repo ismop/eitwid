@@ -46,4 +46,6 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 	void clearParameters();
 
 	void showButtonConfigLabel(boolean show);
+
+	void showSingleProfilePerSectionMessage();
 }

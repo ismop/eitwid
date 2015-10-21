@@ -244,4 +244,9 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 			add.setText(messages.addPanelLabel());
 		}
 	}
+
+	@Override
+	public void showSingleProfilePerSectionMessage() {
+		Window.alert(messages.singleProfilePerSection());
+	}
 }
