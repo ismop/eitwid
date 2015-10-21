@@ -262,7 +262,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			}
 			
 			Section section = configuration.getSections().get(profile.getSectionId());
-			List<List<Double>> corners = section.getShape().getCoordinates();
+			//removing last element which is just there to close the loop
+			List<List<Double>> corners = section.getShape().getCoordinates().subList(0, section.getShape().getCoordinates().size() - 1);
 			List<List<Double>> projectedCorners = coordinatesUtil.projectCoordinates(corners);
 			rotate(projectedCorners);
 			
@@ -284,11 +285,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			
 			if(scaled.size() > 3) {
 				if(scaled.get(0).get(0) > scaled.get(1).get(0)) {
-					scaled.set(0, scaled.remove(1));
+					scaled.add(0, scaled.remove(1));
 				}
 				
 				if(scaled.get(2).get(0) < scaled.get(3).get(0)) {
-					scaled.set(2, scaled.remove(3));
+					scaled.add(2, scaled.remove(3));
 				}
 			}
 			

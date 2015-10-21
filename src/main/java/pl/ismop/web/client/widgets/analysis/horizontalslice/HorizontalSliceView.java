@@ -43,15 +43,19 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	@Override
 	public void drawCrosssection(String parameterUnit, double minValue, double maxValue,
 			Map<List<List<Double>>, Map<List<Double>, Double>> locationsWithValues) {
-		drawLegend(0xecf330, 0x307bf3, minValue, maxValue, parameterUnit);
+		GWT.log("Locations with values: " + locationsWithValues);
+		int topColor = 0xecf330;
+		int bottomColor = 0x307bf3;
+		drawLegend(topColor, bottomColor, minValue, maxValue, parameterUnit);
 		drawDevices(locationsWithValues);
 		
 		for(List<List<Double>> sectionCorners : locationsWithValues.keySet()) {
 			@SuppressWarnings("unchecked")
-			JsArray<JsArrayNumber> coordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
+			JsArray<JsArrayNumber> coordinatesAndValues = (JsArray<JsArrayNumber>) JsArray.createArray();
 			List<Double> topLeftCorner = sectionCorners.get(0);
 			List<Double> topRightCorner = sectionCorners.get(1);
 			Iterator<List<Double>> iterator = locationsWithValues.get(sectionCorners).keySet().iterator();
+			Double previousValue = null; 
 
 			while(iterator.hasNext()) {
 				List<Double> next = iterator.next();
@@ -60,28 +64,59 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 				JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
 				topLeft.push(topLeftCorner.get(0));
 				topLeft.push(topLeftCorner.get(1));
-				coordinates.push(topLeft);
+				coordinatesAndValues.push(topLeft);
 				
 				JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
 				topRight.push(topRightCorner.get(0));
 				topRight.push(topRightCorner.get(1));
-				coordinates.push(topRight);
+				coordinatesAndValues.push(topRight);
 				
 				JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
 				bottomRight.push(bottomRightCorner.get(0));
 				bottomRight.push(bottomRightCorner.get(1));
-				coordinates.push(bottomRight);
+				coordinatesAndValues.push(bottomRight);
 				
 				JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
 				bottomLeft.push(bottomLeftCorner.get(0));
 				bottomLeft.push(bottomLeftCorner.get(1));
-				coordinates.push(bottomLeft);
+				coordinatesAndValues.push(bottomLeft);
+				
+				JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
+				values.push(previousValue == null ? locationsWithValues.get(sectionCorners).get(next) : previousValue);
+				values.push(locationsWithValues.get(sectionCorners).get(next));
+				coordinatesAndValues.push(values);
 				
 				topLeftCorner = bottomLeftCorner;
 				topRightCorner = bottomRightCorner;
+				previousValue = locationsWithValues.get(sectionCorners).get(next);
 			}
 			
-			drawHeatSection(coordinates);
+			JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
+			topLeft.push(topLeftCorner.get(0));
+			topLeft.push(topLeftCorner.get(1));
+			coordinatesAndValues.push(topLeft);
+			
+			JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
+			topRight.push(topRightCorner.get(0));
+			topRight.push(topRightCorner.get(1));
+			coordinatesAndValues.push(topRight);
+			
+			JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
+			bottomRight.push(sectionCorners.get(2).get(0));
+			bottomRight.push(sectionCorners.get(2).get(1));
+			coordinatesAndValues.push(bottomRight);
+			
+			JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
+			bottomLeft.push(sectionCorners.get(3).get(0));
+			bottomLeft.push(sectionCorners.get(3).get(1));
+			coordinatesAndValues.push(bottomLeft);
+			
+			JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
+			values.push(previousValue);
+			values.push(previousValue);
+			coordinatesAndValues.push(values);
+			
+			drawHeatSection(coordinatesAndValues, topColor, bottomColor, minValue, maxValue);
 		}
 	};
 	
@@ -159,14 +194,14 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	private List<Double> calculateCorner(List<Double> firstPoint, List<Double> secondPoint, List<Double> crossPoint, List<Double> referencePoint) {
 		List<Double> result = new ArrayList<>();
 		//calculating the a coefficient of the first line (y = ax + b)
-		double a = (secondPoint.get(1) - firstPoint.get(1)) / (secondPoint.get(1) - firstPoint.get(0));
+		double a = (secondPoint.get(1) - firstPoint.get(1)) / (secondPoint.get(0) - firstPoint.get(0));
 		//calculating d coefficient of the second parallel line (y = ax + d)
 		double d = crossPoint.get(1) - a * crossPoint.get(0);
 		//calculating f coefficient of a perpendicular line to the first one crossing the reference point
 		double f = referencePoint.get(1) + referencePoint.get(0) / a;
 		//calculating the intersection point of the perpendicular and parallel lines
-		result.add((a - 1 / a) / (f - d));
-		result.add(result.get(0) * a + d);
+		result.add((f - d) / (a + (1 / a)));
+		result.add(a * ((f - d) / (a + (1 / a))) + d);
 		
 		return result;
 	}
@@ -317,11 +352,13 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		render();
 	}-*/;
 
-	private native void drawHeatSection(JsArray<JsArrayNumber> coordinates) /*-{
+	private native void drawHeatSection(JsArray<JsArrayNumber> coordinates, int topColor, int bottomColor, double minValue, double maxValue) /*-{
 		console.log(coordinates);
-		var geometry = new $wnd.THREE.Geometry();
 		
-		for(var i = 0; i < coordinates.length; i = i + 4) {
+		var bottom = new $wnd.THREE.Color(bottomColor);
+		var top = new $wnd.THREE.Color(topColor);
+		for(var i = 0; i < coordinates.length; i = i + 5) {
+			var geometry = new $wnd.THREE.Geometry();
 			geometry.vertices.push(
 				new $wnd.THREE.Vector3(coordinates[i][0], coordinates[i][1], 0),
 				new $wnd.THREE.Vector3(coordinates[i + 1][0], coordinates[i + 1][1], 0),
@@ -329,24 +366,24 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 				new $wnd.THREE.Vector3(coordinates[i + 3][0], coordinates[i + 3][1], 0)
 			);
 			
-			var face1 = new $wnd.THREE.Face3(i, i + 1, i + 2);
-			face1.vertexColors[0] = new $wnd.THREE.Color(0x222222);
-			face1.vertexColors[1] = new $wnd.THREE.Color(0x222222);
-			face1.vertexColors[2] = new $wnd.THREE.Color(0x222222);
+			var face1 = new $wnd.THREE.Face3(0, 3, 2);
+			face1.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][0] - minValue) / (maxValue - minValue)));
+			face1.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][1] - minValue) / (maxValue - minValue)));
+			face1.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][1] - minValue) / (maxValue - minValue)));
 			
-			var face2 = new $wnd.THREE.Face3(i + 2, i + 3, i);
-			face2.vertexColors[0] = new $wnd.THREE.Color(0x222222);
-			face2.vertexColors[1] = new $wnd.THREE.Color(0x222222);
-			face2.vertexColors[2] = new $wnd.THREE.Color(0x222222);
+			var face2 = new $wnd.THREE.Face3(2, 1, 0);
+			face2.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][1] - minValue) / (maxValue - minValue)));
+			face2.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][0] - minValue) / (maxValue - minValue)));
+			face2.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][0] - minValue) / (maxValue - minValue)));
 			
 			geometry.faces.push(face1);
 			geometry.faces.push(face2);
+			
+			var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors});
+			var mesh = new $wnd.THREE.Mesh(geometry, material);
+//			var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
+			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
+//			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
 		}
-		
-		var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors});
-		var mesh = new $wnd.THREE.Mesh(geometry, material);
-		var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
-		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
-		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(wireframe);
 	}-*/;
 }
