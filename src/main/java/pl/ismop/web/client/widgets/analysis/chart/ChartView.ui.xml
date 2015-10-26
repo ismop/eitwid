@@ -3,7 +3,7 @@
     <ui:with type="pl.ismop.web.client.widgets.analysis.chart.ChartMessages" field="messages"/>
     <ui:style>
         .chart {
-            width: 100%
+            width: 100%;
             height: 250px;
         }
     </ui:style>
