@@ -73,10 +73,12 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 
 	@Override
 	public void adjustBounds(List<List<Double>> points) {
+		GWT.log(points.toString());
 		if(points.size() > 1) {
 			JavaScriptObject bounds = createLatLngBounds();
 			
 			for(List<Double> point : points) {
+				GWT.log("Extending with " + point);
 				extendBounds(bounds, point.get(1), point.get(0));
 			}
 			
@@ -284,7 +286,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		return new $wnd.google.maps.LatLngBounds();
 	}-*/;
 	
-	private native void extendBounds(JavaScriptObject bounds, Double lat, Double lng) /*-{
+	private native void extendBounds(JavaScriptObject bounds, double lat, double lng) /*-{
 		bounds.extend(new $wnd.google.maps.LatLng(lat, lng));
 	}-*/;
 
