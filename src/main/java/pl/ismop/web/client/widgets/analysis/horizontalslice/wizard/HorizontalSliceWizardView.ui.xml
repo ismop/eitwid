@@ -3,6 +3,30 @@
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardMessages" field="messages"/>
+	<g:HTMLPanel>
+		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%" addStyleNames="{style.modal}">
+			<b:ModalBody>
+				<b:Row addStyleNames="{style.row}">
+					<b:Column size="MD_6" addStyleNames="{style.column}">
+						<b:Heading size="H3" text="{messages.pickInfoLabel}"/>
+						<b:Label ui:field="noProfilesPicked" text="{messages.noProfilesLabel}"/>
+						<g:FlowPanel ui:field="profiles"/>
+						<g:FlowPanel addStyleNames="{style.parameterPanel}">
+							<b:Heading size="H3" text="{messages.pickParameterLabel}"/>
+							<b:Label ui:field="noParameters" text="{messages.noParametersLabel}"/>
+							<g:FlowPanel ui:field="parameters"/>
+							<g:FlowPanel addStyleNames="{style.buttonsPanel}">
+								<b:Button ui:field="add" text="{messages.addPanelLabel}" type="PRIMARY"></b:Button>
+							</g:FlowPanel>
+						</g:FlowPanel>
+					</b:Column>
+					<b:Column size="MD_6" addStyleNames="{style.column}">
+						<g:FlowPanel ui:field="mapContainer" addStyleNames="{style.map}"/>
+					</b:Column>
+				</b:Row>
+			</b:ModalBody>
+		</b:Modal>
+	</g:HTMLPanel>
 	<ui:style>
 		@external .modal-dialog, .modal-content, .modal-body;
 		
@@ -39,28 +63,4 @@
 			bottom: 0px;
 		}
 	</ui:style>
-	<g:HTMLPanel>
-		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%" addStyleNames="{style.modal}">
-			<b:ModalBody>
-				<b:Row addStyleNames="{style.row}">
-					<b:Column size="MD_6" addStyleNames="{style.column}">
-						<b:Heading size="H3" text="{messages.pickInfoLabel}"/>
-						<b:Label ui:field="noProfilesPicked" text="{messages.noProfilesLabel}"/>
-						<g:FlowPanel ui:field="profiles"/>
-						<g:FlowPanel addStyleNames="{style.parameterPanel}">
-							<b:Heading size="H3" text="{messages.pickParameterLabel}"/>
-							<b:Label ui:field="noParameters" text="{messages.noParametersLabel}"/>
-							<g:FlowPanel ui:field="parameters"/>
-							<g:FlowPanel addStyleNames="{style.buttonsPanel}">
-								<b:Button ui:field="add" text="{messages.addPanelLabel}" type="PRIMARY"></b:Button>
-							</g:FlowPanel>
-						</g:FlowPanel>
-					</b:Column>
-					<b:Column size="MD_6" addStyleNames="{style.column}">
-						<g:FlowPanel ui:field="mapContainer" addStyleNames="{style.map}"/>
-					</b:Column>
-				</b:Row>
-			</b:ModalBody>
-		</b:Modal>
-	</g:HTMLPanel>
 </ui:UiBinder>

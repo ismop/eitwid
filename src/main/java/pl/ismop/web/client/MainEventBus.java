@@ -19,6 +19,7 @@ import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssecti
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
+import pl.ismop.web.client.widgets.analysis.verticalslice.wizard.VerticalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.error.ErrorPresenter;
@@ -174,4 +175,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = ChartWizardPresenter.class)
 	void timelineSelectionChanged();
+
+	@Event(handlers = VerticalSliceWizardPresenter.class)
+	void showVerticalCrosssectionWizard();
 }

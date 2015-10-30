@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.analysis.verticalslice.wizard.VerticalSliceWizardMessages" field="messages"/>
+	<g:HTMLPanel>
+		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%" addStyleNames="{style.modal}">
+		</b:Modal>
+	</g:HTMLPanel>
+	<ui:style>
+		@external .modal-dialog, .modal-content, .modal-body;
+		
+		.modal .modal-dialog {
+			height: 90%;
+		}
+		
+		.modal .modal-content {
+			height: 100%;
+		}
+		
+		.modal .modal-body {
+			height: literal("calc(100% - 60px)");
+			overflow-y: auto;
+		}
+		
+		.row, .column, .map {
+			height: 100%;
+		}
+	</ui:style>
+</ui:UiBinder>
