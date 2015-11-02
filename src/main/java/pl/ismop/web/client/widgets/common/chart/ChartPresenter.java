@@ -199,6 +199,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 
 	private native void addAxis(JavaScriptObject nativeChart, int index, String yAxisLabel) /*-{
 		nativeChart.addAxis({
+			showEmpty: false,
 			title: {
 				text: yAxisLabel
 			},

@@ -69,7 +69,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show);
 
-	@Event(handlers = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	@Event(handlers = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class, VerticalSliceWizardPresenter.class})
 	void profileClicked(Profile profile);
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
@@ -105,13 +105,13 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void clearSelection();
 
-	@Event(handlers = HorizontalSliceWizardPresenter.class, deactivate = LeveeNavigatorPresenter.class)
+	@Event(handlers = HorizontalSliceWizardPresenter.class, deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
 	void showHorizontalCrosssectionWizard();
 
 	@Event(handlers = HorizontalSliceWizardPresenter.class, deactivate = LeveeNavigatorPresenter.class)
 	void showHorizontalCrosssectionWizardWithConfig(HorizontalCrosssectionConfiguration configuration);
 
-	@Event(activate = LeveeNavigatorPresenter.class)
+	@Event(activate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
 	void horizontalCrosssectionWizardHidden();
 
 	@Event(handlers = ComparisonPresenter.class)
@@ -176,6 +176,9 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ChartWizardPresenter.class)
 	void timelineSelectionChanged();
 
-	@Event(handlers = VerticalSliceWizardPresenter.class)
+	@Event(handlers = VerticalSliceWizardPresenter.class, deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
 	void showVerticalCrosssectionWizard();
+
+	@Event(activate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	void verticalCrosssectionWizardHidden();
 }
