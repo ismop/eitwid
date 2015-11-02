@@ -19,6 +19,8 @@ import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssecti
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
+import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalCrosssectionConfiguration;
+import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.verticalslice.wizard.VerticalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
@@ -105,15 +107,6 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = LeveeNavigatorPresenter.class)
 	void clearSelection();
 
-	@Event(handlers = HorizontalSliceWizardPresenter.class, deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
-	void showHorizontalCrosssectionWizard();
-
-	@Event(handlers = HorizontalSliceWizardPresenter.class, deactivate = LeveeNavigatorPresenter.class)
-	void showHorizontalCrosssectionWizardWithConfig(HorizontalCrosssectionConfiguration configuration);
-
-	@Event(activate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
-	void horizontalCrosssectionWizardHidden();
-
 	@Event(handlers = ComparisonPresenter.class)
 	void addPanel(String panelTitle, IPanelContent<?, ?> content);
 
@@ -170,15 +163,34 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = AnalysisSidePanelPresenter.class )
 	void clearMinimap();
 
-	@Event(handlers = HorizontalSlicePresenter.class)
-	void updateHorizontalSliceConfiguration(HorizontalCrosssectionConfiguration configuration);
-
 	@Event(handlers = ChartWizardPresenter.class)
 	void timelineSelectionChanged();
 
-	@Event(handlers = VerticalSliceWizardPresenter.class, deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
-	void showVerticalCrosssectionWizard();
+	@Event(handlers = HorizontalSliceWizardPresenter.class, activate = HorizontalSliceWizardPresenter.class,
+			deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
+	void showHorizontalCrosssectionWizard();
 
-	@Event(activate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	@Event(handlers = HorizontalSliceWizardPresenter.class, activate = HorizontalSliceWizardPresenter.class,
+			deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
+	void showHorizontalCrosssectionWizardWithConfig(HorizontalCrosssectionConfiguration configuration);
+
+	@Event(handlers = HorizontalSlicePresenter.class)
+	void updateHorizontalSliceConfiguration(HorizontalCrosssectionConfiguration configuration);
+
+	@Event(activate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class}, deactivate = HorizontalSliceWizardPresenter.class)
+	void horizontalCrosssectionWizardHidden();
+
+	@Event(handlers = VerticalSliceWizardPresenter.class, activate = VerticalSliceWizardPresenter.class,
+			deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	void showVerticalCrosssectionWizard();
+	
+	@Event(handlers = VerticalSliceWizardPresenter.class, activate = VerticalSliceWizardPresenter.class,
+			deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	void showVerticalCrosssectionWizardWithConfig(VerticalCrosssectionConfiguration configuration);
+
+	@Event(handlers = VerticalSlicePresenter.class)
+	void updateVerticalSliceConfiguration(VerticalCrosssectionConfiguration configuration);
+	
+	@Event(activate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class}, deactivate = VerticalSliceWizardPresenter.class)
 	void verticalCrosssectionWizardHidden();
 }

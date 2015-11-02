@@ -18,15 +18,22 @@ import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, MainEventBus> implements IVerticalSlicePresenter, 
 		IPanelContent<IVerticalSliceView, MainEventBus> {
 	private DapController dapController;
+	
+	private VerticalCrosssectionConfiguration configuration;
 
 	@Inject
 	public VerticalSlicePresenter(DapController dapController) {
 		this.dapController = dapController;
 	}
+	
+	public void onUpdateVerticalSliceConfiguration(VerticalCrosssectionConfiguration configuration) {
+		if(this.configuration == configuration) {
+			
+		}
+	}
 
 	public void setConfiguration(VerticalCrosssectionConfiguration configuration) {
-		// TODO Auto-generated method stub
-		
+		this.configuration = configuration;
 	}
 
 	@Override
@@ -43,8 +50,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 	@Override
 	public void edit() {
-		// TODO Auto-generated method stub
-		
+		eventBus.showVerticalCrosssectionWizardWithConfig(configuration);
 	}
 
 	@Override

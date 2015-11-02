@@ -10,7 +10,7 @@ public interface IVerticalSliceWizardView extends IsWidget {
 
 		void onParameterChanged(String parameterName);
 
-		void onAddPanel();
+		void onAcceptConfig();
 	}
 	
 	void showModal(boolean show);
@@ -28,4 +28,12 @@ public interface IVerticalSliceWizardView extends IsWidget {
 	void showNoParamtersLabel(boolean show);
 
 	String getFullPanelTitle();
+
+	void clearParameters();
+
+	void clearProfiles();
+
+	void showButtonConfigLabel(boolean show);
+
+	void showNoProfilePickedError();
 }

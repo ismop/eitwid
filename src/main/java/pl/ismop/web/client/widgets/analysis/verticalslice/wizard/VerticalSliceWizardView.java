@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
 import org.gwtbootstrap3.client.shared.event.ModalShownEvent;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Label;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -19,6 +20,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -48,6 +50,9 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 	@UiField
 	Label noProfilesPicked, noParameters;
 	
+	@UiField
+	Button add;
+	
 	public VerticalSliceWizardView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		parameterWidgets = new HashMap<>();
@@ -65,7 +70,7 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 	
 	@UiHandler("add")
 	void addPanel(ClickEvent event) {
-		getPresenter().onAddPanel();
+		getPresenter().onAcceptConfig();
 	}
 
 	@Override
@@ -142,5 +147,29 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 	@Override
 	public String getFullPanelTitle() {
 		return messages.fullPanelTitle();
+	}
+
+	@Override
+	public void clearParameters() {
+		parameters.clear();
+	}
+
+	@Override
+	public void clearProfiles() {
+		profiles.clear();
+	}
+
+	@Override
+	public void showButtonConfigLabel(boolean show) {
+		if(show) {
+			add.setText(messages.updatePanelLabel());
+		} else {
+			add.setText(messages.addPanelLabel());
+		}
+	}
+
+	@Override
+	public void showNoProfilePickedError() {
+		Window.alert(messages.noProfilePickedMessage());
 	}
 }

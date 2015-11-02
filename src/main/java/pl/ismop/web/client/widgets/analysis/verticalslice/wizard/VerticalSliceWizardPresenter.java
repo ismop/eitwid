@@ -34,6 +34,8 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 	private MapPresenter mapPresenter;
 	
 	private VerticalCrosssectionConfiguration configuration;
+	
+	private boolean configMode;
 
 	@Inject
 	public VerticalSliceWizardPresenter(DapController dapController) {
@@ -41,6 +43,11 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 	}
 	
 	public void onShowVerticalCrosssectionWizard() {
+		view.clearProfiles();
+		view.clearParameters();
+		configMode = false;
+		view.showButtonConfigLabel(false);
+		
 		configuration = new VerticalCrosssectionConfiguration();
 		view.showModal(true);
 	}
@@ -92,6 +99,12 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 				}
 			});
 		}
+	}
+	
+	public void onShowVerticalCrosssectionWizardWithConfig(VerticalCrosssectionConfiguration configuration) {
+		onShowVerticalCrosssectionWizard();
+		this.configuration = configuration;
+		initializeConfigMode();
 	}
 
 	@Override
@@ -147,6 +160,43 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 		eventBus.verticalCrosssectionWizardHidden();
 	}
 
+	@Override
+	public void onParameterChanged(String parameterName) {
+		configuration.setPickedParameterName(parameterName);
+	}
+
+	@Override
+	public void onAcceptConfig() {
+		if(configuration.getPickedProfile() == null) {
+			view.showNoProfilePickedError();
+		} else {
+			if(configMode) {
+				eventBus.updateVerticalSliceConfiguration(configuration);
+			} else {
+				VerticalSlicePresenter presenter = eventBus.addHandler(VerticalSlicePresenter.class);
+				presenter.setConfiguration(configuration);
+				eventBus.addPanel(view.getFullPanelTitle(), presenter);
+			}
+			
+			view.showModal(false);
+		}
+	}
+
+	private void initializeConfigMode() {
+		configMode = true;
+		view.showButtonConfigLabel(true);
+		
+		for(String parameterName : configuration.getParameterNames()) {
+			if(parameterName.equals(configuration.getPickedParameterName())) {
+				view.addParameter(parameterName, true);
+			} else {
+				view.addParameter(parameterName, false);
+			}
+		}
+		
+		view.setProfile(configuration.getPickedProfile().getId());
+	}
+
 	private void updateParameters(List<Parameter> parameters) {
 		Set<String> result = new HashSet<>();
 		
@@ -185,18 +235,5 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 		if(configuration.getParameterNames().size() == 0) {
 			view.showNoParamtersLabel(true);
 		}
-	}
-
-	@Override
-	public void onParameterChanged(String parameterName) {
-		configuration.setPickedParameterName(parameterName);
-	}
-
-	@Override
-	public void onAddPanel() {
-		VerticalSlicePresenter presenter = eventBus.addHandler(VerticalSlicePresenter.class);
-		presenter.setConfiguration(configuration);
-		eventBus.addPanel(view.getFullPanelTitle(), presenter);
-		view.showModal(false);
 	}
 }

@@ -18,4 +18,8 @@ public interface VerticalSliceWizardMessages extends Messages {
 	String loadingTitle();
 	
 	String fullPanelTitle();
+
+	String updatePanelLabel();
+
+	String noProfilePickedMessage();
 }
