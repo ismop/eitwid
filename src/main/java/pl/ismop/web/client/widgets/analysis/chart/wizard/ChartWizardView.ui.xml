@@ -33,12 +33,12 @@
         }
 
         .scroll-panel {
-            height: 100%;
+            height: literal("calc(100% - 50px)");
             width: 100%;
         }
 
         .map {
-            height: literal("calc(100% - 50px)");
+            height: 100%;
         }
 
         .actions {
