@@ -130,6 +130,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
         Parameter parameter = nameToParameter.get(parameterName);
         SensorPanelPresenter panelPresenter = eventBus.addHandler(SensorPanelPresenter.class);
         panelPresenter.setParameter(parameter);
+        panelPresenter.setSelectedExperiment(selectedExperiment);
         getView().addPanel(panelPresenter.getView());
 
         panels.put(parameterName, panelPresenter);

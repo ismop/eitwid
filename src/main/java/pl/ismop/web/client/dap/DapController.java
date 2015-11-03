@@ -43,6 +43,9 @@ import pl.ismop.web.client.dap.profile.ProfilesResponse;
 import pl.ismop.web.client.dap.result.Result;
 import pl.ismop.web.client.dap.result.ResultService;
 import pl.ismop.web.client.dap.result.ResultsResponse;
+import pl.ismop.web.client.dap.scenario.Scenario;
+import pl.ismop.web.client.dap.scenario.ScenarioService;
+import pl.ismop.web.client.dap.scenario.ScenariosResponse;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.section.SectionService;
 import pl.ismop.web.client.dap.section.SectionsResponse;
@@ -63,6 +66,7 @@ import pl.ismop.web.client.hypgen.Experiment;
 @Singleton
 public class DapController {
 	private final IsmopConverter converter;
+	private final ScenarioService scenarioService;
 	private ExperimentService leveeExperimentService;
 	private ErrorUtil errorUtil;
 	private LeveeService leveeService;
@@ -138,6 +142,10 @@ public class DapController {
 		void processExperiments(List<pl.ismop.web.client.dap.experiment.Experiment> experiments);
 	}
 
+	public interface ScenariosCallback extends ErrorCallback {
+		void processScenarios(List<Scenario> scenarios);
+	}
+
 	private class MeasurementsRestCallback implements MethodCallback<MeasurementsResponse> {
 		private final MeasurementsCallback callback;
 
@@ -160,7 +168,7 @@ public class DapController {
 	public DapController(ErrorUtil errorUtil, LeveeService leveeService, SensorService sensorService, MeasurementService measurementService,
 			SectionService sectionService, ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService,
 			DeviceService deviceService, DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
-			TimelineService timelineService, ExperimentService leveeExperimentService, IsmopConverter converter) {
+			TimelineService timelineService, ExperimentService leveeExperimentService, ScenarioService scenarioService, IsmopConverter converter) {
 		this.errorUtil = errorUtil;
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
@@ -175,6 +183,7 @@ public class DapController {
 		this.contextService = contextService;
 		this.timelineService = timelineService;
 		this.leveeExperimentService = leveeExperimentService;
+		this.scenarioService = scenarioService;
 		this.converter = converter;
 	}
 	
@@ -576,7 +585,7 @@ public class DapController {
 		});
 	}
 
-	public void getMeasurementsForTimelineIds(List<String> timelineIds, final MeasurementsCallback callback) {
+	public void getMeasurementsForTimelineIds(Collection<String> timelineIds, final MeasurementsCallback callback) {
 		String until = converter.format(new Date());
 		String from = converter.format(monthEarlier());
 		measurementService.getMeasurements(merge(timelineIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
@@ -800,6 +809,20 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, ExperimentsResponse experiments) {
 				callback.processExperiments(experiments.getExperiments());
+			}
+		});
+	}
+
+	public void getExperimentScenarios(String experimentId, final ScenariosCallback callback) {
+		scenarioService.getExperimentScenarios(experimentId, new MethodCallback<ScenariosResponse>() {
+			@Override
+			public void onSuccess(Method method, ScenariosResponse scenarios) {
+				callback.processScenarios(scenarios.getScenarios());
+			}
+
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 		});
 	}

@@ -1,17 +1,19 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel;
 
-import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.context.Context;
+import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.parameter.Parameter;
+import pl.ismop.web.client.dap.scenario.Scenario;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel.ISensorPanelView.ISensorPanelPresenter;
 import pl.ismop.web.client.widgets.delegator.ContextsCallback;
+import pl.ismop.web.client.widgets.delegator.ScenariosCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
     private SensorPanelMessages messages;
     private DapController dapController;
     private Map<String, Timeline> timelineNamesToTimeline;
+    private Experiment selectedExperiment;
 
     @Inject
     SensorPanelPresenter(DapController dapController) {
@@ -62,20 +65,32 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
                 dapController.getContexts(contextIds, new ContextsCallback(this) {
                     @Override
                     public void processContexts(List<Context> contexts) {
-                        Map<String, Context> idToContext = new HashMap<>();
+                        final Map<String, Context> idToContext = new HashMap<>();
                         for (Context context : contexts) {
                             idToContext.put(context.getId(), context);
                         }
 
-                        for (Timeline timeline : timelines) {
-                            // TODO: better names for timelines. Take into account also scenarios
-                            // when added to DAP
-                            String name = idToContext.get(timeline.getContextId()).getName();
-                            timeline.setLabel(name);
-                            timeline.setParameter(parameter);
-                            timelineNamesToTimeline.put(name, timeline);
-                        }
-                        getView().setTimelines(timelineNamesToTimeline.keySet());
+                        dapController.getExperimentScenarios(selectedExperiment.getId(), new ScenariosCallback(this) {
+                            @Override
+                            public void processScenarios(List<Scenario> scenarios) {
+                                Map<String, Scenario> idToScenario = new HashMap<>();
+                                for (Scenario scenario : scenarios) {
+                                    idToScenario.put(scenario.getId(), scenario);
+                                }
+
+                                for (Timeline timeline : timelines) {
+                                    String name = idToContext.get(timeline.getContextId()).getName();
+                                    if (timeline.getScenarioId() != null) {
+                                        name = idToScenario.get(timeline.getScenarioId()).getName();
+                                    }
+
+                                    timeline.setLabel(name);
+                                    timeline.setParameter(parameter);
+                                    timelineNamesToTimeline.put(name, timeline);
+                                }
+                                getView().setTimelines(timelineNamesToTimeline.keySet());
+                            }
+                        });
                     }
                 });
             }
@@ -100,5 +115,9 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
     @Override
     public void timelineSelectionChanged() {
         eventBus.timelineSelectionChanged();
+    }
+
+    public void setSelectedExperiment(Experiment selectedExperiment) {
+        this.selectedExperiment = selectedExperiment;
     }
 }

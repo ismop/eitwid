@@ -13,6 +13,12 @@ public class Timeline {
 	@Json(name = "context_id")
 	private String contextId;
 
+	@Json(name = "scenario_id")
+	private String scenarioId;
+
+	@Json(name = "experiment_id")
+	private String experimentId;
+
 	@JsonIgnore
 	private Parameter parameter;
 
@@ -41,6 +47,22 @@ public class Timeline {
 
 	public void setContextId(String contextId) {
 		this.contextId = contextId;
+	}
+
+	public String getExperimentId() {
+		return experimentId;
+	}
+
+	public void setExperimentId(String experimentId) {
+		this.experimentId = experimentId;
+	}
+
+	public String getScenarioId() {
+		return scenarioId;
+	}
+
+	public void setScenarioId(String scenarioId) {
+		this.scenarioId = scenarioId;
 	}
 
 	public void setParameter(Parameter parameter) {
