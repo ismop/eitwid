@@ -1,5 +1,6 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel;
 
+import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -75,18 +76,26 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
                             public void processScenarios(List<Scenario> scenarios) {
                                 Map<String, Scenario> idToScenario = new HashMap<>();
                                 for (Scenario scenario : scenarios) {
+                                    GWT.log("Scenario name: " + scenario.getName() + " id " + scenario.getId());
                                     idToScenario.put(scenario.getId(), scenario);
                                 }
 
                                 for (Timeline timeline : timelines) {
-                                    String name = idToContext.get(timeline.getContextId()).getName();
+                                    String name = null;
                                     if (timeline.getScenarioId() != null) {
-                                        name = idToScenario.get(timeline.getScenarioId()).getName();
+                                        Scenario scenario = idToScenario.get(timeline.getScenarioId());
+                                        if (scenario != null) {
+                                            name = idToScenario.get(timeline.getScenarioId()).getName();
+                                        }
+                                    } else {
+                                        name = idToContext.get(timeline.getContextId()).getName();
                                     }
 
-                                    timeline.setLabel(name);
-                                    timeline.setParameter(parameter);
-                                    timelineNamesToTimeline.put(name, timeline);
+                                    if (name != null) {
+                                        timeline.setLabel(name);
+                                        timeline.setParameter(parameter);
+                                        timelineNamesToTimeline.put(name, timeline);
+                                    }
                                 }
                                 getView().setTimelines(timelineNamesToTimeline.keySet());
                             }
