@@ -110,7 +110,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ComparisonPresenter.class)
 	void addPanel(String panelTitle, IPanelContent<?, ?> content);
 
-	@Event(handlers = { DummyPresenter.class, AnalysisSidePanelPresenter.class, ChartPresenter.class, HorizontalSlicePresenter.class})
+	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class, HorizontalSlicePresenter.class, VerticalSlicePresenter.class})
 	void dateChanged(Date selectedDate);
 
 	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })

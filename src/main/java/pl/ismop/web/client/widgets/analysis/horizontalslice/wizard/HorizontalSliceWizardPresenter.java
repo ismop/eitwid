@@ -3,6 +3,7 @@ package pl.ismop.web.client.widgets.analysis.horizontalslice.wizard;
 import static java.util.Collections.sort;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -234,11 +235,13 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		configMode = true;
 		view.showButtonConfigLabel(true);
 		
+		Map<String, Integer> counter = countParameters(configuration.getParameterMap().values());
+		
 		for(String parameterName : configuration.getParameterNames()) {
 			if(parameterName.equals(configuration.getPickedParameterName())) {
-				view.addParameter(parameterName, true);
+				view.addParameter(parameterName, true, counter.get(parameterName) > 1);
 			} else {
-				view.addParameter(parameterName, false);
+				view.addParameter(parameterName, false, counter.get(parameterName) > 1);
 			}
 		}
 		
@@ -306,6 +309,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 	private void updateParameters(List<Parameter> parameters) {
 		Set<String> result = new HashSet<>();
+		Map<String, Integer> counter = countParameters(parameters);
 		
 		for(Parameter parameter : parameters) {
 			result.add(parameter.getMeasurementTypeName());
@@ -328,10 +332,10 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		for(String parameterName : result) {
 			if(!configuration.getParameterNames().contains(parameterName)) {
 				if(configuration.getPickedParameterName() == null) {
-					view.addParameter(parameterName, true);
+					view.addParameter(parameterName, true, counter.get(parameterName) > 1);
 					configuration.setPickedParameterName(parameterName);
 				} else {
-					view.addParameter(parameterName, false);
+					view.addParameter(parameterName, false, counter.get(parameterName) > 1);
 				}
 				
 				configuration.getParameterNames().add(parameterName);
@@ -342,5 +346,16 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		if(configuration.getParameterNames().size() == 0) {
 			view.showNoParamtersLabel(true);
 		}
+	}
+	
+	private Map<String, Integer> countParameters(Collection<Parameter> parameters) {
+		Map<String, Integer> result = new HashMap<>();
+		
+		for(Parameter parameter : parameters) {
+			result.put(parameter.getMeasurementTypeName(), result.get(
+					parameter.getMeasurementTypeName()) == null ? 1 : result.get(parameter.getMeasurementTypeName()) + 1);
+		}
+		
+		return result;
 	}
 }

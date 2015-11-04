@@ -22,4 +22,6 @@ public interface VerticalSliceWizardMessages extends Messages {
 	String updatePanelLabel();
 
 	String noProfilePickedMessage();
+
+	String parameterDisabledInfo();
 }

@@ -23,9 +23,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 	interface HorizontalSliceViewUiBinder extends UiBinder<Widget, HorizontalSliceView> {}
 	
-	private JavaScriptObject scene;
-	
-	private JavaScriptObject meshes;
+	private JavaScriptObject scene, meshes;
 
 	@UiField
 	HorizontalSliceMessages messages;
@@ -45,7 +43,6 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	@Override
 	public void drawCrosssection(String parameterUnit, double minValue, double maxValue,
 			Map<List<List<Double>>, Map<List<Double>, Double>> locationsWithValues) {
-		GWT.log("Locations with values: " + locationsWithValues);
 		int topColor = 0xecf330;
 		int bottomColor = 0x307bf3;
 		drawLegend(topColor, bottomColor, minValue, maxValue, parameterUnit);
@@ -368,8 +365,6 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}-*/;
 
 	private native void drawHeatSection(JsArray<JsArrayNumber> coordinates, int topColor, int bottomColor, double minValue, double maxValue) /*-{
-		console.log(coordinates);
-		
 		var bottom = new $wnd.THREE.Color(bottomColor);
 		var top = new $wnd.THREE.Color(topColor);
 		for(var i = 0; i < coordinates.length; i = i + 5) {
@@ -396,9 +391,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			
 			var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors});
 			var mesh = new $wnd.THREE.Mesh(geometry, material);
-//			var wireframe = new $wnd.THREE.EdgesHelper(mesh, 0x383838);
 			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
-//			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(wireframe);
 		}
 	}-*/;
 	

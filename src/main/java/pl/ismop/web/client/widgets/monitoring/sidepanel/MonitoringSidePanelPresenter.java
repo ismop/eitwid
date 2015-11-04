@@ -76,6 +76,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		if(show) {
 			view.addMetadata(view.getTypeLabel(), view.getDeviceAggregateTypeLabel());
 			view.addMetadata(view.getInternalIdLabel(), deviceAggregate.getId());
+			view.addMetadata(view.getAggregateContentsLabel(), deviceAggregate.getCustomId());
 		}
 	}
 	

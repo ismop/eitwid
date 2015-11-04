@@ -33,7 +33,7 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 
 	void showNoProfileLabel();
 
-	void addParameter(String parameterName, boolean check);
+	void addParameter(String parameterName, boolean check, boolean enabled);
 
 	void removeParameter(String parameterName);
 

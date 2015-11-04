@@ -23,7 +23,7 @@ public interface IVerticalSliceWizardView extends IsWidget {
 
 	void removeParameter(String parameterName);
 
-	void addParameter(String parameterName, boolean check);
+	void addParameter(String parameterName, boolean check, boolean enabled);
 
 	void showNoParamtersLabel(boolean show);
 

@@ -122,11 +122,17 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 	}
 
 	@Override
-	public void addParameter(final String parameterName, boolean check) {
+	public void addParameter(final String parameterName, boolean check, boolean enabled) {
 		noParameters.setVisible(false);
 		
 		Radio radio = new Radio("parameters", parameterName);
 		radio.setValue(check);
+		radio.setEnabled(enabled);
+		
+		if(!enabled) {
+			radio.setTitle(messages.parameterDisabledInfo());
+		}
+		
 		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {

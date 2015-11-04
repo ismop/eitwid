@@ -24,4 +24,6 @@ public interface HorizontalSliceWizardMessages extends Messages {
 	String updatePanelLabel();
 
 	String singleProfilePerSection();
+
+	String parameterDisabledInfo();
 }

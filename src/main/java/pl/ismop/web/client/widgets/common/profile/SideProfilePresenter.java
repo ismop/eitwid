@@ -121,8 +121,8 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 				pow(projectedValues.get(0).get(1) - projectedReference.get(1), 2)
 			);
 			
-			//for now let's position the devices half meter above ground
-			result.put(similarDeviceIds, Arrays.asList(distance, 0.5));
+			//for now let's position the devices 10 cm above ground
+			result.put(similarDeviceIds, Arrays.asList(distance, 0.1));
 		}
 		
 		return result;
