@@ -50,4 +50,6 @@ public interface IMonitoringSidePanel extends IsWidget {
 	String getDeviceTypeLabel();
 
 	String getDeviceAggregateTypeLabel();
+
+	String getAggregateContentsLabel();
 }

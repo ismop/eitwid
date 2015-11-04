@@ -62,14 +62,11 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     @Override
     public void addHorizontalCS() {
     	eventBus.showHorizontalCrosssectionWizard();
-//        IPanelContent content = eventBus.addHandler(DummyPresenter.class);
-//        eventBus.addPanel("New horizontal cross section", content);
     }
 
     @Override
     public void addVerticalCS() {
-        IPanelContent content = eventBus.addHandler(DummyPresenter.class);
-        eventBus.addPanel("New vertical cross section", content);
+    	eventBus.showVerticalCrosssectionWizard();
     }
 
     @Override

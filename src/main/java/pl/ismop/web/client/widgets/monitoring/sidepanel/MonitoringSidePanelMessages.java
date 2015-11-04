@@ -40,4 +40,6 @@ public interface MonitoringSidePanelMessages extends Messages {
 	String expandChartTitle();
 	
 	String clearChartTitle();
+
+	String aggregateContents();
 }

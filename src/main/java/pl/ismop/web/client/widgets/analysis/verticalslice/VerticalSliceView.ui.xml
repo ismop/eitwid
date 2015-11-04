@@ -2,17 +2,18 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
-	<ui:with type="pl.ismop.web.client.widgets.common.map.MapViewMessages" field="messages"/>
-	<g:FlowPanel ui:field="panel" addStyleNames="{style.panel}">
+	<ui:with type="pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceMessages" field="messages"/>
+	<g:HTMLPanel addStyleNames="{style.panel}">
 		<g:FlowPanel ui:field="loadingPanel" addStyleNames="{style.progress}" visible="false">
 			<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.loadingTitle}"/>
 		</g:FlowPanel>
-		<g:FlowPanel ui:field="mapContainer" addStyleNames="{style.map}"/>
-	</g:FlowPanel>
+		<g:FlowPanel ui:field="panel" addStyleNames="{style.container}"/>
+	</g:HTMLPanel>
 	<ui:style>
 		.panel {
-			width: 100%;
-			height: 100%;
+			height: 300px;
+			position: relative;
+			top: 0px;
 		}
 		
 		.progress {
@@ -27,7 +28,7 @@
 			opacity: 0.8;
 		}
 		
-		.map {
+		.container {
 			position: relative;
 			height: 100%;
 			top: 0px;
