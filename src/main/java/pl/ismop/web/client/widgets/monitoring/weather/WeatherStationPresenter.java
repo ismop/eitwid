@@ -1,7 +1,6 @@
 package pl.ismop.web.client.widgets.monitoring.weather;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -13,19 +12,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.james.mime4j.field.datetime.DateTime;
-import org.moxieapps.gwt.highcharts.client.Axis.Type;
-import org.moxieapps.gwt.highcharts.client.AxisTitle;
-import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.Legend;
-import org.moxieapps.gwt.highcharts.client.Legend.Layout;
-import org.moxieapps.gwt.highcharts.client.Legend.VerticalAlign;
-import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.ToolTip;
-import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
-import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
-import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -59,7 +46,6 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	
 	private DapController dapController;
 	
-	private Chart chart;
 	private ChartPresenter chartPresenter;
 
 	final Map<String, Parameter> parameterMap = new HashMap<>();
@@ -93,83 +79,10 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			view.setChart(chartPresenter.getView());
 		}
 		chartPresenter.reset();	
-		preloadParams();
-	}
-	
-	private ChartSeries series(Parameter parameter, List<Measurement> measurements) {
-		ChartSeries s1 = new ChartSeries();
-		s1.setName(parameter.getParameterName());
-		s1.setDeviceId(parameter.getDeviceId());
-		s1.setParameterId(parameter.getId());
-		s1.setUnit(parameter.getMeasurementTypeUnit());
-		s1.setLabel(parameter.getMeasurementTypeName());
-		Number[][] values = new Number[measurements.size()][2];
-		for(int j = 0; j<measurements.size(); j++) {
-			Measurement measurement = measurements.get(j);
-			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-			Date date = format.parse(measurement.getTimestamp());
-			values[j][0] = date.getTime();
-			values[j][1] = measurement.getValue();
-		}
-		s1.setValues(values);
-		return s1;
-	}
-	
-	private void preloadParams() {
 		view.showProgress(true);
 		view.clearMeasurements();
-	
-		dapController.getDevicesForType("weather_station", new DevicesCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				view.showProgress(false);
-				Window.alert("Error: " + errorDetails.getMessage());
-			}
-
-			@Override
-			public void processDevices(List<Device> devices) {
-				if(devices.size() > 0) {
-					groupAndProcessReadings(devices);
-				} else {
-					view.showProgress(false);
-				}
-			}
-			
-		});
-	}	
-
-	private void updateParamPreview(GroupedReadings groupedReadings) {
-		Iterator<String> keyIterator = groupedReadings.getLatestReadings().keySet().iterator();
-		String firstParamId = null;
-		if(groupedReadings.getLatestReadings().keySet().size() > 0) {
-			view.getContentVisibility().setVisible(true);
-			
-			String stationName = keyIterator.next();
-			view.getHeading1().setText(stationName);
-			sortLatestReadings(groupedReadings.getLatestReadings().get(stationName));
-			
-			for(LatestReading latestReading : groupedReadings.getLatestReadings().get(stationName)) {
-				if (firstParamId == null) {
-					firstParamId = latestReading.parameterId;
-				}
-				view.addLatestReading1(latestReading.parameterId, 
-						latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
-						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(latestReading.timestamp));
-			}
-		}
-		
-		if(groupedReadings.getLatestReadings().keySet().size() > 1) {
-			String stationName = keyIterator.next();
-			view.getHeading2().setText(stationName);
-			sortLatestReadings(groupedReadings.getLatestReadings().get(stationName));
-			
-			for(LatestReading latestReading : groupedReadings.getLatestReadings().get(stationName)) {
-				view.addLatestReading2(latestReading.parameterId, latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
-						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(latestReading.timestamp));
-			}
-		}
-
-		view.getContentVisibility().setVisible(true);
+		parameterMap.clear(); 
+		preloadParametersWithLatestReadings();
 	}
 	
 	@Override
@@ -212,12 +125,10 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 						@Override
 						public void processTimelines(List<Timeline> timelines) {
 							if(timelines.size() > 0) {
-								
-								final List<String> timelineIds = new LinkedList<String>();
-								timelineIds.add(timelines.get(0).getId());
-								final Map<String, Timeline> timelineMap = new HashMap<>();
-								
-								dapController.getMeasurementsForTimelineIds(timelineIds, new MeasurementsCallback() {
+								Date now = new Date(); 
+								Date twoWeeksAgo = CalendarUtil.copyDate(now);
+								CalendarUtil.addDaysToDate(twoWeeksAgo, -14);
+								dapController.getMeasurements(timelines.get(0).getId(), twoWeeksAgo, now, new MeasurementsCallback() {
 									@Override
 									public void onError(ErrorDetails errorDetails) {
 										view.showProgress(false);
@@ -226,12 +137,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 									
 									@Override
 									public void processMeasurements(List<Measurement> measurements) {
-										//chartPresenter.reset();	
 										chartPresenter.addChartSeries(series(parameter, measurements));
 										view.showProgress(false);
-//										GroupedReadings groupedReadings = groupReadings(measurements, timelineMap, parameterMap, deviceMap);
-//										view.showProgress(false);
-//										updateParamPreview(groupedReadings);
 									}
 								});
 							} else {
@@ -245,76 +152,27 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			}
 		});
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
-	private void loadParameters() {
-		view.getContentVisibility().setVisible(false);
-		view.showProgress(true);
-		view.clearMeasurements();
-		view.getChartVisibility().setVisible(false);
+	private void preloadParametersWithLatestReadings() {
 		dapController.getDevicesForType("weather_station", new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				view.showProgress(false);
 				Window.alert("Error: " + errorDetails.getMessage());
 			}
-			
+
 			@Override
 			public void processDevices(List<Device> devices) {
 				if(devices.size() > 0) {
-					groupAndProcessReadings(devices);
-				} else {
-					view.showProgress(false);
-				}
-			}
-		});
-	}
-	
-	private void groupAndProcessReadings(List<Device> devices) {
-		final List<String> deviceIds = new ArrayList<>();
-		final Map<String, Device> deviceMap = new HashMap<>();
-		
-		for(Device device : devices) {
-			deviceIds.add(device.getId());
-			deviceMap.put(device.getId(), device);
-		}
-		
-		dapController.getParameters(deviceIds, new ParametersCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				view.showProgress(false);
-				Window.alert("Error: " + errorDetails.getMessage());
-			}
-			
-			@Override
-			public void processParameters(List<Parameter> parameters) {
-				if(parameters.size() > 0) {
-					final List<String> parameterIds = new ArrayList<>();
+					final List<String> deviceIds = new ArrayList<>();
+					final Map<String, Device> deviceMap = new HashMap<>();
 					
-					// Recreate parameter map
-					parameterMap.clear(); 
-					for(Parameter parameter : parameters) {
-						parameterMap.put(parameter.getId(), parameter);
-						parameterIds.add(parameter.getId());
+					for(Device device : devices) {
+						deviceIds.add(device.getId());
+						deviceMap.put(device.getId(), device);
 					}
 					
-					dapController.getContext("measurements", new ContextsCallback() {
+					dapController.getParameters(deviceIds, new ParametersCallback() {
 						@Override
 						public void onError(ErrorDetails errorDetails) {
 							view.showProgress(false);
@@ -322,9 +180,16 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 						}
 						
 						@Override
-						public void processContexts(List<Context> contexts) {
-							if(contexts.size() > 0) {
-								dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
+						public void processParameters(List<Parameter> parameters) {
+							if(parameters.size() > 0) {
+								final List<String> parameterIds = new ArrayList<>();
+								// Recreate parameter map - should be empty
+								for(Parameter parameter : parameters) {
+									parameterMap.put(parameter.getId(), parameter);
+									parameterIds.add(parameter.getId());
+								}
+								
+								dapController.getContext("measurements", new ContextsCallback() {
 									@Override
 									public void onError(ErrorDetails errorDetails) {
 										view.showProgress(false);
@@ -332,17 +197,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 									}
 									
 									@Override
-									public void processTimelines(List<Timeline> timelines) {
-										if(timelines.size() > 0) {
-											final List<String> timelineIds = new ArrayList<>();
-											final Map<String, Timeline> timelineMap = new HashMap<>();
-											for(Timeline timeline : timelines) {
-												timelineIds.add(timeline.getId());
-												timelineMap.put(timeline.getId(), timeline);
-											}
-											Date lastDay = new Date();
-											CalendarUtil.addDaysToDate(lastDay, -1);
-											dapController.getLastMeasurements(timelineIds, lastDay, new MeasurementsCallback() {
+									public void processContexts(List<Context> contexts) {
+										if(contexts.size() > 0) {
+											dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
 												@Override
 												public void onError(ErrorDetails errorDetails) {
 													view.showProgress(false);
@@ -350,14 +207,34 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 												}
 												
 												@Override
-												public void processMeasurements(List<Measurement> measurements) {
-													GroupedReadings groupedReadings = groupReadings(measurements, timelineMap, parameterMap, deviceMap);
-//													/view.showProgress(false);
-													updateParamPreview(groupedReadings);
-													
-													//updateParamPreview2(measurements, timelineMap, parameterMap, deviceMap);
+												public void processTimelines(List<Timeline> timelines) {
+													if(timelines.size() > 0) {
+														final List<String> timelineIds = new ArrayList<>();
+														final Map<String, Timeline> timelineMap = new HashMap<>();
+														for(Timeline timeline : timelines) {
+															timelineIds.add(timeline.getId());
+															timelineMap.put(timeline.getId(), timeline);
+														}
+														Date lastDay = new Date();
+														CalendarUtil.addDaysToDate(lastDay, -1);
+														dapController.getLastMeasurements(timelineIds, lastDay, new MeasurementsCallback() {
+															@Override
+															public void onError(ErrorDetails errorDetails) {
+																view.showProgress(false);
+																Window.alert("Error: " + errorDetails.getMessage());
+															}
+															
+															@Override
+															public void processMeasurements(List<Measurement> measurements) {
+																GroupedReadings groupedReadings = groupReadings(measurements, timelineMap, parameterMap, deviceMap);
+																updateParamPreview(groupedReadings);
+															}
+			
+														});
+													} else {
+														view.showProgress(false);
+													}
 												}
-
 											});
 										} else {
 											view.showProgress(false);
@@ -373,27 +250,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					view.showProgress(false);
 				}
 			}
-		});
+		});	
 	}
-	
-	
-//	private void updateParamPreview2(
-//			List<Measurement> measurements,
-//			Map<String, Timeline> timelineMap,
-//			Map<String, Parameter> parameterMap,
-//			Map<String, Device> deviceMap) {	
-//		
-//		WeatherStationGroup weatherStationGroup = new WeatherStationGroup();
-//		
-//		for (Measurement measurement : measurements) {
-//			Timeline timeline = timelineMap.get(measurement.getTimelineId());
-//			Parameter parameter = parameterMap.get(timeline.getParameterId());
-//			Device device = deviceMap.get(parameter.getDeviceId());
-//			weatherStationGroup.addMeasurement(device, parameter, timeline, measurement);
-//		}
-//
-//	
-//	}
 	
 	private GroupedReadings groupReadings(List<Measurement> measurements, Map<String, Timeline> timelineMap, Map<String, Parameter> parameterMap,
 			Map<String, Device> deviceMap) {
@@ -461,12 +319,10 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			if (readings.getParameterId().equals(parameter.getId())) {
 				return readings;
 			}
-				
 //			if(readings.getLabel().equals(parameter.getMeasurementTypeName()) && readings.getUnit().equals(parameter.getMeasurementTypeUnit())) {
 //				return readings;
 //			}
 		}
-		
 		Readings readings = new Readings();
 		readings.setParameterName(parameter.getParameterName());
 		readings.setTypeName(parameter.getMeasurementTypeName());
@@ -490,9 +346,29 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		return result;
 	}
 	
-	private void updateView(GroupedReadings groupedReadings) {
+
+	private ChartSeries series(Parameter parameter, List<Measurement> measurements) {
+		ChartSeries s1 = new ChartSeries();
+		s1.setName(parameter.getParameterName());
+		s1.setDeviceId(parameter.getDeviceId());
+		s1.setParameterId(parameter.getId());
+		s1.setUnit(parameter.getMeasurementTypeUnit());
+		s1.setLabel(parameter.getMeasurementTypeName());
+		Number[][] values = new Number[measurements.size()][2];
+		for(int j = 0; j<measurements.size(); j++) {
+			Measurement measurement = measurements.get(j);
+			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
+			Date date = format.parse(measurement.getTimestamp());
+			values[j][0] = date.getTime();
+			values[j][1] = measurement.getValue();
+		}
+		s1.setValues(values);
+		return s1;
+	}
+
+	private void updateParamPreview(GroupedReadings groupedReadings) {
 		Iterator<String> keyIterator = groupedReadings.getLatestReadings().keySet().iterator();
-		
+		String firstParamId = null;
 		if(groupedReadings.getLatestReadings().keySet().size() > 0) {
 			view.getContentVisibility().setVisible(true);
 			
@@ -501,6 +377,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			sortLatestReadings(groupedReadings.getLatestReadings().get(stationName));
 			
 			for(LatestReading latestReading : groupedReadings.getLatestReadings().get(stationName)) {
+				if (firstParamId == null) {
+					firstParamId = latestReading.parameterId;
+				}
 				view.addLatestReading1(latestReading.parameterId, 
 						latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
 						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(latestReading.timestamp));
@@ -513,51 +392,12 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			sortLatestReadings(groupedReadings.getLatestReadings().get(stationName));
 			
 			for(LatestReading latestReading : groupedReadings.getLatestReadings().get(stationName)) {
-				view.addLatestReading2(latestReading.parameterId,
-						latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
+				view.addLatestReading2(latestReading.parameterId, latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
 						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(latestReading.timestamp));
 			}
 		}
-		
-		if(chart != null) {
-			chart.removeAllSeries();
-			chart.removeFromParent();
-		}
-		
-		chart = new Chart()
-				.setType(Series.Type.LINE)
-				.setLegend(new Legend()
-						.setVerticalAlign(VerticalAlign.BOTTOM)
-						.setLayout(Layout.HORIZONTAL))
-				.setToolTip(new ToolTip()
-						.setPointFormat("<span style=\"color: {point.color};\">\u25CF</span> {series.name}: <b>{point.y:.2f}</b><br/>"))
-				.setZoomType(ZoomType.X);
-		chart.getXAxis().setType(Type.DATE_TIME);
-		
-		int axisIndex = 0;
-		
-		for(final Readings readingsEntry : groupedReadings.getReadingsList()) {
-			chart.getYAxis(axisIndex)
-				.setAxisTitle(new AxisTitle().setText(readingsEntry.getParameterName() + " [" + readingsEntry.getUnit() + "]"))
-				.setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
-					@Override
-					public String format(AxisLabelsData axisLabelsData) {
-						return NumberFormat.getFormat("0.00").format(axisLabelsData.getValueAsDouble());
-					}
-				}));
-			
-			for(String deviceCustomId : readingsEntry.getMeasurements().keySet()) {
-				chart.addSeries(chart.createSeries()
-						.setName(deviceCustomId)
-						.setYAxis(axisIndex)
-						.setPoints(readingsEntry.getMeasurements().get(deviceCustomId)));
-			}
-			
-			axisIndex++;
-		}
-		
-		view.getChartVisibility().setVisible(true);
-		view.setChart(chart);
+
+		view.getContentVisibility().setVisible(true);
 	}
 
 	private void sortLatestReadings(List<LatestReading> readings) {
@@ -568,7 +408,5 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			}
 		});
 	}
-
-
 
 }
