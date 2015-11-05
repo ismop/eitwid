@@ -44,8 +44,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	private DapController dapController;
 	
 	private ChartPresenter chartPresenter;
-
-	final Map<String, Parameter> parameterMap = new HashMap<>();
+	
+	final WeatherReadings readings = new WeatherReadings();
 	
 	@Inject
 	public WeatherStationPresenter(DapController dapController) {
@@ -78,13 +78,13 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		chartPresenter.reset();	
 		view.showProgress(true);
 		view.clearMeasurements();
-		parameterMap.clear(); 
+		readings.clear(); 
 		preloadParametersWithLatestReadings();
 	}
 	
 	@Override
 	public void loadParameter(String parameterId, Boolean value) {
-		Parameter parameter = parameterMap.get(parameterId);
+		Parameter parameter = readings.parameterMap.get(parameterId);
 		if (parameter != null) {
 			if (value){
 				loadParameter(parameter);
@@ -99,58 +99,31 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	}
 
 	private void loadParameter(final Parameter parameter) {
-		final List<String> parameterIds = new ArrayList<>();
-		parameterIds.add(parameter.getId());
-
 		chartPresenter.setLoadingState(true);
-		dapController.getContext("measurements", new ContextsCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				chartPresenter.setLoadingState(false);
-				Window.alert("Error: " + errorDetails.getMessage());
-			}
-			
-			@Override
-			public void processContexts(List<Context> contexts) {
-				if(contexts.size() > 0) {
-					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
-						@Override
-						public void onError(ErrorDetails errorDetails) {
-							chartPresenter.setLoadingState(false);
-							Window.alert("Error: " + errorDetails.getMessage());
-						}
-						
-						@Override
-						public void processTimelines(List<Timeline> timelines) {
-							if(timelines.size() > 0) {
-								Date now = new Date(); 
-								Date twoWeeksAgo = CalendarUtil.copyDate(now);
-								CalendarUtil.addDaysToDate(twoWeeksAgo, -14);
-								dapController.getMeasurements(timelines.get(0).getId(), twoWeeksAgo, now, new MeasurementsCallback() {
-									@Override
-									public void onError(ErrorDetails errorDetails) {
-										chartPresenter.setLoadingState(false);
-										Window.alert("Error: " + errorDetails.getMessage());
-									}
-									
-									@Override
-									public void processMeasurements(List<Measurement> measurements) {
-										chartPresenter.setLoadingState(false);
-										chartPresenter.addChartSeries(series(parameter, measurements));
-									}
-								});
-							} else {
-								chartPresenter.setLoadingState(false);
-							}
-						}
-					});
-				} else {
+		Timeline timeline = readings.parameterToTimeline.get(parameter.getId());
+		if (timeline!= null) {
+			Date now = new Date(); 
+			Date twoWeeksAgo = CalendarUtil.copyDate(now);
+			CalendarUtil.addDaysToDate(twoWeeksAgo, -14);
+			dapController.getMeasurements(timeline.getId(), twoWeeksAgo, now, new MeasurementsCallback() {
+				@Override
+				public void onError(ErrorDetails errorDetails) {
 					chartPresenter.setLoadingState(false);
+					Window.alert("Error: " + errorDetails.getMessage());
 				}
-			}
-		});
-	}
+				
+				@Override
+				public void processMeasurements(List<Measurement> measurements) {
+					chartPresenter.setLoadingState(false);
+					chartPresenter.addChartSeries(series(parameter, measurements));
+				}
+			});
+		} else {
+			chartPresenter.setLoadingState(false);
+		}
 
+	}
+	
 	private void preloadParametersWithLatestReadings() {
 		dapController.getDevicesForType("weather_station", new DevicesCallback() {
 			@Override
@@ -162,70 +135,56 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			@Override
 			public void processDevices(List<Device> devices) {
 				if(devices.size() > 0) {
-					final List<String> deviceIds = new ArrayList<>();
-					final Map<String, Device> deviceMap = new HashMap<>();
-					
-					for(Device device : devices) {
-						deviceIds.add(device.getId());
-						deviceMap.put(device.getId(), device);
-					}
-					
-					dapController.getParameters(deviceIds, new ParametersCallback() {
+					readings.addDevices(devices);
+					dapController.getParameters(readings.deviceIds, new ParametersCallback() {
 						@Override
 						public void onError(ErrorDetails errorDetails) {
 							view.showProgress(false);
-							Window.alert("Error: " + errorDetails.getMessage());
+							showError(errorDetails);
 						}
-						
+
 						@Override
 						public void processParameters(List<Parameter> parameters) {
 							if(parameters.size() > 0) {
-								final List<String> parameterIds = new ArrayList<>();
-								// Recreate parameter map - should be empty
-								for(Parameter parameter : parameters) {
-									parameterMap.put(parameter.getId(), parameter);
-									parameterIds.add(parameter.getId());
-								}
-								
+								readings.addParemeters(parameters);
 								dapController.getContext("measurements", new ContextsCallback() {
+									
 									@Override
 									public void onError(ErrorDetails errorDetails) {
 										view.showProgress(false);
-										Window.alert("Error: " + errorDetails.getMessage());
+										showError(errorDetails);
 									}
 									
 									@Override
 									public void processContexts(List<Context> contexts) {
 										if(contexts.size() > 0) {
-											dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
+											readings.setContext(contexts.get(0));
+											dapController.getTimelinesForParameterIds(readings.context.getId(), readings.parameterIds, new TimelinesCallback() {
+												
 												@Override
 												public void onError(ErrorDetails errorDetails) {
 													view.showProgress(false);
-													Window.alert("Error: " + errorDetails.getMessage());
+													showError(errorDetails);
 												}
 												
 												@Override
 												public void processTimelines(List<Timeline> timelines) {
 													if(timelines.size() > 0) {
-														final List<String> timelineIds = new ArrayList<>();
-														final Map<String, Timeline> timelineMap = new HashMap<>();
-														for(Timeline timeline : timelines) {
-															timelineIds.add(timeline.getId());
-															timelineMap.put(timeline.getId(), timeline);
-														}
+														readings.addTimelines(timelines);
+
 														Date fourDaysAgo = new Date();
 														CalendarUtil.addDaysToDate(fourDaysAgo, -4);
-														dapController.getLastMeasurements(timelineIds, fourDaysAgo, new MeasurementsCallback() {
+														
+														dapController.getLastMeasurements(readings.timelineIds, fourDaysAgo, new MeasurementsCallback() {
 															@Override
 															public void onError(ErrorDetails errorDetails) {
 																view.showProgress(false);
-																Window.alert("Error: " + errorDetails.getMessage());
+																showError(errorDetails);
 															}
 															
 															@Override
 															public void processMeasurements(List<Measurement> measurements) {
-																GroupedReadings groupedReadings = groupReadings(measurements, timelineMap, parameterMap, deviceMap);
-																updateParamPreview(groupedReadings);
+																updateParamPreview(measurements);
 																view.showProgress(false);
 															}
 			
@@ -252,6 +211,68 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		});	
 	}
 	
+	private void showError(ErrorDetails errorDetails) {
+		Window.alert("Error: " + errorDetails.getMessage());
+	}
+	
+
+	private void updateParamPreview(List<Measurement> measurements) {
+		
+		Map<String, Measurement> lastMeasurements = readings.getLastMeasurements(measurements);
+	
+		if (readings.deviceIds.size()>0) {
+			Device device = readings.deviceMap.get(readings.deviceIds.get(0));
+			view.getHeading1().setText(device.getCustomId());
+			List<Parameter> parameters = readings.getParametersForDevice(device.getId());
+			for (Parameter parameter : parameters) {
+				view.addLatestReading1(parameter.getId(), 
+						parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
+						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));	
+			}
+		} 
+		
+		if (readings.deviceIds.size()>1) {
+			Device device = readings.deviceMap.get(readings.deviceIds.get(1));
+			view.getHeading2().setText(device.getCustomId());
+			List<Parameter> parameters = readings.getParametersForDevice(device.getId());
+			for (Parameter parameter : parameters) {
+				view.addLatestReading2(parameter.getId(), 
+						parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
+						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));	
+			}
+		} 
+		
+		view.getContentVisibility().setVisible(true);
+	}
+	
+	
+	private Number normalizeValue(Measurement measurement) {
+		Timeline timeline = readings.timelineMap.get(measurement.getTimelineId());
+		Parameter parameter = readings.parameterMap.get(timeline.getParameterId());
+		Device device = readings.deviceMap.get(parameter.getDeviceId());
+		if (device.getCustomId().equals("Stacja pogodowa KI")) {
+			double value = measurement.getValue();
+			switch (parameter.getMeasurementTypeUnit()) {
+				case "mm":
+					return 0.001 * value;
+				case "m/s":
+					return 0.1 * value;
+				case "C":
+					return 0.1 * value;
+				case "%":
+					return 0.1 * value;
+				case "stopnie":
+					double calc = (360.0/16.0) * (value+4);
+					if (calc >= 16.0) {
+						calc -= 16.0;
+					}
+					return calc;
+			}
+		}
+		return measurement.getValue();
+	}
+	
+	@Deprecated
 	private GroupedReadings groupReadings(List<Measurement> measurements, Map<String, Timeline> timelineMap, Map<String, Parameter> parameterMap,
 			Map<String, Device> deviceMap) {
 		GroupedReadings groupedReadings = new GroupedReadings();
@@ -313,6 +334,61 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		return null;
 	}
 
+	@Deprecated
+	private void loadParameterOld(final Parameter parameter) {
+		final List<String> parameterIds = new ArrayList<>();
+		parameterIds.add(parameter.getId());
+
+		chartPresenter.setLoadingState(true);
+		dapController.getContext("measurements", new ContextsCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				chartPresenter.setLoadingState(false);
+				Window.alert("Error: " + errorDetails.getMessage());
+			}
+			
+			@Override
+			public void processContexts(List<Context> contexts) {
+				if(contexts.size() > 0) {
+					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
+						@Override
+						public void onError(ErrorDetails errorDetails) {
+							chartPresenter.setLoadingState(false);
+							Window.alert("Error: " + errorDetails.getMessage());
+						}
+						
+						@Override
+						public void processTimelines(List<Timeline> timelines) {
+							if(timelines.size() > 0) {
+								Date now = new Date(); 
+								Date twoWeeksAgo = CalendarUtil.copyDate(now);
+								CalendarUtil.addDaysToDate(twoWeeksAgo, -14);
+								dapController.getMeasurements(timelines.get(0).getId(), twoWeeksAgo, now, new MeasurementsCallback() {
+									@Override
+									public void onError(ErrorDetails errorDetails) {
+										chartPresenter.setLoadingState(false);
+										Window.alert("Error: " + errorDetails.getMessage());
+									}
+									
+									@Override
+									public void processMeasurements(List<Measurement> measurements) {
+										chartPresenter.setLoadingState(false);
+										chartPresenter.addChartSeries(series(parameter, measurements));
+									}
+								});
+							} else {
+								chartPresenter.setLoadingState(false);
+							}
+						}
+					});
+				} else {
+					chartPresenter.setLoadingState(false);
+				}
+			}
+		});
+	}
+
+	
 	private Readings findOrCreateSimilarReadings(Parameter parameter, List<Readings> readingsList) {
 		for(Readings readings : readingsList) {
 			if (readings.getParameterId().equals(parameter.getId())) {
@@ -344,9 +420,28 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		
 		return result;
 	}
-	
 
 	private ChartSeries series(Parameter parameter, List<Measurement> measurements) {
+		ChartSeries s1 = new ChartSeries();
+		s1.setName(parameter.getParameterName());
+		s1.setDeviceId(parameter.getDeviceId());
+		s1.setParameterId(parameter.getId());
+		s1.setUnit(parameter.getMeasurementTypeUnit());
+		s1.setLabel(parameter.getMeasurementTypeName());
+		Number[][] values = new Number[measurements.size()][2];
+		for(int j = 0; j<measurements.size(); j++) {
+			Measurement measurement = measurements.get(j);
+			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
+			Date date = measurement.getTimestamp();
+			values[j][0] = date.getTime();
+			values[j][1] = normalizeValue(measurement);
+		}
+		s1.setValues(values);
+		return s1;
+	}
+	
+	@Deprecated
+	private ChartSeries seriesOld(Parameter parameter, List<Measurement> measurements) {
 		ChartSeries s1 = new ChartSeries();
 		s1.setName(parameter.getParameterName());
 		s1.setDeviceId(parameter.getDeviceId());
@@ -365,7 +460,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		return s1;
 	}
 
-	private void updateParamPreview(GroupedReadings groupedReadings) {
+	@Deprecated
+	private void updateParamPreviewOld(GroupedReadings groupedReadings) {
 		Iterator<String> keyIterator = groupedReadings.getLatestReadings().keySet().iterator();
 		String firstParamId = null;
 		if(groupedReadings.getLatestReadings().keySet().size() > 0) {
@@ -413,7 +509,14 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					return 0.1 * value;
 				case "%":
 					return 0.1 * value;
+				case "stopnie":
+					double calc = (360.0/16.0) * (value+4);
+					if (calc >= 16.0) {
+						calc -= 16.0;
+					}
+					return calc;
 			}
+			
 		}
 		return latestReading.value;
 	}
