@@ -6,13 +6,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-
-import org.moxieapps.gwt.highcharts.client.Chart;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -272,7 +269,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 				for(Measurement measurement : measurements) {
 					if(timelineId.equals(measurement.getTimelineId())) {
 						DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-						Date date = format.parse(measurement.getTimestamp());
+						Date date = measurement.getTimestamp();
 						values[index][0] = date.getTime();
 						values[index][1] = measurement.getValue();
 						
@@ -358,7 +355,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		for(int j = 0; j<measurements.size(); j++) {
 			Measurement measurement = measurements.get(j);
 			DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
-			Date date = format.parse(measurement.getTimestamp());
+			Date date = measurement.getTimestamp();
 			values[j][0] = date.getTime();
 			values[j][1] = measurement.getValue();
 		}
