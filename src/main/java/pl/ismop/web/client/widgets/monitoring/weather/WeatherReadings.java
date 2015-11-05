@@ -96,13 +96,10 @@ public class WeatherReadings {
 	}
 	
 	private Comparator<Parameter> parameterComparator = new Comparator<Parameter>() {
-
 		@Override
 		public int compare(Parameter o1, Parameter o2) {
-			return o1.getId().compareTo(o2.getId());
+			return o1.getParameterName().compareTo(o2.getParameterName());
 		}
 	};
-
-
 		
 }
