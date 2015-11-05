@@ -31,15 +31,15 @@ import static pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.*;
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
 	private class DeviceData {
-		private PlotBand plotBand;
+		private PlotLine plotLine;
 		private Series series;
 
-		public DeviceData(PlotBand plotBand) {
-			this.plotBand = plotBand;
+		public DeviceData(PlotLine plotLine) {
+			this.plotLine = plotLine;
 		}
 
-		public PlotBand getPlotBand() {
-			return plotBand;
+		public PlotLine getPlotLine() {
+			return plotLine;
 		}
 
 		public Series getSeries() {
@@ -98,7 +98,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void clearOldSelection() {
 		for(DeviceData dd : selectedDevices.values()) {
-			fibreChart.getXAxis().removePlotBand(dd.getPlotBand());
+			fibreChart.getXAxis().removePlotLine(dd.getPlotLine());
 		}
 		selectedDevices.clear();
 		if (map != null) {
@@ -245,7 +245,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void selectDevice(final Device device) {
-		selectedDevices.put(device, new DeviceData(drawDeviceBand(device)));
+		selectedDevices.put(device, new DeviceData(drawDeviceLine(device)));
 
 		selectDeviceOnMinimap(device);
 		loadDeviceValues(device);
@@ -255,7 +255,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		DeviceData deviceData = selectedDevices.remove(device);
 
 		unselectDeviceOnMinimap(device);
-		removePlotBand(deviceData.getPlotBand());
+		removePlotLine(deviceData.getPlotLine());
 		removeDeviceSeries(deviceData.getSeries());
 	}
 
@@ -265,9 +265,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		}
 	}
 
-	private void removePlotBand(PlotBand plotBand) {
-		if (plotBand != null) {
-			fibreChart.getXAxis().removePlotBand(plotBand);
+	private void removePlotLine(PlotLine plotLine) {
+		if (plotLine != null) {
+			fibreChart.getXAxis().removePlotLine(plotLine);
 		}
 	}
 
@@ -279,15 +279,14 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		map.removeDevice(device);
 	}
 
-	private PlotBand drawDeviceBand(Device selectedDevice) {
-		PlotBand selectedDeviceBand = fibreChart.getXAxis().createPlotBand().
-				setFrom(selectedDevice.getLeveeDistanceMarker() - 0.4).
-				setTo(selectedDevice.getLeveeDistanceMarker() + 0.4).
+	private PlotLine drawDeviceLine(Device selectedDevice) {
+		PlotLine selectedDeviceLine = fibreChart.getXAxis().createPlotLine().
+				setWidth(2).setValue(selectedDevice.getLeveeDistanceMarker()).
 				setColor(properties.selectionColor());
 
-		fibreChart.getXAxis().addPlotBands(selectedDeviceBand);
+		fibreChart.getXAxis().addPlotLines(selectedDeviceLine);
 
-		return selectedDeviceBand;
+		return selectedDeviceLine;
 	}
 
 	private void loadDeviceValues(final Device selectedDevice) {
