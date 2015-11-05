@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice.wizard;
 
+import java.util.Map;
+
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IHorizontalSliceWizardView extends IsWidget {
@@ -15,6 +17,8 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 		void onChangePickedHeight(String profileId, String height);
 
 		void onParameterChanged(String parameterName);
+
+		void onDataSelectorChanged(String dataSelector);
 	}
 
 	void showModal(boolean show);
@@ -48,4 +52,12 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 	void showButtonConfigLabel(boolean show);
 
 	void showSingleProfilePerSectionMessage();
+
+	String getRealDataLabel();
+
+	String getScenarioNamePrefix();
+
+	void addScenarios(Map<String, String> scenariosMap);
+
+	void selectScenario(String dataSelector);
 }

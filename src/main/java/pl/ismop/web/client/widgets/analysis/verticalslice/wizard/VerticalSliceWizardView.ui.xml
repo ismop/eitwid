@@ -52,9 +52,9 @@
 		
 		.parameterPanel {
 			position: absolute;
-			height: 50%;
-			left: 0px;
-			right: 0px;
+			height: 80%;
+			left: 10px;
+			right: 10px;
 			bottom: 0px;
 			padding: 5px;
 		}

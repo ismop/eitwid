@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,7 +121,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		}
 		
 		final String parameterUnit = parameter != null ? parameter.getMeasurementTypeUnit() : "";
-		dapController.getContext("measurements", new ContextsCallback() {
+		String context = configuration.getDataSelector().equals("0") ? "measurements" : "scenarios";
+		dapController.getContext(context, new ContextsCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				view.showLoadingState(false);
@@ -139,13 +141,24 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 						
 						@Override
 						public void processTimelines(final List<Timeline> timelines) {
+							if(!configuration.getDataSelector().equals("0")) {
+								for(Iterator<Timeline> i = timelines.iterator(); i.hasNext();) {
+									if(!i.next().getScenarioId().equals(configuration.getDataSelector())) {
+										i.remove();
+									}
+								}
+							}
+							
 							List<String> timelineIds = new ArrayList<>();
 							
 							for(Timeline timeline : timelines) {
 								timelineIds.add(timeline.getId());
 							}
 							
-							dapController.getLastMeasurements(timelineIds, currentDate, new MeasurementsCallback() {
+							Date queryDate = configuration.getDataSelector().equals("0") ? currentDate :
+								new Date(currentDate.getTime() - configuration.getExperiment().getStart().getTime());
+							
+							dapController.getLastMeasurements(timelineIds, queryDate, new MeasurementsCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {
 									view.showLoadingState(false);

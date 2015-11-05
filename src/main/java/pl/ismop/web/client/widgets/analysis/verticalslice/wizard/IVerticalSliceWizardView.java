@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.analysis.verticalslice.wizard;
 
+import java.util.Map;
+
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IVerticalSliceWizardView extends IsWidget {
@@ -11,6 +13,8 @@ public interface IVerticalSliceWizardView extends IsWidget {
 		void onParameterChanged(String parameterName);
 
 		void onAcceptConfig();
+
+		void onDataSelectorChanged(String dataSelector);
 	}
 	
 	void showModal(boolean show);
@@ -36,4 +40,12 @@ public interface IVerticalSliceWizardView extends IsWidget {
 	void showButtonConfigLabel(boolean show);
 
 	void showNoProfilePickedError();
+
+	String getRealDataLabel();
+
+	void addScenarios(Map<String, String> scenariosMap);
+
+	String getScenarioNamePrefix();
+
+	void selectScenario(String dataSelector);
 }
