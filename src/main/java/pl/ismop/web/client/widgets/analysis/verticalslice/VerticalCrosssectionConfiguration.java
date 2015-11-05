@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.scenario.Scenario;
 
 public class VerticalCrosssectionConfiguration {
 	private Profile pickedProfile;
@@ -21,10 +23,17 @@ public class VerticalCrosssectionConfiguration {
 	
 	private String pickedParameterName;
 	
+	private String dataSelector;
+	
+	private Map<String, Scenario> scenarioMap;
+	
+	private Experiment experiment;
+	
 	public VerticalCrosssectionConfiguration() {
 		profileDevicesMap = new HashMap<>();
 		parameterMap = new HashMap<>();
 		parameterNames = new HashSet<>();
+		scenarioMap = new HashMap<>();
 	}
 
 	public Profile getPickedProfile() {
@@ -65,5 +74,29 @@ public class VerticalCrosssectionConfiguration {
 
 	public void setPickedParameterName(String pickedParameterName) {
 		this.pickedParameterName = pickedParameterName;
+	}
+
+	public String getDataSelector() {
+		return dataSelector;
+	}
+
+	public void setDataSelector(String dataSelector) {
+		this.dataSelector = dataSelector;
+	}
+
+	public Map<String, Scenario> getScenarioMap() {
+		return scenarioMap;
+	}
+
+	public void setScenarioMap(Map<String, Scenario> scenarioMap) {
+		this.scenarioMap = scenarioMap;
+	}
+
+	public Experiment getExperiment() {
+		return experiment;
+	}
+
+	public void setExperiment(Experiment experiment) {
+		this.experiment = experiment;
 	}
 }

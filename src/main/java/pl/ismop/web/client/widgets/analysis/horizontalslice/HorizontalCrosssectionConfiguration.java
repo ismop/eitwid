@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.scenario.Scenario;
 import pl.ismop.web.client.dap.section.Section;
 
 public class HorizontalCrosssectionConfiguration {
@@ -30,6 +32,12 @@ public class HorizontalCrosssectionConfiguration {
 	
 	private Map<String, Section> sections;
 	
+	private Experiment experiment;
+	
+	private Map<String, Scenario> scenarioMap;
+	
+	private String dataSelector;
+	
 	public HorizontalCrosssectionConfiguration() {
 		parameterNames = new HashSet<>();
 		pickedProfiles = new HashMap<>();
@@ -39,6 +47,7 @@ public class HorizontalCrosssectionConfiguration {
 		heightDevicesmap = new HashMap<>();
 		profileHeights = new HashMap<>();
 		sections = new HashMap<>();
+		scenarioMap = new HashMap<>();
 	}
 
 	public Set<String> getParameterNames() {
@@ -111,5 +120,29 @@ public class HorizontalCrosssectionConfiguration {
 
 	public void setSections(Map<String, Section> sections) {
 		this.sections = sections;
+	}
+
+	public Map<String, Scenario> getScenarioMap() {
+		return scenarioMap;
+	}
+
+	public void setScenarioMap(Map<String, Scenario> scenarioMap) {
+		this.scenarioMap = scenarioMap;
+	}
+
+	public Experiment getExperiment() {
+		return experiment;
+	}
+
+	public void setExperiment(Experiment experiment) {
+		this.experiment = experiment;
+	}
+
+	public String getDataSelector() {
+		return dataSelector;
+	}
+
+	public void setDataSelector(String dataSelector) {
+		this.dataSelector = dataSelector;
 	}
 }

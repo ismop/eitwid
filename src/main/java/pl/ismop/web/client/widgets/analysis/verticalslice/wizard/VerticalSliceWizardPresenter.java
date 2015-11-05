@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -20,10 +20,13 @@ import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.DevicesCallback;
 import pl.ismop.web.client.dap.DapController.ParametersCallback;
 import pl.ismop.web.client.dap.DapController.ProfilesCallback;
+import pl.ismop.web.client.dap.DapController.ScenariosCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.scenario.Scenario;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalCrosssectionConfiguration;
@@ -41,18 +44,22 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 	
 	private boolean configMode;
 
+	private Experiment experiment;
+
 	@Inject
 	public VerticalSliceWizardPresenter(DapController dapController) {
 		this.dapController = dapController;
 	}
 	
-	public void onShowVerticalCrosssectionWizard() {
+	public void onShowVerticalCrosssectionWizard(Experiment experiment) {
+		this.experiment = experiment;
 		view.clearProfiles();
 		view.clearParameters();
 		configMode = false;
 		view.showButtonConfigLabel(false);
 		
 		configuration = new VerticalCrosssectionConfiguration();
+		configuration.setExperiment(experiment);
 		view.showModal(true);
 	}
 	
@@ -90,14 +97,29 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 						}
 						
 						@Override
-						public void processParameters(List<Parameter> parameters) {
-							view.showLoadingState(false);
-							
+						public void processParameters(final List<Parameter> parameters) {
 							for(Parameter parameter : parameters) {
 								configuration.getParameterMap().put(parameter.getId(), parameter);
 							}
 							
-							updateParameters(parameters);
+							dapController.getExperimentScenarios(experiment.getId(), new ScenariosCallback() {
+								@Override
+								public void onError(ErrorDetails errorDetails) {
+									view.showLoadingState(false);
+									eventBus.showError(errorDetails);
+								}
+								
+								@Override
+								public void processScenarios(List<Scenario> scenarios) {
+									view.showLoadingState(false);
+									
+									for(Scenario scenario : scenarios) {
+										configuration.getScenarioMap().put(scenario.getId(), scenario);
+									}
+									
+									updateParametersAndScenarios(parameters, scenarios);
+								}
+							});
 						}
 					});
 				}
@@ -106,7 +128,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 	}
 	
 	public void onShowVerticalCrosssectionWizardWithConfig(VerticalCrosssectionConfiguration configuration) {
-		onShowVerticalCrosssectionWizard();
+		onShowVerticalCrosssectionWizard(experiment);
 		this.configuration = configuration;
 		initializeConfigMode();
 	}
@@ -186,6 +208,11 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 		}
 	}
 
+	@Override
+	public void onDataSelectorChanged(String dataSelector) {
+		configuration.setDataSelector(dataSelector);
+	}
+
 	private void initializeConfigMode() {
 		configMode = true;
 		view.showButtonConfigLabel(true);
@@ -201,9 +228,13 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 		}
 		
 		view.setProfile(configuration.getPickedProfile().getId());
+		processScenarios(new ArrayList<>(configuration.getScenarioMap().values()));
+		view.selectScenario(configuration.getDataSelector());
 	}
 
-	private void updateParameters(List<Parameter> parameters) {
+	private void updateParametersAndScenarios(List<Parameter> parameters, List<Scenario> scenarios) {
+		configuration.setDataSelector("0");
+		
 		Set<String> result = new HashSet<>();
 		Map<String, Integer> counter = countParameters(parameters);
 		
@@ -241,7 +272,20 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 		
 		if(configuration.getParameterNames().size() == 0) {
 			view.showNoParamtersLabel(true);
+		} else {
+			processScenarios(scenarios);
 		}
+	}
+
+	private void processScenarios(List<Scenario> scenarios) {
+		Map<String, String> scenariosMap = new LinkedHashMap<>();
+		scenariosMap.put("0", view.getRealDataLabel());
+		
+		for(Scenario scenario : scenarios) {
+			scenariosMap.put(scenario.getId(), view.getScenarioNamePrefix() + " " + scenario.getName());
+		}
+		
+		view.addScenarios(scenariosMap);
 	}
 
 	private Map<String, Integer> countParameters(Collection<Parameter> parameters) {

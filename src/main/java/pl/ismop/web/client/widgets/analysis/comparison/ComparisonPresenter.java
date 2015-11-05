@@ -61,12 +61,12 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
 
     @Override
     public void addHorizontalCS() {
-    	eventBus.showHorizontalCrosssectionWizard();
+    	eventBus.showHorizontalCrosssectionWizard(selectedExperiment);
     }
 
     @Override
     public void addVerticalCS() {
-    	eventBus.showVerticalCrosssectionWizard();
+    	eventBus.showVerticalCrosssectionWizard(selectedExperiment);
     }
 
     @Override

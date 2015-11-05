@@ -15,10 +15,13 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.Label;
+import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Radio;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -46,9 +49,9 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	
 	private Map<String, HasWidgets> profileHeightsContainers;
 	
-	private Map<String, IsWidget> profileWidgets;
+	private Map<String, IsWidget> profileWidgets, parameterWidgets;
 	
-	private Map<String, IsWidget> parameterWidgets;
+	private ListBox scenarioList;
 	
 	@UiField
 	HorizontalSliceWizardMessages messages;
@@ -254,5 +257,47 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@Override
 	public void showSingleProfilePerSectionMessage() {
 		Window.alert(messages.singleProfilePerSection());
+	}
+
+	@Override
+	public String getRealDataLabel() {
+		return messages.realDataLabel();
+	}
+
+	@Override
+	public String getScenarioNamePrefix() {
+		return messages.scenarioNamePrefix();
+	}
+
+	@Override
+	public void addScenarios(Map<String, String> scenariosMap) {
+		if(scenarioList != null) {
+			scenarioList.removeFromParent();
+		}
+		
+		scenarioList = new ListBox();
+		scenarioList.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				getPresenter().onDataSelectorChanged(scenarioList.getSelectedValue());
+			}
+		});
+		
+		for(String id : scenariosMap.keySet()) {
+			scenarioList.addItem(scenariosMap.get(id), id);
+		}
+		
+		parameters.add(scenarioList);
+	}
+
+	@Override
+	public void selectScenario(String dataSelector) {
+		for(int i = 0; i < scenarioList.getItemCount(); i++) {
+			if(scenarioList.getValue(i).equals(dataSelector)) {
+				scenarioList.setSelectedIndex(i);
+				
+				break;
+			}
+		}
 	}
 }
