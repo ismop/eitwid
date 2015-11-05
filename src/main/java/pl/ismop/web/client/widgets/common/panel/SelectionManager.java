@@ -47,6 +47,12 @@ public class SelectionManager implements ISelectionManager {
         eventBus.showProfile(profile);
     }
 
+    @Override
+    public void clear() {
+        selectedDevices.clear();
+        eventBus.clearMinimap();
+    }
+
     public void activate() {
         for (Device selectedDevice : selectedDevices) {
             eventBus.selectDevice(selectedDevice);

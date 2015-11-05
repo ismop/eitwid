@@ -26,6 +26,7 @@ public class ErrorPresenter extends BaseEventHandler<MainEventBus> {
 		NotifySettings settings = NotifySettings.newSettings();
 		settings.setAnimation(Animation.FADE_IN_DOWN, Animation.FADE_OUT_RIGHT);
 		settings.setType(NotifyType.DANGER);
+		settings.setZIndex(1050);
 		Notify.notify(errorMessages.errorTitle(), errorDetails.getMessage(), settings);
 	}
 }

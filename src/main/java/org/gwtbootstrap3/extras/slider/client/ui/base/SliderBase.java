@@ -102,9 +102,9 @@ public abstract class SliderBase<T> extends Widget implements
 
     @Override
     protected void onUnload() {
-        super.onUnload();
-        unbindSliderEvents(getElement());
-        sliderCommand(getElement(), SliderCommand.DESTROY);
+//        super.onUnload();
+//        unbindSliderEvents(getElement());
+//        sliderCommand(getElement(), SliderCommand.DESTROY);
     }
 
     /**

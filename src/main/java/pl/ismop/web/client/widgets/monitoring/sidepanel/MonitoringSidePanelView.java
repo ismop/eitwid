@@ -185,4 +185,9 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	public String getDeviceAggregateTypeLabel() {
 		return messages.deviceAggregateTypeLabel();
 	}
+
+	@Override
+	public String getAggregateContentsLabel() {
+		return messages.aggregateContents();
+	}
 }

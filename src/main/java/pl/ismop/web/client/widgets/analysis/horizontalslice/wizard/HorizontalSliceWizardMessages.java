@@ -16,4 +16,14 @@ public interface HorizontalSliceWizardMessages extends Messages {
 	String pickParameterLabel();
 	
 	String noParametersLabel();
+
+	String noProfilePickedError();
+
+	String fullPanelTitle();
+
+	String updatePanelLabel();
+
+	String singleProfilePerSection();
+
+	String parameterDisabledInfo();
 }

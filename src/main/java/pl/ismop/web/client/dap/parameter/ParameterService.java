@@ -18,5 +18,9 @@ public interface ParameterService extends RestService {
 
 	@GET
 	@Path("parameters?id={id}")
-	void getParametersById(@PathParam("id") String id, MethodCallback<ParametersResponse> methodCallback);
+	void getParametersById(@PathParam("id") String id, MethodCallback<ParametersResponse> callback);
+
+	@GET
+	@Path("parameters?levee_id={leveeId}")
+	void getLeveeParameters(@PathParam("leveeId") Integer leveeId, MethodCallback<ParametersResponse> callback);
 }

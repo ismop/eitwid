@@ -284,7 +284,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		return new $wnd.google.maps.LatLngBounds();
 	}-*/;
 	
-	private native void extendBounds(JavaScriptObject bounds, Double lat, Double lng) /*-{
+	private native void extendBounds(JavaScriptObject bounds, double lat, double lng) /*-{
 		bounds.extend(new $wnd.google.maps.LatLng(lat, lng));
 	}-*/;
 

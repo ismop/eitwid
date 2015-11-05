@@ -21,10 +21,13 @@ import org.gwtbootstrap3.client.ui.Radio;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -45,6 +48,8 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	
 	private Map<String, IsWidget> profileWidgets;
 	
+	private Map<String, IsWidget> parameterWidgets;
+	
 	@UiField
 	HorizontalSliceWizardMessages messages;
 	
@@ -52,15 +57,19 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	Modal modal;
 	
 	@UiField
-	FlowPanel mapContainer, profiles;
+	FlowPanel mapContainer, profiles, parameters;
 	
 	@UiField
-	Label noProfilesPicked;
+	Label noProfilesPicked, noParameters;
+	
+	@UiField
+	Button add;
 
 	public HorizontalSliceWizardView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		profileHeightsContainers = new HashMap<>();
 		profileWidgets = new HashMap<>();
+		parameterWidgets = new HashMap<>();
 	}
 	
 	@UiHandler("modal")
@@ -71,6 +80,11 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@UiHandler("modal")
 	void modalHide(ModalHideEvent event) {
 		getPresenter().onModalHide();
+	}
+	
+	@UiHandler("add")
+	void addPanel(ClickEvent event) {
+		getPresenter().onAcceptConfig();
 	}
 
 	@Override
@@ -134,6 +148,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	public void clearProfiles() {
 		profiles.clear();
 		profileHeightsContainers.clear();
+		profileWidgets.clear();
 		noProfilesPicked.setVisible(true);
 	}
 
@@ -157,14 +172,87 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void addProfileHeight(Double height, String profileId, boolean check) {
+	public void addProfileHeight(final Double height, final String profileId, boolean check) {
 		Radio radio = new Radio(profileId, messages.heightLabel() + " " + String.valueOf(NumberFormat.getFormat("0.00").format(height)));
 		radio.setValue(check);
+		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if(event.getValue()) {
+					getPresenter().onChangePickedHeight(profileId, String.valueOf(height));
+				}
+			}
+		});
 		profileHeightsContainers.get(profileId).add(radio);
 	}
 
 	@Override
 	public void showNoProfileLabel() {
 		noProfilesPicked.setVisible(true);
+	}
+
+	@Override
+	public void addParameter(final String parameterName, boolean check, boolean enabled) {
+		noParameters.setVisible(false);
+		
+		Radio radio = new Radio("parameters", parameterName);
+		radio.setValue(check);
+		radio.setEnabled(enabled);
+		
+		if(!enabled) {
+			radio.setTitle(messages.parameterDisabledInfo());
+		}
+		
+		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if(event.getValue()) {
+					getPresenter().onParameterChanged(parameterName);
+				}
+			}
+		});
+		parameterWidgets.put(parameterName, radio);
+		parameters.add(radio);
+	}
+
+	@Override
+	public void removeParameter(String parameterName) {
+		parameters.remove(parameterWidgets.remove(parameterName));
+	}
+
+	@Override
+	public void showNoParamtersLabel(boolean show) {
+		noParameters.setVisible(show);
+	}
+
+	@Override
+	public void showNoProfilePickedError() {
+		Window.alert(messages.noProfilePickedError());
+	}
+
+	@Override
+	public String getFullPanelTitle() {
+		return messages.fullPanelTitle();
+	}
+
+	@Override
+	public void clearParameters() {
+		parameters.clear();
+		parameterWidgets.clear();
+		noParameters.setVisible(true);
+	}
+
+	@Override
+	public void showButtonConfigLabel(boolean show) {
+		if(show) {
+			add.setText(messages.updatePanelLabel());
+		} else {
+			add.setText(messages.addPanelLabel());
+		}
+	}
+
+	@Override
+	public void showSingleProfilePerSectionMessage() {
+		Window.alert(messages.singleProfilePerSection());
 	}
 }

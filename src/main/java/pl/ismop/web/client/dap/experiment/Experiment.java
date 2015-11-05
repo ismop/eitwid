@@ -1,7 +1,9 @@
 package pl.ismop.web.client.dap.experiment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import org.fusesource.restygwt.client.Json;
+import pl.ismop.web.client.dap.section.Section;
 
 import java.util.Date;
 import java.util.List;
@@ -16,20 +18,19 @@ public class Experiment {
     private String description;
 
     @Json(name = "start_date")
-    private String start;
+    private Date start;
 
     @Json(name = "end_date")
-    private String end;
-
-    private Date startDate;
-
-    private Date endDate;
+    private Date end;
 
     @Json(name = "levee_id")
     private Integer leveeId;
 
     @Json(name = "timeline_ids")
     private List<Integer> timelineIds;
+
+    @JsonIgnore
+    private List<Section> sections;
 
     public String getId() {
         return id;
@@ -51,22 +52,20 @@ public class Experiment {
         return description;
     }
 
-    public String getStart() {
+    public Date getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(Date start) {
         this.start = start;
-        this.startDate = format.parse(start);
     }
 
-    public String getEnd() {
+    public Date getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(Date end) {
         this.end = end;
-        this.endDate = format.parse(end);
     }
 
     public Integer getLeveeId() {
@@ -85,11 +84,11 @@ public class Experiment {
         this.timelineIds = timelineIds;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public void setSections(List<Section> sections) {
+        this.sections = sections;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public List<Section> getSections() {
+        return sections;
     }
 }

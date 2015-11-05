@@ -2,7 +2,9 @@ package pl.ismop.web.client.dap.parameter;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.fusesource.restygwt.client.Json;
+import pl.ismop.web.client.dap.device.Device;
 
 public class Parameter {
 	private String id;
@@ -24,6 +26,9 @@ public class Parameter {
 	
 	@Json(name = "timeline_ids")
 	private List<String> timelineIds;
+
+	@JsonIgnore
+	private Device device;
 
 	public String getId() {
 		return id;
@@ -79,5 +84,13 @@ public class Parameter {
 
 	public void setTimelineIds(List<String> timelineIds) {
 		this.timelineIds = timelineIds;
+	}
+
+	public Device getDevice() {
+		return device;
+	}
+
+	public void setDevice(Device device) {
+		this.device = device;
 	}
 }

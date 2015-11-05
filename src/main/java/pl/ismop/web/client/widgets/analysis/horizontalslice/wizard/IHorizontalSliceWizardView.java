@@ -9,6 +9,12 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 		void onModalHide();
 
 		void onRemoveProfile(String profileId);
+
+		void onAcceptConfig();
+
+		void onChangePickedHeight(String profileId, String height);
+
+		void onParameterChanged(String parameterName);
 	}
 
 	void showModal(boolean show);
@@ -26,4 +32,20 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 	void addProfileHeight(Double height, String profileId, boolean check);
 
 	void showNoProfileLabel();
+
+	void addParameter(String parameterName, boolean check, boolean enabled);
+
+	void removeParameter(String parameterName);
+
+	void showNoParamtersLabel(boolean show);
+
+	void showNoProfilePickedError();
+
+	String getFullPanelTitle();
+
+	void clearParameters();
+
+	void showButtonConfigLabel(boolean show);
+
+	void showSingleProfilePerSectionMessage();
 }

@@ -10,11 +10,10 @@ import javax.inject.Inject;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Singleton;
 
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.context.ContextService;
 import pl.ismop.web.client.dap.context.ContextsResponse;
@@ -44,6 +43,9 @@ import pl.ismop.web.client.dap.profile.ProfilesResponse;
 import pl.ismop.web.client.dap.result.Result;
 import pl.ismop.web.client.dap.result.ResultService;
 import pl.ismop.web.client.dap.result.ResultsResponse;
+import pl.ismop.web.client.dap.scenario.Scenario;
+import pl.ismop.web.client.dap.scenario.ScenarioService;
+import pl.ismop.web.client.dap.scenario.ScenariosResponse;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.section.SectionService;
 import pl.ismop.web.client.dap.section.SectionsResponse;
@@ -63,6 +65,8 @@ import pl.ismop.web.client.hypgen.Experiment;
 
 @Singleton
 public class DapController {
+	private final IsmopConverter converter;
+	private final ScenarioService scenarioService;
 	private ExperimentService leveeExperimentService;
 	private ErrorUtil errorUtil;
 	private LeveeService leveeService;
@@ -138,6 +142,10 @@ public class DapController {
 		void processExperiments(List<pl.ismop.web.client.dap.experiment.Experiment> experiments);
 	}
 
+	public interface ScenariosCallback extends ErrorCallback {
+		void processScenarios(List<Scenario> scenarios);
+	}
+
 	private class MeasurementsRestCallback implements MethodCallback<MeasurementsResponse> {
 		private final MeasurementsCallback callback;
 
@@ -160,7 +168,7 @@ public class DapController {
 	public DapController(ErrorUtil errorUtil, LeveeService leveeService, SensorService sensorService, MeasurementService measurementService,
 			SectionService sectionService, ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService,
 			DeviceService deviceService, DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
-			TimelineService timelineService, ExperimentService leveeExperimentService) {
+			TimelineService timelineService, ExperimentService leveeExperimentService, ScenarioService scenarioService, IsmopConverter converter) {
 		this.errorUtil = errorUtil;
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
@@ -175,6 +183,8 @@ public class DapController {
 		this.contextService = contextService;
 		this.timelineService = timelineService;
 		this.leveeExperimentService = leveeExperimentService;
+		this.scenarioService = scenarioService;
+		this.converter = converter;
 	}
 	
 	public void getLevees(final LeveesCallback callback) {	
@@ -247,19 +257,19 @@ public class DapController {
 	}
 
 	public void getMeasurements(String timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(endDate);
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(startDate);
+		String until = converter.format(endDate);
+		String from = converter.format(startDate);
 		measurementService.getMeasurements(timelineId, from, until, new MeasurementsRestCallback(callback));
 	}
 	
 	public void getMeasurementsWithQuantity(String timelineId, Date startDate, Date endDate, int quantity, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(endDate);
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(startDate);
+		String until = converter.format(endDate);
+		String from = converter.format(startDate);
 		measurementService.getMeasurementsWithQuantity(timelineId, from, until, quantity, new MeasurementsRestCallback(callback));
 	}
 
-	public void getMeasurements(List<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
-		getMeasurements(merge(timelineId, ","), startDate, endDate, callback);
+	public void getMeasurements(Collection<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
+		getMeasurements(merge(timelineId), startDate, endDate, callback);
 	}
 
 	public void getAllMeasurements(Collection<String> timelineIds, final MeasurementsCallback callback) {
@@ -277,11 +287,8 @@ public class DapController {
 	}
 
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(date);
-		String from = DateTimeFormat.
-						getFormat(PredefinedFormat.ISO_8601).
-						format(new Date(date.getTime() - 1500_000L));
-
+		String until = converter.format(date);
+		String from = converter.format(new Date(date.getTime() - 1500_000L));
 		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
 				new MeasurementsRestCallback(callback));
 	}
@@ -479,8 +486,36 @@ public class DapController {
 		});
 	}
 
+	public void getLeveeParameters(Integer leveeId, final ParametersCallback callback) {
+		parameterService.getLeveeParameters(leveeId, new MethodCallback<ParametersResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ParametersResponse response) {
+				callback.processParameters(response.getParameters());
+			}
+		});
+	}
+
 	public void getContext(String contextType, final ContextsCallback callback) {
 		contextService.getContexts(contextType, new MethodCallback<ContextsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ContextsResponse response) {
+				callback.processContexts(response.getContexts());
+			}
+		});
+	}
+
+	public void getContexts(List<String> contextIds, final ContextsCallback callback) {
+		contextService.getContextsById(merge(contextIds), new MethodCallback<ContextsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -521,6 +556,20 @@ public class DapController {
 		});
 	}
 
+	public void getParameterTimelines(String parameterId, final TimelinesCallback callback) {
+		timelineService.getParameterTimelines(parameterId, new MethodCallback<TimelinesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, TimelinesResponse response) {
+				callback.processTimelines(response.getTimelines());
+			}
+		});
+	}
+
 	public void getExperimentTimelines(String experimentId, final TimelinesCallback callback) {
 		timelineService.getExperimentTimelines(experimentId, new MethodCallback<TimelinesResponse>() {
 			@Override
@@ -535,9 +584,9 @@ public class DapController {
 		});
 	}
 
-	public void getMeasurementsForTimelineIds(List<String> timelineIds, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(monthEarlier());
+	public void getMeasurementsForTimelineIds(Collection<String> timelineIds, final MeasurementsCallback callback) {
+		String until = converter.format(new Date());
+		String from = converter.format(monthEarlier());
 		measurementService.getMeasurements(merge(timelineIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -552,8 +601,8 @@ public class DapController {
 	}
 
 	public void getMeasurementsForTimelineIdsWithQuantity(List<String> timelineIds, int quantity, final MeasurementsCallback callback) {
-		String until = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(new Date());
-		String from = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601).format(threeDaysEarlier());
+		String until = converter.format(new Date());
+		String from = converter.format(monthEarlier());
 		measurementService.getMeasurementsWithQuantity(merge(timelineIds, ","), from, until, quantity, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -721,6 +770,20 @@ public class DapController {
 		});
 	}
 
+	public void getLeveeDevices(Integer leveeId, final DevicesCallback callback) {
+		deviceService.getLeveeDevices(leveeId, new MethodCallback<DevicesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DevicesResponse response) {
+				callback.processDevices(response.getDevices());
+			}
+		});
+	}
+
 	public void getDeviceAggregation(String deviceAggregationId, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregationsForIds(deviceAggregationId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
@@ -749,12 +812,22 @@ public class DapController {
 		});
 	}
 
-	private Date monthEarlier() {
-		return new Date(new Date().getTime() - 2678400000L);
+	public void getExperimentScenarios(String experimentId, final ScenariosCallback callback) {
+		scenarioService.getExperimentScenarios(experimentId, new MethodCallback<ScenariosResponse>() {
+			@Override
+			public void onSuccess(Method method, ScenariosResponse scenarios) {
+				callback.processScenarios(scenarios.getScenarios());
+			}
+
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callback.onError(errorUtil.processErrors(method, exception));
+			}
+		});
 	}
 
-	private Date threeDaysEarlier() {
-		return new Date(new Date().getTime() - 259200000L);
+	private Date monthEarlier() {
+		return new Date(new Date().getTime() - 2678400000L);
 	}
 
 	private void collectDevices(List<DeviceAggregate> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,

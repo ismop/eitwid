@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -75,13 +76,20 @@ public class AnalysisSidePanelView extends Composite
 			item.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent clickEvent) {
-					selectedExperiment.setText(currentExperiment.getName());
-					selectedExperiment.setTitle(currentExperiment.getDescription());
-					getPresenter().selectExperiment(currentExperiment);
+					if (peformExperimentchange()) {
+						selectedExperiment.setText(currentExperiment.getName());
+						selectedExperiment.setTitle(currentExperiment.getDescription());
+						getPresenter().selectExperiment(currentExperiment);
+					}
 				}
 			});
 			experimentList.add(item);
 		}
+	}
+
+	private boolean peformExperimentchange() {
+		return selectedExperiment.getText().equals(messages.selectExperiment()) ||
+				Window.confirm(messages.confirmExperimentChange());
 	}
 
 	@Override

@@ -15,4 +15,8 @@ public interface ContextService extends RestService {
 	@GET
 	@Path("contexts?context_type={contextType}")
 	void getContexts(@PathParam("contextType") String contextType, MethodCallback<ContextsResponse> callback);
+
+	@GET
+	@Path("contexts?id={contextId}")
+	void getContextsById(@PathParam("contextId") String contextId, MethodCallback<ContextsResponse> callback);
 }

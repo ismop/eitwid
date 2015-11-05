@@ -12,15 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.JsArrayNumber;
-import com.google.gwt.core.client.JsArrayUtils;
+import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.util.CoordinatesUtil;
 import pl.ismop.web.client.widgets.common.profile.ISideProfileView.ISideProfilePresenter;
 
 @Presenter(view = SideProfileView.class, multiple = true)
@@ -34,15 +33,19 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 	private int width, height;
 	
 	private List<String> hoveredDeviceIds;
+
+	private CoordinatesUtil coordinatesUtil;
 	
-	public SideProfilePresenter() {
+	@Inject
+	public SideProfilePresenter(CoordinatesUtil coordinatesUtil) {
+		this.coordinatesUtil = coordinatesUtil;
 		hoveredDeviceIds = new ArrayList<>();
 	}
 	
 	public void setProfileAndDevices(Profile profile, List<Device> devices) {
 		view.setScene(profile.getId(), width, height);
 		
-		List<List<Double>> fullProfile = createFullProfile(projectCoordinates(profile.getShape().getCoordinates()));
+		List<List<Double>> fullProfile = createFullProfile(coordinatesUtil.projectCoordinates(profile.getShape().getCoordinates()));
 		boolean leftBank = true;
 
 		//TODO: come up with a better way of telling where the water is
@@ -108,18 +111,18 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		List<List<Double>> referenceSource = new ArrayList<>();
 		referenceSource.add(referencePoint);
 		
-		List<Double> projectedReference = projectCoordinates(referenceSource).get(0);
+		List<Double> projectedReference = coordinatesUtil.projectCoordinates(referenceSource).get(0);
 		Map<List<String>, List<List<Double>>> similar = findSimilar(devices);
 		
 		for(List<String> similarDeviceIds : similar.keySet()) {
-			List<List<Double>> projectedValues = projectCoordinates(similar.get(similarDeviceIds));
+			List<List<Double>> projectedValues = coordinatesUtil.projectCoordinates(similar.get(similarDeviceIds));
 			double distance = sqrt(
 				pow(projectedValues.get(0).get(0) - projectedReference.get(0), 2) +
 				pow(projectedValues.get(0).get(1) - projectedReference.get(1), 2)
 			);
 			
-			//for now let's position the devices half meter above ground
-			result.put(similarDeviceIds, Arrays.asList(distance, 0.5));
+			//for now let's position the devices 10 cm above ground
+			result.put(similarDeviceIds, Arrays.asList(distance, 0.1));
 		}
 		
 		return result;
@@ -169,36 +172,4 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		
 		return result;
 	}
-
-	private List<List<Double>> projectCoordinates(List<List<Double>> coordinates) {
-		JsArray<JsArrayNumber> sourceCoordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
-		
-		for(List<Double> cordinatePair : coordinates) {
-			sourceCoordinates.push(JsArrayUtils.readOnlyJsArray(new double[] {cordinatePair.get(0), cordinatePair.get(1)}));
-		}
-		
-		JsArray<JsArrayNumber> projected = convertCoordinates(sourceCoordinates);
-		List<List<Double>> result = new ArrayList<>();
-		
-		for(int i = 0; i < projected.length(); i++) {
-			List<Double> coordinatePair = new ArrayList<>();
-			coordinatePair.add(projected.get(i).get(0));
-			coordinatePair.add(projected.get(i).get(1));
-			result.add(coordinatePair);
-		}
-		
-		return result;
-	}
-
-	private native JsArray<JsArrayNumber> convertCoordinates(JsArray<JsArrayNumber> sourceCoordinates) /*-{
-		var output = [];
-		
-		sourceCoordinates.forEach(function (elem) {
-			var pcs2000 = '+proj=tmerc +lat_0=0 +lon_0=21 +k=0.999923 +x_0=7500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ';
-			var coords = $wnd.proj4(pcs2000, [elem[0], elem[1]]);
-			output.push(coords)
-		});
-		
-		return output;
-	}-*/;
 }
