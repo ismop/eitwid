@@ -24,4 +24,8 @@ public interface VerticalSliceWizardMessages extends Messages {
 	String noProfilePickedMessage();
 
 	String parameterDisabledInfo();
+
+	String realDataLabel();
+
+	String scenarioNamePrefix();
 }

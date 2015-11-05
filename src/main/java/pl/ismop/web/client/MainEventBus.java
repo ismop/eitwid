@@ -168,7 +168,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = HorizontalSliceWizardPresenter.class, activate = HorizontalSliceWizardPresenter.class,
 			deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
-	void showHorizontalCrosssectionWizard();
+	void showHorizontalCrosssectionWizard(Experiment experiment);
 
 	@Event(handlers = HorizontalSliceWizardPresenter.class, activate = HorizontalSliceWizardPresenter.class,
 			deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
@@ -182,7 +182,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = VerticalSliceWizardPresenter.class, activate = VerticalSliceWizardPresenter.class,
 			deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
-	void showVerticalCrosssectionWizard();
+	void showVerticalCrosssectionWizard(Experiment experiment);
 	
 	@Event(handlers = VerticalSliceWizardPresenter.class, activate = VerticalSliceWizardPresenter.class,
 			deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
