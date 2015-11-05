@@ -138,6 +138,7 @@ public class ChartView extends Composite implements IChartView, ReverseViewInter
                                     .setYear("%b")
                     );
             chart.getYAxis().setAxisTitleText(null);
+            chart.setOption("/chart/zoomType", "x");
 
             chart.setSeriesPlotOptions(new SeriesPlotOptions().
                     setSeriesMouseOverEventHandler(new SeriesMouseOverEventHandler() {
