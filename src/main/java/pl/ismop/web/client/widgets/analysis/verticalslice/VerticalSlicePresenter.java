@@ -159,8 +159,15 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 											}
 										}
 										
+										//TODO: come up with a better way of telling where the water is
+										boolean leftBank = true;
+										
+										if(configuration.getPickedProfile().getShape().getCoordinates().get(0).get(0) > 19.676851838778) {
+											leftBank = false;
+										}
+										
 										view.init();
-										view.drawCrosssection(parameterUnit, minValue, maxValue,
+										view.drawCrosssection(parameterUnit, minValue, maxValue, leftBank,
 												calculateProfileAndDevicePositionsWithValues(measurements, timelines, configuration.getPickedProfile()));
 									} else {
 										view.showNoMeasurementsMessage();
