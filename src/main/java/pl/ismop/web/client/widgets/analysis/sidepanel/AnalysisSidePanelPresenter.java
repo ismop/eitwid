@@ -108,37 +108,41 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             dapController.getExperimentTimelines(selectedExperiment.getId(), new DapController.TimelinesCallback() {
                 @Override
                 public void processTimelines(final List<Timeline> timelines) {
-                    final Map<String, String> parameterIdToTimelineId = new HashMap<>();
-                    for (Timeline timeline : timelines) {
-                        parameterIdToTimelineId.put(timeline.getParameterId(), timeline.getId());
-                    }
-                    dapController.getParametersById(parameterIdToTimelineId.keySet(), new ParametersCallback(this) {
-                        @Override
-                        public void processParameters(final List<Parameter> parameters) {
-                            final Map<String, Parameter> timelineIdToParameter = new HashMap<>();
-                            for (Parameter parameter : parameters) {
-                                timelineIdToParameter.put(parameterIdToTimelineId.get(parameter.getId()), parameter);
-                            }
-                            dapController.getAllMeasurements(parameterIdToTimelineId.values(), new MeasurementsCallback(this) {
-                                @Override
-                                public void processMeasurements(List<Measurement> measurements) {
-                                    Map<Parameter, List<Measurement>> series = new HashMap<>();
-                                    for (Measurement measurement : measurements) {
-                                        Parameter parameter = timelineIdToParameter.get(measurement.getTimelineId());
-                                        List<Measurement> m = series.get(parameter);
-                                        if (m == null) {
-                                            m = new ArrayList<>();
-                                            series.put(parameter, m);
-                                        }
-                                        m.add(measurement);
-                                    }
-
-                                    showExperimentWaveShape(series);
-                                    waterWave.hideLoading();
-                                }
-                            });
+                    if (timelines.size() > 0) {
+                        final Map<String, String> parameterIdToTimelineId = new HashMap<>();
+                        for (Timeline timeline : timelines) {
+                            parameterIdToTimelineId.put(timeline.getParameterId(), timeline.getId());
                         }
-                    });
+                        dapController.getParametersById(parameterIdToTimelineId.keySet(), new ParametersCallback(this) {
+                            @Override
+                            public void processParameters(final List<Parameter> parameters) {
+                                final Map<String, Parameter> timelineIdToParameter = new HashMap<>();
+                                for (Parameter parameter : parameters) {
+                                    timelineIdToParameter.put(parameterIdToTimelineId.get(parameter.getId()), parameter);
+                                }
+                                dapController.getAllMeasurements(parameterIdToTimelineId.values(), new MeasurementsCallback(this) {
+                                    @Override
+                                    public void processMeasurements(List<Measurement> measurements) {
+                                        Map<Parameter, List<Measurement>> series = new HashMap<>();
+                                        for (Measurement measurement : measurements) {
+                                            Parameter parameter = timelineIdToParameter.get(measurement.getTimelineId());
+                                            List<Measurement> m = series.get(parameter);
+                                            if (m == null) {
+                                                m = new ArrayList<>();
+                                                series.put(parameter, m);
+                                            }
+                                            m.add(measurement);
+                                        }
+
+                                        showExperimentWaveShape(series);
+                                        waterWave.hideLoading();
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        waterWave.showLoading(messages.noWaterWave());
+                    }
                 }
 
                 @Override
