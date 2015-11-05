@@ -45,18 +45,6 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 	}
 
 	@Override
-	public native void clear() /*-{
-		if(this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes) {
-			for(var i = 0; i < this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes.length; i++) {
-				this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::scene.remove(
-					this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes[i]);
-			}
-			
-			this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes = new Array();
-		}
-	}-*/;
-
-	@Override
 	public void init() {
 		if(scene == null) {
 			addRenderer(panel.getElement(), panel.getOffsetWidth(), panel.getOffsetHeight());
@@ -64,7 +52,8 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 	}
 
 	@Override
-	public void drawCrosssection(String parameterUnit, double minValue, double maxValue, Map<Double, Double> profileAndDevicePositionsWithValues) {
+	public void drawCrosssection(String parameterUnit, double minValue, double maxValue, boolean leftBank,
+			Map<Double, Double> profileAndDevicePositionsWithValues) {
 		int topColor = 0xecf330;
 		int bottomColor = 0x307bf3;
 		drawLegend(topColor, bottomColor, minValue, maxValue, parameterUnit);
@@ -167,13 +156,20 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 			previousCoordinate = xCoordinate;
 		}
 		
-		drawSlice(localCoordinates, values, topColor, bottomColor, maxValue, minValue);
-	}
-
-	private double calculateValueProportionallyToDistance(double currentValue, double previousValue, double rightX, double leftX, double currentX) {
-		double result = previousValue + (currentValue - previousValue) * ((currentX - leftX) / (rightX - leftX));
+		JsArrayNumber waterXs = (JsArrayNumber) JsArrayNumber.createArray();
+		JsArrayNumber waterYs = (JsArrayNumber) JsArrayNumber.createArray();
+		waterYs.push(shiftY);
+		waterYs.push(2.0 * scale + shiftY);
 		
-		return result; 
+		if(leftBank) {
+			waterXs.push(shiftX);
+			waterXs.push((bottomWidth / 2) * scale + shiftX);
+		} else {
+			waterXs.push((bottomWidth / 2) * scale + shiftX);
+			waterXs.push(bottomWidth * scale + shiftX);
+		}
+		
+		drawSlice(localCoordinates, values, topColor, bottomColor, maxValue, minValue, waterXs, waterYs);
 	}
 
 	@Override
@@ -181,6 +177,18 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		Window.alert(messages.noMeasurementsMessage());
 	}
 	
+	@Override
+	public native void clear() /*-{
+		if(this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes) {
+			for(var i = 0; i < this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes.length; i++) {
+				this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::scene.remove(
+					this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes[i]);
+			}
+			
+			this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes = new Array();
+		}
+	}-*/;
+
 	private double findY(double firstX, double firstY, double secondX, double secondY, Double xCoordinate) {
 		double a = (secondY - firstY) / (secondX - firstX);
 		double b = firstY - a * firstX;
@@ -192,8 +200,14 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		return NumberFormat.getFormat("0.00").format(number);
 	}
 
+	private double calculateValueProportionallyToDistance(double currentValue, double previousValue, double rightX, double leftX, double currentX) {
+		double result = previousValue + (currentValue - previousValue) * ((currentX - leftX) / (rightX - leftX));
+		
+		return result; 
+	}
+
 	private native void drawSlice(JsArray<JsArray<JsArrayNumber>> localCoordinates, JsArrayNumber values, int topColor, int bottomColor,
-			double maxValue, double minValue) /*-{
+			double maxValue, double minValue, JsArrayNumber waterXs, JsArrayNumber waterYs) /*-{
 		var top = new $wnd.THREE.Color(topColor);
 		var bottom = new $wnd.THREE.Color(bottomColor);
 		
@@ -250,6 +264,19 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 			
 			var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors});
 			var mesh = new $wnd.THREE.Mesh(geometry, material);
+			this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
+			
+			var waterShape = new $wnd.THREE.Shape();
+			waterShape.moveTo(waterXs[0], waterYs[0]);
+			waterShape.lineTo(waterXs[0], waterYs[1]);
+			waterShape.lineTo(waterXs[1], waterYs[1]);
+			waterShape.lineTo(waterXs[1], waterYs[0]);
+			waterShape.lineTo(waterXs[0], waterYs[0]);
+			
+			var waterGeometry = new $wnd.THREE.ShapeGeometry(waterShape);
+			var waterMaterial = new $wnd.THREE.MeshBasicMaterial({color: 0xd2e6f7, opacity: 0.6});
+			var mesh = new $wnd.THREE.Mesh(waterGeometry, waterMaterial);
+			mesh.translateZ(-0.1);
 			this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
 		}
 	}-*/;
