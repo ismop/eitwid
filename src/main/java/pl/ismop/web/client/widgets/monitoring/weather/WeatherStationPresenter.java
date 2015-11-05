@@ -87,7 +87,6 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		Parameter parameter = parameterMap.get(parameterId);
 		if (parameter != null) {
 			if (value){
-				view.showProgress(true);
 				loadParameter(parameter);
 			} else {
 				unloadParameter(parameter);
@@ -102,10 +101,12 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	private void loadParameter(final Parameter parameter) {
 		final List<String> parameterIds = new ArrayList<>();
 		parameterIds.add(parameter.getId());
+
+		chartPresenter.setLoadingState(true);
 		dapController.getContext("measurements", new ContextsCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
-				view.showProgress(false);
+				chartPresenter.setLoadingState(false);
 				Window.alert("Error: " + errorDetails.getMessage());
 			}
 			
@@ -115,7 +116,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
 						@Override
 						public void onError(ErrorDetails errorDetails) {
-							view.showProgress(false);
+							chartPresenter.setLoadingState(false);
 							Window.alert("Error: " + errorDetails.getMessage());
 						}
 						
@@ -128,23 +129,23 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 								dapController.getMeasurements(timelines.get(0).getId(), twoWeeksAgo, now, new MeasurementsCallback() {
 									@Override
 									public void onError(ErrorDetails errorDetails) {
-										view.showProgress(false);
+										chartPresenter.setLoadingState(false);
 										Window.alert("Error: " + errorDetails.getMessage());
 									}
 									
 									@Override
 									public void processMeasurements(List<Measurement> measurements) {
+										chartPresenter.setLoadingState(false);
 										chartPresenter.addChartSeries(series(parameter, measurements));
-										view.showProgress(false);
 									}
 								});
 							} else {
-								view.showProgress(false);
+								chartPresenter.setLoadingState(false);
 							}
 						}
 					});
 				} else {
-					view.showProgress(false);
+					chartPresenter.setLoadingState(false);
 				}
 			}
 		});
@@ -212,9 +213,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 															timelineIds.add(timeline.getId());
 															timelineMap.put(timeline.getId(), timeline);
 														}
-														Date lastDay = new Date();
-														CalendarUtil.addDaysToDate(lastDay, -1);
-														dapController.getLastMeasurements(timelineIds, lastDay, new MeasurementsCallback() {
+														Date fourDaysAgo = new Date();
+														CalendarUtil.addDaysToDate(fourDaysAgo, -4);
+														dapController.getLastMeasurements(timelineIds, fourDaysAgo, new MeasurementsCallback() {
 															@Override
 															public void onError(ErrorDetails errorDetails) {
 																view.showProgress(false);
@@ -225,6 +226,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 															public void processMeasurements(List<Measurement> measurements) {
 																GroupedReadings groupedReadings = groupReadings(measurements, timelineMap, parameterMap, deviceMap);
 																updateParamPreview(groupedReadings);
+																view.showProgress(false);
 															}
 			
 														});
@@ -378,7 +380,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					firstParamId = latestReading.parameterId;
 				}
 				view.addLatestReading1(latestReading.parameterId, 
-						latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
+						latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(hackValue(stationName, latestReading)), latestReading.unit,
 						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(latestReading.timestamp));
 			}
 		}
@@ -389,12 +391,31 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			sortLatestReadings(groupedReadings.getLatestReadings().get(stationName));
 			
 			for(LatestReading latestReading : groupedReadings.getLatestReadings().get(stationName)) {
-				view.addLatestReading2(latestReading.parameterId, latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(latestReading.value), latestReading.unit,
+				view.addLatestReading2(latestReading.parameterId, latestReading.parameterName, latestReading.typeName, NumberFormat.getFormat("0.00").format(hackValue(stationName, latestReading)), latestReading.unit,
 						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(latestReading.timestamp));
 			}
 		}
 
 		view.getContentVisibility().setVisible(true);
+	}
+
+	// TODO get rid of this method as soon as possible
+	// move normalization to DAP
+	private Number hackValue(String stationName, LatestReading latestReading) {
+		if (stationName.equals("Stacja pogodowa KI")) {
+			double value = latestReading.value.doubleValue();
+			switch (latestReading.unit) {
+				case "mm":
+					return 0.001 * value;
+				case "m/s":
+					return 0.1 * value;
+				case "C":
+					return 0.1 * value;
+				case "%":
+					return 0.1 * value;
+			}
+		}
+		return latestReading.value;
 	}
 
 	private void sortLatestReadings(List<LatestReading> readings) {

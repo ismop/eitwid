@@ -8,12 +8,16 @@
 			width: 100%;
 		}
 
+		.parameterPreview {
+			margin-bottom: 1.5em;
+		}
+
 		.progress {
 			text-align: center;
 		}
 
 		td {
-			 padding: 0.5em 1em 0 0;
+			 padding: 0.8em 1em 0 0;
 		}
 
 		.parameterLabel {
@@ -30,11 +34,11 @@
 				</g:FlowPanel>
 				<b:Container ui:field="container" fluid="true" visible="false">
 					<b:Row>
-						<b:Column size="MD_6">
+						<b:Column size="MD_6" addStyleNames="{style.parameterPreview}">
 							<b:Heading ui:field="weatherHeading1" size="H4"/>
 							<g:FlexTable ui:field="measurements1"/>
 						</b:Column>
-						<b:Column size="MD_6">
+						<b:Column size="MD_6" addStyleNames="{style.parameterPreview}">
 							<b:Heading ui:field="weatherHeading2" size="H4"/>
 							<g:FlexTable ui:field="measurements2"/>
 						</b:Column>
