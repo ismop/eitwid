@@ -1,6 +1,7 @@
 package pl.ismop.web.client.widgets.common.chart;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,9 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEvent;
@@ -18,6 +22,9 @@ import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -77,6 +84,17 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 					}
 				})
 			);
+			chart.setToolTip(new ToolTip().setFormatter(new ToolTipFormatter() {
+				@Override
+				public String format(ToolTipData toolTipData) {
+					String color = getPointColor(toolTipData.getPoint().getNativePoint());
+					
+					return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(new Date(toolTipData.getXAsLong())) +
+							"<br/><br/><span style=\"color:" + color + "\">\u25CF</span> " + toolTipData.getSeriesName() +
+							": <b>" + NumberFormat.getFormat("0.00").format(toolTipData.getPoint().getY()) + " " +
+							dataSeriesMap.get(toolTipData.getSeriesId()).getUnit() + "</b><br/>";
+				}
+			}));
 			view.addChart(chart);
 		}
 		
@@ -186,6 +204,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			return index;
 		}
 	}
+
+	private native String getPointColor(JavaScriptObject nativePoint) /*-{
+		return nativePoint.color;
+	}-*/;
 
 	private native void updateFirstYAxis(JavaScriptObject nativeChart, String yAxisLabel) /*-{
 		nativeChart.yAxis[0].update({
