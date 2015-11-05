@@ -100,6 +100,10 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	@Override
 	public void setSelectionManager(ISelectionManager selectionManager) {
 		this.selectionManager = selectionManager;
+		
+		for(Profile profile : configuration.getPickedProfiles().values()) {
+			selectionManager.showProfile(profile);
+		}
 	}
 
 	private void refreshView() {
