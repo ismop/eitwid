@@ -7,8 +7,11 @@ import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IWeatherStationView extends IsWidget {
+	
 	interface IWeatherStationPresenter {
-		
+		public void onModalShown();
+		public void onModalHidden();
+		public void loadParameter(String parameterId, Boolean value);
 	}
 
 	void showModal();
@@ -25,9 +28,14 @@ public interface IWeatherStationView extends IsWidget {
 
 	HasVisibility getContentVisibility();
 
-	void addLatestReading1(String label, String value, String unit, String timestamp);
-
 	void clearMeasurements();
+	
+	void addLatestReading1(String parameterId, String parameterName, String typeName, String value, String unit, String timestamp);
 
-	void addLatestReading2(String label, String value, String unit, String timestamp);
+	void addLatestReading2(String parameterId, String parameterName, String typeName, String value, String unit, String timestamp);
+	
+	public int getChartContainerHeight();
+
+	void setChart(IsWidget chart);
+	
 }

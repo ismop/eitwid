@@ -3,16 +3,19 @@ package pl.ismop.web.client.widgets.old.plot;
 import java.util.Map;
 
 public class Readings {
-	private String label;
+	private String parameterName;
+	private String typeName;
+
 	private String unit;
 	private Map<String, Number[][]> measurements;
+	private String parameterId;
 	
-	public String getLabel() {
-		return label;
+	public String getParameterName() {
+		return parameterName;
 	}
 	
-	public void setLabel(String label) {
-		this.label = label;
+	public void setParameterName(String label) {
+		this.parameterName = label;
 	}
 	
 	public String getUnit() {
@@ -33,6 +36,22 @@ public class Readings {
 
 	@Override
 	public String toString() {
-		return "Readings [label=" + label + ", unit=" + unit + ", measurements=" + measurements + "]";
+		return "Readings [label=" + parameterName + ", unit=" + unit + ", measurements=" + measurements + "]";
+	}
+
+	public void setParameterId(String id) {
+		this.parameterId = id;
+	}
+
+	public String getParameterId() {
+		return parameterId;
+	}
+	
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
 	}
 }

@@ -3,13 +3,27 @@
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.monitoring.weather.WeatherStationViewMessages" field="messages"/>
-	<ui:style>
+	<ui:style type='pl.ismop.web.client.widgets.monitoring.weather.WeatherStationView.WeatherStationViewStyle'>
+		.chart {
+			width: 100%;
+		}
+
 		.progress {
 			text-align: center;
 		}
+
+		td {
+			 padding: 0.5em 1em 0 0;
+		}
+
+		.parameterLabel {
+			font-weight: bold;
+
+		}
+
 	</ui:style>
 	<g:HTMLPanel>
-		<b:Modal ui:field="modal" title="{messages.weatherStation}" fade="true" width="1200px">
+		<b:Modal ui:field="modal" title="{messages.weatherStation}" fade="true" width="90%">
 			<b:ModalBody>
 				<g:FlowPanel ui:field="progress" visible="false" addStyleNames="{style.progress}">
 					<b:Icon type="CIRCLE_O_NOTCH" spin="true" title="{messages.loadingLabel}"/>
@@ -18,15 +32,15 @@
 					<b:Row>
 						<b:Column size="MD_6">
 							<b:Heading ui:field="weatherHeading1" size="H4"/>
-							<g:FlowPanel ui:field="measurements1"/>
+							<g:FlexTable ui:field="measurements1"/>
 						</b:Column>
 						<b:Column size="MD_6">
 							<b:Heading ui:field="weatherHeading2" size="H4"/>
-							<g:FlowPanel ui:field="measurements2"/>
+							<g:FlexTable ui:field="measurements2"/>
 						</b:Column>
 					</b:Row>
 				</b:Container>
-				<g:FlowPanel ui:field="chartSlot" visible="false"/>
+				<g:FlowPanel ui:field="chartSlot" addStyleNames="{style.chart}"/>
 			</b:ModalBody>
 		</b:Modal>
 	</g:HTMLPanel>

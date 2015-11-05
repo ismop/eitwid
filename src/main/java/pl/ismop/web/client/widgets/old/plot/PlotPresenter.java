@@ -137,7 +137,7 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 																	
 																	for(final Readings readingsEntry : readings) {
 																		chart.getYAxis(axisIndex)
-																			.setAxisTitle(new AxisTitle().setText(readingsEntry.getLabel() + " [" + readingsEntry.getUnit() + "]"))
+																			.setAxisTitle(new AxisTitle().setText(readingsEntry.getParameterName() + " [" + readingsEntry.getUnit() + "]"))
 																			.setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
 																				@Override
 																				public String format(AxisLabelsData axisLabelsData) {
@@ -201,7 +201,7 @@ public class PlotPresenter extends BasePresenter<IPlotView, MainEventBus> implem
 		for(List<Parameter> parameterGroup : matchedParameters.values()) {
 			Readings readings = new Readings();
 			readings.setMeasurements(new HashMap<String, Number[][]>());
-			readings.setLabel(parameterGroup.get(0).getMeasurementTypeName());
+			readings.setParameterName(parameterGroup.get(0).getMeasurementTypeName());
 			readings.setUnit(parameterGroup.get(0).getMeasurementTypeUnit());
 			
 			for(Parameter parameter : parameterGroup) {

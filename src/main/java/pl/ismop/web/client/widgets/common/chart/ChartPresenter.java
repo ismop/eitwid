@@ -89,6 +89,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			.setPoints(series.getValues())
 			.setYAxis(getYAxisIndex(series));
 		chart.addSeries(chartSeries);
+
 	}
 
 	public void setHeight(int height) {

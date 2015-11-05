@@ -10,11 +10,15 @@ public class GroupedReadings {
 	public static class LatestReading {
 		public Number value;
 		
+		public String typeName;
+		
 		public String unit;
 		
-		public String label;
+		public String parameterName;
 		
 		public Date timestamp;
+
+		public String parameterId;
 	}
 	
 	private List<Readings> readingsList;
