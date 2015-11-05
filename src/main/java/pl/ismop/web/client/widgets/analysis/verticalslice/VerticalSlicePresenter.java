@@ -43,6 +43,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 	private CoordinatesUtil coordinatesUtil;
 
+	private ISelectionManager selectionManager;
+
 	@Inject
 	public VerticalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil) {
 		this.dapController = dapController;
@@ -83,13 +85,12 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 	@Override
 	public void setSelectionManager(ISelectionManager selectionManager) {
-		// TODO Auto-generated method stub
-		
+		this.selectionManager = selectionManager;
+		selectionManager.showProfile(configuration.getPickedProfile());
 	}
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
 		
 	}
 
