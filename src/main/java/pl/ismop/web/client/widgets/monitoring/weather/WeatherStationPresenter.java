@@ -250,7 +250,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 				case "%":
 					return 0.1 * value;
 				case "stopnie":
-					double calc = (((value - 4.0) / 16.0)) * 360.0;
+					double calc = (((value) / 16.0)) * 360.0;
 					return calc;
 			}
 		}
