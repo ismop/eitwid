@@ -19,7 +19,6 @@ public class IsmopWebEntryPoint implements EntryPoint {
 		ServiceRoots.add("dap", properties.get("dapEndpoint"));
 		ServiceRoots.add("hypgen", properties.get("hypgenEndpoint"));
 		Defaults.ignoreJsonNulls();
-		Defaults.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		
 		Mvp4gModule module = (Mvp4gModule)GWT.create(Mvp4gModule.class);
 		module.createAndStartModule();
