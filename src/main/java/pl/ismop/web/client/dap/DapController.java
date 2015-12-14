@@ -288,7 +288,7 @@ public class DapController {
 
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
 		String until = converter.format(date);
-		String from = converter.format(new Date(date.getTime() - 7200_000L));
+		String from = converter.format(new Date(date.getTime() - 86_400_000L));
 		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
 				new MeasurementsRestCallback(callback));
 	}

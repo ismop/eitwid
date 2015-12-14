@@ -6,6 +6,14 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
+import com.mvp4g.client.annotation.Presenter;
+import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.ContextsCallback;
@@ -22,16 +30,6 @@ import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.monitoring.weather.IWeatherStationView.IWeatherStationPresenter;
-import scala.annotation.meta.param;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.datepicker.client.CalendarUtil;
-import com.mvp4g.client.annotation.Presenter;
-import com.mvp4g.client.presenter.BasePresenter;
 
 @Presenter(view = WeatherStationView.class)
 public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, MainEventBus> implements IWeatherStationPresenter {
@@ -203,19 +201,26 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	}
 
 	private void updateParamPreview(List<Measurement> measurements) {
-		
 		Map<String, Measurement> lastMeasurements = readings.getLastMeasurements(measurements);
-		GWT.log("" + lastMeasurements);
 	
 		if (readings.deviceIds.size()>0) {
 			Device device = readings.deviceMap.get(readings.deviceIds.get(0));
 			view.getHeading1().setText(device.getCustomId());
 			List<Parameter> parameters = readings.getParametersForDevice(device.getId());
 			for (Parameter parameter : parameters) {
-				GWT.log("Processing parameter: " + parameter);
-				view.addLatestReading1(parameter.getId(), 
-						parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
-						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));	
+				if(lastMeasurements.get(parameter.getId()) != null) {
+					view.addLatestReading1(parameter.getId(), 
+							parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
+							DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));
+				} else {
+					view.addLatestReading1(
+						parameter.getId(), 
+						parameter.getParameterName(),
+						parameter.getMeasurementTypeName(),
+						view.getNoReadingLabel(),
+						"",
+						"");	
+				}
 			}
 		} 
 		
@@ -224,10 +229,19 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			view.getHeading2().setText(device.getCustomId());
 			List<Parameter> parameters = readings.getParametersForDevice(device.getId());
 			for (Parameter parameter : parameters) {
-				GWT.log("Processing parameter: " + parameter);
-				view.addLatestReading2(parameter.getId(), 
-						parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
-						DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));	
+				if(lastMeasurements.get(parameter.getId()) != null) {
+					view.addLatestReading2(parameter.getId(), 
+							parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
+							DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));
+				} else {
+					view.addLatestReading2(
+						parameter.getId(), 
+						parameter.getParameterName(),
+						parameter.getMeasurementTypeName(),
+						view.getNoReadingLabel(),
+						"",
+						"");
+				}
 			}
 		} 
 		

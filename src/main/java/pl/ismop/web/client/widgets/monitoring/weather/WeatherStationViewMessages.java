@@ -8,4 +8,6 @@ public interface WeatherStationViewMessages extends Messages {
 	String noWeatherData();
 	
 	String loadingLabel();
+
+	String noReadingLabel();
 }

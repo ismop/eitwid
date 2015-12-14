@@ -10,7 +10,9 @@ public interface IWeatherStationView extends IsWidget {
 	
 	interface IWeatherStationPresenter {
 		public void onModalShown();
+				
 		public void onModalHidden();
+		
 		public void loadParameter(String parameterId, Boolean value);
 	}
 
@@ -37,5 +39,6 @@ public interface IWeatherStationView extends IsWidget {
 	public int getChartContainerHeight();
 
 	void setChart(IsWidget chart);
-	
+
+	String getNoReadingLabel();
 }
