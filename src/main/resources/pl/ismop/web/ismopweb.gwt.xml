@@ -6,7 +6,13 @@
 	<inherits name='com.mvp4g.Mvp4gModule'/>
 	<inherits name='org.fusesource.restygwt.RestyGWT'/>
 	<inherits name="de.benediktmeurer.gwt.slf4j.jul.JUL"/>
-	<inherits name="org.gwtbootstrap3.GwtBootstrap3Theme"/>
+	<inherits name="org.gwtbootstrap3.GwtBootstrap3"/>
+	<inherits name="org.gwtbootstrap3.extras.select.Select"/>
+	<inherits name="org.gwtbootstrap3.extras.datetimepicker.DateTimePickerNoResources"/>
+	<inherits name="org.gwtbootstrap3.extras.slider.Slider"/>
+	<inherits name="org.gwtbootstrap3.extras.notify.Notify"/>
+	<inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
+	<inherits name="com.google.common.collect.Collect"/>
 	
 	<entry-point class='pl.ismop.web.client.IsmopWebEntryPoint'/>
 	<source path="client"/>

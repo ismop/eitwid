@@ -1,0 +1,41 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.root.RootPanelMessages" field="messages"/>
+	<ui:style>
+		.logout {
+			padding-right: 30px;
+		}
+		.mainPanel {
+			background-color: #eaeaea;
+		}
+	</ui:style>
+	<g:DockLayoutPanel unit="PX">
+		<g:north size="50">
+			<b:Navbar>
+				<b:NavbarBrand href="/">ISMOP</b:NavbarBrand>
+					<b:NavbarNav>
+						<b:AnchorListItem ui:field="monitoring"><ui:text from="{messages.monitoringLabel}"/></b:AnchorListItem>
+						<b:AnchorListItem ui:field="analysis"><ui:text from="{messages.analysisLabel}"/></b:AnchorListItem>
+					</b:NavbarNav>
+					<b:NavbarText pull="RIGHT">
+						<b:NavbarLink ui:field="logout" href="/logout" icon="SIGN_OUT" text="{messages.logoutLabel}" addStyleNames="{style.logout}"/>
+						<g:FormPanel ui:field="logoutForm" action="/logout" method="POST">
+							<g:Hidden ui:field="csrf"/>
+						</g:FormPanel>
+					</b:NavbarText>
+			</b:Navbar>
+		</g:north>
+		<g:center>
+			<g:DockLayoutPanel unit="PCT">
+				<g:east size="35">
+					<g:HTMLPanel ui:field="sidePanel"/>
+				</g:east>
+				<g:center>
+					<g:HTMLPanel ui:field="mainPanel" addStyleNames="{style.mainPanel}"/>
+				</g:center>
+			</g:DockLayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

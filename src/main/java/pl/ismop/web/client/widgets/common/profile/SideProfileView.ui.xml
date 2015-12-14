@@ -1,0 +1,27 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.common.profile.SideProfileViewMessages" field="messages"/>
+	<ui:style>
+		.panel {
+			width: 100%;
+			height: 100%;
+		}
+		
+		.backPanel {
+			position: absolute;
+			top:0px;
+			left: 0px;
+			right: 0px;
+			padding: 5px;
+			text-align: right;
+		}
+	</ui:style>
+	<g:HTMLPanel addStyleNames="{style.panel}">
+		<g:HTMLPanel ui:field="panel" addStyleNames="{style.panel}"/>
+		<g:FlowPanel addStyleNames="{style.backPanel}">
+			<b:Button ui:field="back" text="{messages.backLabel}" size="SMALL"/>
+		</g:FlowPanel>
+	</g:HTMLPanel>
+</ui:UiBinder>

@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import pl.ismop.web.client.hypgen.Experiment;
 import pl.ismop.web.client.model.UserExperiments;
@@ -21,7 +20,6 @@ import pl.ismop.web.domain.User;
 import pl.ismop.web.repository.ExperimentRepository;
 import pl.ismop.web.repository.UserRepository;
 
-@RestController
 public class ExperimentController {
 	@Autowired private UserRepository userRepository;
 	@Autowired private ExperimentRepository experimentRepository;

@@ -6,17 +6,22 @@ import org.fusesource.restygwt.client.Json;
 
 public class Levee {
 	private String id;
+	
 	private String name;
+	
 	@Json(name = "emergency_level")
 	@XmlElement(name = "emergency_level")
 	private String emergencyLevel;
+	
 	@Json(name = "threat_level")
 	@XmlElement(name = "threat_level")
 	private String threatLevel;
+	
 	@Json(name = "threat_level_updated_at")
 	@XmlElement(name = "threat_level_updated_at")
 	private String threatLevelLastUpdate;
-	private Shape shape;
+	
+	private PolygonShape shape;
 	
 	public String getId() {
 		return id;
@@ -48,10 +53,10 @@ public class Levee {
 	public void setThreatLevelLastUpdate(String threatLevelLastUpdate) {
 		this.threatLevelLastUpdate = threatLevelLastUpdate;
 	}
-	public Shape getShape() {
+	public PolygonShape getShape() {
 		return shape;
 	}
-	public void setShape(Shape shape) {
+	public void setShape(PolygonShape shape) {
 		this.shape = shape;
 	}
 	@Override

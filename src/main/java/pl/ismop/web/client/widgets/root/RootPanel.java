@@ -2,8 +2,6 @@ package pl.ismop.web.client.widgets.root;
 
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 
-import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -16,8 +14,11 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
+
+import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 
 public class RootPanel extends Composite implements IRootPanelView, ReverseViewInterface<IRootPresenter> {
 	private static RootPanelUiBinder uiBinder = GWT.create(RootPanelUiBinder.class);
@@ -25,17 +26,26 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	
 	private IRootPresenter presenter;
 	
-	@UiField HTMLPanel mapPanel;
-	@UiField FormPanel logoutForm;
-	@UiField Hidden csrf;
-	@UiField AnchorListItem levees;
-	@UiField AnchorListItem sensors;
-	@UiField AnchorListItem experiments;
-	@UiField RootPanelMessages messages;
+	@UiField
+	RootPanelMessages messages;
+	
+	@UiField
+	HTMLPanel mainPanel, sidePanel;
+	
+	@UiField
+	FormPanel logoutForm;
+	
+	@UiField
+	Hidden csrf;
+	
+	@UiField
+	AnchorListItem monitoring;
+	
+	@UiField
+	AnchorListItem analysis;
 
 	public RootPanel() {
 		initWidget(uiBinder.createAndBindUi(this));
-		mapPanel.getElement().setId("mapPanel");
 		csrf.setName(DOM.getElementById("csrfParameterName").getAttribute("content"));
 		csrf.setValue(DOM.getElementById("csrfToken").getAttribute("content"));
 	}
@@ -51,20 +61,14 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 		Window.Location.assign("/login?logout");
 	}
 	
-	@UiHandler("levees")
-	void showLevees(ClickEvent event) {
-		getPresenter().onShowLevees(!levees.isActive());
+	@UiHandler("analysis")
+	void analysisClicked(ClickEvent event) {
+		getPresenter().onAnalysisViewOption();
 	}
 	
-	@UiHandler("sensors")
-	void showSensors(ClickEvent event) {
-		getPresenter().onShowSensors(!sensors.isActive());
-		sensors.setActive(!sensors.isActive());
-	}
-	
-	@UiHandler("experiments")
-	void showExperiments(ClickEvent event) {
-		getPresenter().onShowExperiments();
+	@UiHandler("monitoring")
+	void monitoringClicke(ClickEvent event) {
+		getPresenter().onMonitoringViewOption();
 	}
 
 	@Override
@@ -78,7 +82,28 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	}
 
 	@Override
-	public void setExperimentsLabel(int numberOfExperiments) {
-		experiments.setText(messages.experimentsLabel(numberOfExperiments));
+	public void markAnalysisOption(boolean mark) {
+		analysis.setActive(mark);
+	}
+
+	@Override
+	public void markMonitoringOption(boolean mark) {
+		monitoring.setActive(mark);
+	}
+
+	@Override
+	public void clearPanels() {
+		mainPanel.clear();
+		sidePanel.clear();
+	}
+
+	@Override
+	public void setSidePanelWidget(IsWidget view) {
+		sidePanel.add(view);
+	}
+
+	@Override
+	public void setMainPanelWidget(IsWidget view) {
+		mainPanel.add(view);
 	}
 }

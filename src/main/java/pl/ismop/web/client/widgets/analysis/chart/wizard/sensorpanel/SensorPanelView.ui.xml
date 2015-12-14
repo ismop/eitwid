@@ -1,0 +1,52 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:b='urn:import:org.gwtbootstrap3.client.ui'
+             xmlns:select='urn:import:org.gwtbootstrap3.extras.select.client.ui'>
+    <ui:with type="pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel.SensorPanelMessages" field="messages"/>
+    <ui:style>
+        .close-button:hover {
+            color: red;
+        }
+
+        .window-buttons {
+            margin: -2px -10px 0 0;
+        }
+
+        .panel:focus {
+            outline: none;
+        }
+
+        .devices-select {
+            margin: -10px 0 -10px -12px !important;
+        }
+
+        .row, .column {
+            height: 100%;
+        }
+
+        .well {
+            height: 100%;
+            margin: 0px;
+        }
+    </ui:style>
+    <g:FocusPanel ui:field="panelWrapper" addStyleNames="{style.panel}">
+        <b:Panel ui:field="panel">
+            <b:PanelHeader>
+                <b:Heading ui:field="heading" size="H3" />
+            </b:PanelHeader>
+            <b:PanelBody ui:field="panelBody">
+                <b:Row addStyleNames="{style.row}" ui:field="loading" visible="false">
+                    <b:Column size="MD_12">
+                        <b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
+                        <g:InlineLabel ui:field="loadingLabel" />
+                    </b:Column>
+                </b:Row>
+                <b:Row addStyleNames="{style.row}" visible="false" ui:field="timelines">
+                    <b:Column size="MD_12" addStyleNames="{style.column}">
+                        <select:Select ui:field="timelinesSelect" liveSearch="true" multiple="true" visibleSize="5" />
+                    </b:Column>
+                </b:Row>
+            </b:PanelBody>
+        </b:Panel>
+    </g:FocusPanel>
+</ui:UiBinder>

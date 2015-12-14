@@ -14,9 +14,17 @@ import pl.ismop.web.client.dap.DapDispatcher;
 public interface SectionService extends RestService {
 	@GET
 	@Path("sections")
-	void getProfiles(MethodCallback<SectionsResponse> callback);
+	void getSections(MethodCallback<SectionsResponse> callback);
+	
+	@GET
+	@Path("sections?leveeId={leveeId}")
+	void getSectionsForLevee(@PathParam("leveeId") String leveeId, MethodCallback<SectionsResponse> callback);
 	
 	@GET
 	@Path("sections?selection={selection}")
 	void getSections(@PathParam("selection") String selection, MethodCallback<SectionsResponse> callback);
+
+	@GET
+	@Path("sections?id={id}")
+	void getSectionsById(@PathParam("id") String id, MethodCallback<SectionsResponse> callback);
 }

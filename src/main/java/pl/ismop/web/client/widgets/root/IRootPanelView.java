@@ -4,10 +4,18 @@ import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IRootPanelView extends IsWidget {
 	interface IRootPresenter {
-		void onShowSensors(boolean show);
-		void onShowLevees(boolean show);
-		void onShowExperiments();
+		void onMonitoringViewOption();
+
+		void onAnalysisViewOption();
 	}
 
-	void setExperimentsLabel(int numberOfExperiments);
+	void markAnalysisOption(boolean mark);
+
+	void markMonitoringOption(boolean mark);
+
+	void clearPanels();
+
+	void setSidePanelWidget(IsWidget view);
+
+	void setMainPanelWidget(IsWidget view);
 }

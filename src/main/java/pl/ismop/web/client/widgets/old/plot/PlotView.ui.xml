@@ -1,0 +1,15 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.old.plot.PlotMessages" field="messages"/>
+	<ui:style>
+	</ui:style>
+	<g:HTMLPanel>
+		<g:FlowPanel ui:field="plotBusyPanel" visible="false" addStyleNames="text-center">
+			<b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
+		</g:FlowPanel>
+		<g:HTML ui:field="messageLabel"/>
+		<g:FlowPanel ui:field="container"/>
+	</g:HTMLPanel>
+</ui:UiBinder>

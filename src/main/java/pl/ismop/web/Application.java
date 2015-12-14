@@ -90,7 +90,7 @@ public class Application extends WebMvcConfigurerAdapter {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.authorizeRequests()
-				.antMatchers("/register", "/login**")
+				.antMatchers("/register", "/login**", "/forgotPassword", "/changePassword/**")
 					.permitAll()
 				.anyRequest()
 					.authenticated()

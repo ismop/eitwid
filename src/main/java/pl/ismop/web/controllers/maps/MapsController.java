@@ -8,13 +8,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.geojson.GeoJsonFeature;
+import pl.ismop.web.client.geojson.GeoJsonFeatures;
+import pl.ismop.web.client.geojson.PointGeometry;
+import pl.ismop.web.client.geojson.PolygonGeometry;
 import pl.ismop.web.services.DapService;
 
-@RestController
-@RequestMapping("/maps")
 public class MapsController {
 	private AtomicInteger idGenerator;
 	
@@ -115,9 +116,11 @@ public class MapsController {
 					geoJsonFeature.getProperties().put("name", section.getName());
 					geoJsonFeature.getProperties().put("type", "profile");
 					
-					LineGeometry geometry = new LineGeometry();
-					geometry.setCoordinates(section.getProfileShape().getCoordinates());
-					geoJsonFeature.setGeometry(geometry);
+//					if(section.getProfileShape() != null) {
+//						LineGeometry geometry = new LineGeometry();
+//						geometry.setCoordinates(section.getProfileShape().getCoordinates());
+//						geoJsonFeature.setGeometry(geometry);
+//					}
 					
 					return geoJsonFeature;
 				}).
