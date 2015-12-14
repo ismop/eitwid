@@ -187,5 +187,9 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	public IWeatherStationPresenter getPresenter() {
 		return presenter;
 	}
-	
+
+	@Override
+	public String getNoReadingLabel() {
+		return messages.noReadingLabel();
+	}
 }
