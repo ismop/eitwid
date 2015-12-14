@@ -58,7 +58,7 @@ public class MainController {
 	public String home(Model model, HttpServletRequest request) {
 		model.addAttribute("googleMapApiKey", googleMapApiKey);
 		model.addAttribute("dapToken", dapToken);
-		model.addAttribute("dapEndpoint", "/dapproxy");
+		model.addAttribute("dapEndpoint", dapEndpoint);
 		model.addAttribute("hypgenEndpoint", "/hypgenproxy");
 		model.addAttribute("hypgenToken", createHypgenToken());
 		
@@ -104,17 +104,6 @@ public class MainController {
 				return "redirect:/login?registrationSuccessful";
 			}
 		}
-	}
-	
-	@RequestMapping("/levees")
-	public String levees(Model model) {
-		model.addAttribute("googleMapApiKey", googleMapApiKey);
-		model.addAttribute("dapToken", dapToken);
-		model.addAttribute("dapEndpoint", dapEndpoint);
-		model.addAttribute("hypgenEndpoint", hypgenEndpoint);
-		model.addAttribute("hypgenToken", createHypgenToken());
-		
-		return "levees";
 	}
 	
 	@RequestMapping("/changePassword/{token}")
