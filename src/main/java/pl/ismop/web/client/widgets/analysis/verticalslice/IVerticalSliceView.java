@@ -17,5 +17,5 @@ public interface IVerticalSliceView extends IsWidget {
 
 	void drawCrosssection(String parameterUnit, double minValue, double maxValue, boolean leftBank, Map<Double, Double> profileAndDevicePositionsWithValues);
 
-	void showNoMeasurementsMessage();
+	String noMeasurementsMessage();
 }

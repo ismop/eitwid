@@ -194,7 +194,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 	@Override
 	public void onAcceptConfig() {
 		if(configuration.getPickedProfile() == null) {
-			view.showNoProfilePickedError();
+			eventBus.showSimpleError(view.noProfilePickedMessage());
 		} else {
 			if(configMode) {
 				eventBus.updateVerticalSliceConfiguration(configuration);

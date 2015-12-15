@@ -11,6 +11,7 @@
 	<inherits name="org.gwtbootstrap3.extras.datetimepicker.DateTimePickerNoResources"/>
 	<inherits name="org.gwtbootstrap3.extras.slider.Slider"/>
 	<inherits name="org.gwtbootstrap3.extras.notify.Notify"/>
+	<inherits name="org.gwtbootstrap3.extras.bootbox.Bootbox"/>
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
 	<inherits name="com.google.common.collect.Collect"/>
 	

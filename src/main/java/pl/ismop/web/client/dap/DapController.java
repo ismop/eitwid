@@ -325,7 +325,7 @@ public class DapController {
 		sectionService.getSections(new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				Window.alert(exception.getMessage());
+				sectionsCallback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -339,7 +339,7 @@ public class DapController {
 		sectionService.getSectionsForLevee(leveeId, new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				Window.alert(exception.getMessage());
+				sectionsCallback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -367,7 +367,7 @@ public class DapController {
 		resultService.getResults(experimentId, new MethodCallback<ResultsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				Window.alert(exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override

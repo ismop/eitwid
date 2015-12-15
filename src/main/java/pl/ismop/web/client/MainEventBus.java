@@ -193,4 +193,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	
 	@Event(activate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class}, deactivate = VerticalSliceWizardPresenter.class)
 	void verticalCrosssectionWizardHidden();
+	
+	@Event(handlers = ErrorPresenter.class)
+	void showSimpleError(String errorDetails);
 }

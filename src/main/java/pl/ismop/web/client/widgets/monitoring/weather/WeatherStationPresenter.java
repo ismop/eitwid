@@ -122,7 +122,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				view.showProgress(false);
-				Window.alert("Error: " + errorDetails.getMessage());
+				eventBus.showSimpleError("Error: " + errorDetails.getMessage());
 			}
 
 			@Override
@@ -290,7 +290,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	}
 	
 	private void showError(ErrorDetails errorDetails) {
-		Window.alert("Error: " + errorDetails.getMessage());
+		eventBus.showSimpleError("Error: " + errorDetails.getMessage());
 	}
 	
 }

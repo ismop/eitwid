@@ -30,7 +30,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -229,11 +228,6 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void showNoProfilePickedError() {
-		Window.alert(messages.noProfilePickedError());
-	}
-
-	@Override
 	public String getFullPanelTitle() {
 		return messages.fullPanelTitle();
 	}
@@ -252,11 +246,6 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		} else {
 			add.setText(messages.addPanelLabel());
 		}
-	}
-
-	@Override
-	public void showSingleProfilePerSectionMessage() {
-		Window.alert(messages.singleProfilePerSection());
 	}
 
 	@Override
@@ -299,5 +288,15 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 				break;
 			}
 		}
+	}
+
+	@Override
+	public String noProfilePickedError() {
+		return messages.noProfilePickedError();
+	}
+
+	@Override
+	public String singleProfilePerSection() {
+		return messages.singleProfilePerSection();
 	}
 }

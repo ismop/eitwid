@@ -44,6 +44,7 @@ import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 @Presenter(view = HorizontalSliceView.class, multiple = true)
 public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView, MainEventBus> implements IHorizontalSlicePresenter,
 		IPanelContent<IHorizontalSliceView, MainEventBus> {
+	
 	private HorizontalCrosssectionConfiguration configuration;
 	
 	private ISelectionManager selectionManager;
@@ -205,7 +206,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 										view.drawCrosssection(parameterUnit, minValue, maxValue,
 												createDeviceLocationsWithValues(measurements, timelines, contexts.get(0)));
 									} else {
-										view.showNoMeasurementsMessage();
+										eventBus.showSimpleError(view.noMeasurementsMessage());
 									}
 								}
 							});
