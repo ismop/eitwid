@@ -39,6 +39,10 @@
 			<id>dev.cyfronet.pl</id>
 			<url>http://dev.cyfronet.pl/mvnrepo</url>
 		</repository>
+		<repository>
+			<id>sonatype-snapshots</id>
+			<url>http://oss.sonatype.org/content/repositories/snapshots</url>
+		</repository>
 	</repositories>
 	
 	<!-- Used by GWT maven snapshot plugin -->
@@ -147,7 +151,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-gwt</artifactId>
-			<version>18.0</version>
+			<version>20.0-SNAPSHOT</version>
 		</dependency>
 
 
