@@ -11,6 +11,7 @@ import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
@@ -55,7 +56,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 					.setTitle(
 							new ChartTitle().setText(view.getChartTitle()),
 							new ChartSubtitle())
-					.setZoomType(ZoomType.X);
+					.setZoomType(ZoomType.X)
+					.setLegend(new Legend()
+							.setMaxHeight(40));
+			
 			chart.getXAxis().setType(Type.DATE_TIME);
 			
 			if(height > 0) {
