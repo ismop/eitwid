@@ -77,14 +77,18 @@ public class AnalysisSidePanelView extends Composite
 				@Override
 				public void onClick(ClickEvent clickEvent) {
 					if (peformExperimentchange()) {
-						selectedExperiment.setText(currentExperiment.getName());
-						selectedExperiment.setTitle(currentExperiment.getDescription());
 						getPresenter().selectExperiment(currentExperiment);
 					}
 				}
 			});
 			experimentList.add(item);
 		}
+	}
+
+	@Override
+	public void selectExperiment(Experiment currentExperiment) {
+		selectedExperiment.setText(currentExperiment.getName());
+		selectedExperiment.setTitle(currentExperiment.getDescription());
 	}
 
 	private boolean peformExperimentchange() {

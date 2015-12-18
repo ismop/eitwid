@@ -55,6 +55,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             @Override
             public void processExperiments(List<Experiment> loadedExperiments) {
                 getView().setExperiments(loadedExperiments);
+                Date currentDate = new Date();
+                for (Experiment loadedExperiment : loadedExperiments) {
+                    GWT.log(loadedExperiment.getName() + " " + currentDate.after(loadedExperiment.getStart()) + " && " +  currentDate.before(loadedExperiment.getEnd()));
+                    if (currentDate.after(loadedExperiment.getStart()) && currentDate.before(loadedExperiment.getEnd())) {
+                        selectExperiment(loadedExperiment);
+                        break;
+                    }
+                }
             }
 
             @Override
@@ -94,6 +102,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void selectExperiment(Experiment selectedExperiment) {
         if (this.selectedExperiment != selectedExperiment) {
             this.selectedExperiment = selectedExperiment;
+            getView().selectExperiment(selectedExperiment);
             initWaterWave();
             initMinimap();
             loadExperimentWaveShape();
