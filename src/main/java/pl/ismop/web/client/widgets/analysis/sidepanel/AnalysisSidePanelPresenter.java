@@ -57,7 +57,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                 getView().setExperiments(loadedExperiments);
                 Date currentDate = new Date();
                 for (Experiment loadedExperiment : loadedExperiments) {
-                    GWT.log(loadedExperiment.getName() + " " + currentDate.after(loadedExperiment.getStart()) + " && " +  currentDate.before(loadedExperiment.getEnd()));
                     if (currentDate.after(loadedExperiment.getStart()) && currentDate.before(loadedExperiment.getEnd())) {
                         selectExperiment(loadedExperiment);
                         break;
