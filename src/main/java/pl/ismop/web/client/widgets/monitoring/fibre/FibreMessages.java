@@ -13,4 +13,5 @@ public interface FibreMessages extends Messages {
     String loadingData();
     String deviceTooltip(String value, String leveeDistanceMarker, String cableDistanceMarker, String sensorId);
     String errorLoadingDataFromDap();
+    String fibreNoData();
 }

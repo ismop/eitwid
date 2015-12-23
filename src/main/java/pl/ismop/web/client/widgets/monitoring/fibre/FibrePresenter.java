@@ -460,6 +460,15 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			}
 
 			@Override
+			public void noData() {
+				for (Series s : seriesCache.values()) {
+					fibreChart.removeSeries(s, false);
+				}
+				seriesCache = new HashMap<String, Series>();
+				fibreChart.showLoading(messages.fibreNoData());
+			}
+
+			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
 				fibreChart.showLoading(messages.errorLoadingDataFromDap());
