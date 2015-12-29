@@ -18,6 +18,8 @@
 	<entry-point class='pl.ismop.web.client.IsmopWebEntryPoint'/>
 	<source path="client"/>
 	
+	<stylesheet src="/css/ismop.css"/>
+	
 	<!-- Logging configuration -->
 	<set-property name="gwt.logging.logLevel" value="FINE"/>
 	

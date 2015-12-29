@@ -1,0 +1,8 @@
+@CHARSET "UTF-8";
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:focus,
+.navbar-default .navbar-nav > .active > a:hover {
+	color: #555;
+	background-color: #a5a5a5;
+}

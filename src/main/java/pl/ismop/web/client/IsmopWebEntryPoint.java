@@ -31,8 +31,9 @@ public class IsmopWebEntryPoint implements EntryPoint {
 		RootLayoutPanel.get().add((Widget) module.getStartView());
 	}
 
+	//this is the place to do global initialization once
 	private void globalInitialization(GlobalMessages globalMessages) {
-		//this is the place to do global initialization once
+		//configuring highcharts exporting capabilities
 		configureHighchartsGlobalSettings(globalMessages.exportPngLabel(), globalMessages.exportPdfLabel(), globalMessages.exportSvgLabel());
 	}
 	
