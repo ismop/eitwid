@@ -220,7 +220,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			},
 			labels: {
 				format: "{value:.2f}"
-			}
+			},
+			showEmpty: false
 		});
 	}-*/;
 
@@ -232,7 +233,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			},
 			labels: {
 				format: "{value:.2f}"
-			}
+			},
+			showEmpty: false
 		});
 	}-*/;
 }

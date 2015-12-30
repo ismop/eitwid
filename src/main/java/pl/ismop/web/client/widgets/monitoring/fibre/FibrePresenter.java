@@ -1,16 +1,42 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.moxieapps.gwt.highcharts.client.Axis;
+import org.moxieapps.gwt.highcharts.client.AxisTitle;
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.DateTimeLabelFormats;
+import org.moxieapps.gwt.highcharts.client.PlotLine;
+import org.moxieapps.gwt.highcharts.client.Point;
+import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.Series.Type;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.events.PointEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.PointSelectEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.PointUnselectEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointUnselectEventHandler;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-import org.moxieapps.gwt.highcharts.client.*;
-import org.moxieapps.gwt.highcharts.client.Series.Type;
-import org.moxieapps.gwt.highcharts.client.events.*;
-import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -22,11 +48,12 @@ import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
+import pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.ChartPoint;
+import pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.DateSeriesCallback;
+import pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.DevicesDateSeriesCallback;
+import pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.InitializeCallback;
+import pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.SeriesCallback;
 import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
-
-import java.util.*;
-
-import static pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.*;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
@@ -345,6 +372,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			public void ready() {
 				fibreChart.getYAxis().setAxisTitle(new AxisTitle().setText(fetcher.getXAxisTitle()));
 				deviceChart.getYAxis().setAxisTitle(new AxisTitle().setText(fetcher.getXAxisTitle()));
+				customizeYAxis(fibreChart.getNativeChart(), deviceChart.getNativeChart());
 				fibreChart.removeAllSeries();
 				fibreChart.hideLoading();
 				loadData(slider.getSelectedDate());
@@ -513,4 +541,13 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		return points !=null && newPoints != null &&
 				points.length == newPoints.size();
 	}
+
+	private native void customizeYAxis(JavaScriptObject fiberChart, JavaScriptObject deviceChart) /*-{
+		fiberChart.yAxis[0].update({
+			showEmpty: false
+		});
+		deviceChart.yAxis[0].update({
+			showEmpty: false
+		});
+	}-*/;
 }
