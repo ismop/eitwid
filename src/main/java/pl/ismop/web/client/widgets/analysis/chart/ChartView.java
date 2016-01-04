@@ -2,6 +2,7 @@ package pl.ismop.web.client.widgets.analysis.chart;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -154,19 +155,38 @@ public class ChartView extends Composite implements IChartView, ReverseViewInter
 
                 @Override
                 public String format(ToolTipData toolTipData) {
-                    Timeline timeline = nameToTimeline.get(toolTipData.getSeriesName());
-                    String value = formatter.format(Double.valueOf(toolTipData.getYAsString()));
-                    if (timeline != null) {
-                        Parameter parameter = timeline.getParameter();
-                        return "<b>" + parameter.getDevice().getCustomId() + "</b><br/>" +
-                                parameter.getMeasurementTypeName() + ": " +
-                                value + " " + parameter.getMeasurementTypeUnit();
-                    } else {
-                        GWT.log("Unable to find timeline for series");
-                        return value;
+                    String msg = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT).
+                            format(new Date(toolTipData.getXAsLong())) + "<br/>";
+
+                    for(Point point : toolTipData.getPoints()) {
+                        JavaScriptObject nativePoint = point.getNativePoint();
+                        String seriesName = getSeriesName(nativePoint);
+                        Timeline timeline = nameToTimeline.get(seriesName);
+
+                        if (timeline != null) {
+                            Parameter parameter = timeline.getParameter();
+                            msg += "<br/><span style=\"color:" + getPointColor(nativePoint) +
+                                    "\">\u25CF</span> " + seriesName + ": <b>" +
+                                    NumberFormat.getFormat("0.00").format(point.getY()) + " " +
+                                    parameter.getMeasurementTypeUnit() + "</b><br/>";
+                        }
                     }
+
+                    return msg;
                 }
-            }));
+
+                private native String getSeriesId(JavaScriptObject point) /*-{
+                    return point.series.options.id;
+                }-*/;
+
+                private native String getSeriesName(JavaScriptObject point) /*-{
+                    return point.series.name;
+                }-*/;
+
+                private native String getPointColor(JavaScriptObject nativePoint) /*-{
+                    return nativePoint.color;
+                }-*/;
+            }).setShared(true));
             chartPanel.add(chart);
         }
     }

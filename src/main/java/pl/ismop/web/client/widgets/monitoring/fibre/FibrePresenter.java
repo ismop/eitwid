@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.json.client.JSONObject;
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -248,17 +249,26 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 								private NumberFormat formatter = NumberFormat.getFormat("00.00");
 
 								public String format(ToolTipData toolTipData) {
-									Device selectedDevice = deviceMapping.get(toolTipData.getSeriesName() + "::" + toolTipData.getXAsString());
-									if (selectedDevice != null) {
-										return messages.deviceTooltip(formatter.format(Double.valueOf(toolTipData.getYAsString())),
-												selectedDevice.getLeveeDistanceMarker() + "",
-												selectedDevice.getCableDistanceMarker() + "",
-												selectedDevice.getCustomId());
+									String msg = "";
+									for (Point point : toolTipData.getPoints()) {
+										String seriesName = getSeriesName(point.getNativePoint());
+										Device selectedDevice = deviceMapping.get(seriesName + "::" + toolTipData.getXAsString());
+										if (selectedDevice != null) {
+											msg += messages.deviceTooltip(seriesName, selectedDevice.getCableDistanceMarker() + "",
+													formatter.format(point.getY()));
+										}
+									}
+									if (msg != "") {
+										return messages.devicesTooltip(toolTipData.getXAsString(), msg);
 									} else {
 										return null;
 									}
 								}
-							})
+
+								private native String getSeriesName(JavaScriptObject point) /*-{
+                                    return point.series.name;
+                                }-*/;
+							}).setShared(true)
 			);
 
 			view.setFibreDevices(fibreChart);
@@ -359,7 +369,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									.setYear("%b")
 					);
 
-			deviceChart.setToolTip(new ToolTip().setPointFormat("{point.y:.2f} \u00B0C"));
+			deviceChart.setToolTip(new ToolTip().
+					setPointFormat("{point.series.name}: <b>{point.y:.2f} \u00B0C<b><br/>").
+					setShared(true));
 
 			view.setSelectedDevices(deviceChart);
 		}
