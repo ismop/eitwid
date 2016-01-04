@@ -30,7 +30,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	
 	private String elementId;
 	
-	private JavaScriptObject map, layer;
+	private JavaScriptObject map, layer, infoWindow;
 	
 	private boolean initialized;
 
@@ -140,43 +140,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addGeoJson(JSON.parse(geoJsonValue));
 	}-*/;
 
-	private native void initMap() /*-{
-		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
-			zoom: 8,
-			scaleControl: true,
-			draggable: false,
-			zoomControl: false,
-			streetViewControl: false,
-			scrollwheel: false,
-			disableDoubleClickZoom: true
-		});
-		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
-		
-		var layerData = new $wnd.google.maps.Data();
-		var thisObject = this;
-		layerData.setStyle(function(feature) {
-			var icon = {
-				anchor: {
-					x: 6,
-					y: 6
-				},
-				url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureIcon(Ljava/lang/String;)(feature.getId())
-			};
-		
-			return {
-				strokeColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeColor(Ljava/lang/String;)(feature.getId()),
-				fillOpacity: 0.5,
-				strokeOpacity: 0.7,
-				fillColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureFillColor(Ljava/lang/String;)(feature.getId()),
-				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeWidth(Ljava/lang/String;)(feature.getId()),
-				icon: icon
-			};
-		});
-		
-		this.@pl.ismop.web.client.widgets.common.map.MapView::layer = layerData;
-		layerData.setMap(map);
-	}-*/;
-	
 	@Override
 	public native void selectFeature(String featureId, boolean select) /*-{
 		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
@@ -197,6 +160,31 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			} else {
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
 			}
+		}
+	}-*/;
+
+	@Override
+	public native void showPopup(String featureId, String contents) /*-{
+		if(this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow != null) {
+			this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow.close();
+		}
+		
+		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
+		this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow = new $wnd.google.maps.InfoWindow({
+			content: contents,
+			position: feature.getGeometry().get(),
+			pixelOffset: new $wnd.google.maps.Size(0,-7)
+		});
+		this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow.open(
+				this.@pl.ismop.web.client.widgets.common.map.MapView::map);
+		
+	}-*/;
+
+	@Override
+	public native void hidePopup(String featureId) /*-{
+		if(this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow != null) {
+			this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow.close();
+			this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow = null;
 		}
 	}-*/;
 
@@ -260,6 +248,43 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		}
 	}
 	
+	private native void initMap() /*-{
+		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
+			zoom: 8,
+			scaleControl: true,
+			draggable: false,
+			zoomControl: false,
+			streetViewControl: false,
+			scrollwheel: false,
+			disableDoubleClickZoom: true
+		});
+		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
+		
+		var layerData = new $wnd.google.maps.Data();
+		var thisObject = this;
+		layerData.setStyle(function(feature) {
+			var icon = {
+				anchor: {
+					x: 6,
+					y: 6
+				},
+				url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureIcon(Ljava/lang/String;)(feature.getId())
+			};
+		
+			return {
+				strokeColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeColor(Ljava/lang/String;)(feature.getId()),
+				fillOpacity: 0.5,
+				strokeOpacity: 0.7,
+				fillColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureFillColor(Ljava/lang/String;)(feature.getId()),
+				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeWidth(Ljava/lang/String;)(feature.getId()),
+				icon: icon
+			};
+		});
+		
+		this.@pl.ismop.web.client.widgets.common.map.MapView::layer = layerData;
+		layerData.setMap(map);
+	}-*/;
+
 	private native void addHoverHandlers() /*-{
 		var thisObject = this;
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addListener('mouseover', function(event) {
