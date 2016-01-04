@@ -369,7 +369,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									.setYear("%b")
 					);
 
-			deviceChart.setToolTip(new ToolTip().setPointFormat("{point.y:.2f} \u00B0C"));
+			deviceChart.setToolTip(new ToolTip().
+					setPointFormat("{point.series.name}: <b>{point.y:.2f} \u00B0C<b><br/>").
+					setShared(true));
 
 			view.setSelectedDevices(deviceChart);
 		}
