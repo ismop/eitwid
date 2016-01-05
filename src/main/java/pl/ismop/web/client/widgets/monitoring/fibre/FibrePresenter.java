@@ -436,15 +436,21 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void updateSelectedDevicesSeries() {
-		deviceChart.showLoading(messages.loadingDevicesValues());
 		Collection<Device> selected = selectedDevices.keySet();
-		fetcher.getMeasurements(selected, slider.getStartDate(), slider.getEndDate(), new DevicesDateSeriesCallback() {
+		if (selected.size() > 0) {
+			updateDevicesSeries(selected);
+		}
+	}
+
+	private void updateDevicesSeries(Collection<Device> devices) {
+		deviceChart.showLoading(messages.loadingDevicesValues());
+		fetcher.getMeasurements(devices, slider.getStartDate(), slider.getEndDate(), new DevicesDateSeriesCallback() {
 			@Override
 			public void series(Map<Device, List<DateChartPoint>> series) {
 				deviceChart.hideLoading();
 				deviceChart.removeAllSeries();
 
-				for(Map.Entry<Device, List<DateChartPoint>> s : series.entrySet()) {
+				for (Map.Entry<Device, List<DateChartPoint>> s : series.entrySet()) {
 					DeviceData deviceData = selectedDevices.get(s.getKey());
 					if (deviceData != null) {
 						Series measurements = deviceChart.createSeries().
