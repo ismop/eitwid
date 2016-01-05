@@ -1,6 +1,10 @@
 package pl.ismop.web.client.widgets.root;
 
+import java.util.List;
+
 import org.gwtbootstrap3.client.ui.AnchorListItem;
+import org.gwtbootstrap3.client.ui.NavbarLink;
+import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -39,10 +43,10 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	Hidden csrf;
 	
 	@UiField
-	AnchorListItem monitoring;
+	AnchorListItem monitoring, analysis;
 	
 	@UiField
-	AnchorListItem analysis;
+	NavbarLink brokenDevices;
 
 	public RootPanel() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -69,6 +73,11 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@UiHandler("monitoring")
 	void monitoringClicke(ClickEvent event) {
 		getPresenter().onMonitoringViewOption();
+	}
+	
+	@UiHandler("brokenDevices")
+	void brokenDevices(ClickEvent event) {
+		getPresenter().onBrokenDevicesClicked();
 	}
 
 	@Override
@@ -105,5 +114,35 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@Override
 	public void setMainPanelWidget(IsWidget view) {
 		mainPanel.add(view);
+	}
+
+	@Override
+	public void setBrokenDevicesLinkLabel(int numberOfBrokenDevices) {
+		brokenDevices.setText(messages.brokenDevicesLabel(numberOfBrokenDevices));
+	}
+
+	@Override
+	public void showBrokenDevicesLink(boolean show, boolean alert) {
+		brokenDevices.setVisible(show);
+		
+		if(alert) {
+			brokenDevices.getElement().getStyle().setColor("#a94442");
+		} else {
+			brokenDevices.getElement().getStyle().clearColor();
+		}
+	}
+
+	@Override
+	public void showDetails(List<String> brokenParameters) {
+		String parameters = "<ul>";
+		
+		for(String brokenParameter : brokenParameters) {
+			parameters += "<li>" + brokenParameter + "</li>";
+		}
+		
+		parameters += "</ul>";
+		
+		String message = messages.brokenParametersDetails(parameters);
+		Bootbox.alert(message);
 	}
 }

@@ -29,7 +29,7 @@ public class Parameter {
 
 	@JsonIgnore
 	private Device device;
-
+	
 	public String getId() {
 		return id;
 	}

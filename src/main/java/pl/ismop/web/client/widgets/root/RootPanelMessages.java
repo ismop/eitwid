@@ -8,4 +8,8 @@ public interface RootPanelMessages extends Messages {
 	String monitoringLabel();
 	
 	String analysisLabel();
+	
+	String brokenDevicesLabel(int numberOfBrokenDevices);
+
+	String brokenParametersDetails(String string);
 }

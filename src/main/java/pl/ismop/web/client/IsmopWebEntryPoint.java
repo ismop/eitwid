@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.fusesource.restygwt.client.Defaults;
 import org.fusesource.restygwt.client.ServiceRoots;
+import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -35,6 +36,9 @@ public class IsmopWebEntryPoint implements EntryPoint {
 	private void globalInitialization(GlobalMessages globalMessages) {
 		//configuring highcharts exporting capabilities
 		configureHighchartsGlobalSettings(globalMessages.exportPngLabel(), globalMessages.exportPdfLabel(), globalMessages.exportSvgLabel());
+		
+		//Bootbox setup
+		Bootbox.createDefaults().setCloseButton(false).setDefaults();
 	}
 	
 	private String getCurrentDate() {

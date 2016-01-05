@@ -20,6 +20,7 @@
 						<b:AnchorListItem ui:field="analysis"><ui:text from="{messages.analysisLabel}"/></b:AnchorListItem>
 					</b:NavbarNav>
 					<b:NavbarText pull="RIGHT">
+						<b:NavbarLink ui:field="brokenDevices" visible="false" addStyleNames="{style.logout}"/>
 						<b:NavbarLink ui:field="logout" href="/logout" icon="SIGN_OUT" text="{messages.logoutLabel}" addStyleNames="{style.logout}"/>
 						<g:FormPanel ui:field="logoutForm" action="/logout" method="POST">
 							<g:Hidden ui:field="csrf"/>
