@@ -23,7 +23,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -180,11 +179,6 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 	}
 
 	@Override
-	public void showNoProfilePickedError() {
-		Window.alert(messages.noProfilePickedMessage());
-	}
-
-	@Override
 	public String getRealDataLabel() {
 		return messages.realDataLabel();
 	}
@@ -224,5 +218,10 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 				break;
 			}
 		}
+	}
+
+	@Override
+	public String noProfilePickedMessage() {
+		return messages.noProfilePickedMessage();
 	}
 }

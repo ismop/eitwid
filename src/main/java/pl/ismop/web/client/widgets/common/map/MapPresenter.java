@@ -195,54 +195,64 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	@Override
 	public void onFeatureHoverOut(String type, String id) {
 		switch(type) {
-			case "profile":
-				if(profiles.get(id) != null) {
-					view.highlight("profile-" + id, false);
-					eventBus.showProfileMetadata(profiles.get(id), false);
-				}
+		case "profile":
+			if(profiles.get(id) != null) {
+				view.highlight("profile-" + id, false);
+				eventBus.showProfileMetadata(profiles.get(id), false);
+			}
+			
 			break;
-			case "section":
-				if(sections.get(id) != null) {
-					view.highlight("section-" + id, false);
-					eventBus.showSectionMetadata(sections.get(id), false);
-				}
+		case "section":
+			if(sections.get(id) != null) {
+				view.highlight("section-" + id, false);
+				eventBus.showSectionMetadata(sections.get(id), false);
+			}
+			
 			break;
-			case "device":
-				if(devices.get(id) != null) {
-					eventBus.showDeviceMetadata(devices.get(id), false);
-				}
-			case "deviceAggregate":
-				if(deviceAggregates.get(id) != null) {
-					eventBus.showDeviceAggregateMetadata(deviceAggregates.get(id), false);
-				}
+		case "device":
+			if(devices.get(id) != null) {
+				eventBus.showDeviceMetadata(devices.get(id), false);
+				view.hidePopup("device-" + id);
+			}
+			
+			break;
+		case "deviceAggregate":
+			if(deviceAggregates.get(id) != null) {
+				eventBus.showDeviceAggregateMetadata(deviceAggregates.get(id), false);
+				view.hidePopup("deviceAggregate-" + id);
+			}
 		}
 	}
 
 	@Override
 	public void onFeatureHoverIn(String type, String id) {
-		view.highlight(id, true);
-		
 		switch(type) {
-			case "profile":
-				if(profiles.get(id) != null) {
-					view.highlight("profile-" + id, true);
-					eventBus.showProfileMetadata(profiles.get(id), true);
-				}
+		case "profile":
+			if(profiles.get(id) != null) {
+				view.highlight("profile-" + id, true);
+				eventBus.showProfileMetadata(profiles.get(id), true);
+			}
+			
 			break;
-			case "section":
-				if(sections.get(id) != null) {
-					view.highlight("section-" + id, true);
-					eventBus.showSectionMetadata(sections.get(id), true);
-				}
+		case "section":
+			if(sections.get(id) != null) {
+				view.highlight("section-" + id, true);
+				eventBus.showSectionMetadata(sections.get(id), true);
+			}
+			
 			break;
-			case "device":
-				if(devices.get(id) != null) {
-					eventBus.showDeviceMetadata(devices.get(id), true);
-				}
-			case "deviceAggregate":
-				if(deviceAggregates.get(id) != null) {
-					eventBus.showDeviceAggregateMetadata(deviceAggregates.get(id), true);
-				}
+		case "device":
+			if(devices.get(id) != null) {
+				eventBus.showDeviceMetadata(devices.get(id), true);
+				view.showPopup("device-" + id, devices.get(id).getCustomId());
+			}
+			
+			break;
+		case "deviceAggregate":
+			if(deviceAggregates.get(id) != null) {
+				eventBus.showDeviceAggregateMetadata(deviceAggregates.get(id), true);
+				view.showPopup("deviceAggregate-" + id, deviceAggregates.get(id).getCustomId());
+			}
 		}
 	}
 

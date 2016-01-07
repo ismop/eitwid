@@ -35,13 +35,21 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	}
 	
 	@UiField WeatherStationViewMessages messages;
+	
 	@UiField Modal modal;
+	
 	@UiField FlowPanel progress;
+	
 	@UiField Heading weatherHeading1;
+	
 	@UiField Heading weatherHeading2;
+	
 	@UiField FlowPanel chartSlot;
+	
 	@UiField FlexTable measurements1;
+	
 	@UiField FlexTable measurements2;
+	
 	@UiField Container container;
 	
 	@UiField WeatherStationViewStyle style;
@@ -140,7 +148,7 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 					activeCheckboxCounter--;
 				}
 				// one checkbox has to be checked - always
-				if (activeCheckboxCounter>0) {
+				if (activeCheckboxCounter > 0) {
 					presenter.loadParameter(parameterId, event.getValue());
 				} else {
 					activeCheckboxCounter++;
@@ -151,9 +159,13 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 		
 		measurements.setWidget(row, 0, checkBox);
 		
-		Span l = new Span(typeName);
-		l.addStyleName(style.parameterLabel());
-		l.getElement().setAttribute("title", parameterName);
+		Span l = new Span(parameterName);
+		
+		//this is a customary fix to separate weather parameters
+		if (row < 5) {
+			l.addStyleName(style.parameterLabel());
+		}
+		
 		measurements.setWidget(row, 1, l);
 		measurements.setText(row, 2, value + " " + unit);
 		measurements.setText(row, 3, timestamp);

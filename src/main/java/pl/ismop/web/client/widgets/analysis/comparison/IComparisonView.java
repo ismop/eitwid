@@ -4,18 +4,23 @@ import com.google.gwt.user.client.ui.IsWidget;
 import pl.ismop.web.client.widgets.common.panel.IPanelView;
 
 public interface IComparisonView extends IsWidget {
-	void setActionsEnabled(boolean enabled);
-
 	interface IComparisonPresenter {
 		void addChart();
+		
 		void addHorizontalCS();
+		
 		void addVerticalCS();
 	}
+	
+	void setActionsEnabled(boolean enabled);
 
 	void setSlider(IsWidget slider);
+	
 	void addPanel(IPanelView panel);
+	
 	void removePanel(IPanelView panel);
+	
 	void movePanelUp(IPanelView view);
+	
 	void movePanelDown(IPanelView view);
-
 }

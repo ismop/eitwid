@@ -1,9 +1,19 @@
 package pl.ismop.web.client.widgets.root;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.DapController.MalfunctioningParametersCallback;
+import pl.ismop.web.client.dap.parameter.Parameter;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
@@ -13,12 +23,24 @@ import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 @Presenter(view = RootPanel.class)
 public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> implements IRootPresenter{
 	private MonitoringSidePanelPresenter monitoringSidePanelPresenter;
+	
 	private LeveeNavigatorPresenter monitoringLeveeNavigator;
 
 	private AnalysisSidePanelPresenter analysisPanelPresenter;
+	
 	private ComparisonPresenter comparisonPresenter;
+	
+	private DapController dapController;
+	
+	private List<Parameter> malfunctioningParameters;
+	
+	@Inject
+	public RootPresenter(DapController dapController) {
+		this.dapController = dapController;
+	}
 
 	public void onMonitoringPanel() {
+		initBrokenDevicesLink();
 		view.markAnalysisOption(false);
 		view.markMonitoringOption(true);
 		view.clearPanels();
@@ -65,5 +87,33 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	@Override
 	public void onAnalysisViewOption() {
 		eventBus.analysisPanel();
+	}
+
+	@Override
+	public void onBrokenDevicesClicked() {
+		List<String> brokenParameters = new ArrayList<String>();
+		
+		for(Parameter parameter : malfunctioningParameters) {
+			brokenParameters.add(parameter.getCustomId() + " (" + parameter.getMeasurementTypeName() + ")");
+		}
+		
+		Collections.sort(brokenParameters);
+		view.showDetails(brokenParameters);
+	}
+
+	private void initBrokenDevicesLink() {
+		dapController.getMalfunctioningParameters(new MalfunctioningParametersCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+			
+			@Override
+			public void processMalfunctioningParameters(List<Parameter> malfunctioningParameters) {
+				RootPresenter.this.malfunctioningParameters = malfunctioningParameters;
+				view.setBrokenDevicesLinkLabel(malfunctioningParameters.size());
+				view.showBrokenDevicesLink(true, malfunctioningParameters.size() > 0);
+			}
+		});
 	}
 }

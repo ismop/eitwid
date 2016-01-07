@@ -19,6 +19,7 @@ public interface IDataFetcher {
 
     interface SeriesCallback extends ErrorCallback {
         void series(Map<DeviceAggregate, List<ChartPoint>> series);
+        void noData();
     }
 
     interface DateSeriesCallback extends ErrorCallback {

@@ -93,7 +93,7 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
 
     @Override
     public void edit() {
-        Window.alert("Edit this view");
+    	eventBus.showSimpleError("Edit this view");
     }
 
     @Override

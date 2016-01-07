@@ -39,8 +39,6 @@ public interface IVerticalSliceWizardView extends IsWidget {
 
 	void showButtonConfigLabel(boolean show);
 
-	void showNoProfilePickedError();
-
 	String getRealDataLabel();
 
 	void addScenarios(Map<String, String> scenariosMap);
@@ -48,4 +46,6 @@ public interface IVerticalSliceWizardView extends IsWidget {
 	String getScenarioNamePrefix();
 
 	void selectScenario(String dataSelector);
+
+	String noProfilePickedMessage();
 }

@@ -33,8 +33,6 @@ public interface IMonitoringSidePanel extends IsWidget {
 
 	void clearMetadata();
 
-	void showNoMeasurementsForDeviceMessage();
-
 	void setChart(IsWidget view);
 
 	int getChartHeight();
@@ -52,4 +50,6 @@ public interface IMonitoringSidePanel extends IsWidget {
 	String getDeviceAggregateTypeLabel();
 
 	String getAggregateContentsLabel();
+
+	String getNoMeasurementsForDeviceMessage();
 }

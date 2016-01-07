@@ -2,6 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
 			 xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.analysis.comparison.ComparisonMessages" field="messages"/>
 	<ui:style>
 		.panel {
 			width: 100%;
@@ -39,9 +40,9 @@
 			<g:FlowPanel ui:field="panels" addStyleNames="{style.panels}" />
 		</g:ScrollPanel>
 		<g:FlowPanel addStyleNames="{style.actions}">
-			<b:Button ui:field="addChart" text="Add chart..." icon="PLUS" addStyleNames="{style.action-button}"/>
-			<b:Button ui:field="addHorizontalCS" text="Add horizontal cross section..." icon="PLUS" addStyleNames="{style.action-button}"/>
-			<b:Button ui:field="addVerticalCS" text="Add vertical cross section..." icon="PLUS" addStyleNames="{style.action-button}"/>
+			<b:Button ui:field="addChart" text="{messages.addChartLabel}" icon="PLUS" addStyleNames="{style.action-button}"/>
+			<b:Button ui:field="addHorizontalCS" text="{messages.addHorizontalSliceLabel}" icon="PLUS" addStyleNames="{style.action-button}"/>
+			<b:Button ui:field="addVerticalCS" text="{messages.addVerticalSliceLabel}" icon="PLUS" addStyleNames="{style.action-button}"/>
 		</g:FlowPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

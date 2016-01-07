@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.root;
 
+import java.util.List;
+
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IRootPanelView extends IsWidget {
@@ -7,6 +9,8 @@ public interface IRootPanelView extends IsWidget {
 		void onMonitoringViewOption();
 
 		void onAnalysisViewOption();
+
+		void onBrokenDevicesClicked();
 	}
 
 	void markAnalysisOption(boolean mark);
@@ -18,4 +22,10 @@ public interface IRootPanelView extends IsWidget {
 	void setSidePanelWidget(IsWidget view);
 
 	void setMainPanelWidget(IsWidget view);
+
+	void setBrokenDevicesLinkLabel(int numberOfBrokenDevices);
+
+	void showBrokenDevicesLink(boolean show, boolean alert);
+
+	void showDetails(List<String> brokenParameters);
 }

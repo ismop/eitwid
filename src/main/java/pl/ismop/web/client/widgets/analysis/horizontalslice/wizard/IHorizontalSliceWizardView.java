@@ -43,15 +43,11 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 
 	void showNoParamtersLabel(boolean show);
 
-	void showNoProfilePickedError();
-
 	String getFullPanelTitle();
 
 	void clearParameters();
 
 	void showButtonConfigLabel(boolean show);
-
-	void showSingleProfilePerSectionMessage();
 
 	String getRealDataLabel();
 
@@ -60,4 +56,8 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 	void addScenarios(Map<String, String> scenariosMap);
 
 	void selectScenario(String dataSelector);
+
+	String noProfilePickedError();
+
+	String singleProfilePerSection();
 }

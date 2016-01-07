@@ -77,7 +77,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	public void onProfileClicked(final Profile profile) {
 		for(Profile pickedProfile : configuration.getPickedProfiles().values()) {
 			if(pickedProfile.getSectionId().equals(profile.getSectionId())) {
-				view.showSingleProfilePerSectionMessage();
+				eventBus.showSimpleError(view.singleProfilePerSection());
 				
 				return;
 			}
@@ -230,7 +230,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	@Override
 	public void onAcceptConfig() {
 		if(configuration.getPickedProfiles().size() == 0 || configuration.getPickedParameterName() == null) {
-			view.showNoProfilePickedError();
+			eventBus.showSimpleError(view.noProfilePickedError());
 		} else {
 			if(configMode) {
 				eventBus.updateHorizontalSliceConfiguration(configuration);

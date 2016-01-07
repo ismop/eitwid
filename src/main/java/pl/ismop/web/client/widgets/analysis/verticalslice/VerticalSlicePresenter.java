@@ -184,7 +184,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 										view.drawCrosssection(parameterUnit, minValue, maxValue, leftBank,
 												calculateProfileAndDevicePositionsWithValues(measurements, timelines, configuration.getPickedProfile()));
 									} else {
-										view.showNoMeasurementsMessage();
+										eventBus.showSimpleError(view.noMeasurementsMessage());
 									}
 								}
 							});

@@ -160,7 +160,11 @@ public class DataFetcher implements IDataFetcher {
             @Override
             public void processMeasurements(List<Measurement> measurements) {
                 GWT.log("number of loaded measurements: " + measurements.size());
-                callback.series(getSeries(measurements));
+                if (measurements.size() > 0){
+                    callback.series(getSeries(measurements));
+                } else {
+                    callback.noData();
+                }
             }
         });
     }

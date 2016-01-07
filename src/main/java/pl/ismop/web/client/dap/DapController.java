@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
-import com.google.gwt.user.client.Window;
 import com.google.inject.Singleton;
 
 import pl.ismop.web.client.IsmopConverter;
@@ -34,6 +33,8 @@ import pl.ismop.web.client.dap.levee.ModeChangeRequest;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.measurement.MeasurementService;
 import pl.ismop.web.client.dap.measurement.MeasurementsResponse;
+import pl.ismop.web.client.dap.monitoring.MonitoringResponse;
+import pl.ismop.web.client.dap.monitoring.MonitoringService;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.parameter.ParameterService;
 import pl.ismop.web.client.dap.parameter.ParametersResponse;
@@ -66,21 +67,38 @@ import pl.ismop.web.client.hypgen.Experiment;
 @Singleton
 public class DapController {
 	private final IsmopConverter converter;
+	
 	private final ScenarioService scenarioService;
+	
 	private ExperimentService leveeExperimentService;
+	
 	private ErrorUtil errorUtil;
+	
 	private LeveeService leveeService;
+	
 	private SensorService sensorService;
+	
 	private MeasurementService measurementService;
+	
 	private SectionService sectionService;
+	
 	private ThreatAssessmentService threatAssessmentService;
+	
 	private ResultService resultService;
+	
 	private ProfileService profileService;
+	
 	private DeviceService deviceService;
+	
 	private DeviceAggregationService deviceAggregationService;
+	
 	private ParameterService parameterService;
+	
 	private ContextService contextService;
+	
 	private TimelineService timelineService;
+	
+	private MonitoringService monitoringService;
 
 	public interface LeveesCallback extends ErrorCallback {
 		void processLevees(List<Levee> levees);
@@ -145,6 +163,10 @@ public class DapController {
 	public interface ScenariosCallback extends ErrorCallback {
 		void processScenarios(List<Scenario> scenarios);
 	}
+	
+	public interface MalfunctioningParametersCallback extends ErrorCallback {
+		void processMalfunctioningParameters(List<Parameter> malfunctioningParameters);
+	}
 
 	private class MeasurementsRestCallback implements MethodCallback<MeasurementsResponse> {
 		private final MeasurementsCallback callback;
@@ -165,10 +187,24 @@ public class DapController {
 	}
 
 	@Inject
-	public DapController(ErrorUtil errorUtil, LeveeService leveeService, SensorService sensorService, MeasurementService measurementService,
-			SectionService sectionService, ThreatAssessmentService experimentService, ResultService resultService, ProfileService profileService,
-			DeviceService deviceService, DeviceAggregationService deviceAggregationService, ParameterService parameterService, ContextService contextService,
-			TimelineService timelineService, ExperimentService leveeExperimentService, ScenarioService scenarioService, IsmopConverter converter) {
+	public DapController(
+			ErrorUtil errorUtil,
+			LeveeService leveeService,
+			SensorService sensorService,
+			MeasurementService measurementService,
+			SectionService sectionService,
+			ThreatAssessmentService experimentService,
+			ResultService resultService,
+			ProfileService profileService,
+			DeviceService deviceService,
+			DeviceAggregationService deviceAggregationService,
+			ParameterService parameterService,
+			ContextService contextService,
+			TimelineService timelineService,
+			ExperimentService leveeExperimentService,
+			ScenarioService scenarioService,
+			MonitoringService monitoringService,
+			IsmopConverter converter) {
 		this.errorUtil = errorUtil;
 		this.leveeService = leveeService;
 		this.sensorService = sensorService;
@@ -184,6 +220,7 @@ public class DapController {
 		this.timelineService = timelineService;
 		this.leveeExperimentService = leveeExperimentService;
 		this.scenarioService = scenarioService;
+		this.monitoringService = monitoringService;
 		this.converter = converter;
 	}
 	
@@ -325,7 +362,7 @@ public class DapController {
 		sectionService.getSections(new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				Window.alert(exception.getMessage());
+				sectionsCallback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -339,7 +376,7 @@ public class DapController {
 		sectionService.getSectionsForLevee(leveeId, new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				Window.alert(exception.getMessage());
+				sectionsCallback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -367,7 +404,7 @@ public class DapController {
 		resultService.getResults(experimentId, new MethodCallback<ResultsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				Window.alert(exception.getMessage());
+				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
@@ -822,6 +859,20 @@ public class DapController {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
+			}
+		});
+	}
+
+	public void getMalfunctioningParameters(final MalfunctioningParametersCallback malfunctioningParametersCallback) {
+		monitoringService.getMonitoringInfo(new MethodCallback<MonitoringResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				malfunctioningParametersCallback.onError(errorUtil.processErrors(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, MonitoringResponse response) {
+				malfunctioningParametersCallback.processMalfunctioningParameters(response.getParameters());
 			}
 		});
 	}

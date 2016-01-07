@@ -13,7 +13,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -141,11 +140,6 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	}
 
 	@Override
-	public void showNoMeasurementsForDeviceMessage() {
-		Window.alert(messages.noMeasurementsForDevice());
-	}
-
-	@Override
 	public void setChart(IsWidget view) {
 		chart.add(view);
 	}
@@ -189,5 +183,10 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	@Override
 	public String getAggregateContentsLabel() {
 		return messages.aggregateContents();
+	}
+
+	@Override
+	public String getNoMeasurementsForDeviceMessage() {
+		return messages.noMeasurementsForDevice();
 	}
 }

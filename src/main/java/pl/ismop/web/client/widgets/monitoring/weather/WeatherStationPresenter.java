@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -62,12 +61,14 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	
 	private void initPresenter() {
 		view.getContentVisibility().setVisible(false);
-		if(chartPresenter == null) {
+		
+		if (chartPresenter == null) {
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);
 			chartPresenter.setHeight(view.getChartContainerHeight());
 			chartPresenter.addSeriesHoverListener();
 			view.setChart(chartPresenter.getView());
 		}
+		
 		chartPresenter.reset();	
 		view.showProgress(true);
 		view.clearMeasurements();
@@ -78,6 +79,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	@Override
 	public void loadParameter(String parameterId, Boolean value) {
 		Parameter parameter = readings.parameterMap.get(parameterId);
+		
 		if (parameter != null) {
 			if (value){
 				loadParameter(parameter);
@@ -93,7 +95,9 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 
 	private void loadParameter(final Parameter parameter) {
 		chartPresenter.setLoadingState(true);
+		
 		Timeline timeline = readings.parameterToTimeline.get(parameter.getId());
+		
 		if (timeline!= null) {
 			Date now = new Date(); 
 			Date twoWeeksAgo = CalendarUtil.copyDate(now);
@@ -122,7 +126,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				view.showProgress(false);
-				Window.alert("Error: " + errorDetails.getMessage());
+				eventBus.showSimpleError("Error: " + errorDetails.getMessage());
 			}
 
 			@Override
@@ -203,12 +207,14 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	private void updateParamPreview(List<Measurement> measurements) {
 		Map<String, Measurement> lastMeasurements = readings.getLastMeasurements(measurements);
 	
-		if (readings.deviceIds.size()>0) {
+		if (readings.deviceIds.size() > 0) {
 			Device device = readings.deviceMap.get(readings.deviceIds.get(0));
 			view.getHeading1().setText(device.getCustomId());
+			
 			List<Parameter> parameters = readings.getParametersForDevice(device.getId());
+			
 			for (Parameter parameter : parameters) {
-				if(lastMeasurements.get(parameter.getId()) != null) {
+				if (lastMeasurements.get(parameter.getId()) != null) {
 					view.addLatestReading1(parameter.getId(), 
 							parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
 							DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));
@@ -224,12 +230,12 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			}
 		} 
 		
-		if (readings.deviceIds.size()>1) {
+		if (readings.deviceIds.size() > 1) {
 			Device device = readings.deviceMap.get(readings.deviceIds.get(1));
 			view.getHeading2().setText(device.getCustomId());
 			List<Parameter> parameters = readings.getParametersForDevice(device.getId());
 			for (Parameter parameter : parameters) {
-				if(lastMeasurements.get(parameter.getId()) != null) {
+				if (lastMeasurements.get(parameter.getId()) != null) {
 					view.addLatestReading2(parameter.getId(), 
 							parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
 							DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));
@@ -273,24 +279,29 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	}
 	
 	private ChartSeries series(Parameter parameter, List<Measurement> measurements) {
+		Device device = readings.deviceMap.get(parameter.getDeviceId());
 		ChartSeries s1 = new ChartSeries();
-		s1.setName(parameter.getParameterName());
+		s1.setName(device.getCustomId() + " - " + parameter.getParameterName());
 		s1.setDeviceId(parameter.getDeviceId());
 		s1.setParameterId(parameter.getId());
 		s1.setUnit(parameter.getMeasurementTypeUnit());
 		s1.setLabel(parameter.getMeasurementTypeName());
+		
 		Number[][] values = new Number[measurements.size()][2];
-		for(int j = 0; j<measurements.size(); j++) {
+		
+		for (int j = 0; j<measurements.size(); j++) {
 			Measurement measurement = measurements.get(j);
 			values[j][0] = measurement.getTimestamp().getTime();
 			values[j][1] = normalizeValue(measurement);
 		}
+		
 		s1.setValues(values);
+		
 		return s1;
 	}
 	
 	private void showError(ErrorDetails errorDetails) {
-		Window.alert("Error: " + errorDetails.getMessage());
+		eventBus.showSimpleError("Error: " + errorDetails.getMessage());
 	}
 	
 }

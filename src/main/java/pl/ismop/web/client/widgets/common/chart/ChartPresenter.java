@@ -6,15 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
+import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.ToolTip;
-import org.moxieapps.gwt.highcharts.client.ToolTipData;
-import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEvent;
@@ -55,7 +50,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 					.setTitle(
 							new ChartTitle().setText(view.getChartTitle()),
 							new ChartSubtitle())
-					.setZoomType(ZoomType.X);
+					.setZoomType(ZoomType.X)
+					.setLegend(new Legend()
+							.setMaxHeight(40));
+			
 			chart.getXAxis().setType(Type.DATE_TIME);
 			
 			if(height > 0) {
@@ -87,14 +85,29 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			chart.setToolTip(new ToolTip().setFormatter(new ToolTipFormatter() {
 				@Override
 				public String format(ToolTipData toolTipData) {
-					String color = getPointColor(toolTipData.getPoint().getNativePoint());
-					
-					return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(new Date(toolTipData.getXAsLong())) +
-							"<br/><br/><span style=\"color:" + color + "\">\u25CF</span> " + toolTipData.getSeriesName() +
-							": <b>" + NumberFormat.getFormat("0.00").format(toolTipData.getPoint().getY()) + " " +
-							dataSeriesMap.get(toolTipData.getSeriesId()).getUnit() + "</b><br/>";
+					String msg = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(new Date(toolTipData.getXAsLong())) + "<br/>";
+					for (Point point : toolTipData.getPoints()) {
+						JavaScriptObject nativePoint = point.getNativePoint();
+						msg += "<br/><span style=\"color:" + getPointColor(nativePoint) +
+							   	"\">\u25CF</span> " + getSeriesName(nativePoint) + ": <b>" +
+								NumberFormat.getFormat("0.00").format(point.getY()) + " " +
+								dataSeriesMap.get(getSeriesId(nativePoint)).getUnit() + "</b><br/>";
+					}
+					return msg;
 				}
-			}));
+
+				private native String getSeriesId(JavaScriptObject point) /*-{
+                    return point.series.options.id;
+                }-*/;
+
+				private native String getSeriesName(JavaScriptObject point) /*-{
+                    return point.series.name;
+                }-*/;
+
+				private native String getPointColor(JavaScriptObject nativePoint) /*-{
+                    return nativePoint.color;
+                }-*/;
+			}).setShared(true));
 			view.addChart(chart);
 		}
 		
@@ -205,10 +218,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		}
 	}
 
-	private native String getPointColor(JavaScriptObject nativePoint) /*-{
-		return nativePoint.color;
-	}-*/;
-
 	private native void updateFirstYAxis(JavaScriptObject nativeChart, String yAxisLabel) /*-{
 		nativeChart.yAxis[0].update({
 			title: {
@@ -216,7 +225,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			},
 			labels: {
 				format: "{value:.2f}"
-			}
+			},
+			showEmpty: false
 		});
 	}-*/;
 
@@ -228,7 +238,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			},
 			labels: {
 				format: "{value:.2f}"
-			}
+			},
+			showEmpty: false
 		});
 	}-*/;
 }

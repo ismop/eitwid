@@ -1,0 +1,14 @@
+@CHARSET "UTF-8";
+
+/* Enhances the colors in the top menu */
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:focus,
+.navbar-default .navbar-nav > .active > a:hover {
+	color: #fff;
+	background-color: #a5a5a5;
+}
+
+/* Hides the close icons in the Google Maps' info window. */
+.gm-style-iw + div {
+	display: none;
+}

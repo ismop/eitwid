@@ -3,6 +3,7 @@ package pl.ismop.web.client.widgets.error;
 import javax.inject.Inject;
 
 import org.gwtbootstrap3.extras.animate.client.ui.constants.Animation;
+import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 import org.gwtbootstrap3.extras.notify.client.constants.NotifyType;
 import org.gwtbootstrap3.extras.notify.client.ui.Notify;
 import org.gwtbootstrap3.extras.notify.client.ui.NotifySettings;
@@ -28,5 +29,9 @@ public class ErrorPresenter extends BaseEventHandler<MainEventBus> {
 		settings.setType(NotifyType.DANGER);
 		settings.setZIndex(1050);
 		Notify.notify(errorMessages.errorTitle(), errorDetails.getMessage(), settings);
+	}
+	
+	public void onShowSimpleError(String errorDetails) {
+		Bootbox.alert(errorDetails);
 	}
 }
