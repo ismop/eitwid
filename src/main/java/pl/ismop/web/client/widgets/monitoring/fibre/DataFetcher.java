@@ -12,6 +12,7 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorCallback;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
 import pl.ismop.web.client.widgets.delegator.ErrorCallbackDelegator;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
@@ -226,41 +227,153 @@ public class DataFetcher implements IDataFetcher {
 
     @Override
     public void getMeasurements(Collection<Device> devices,
-                                Date startDate, Date endDate,
+                                final Date startDate, final Date endDate,
                                 final DevicesDateSeriesCallback callback) {
         List<String> timelineIds = new ArrayList<>();
         BiMap<Device, String> deviceToTimelineId = timelineIdToDevice.inverse();
         for (Device d : devices) {
             timelineIds.add(deviceToTimelineId.get(d));
         }
-        dapController.getMeasurements(timelineIds, startDate, endDate, new MeasurementsCallback(callback) {
-            @Override
-            public void processMeasurements(List<Measurement> measurements) {
-                Map<Device, List<DateChartPoint>> results = new HashMap<Device, List<DateChartPoint>>();
-                for (Measurement m : measurements) {
-                    Device device = timelineIdToDevice.get(m.getTimelineId());
-                    List<DateChartPoint> series = results.get(device);
-                    if(series == null) {
-                        series = new ArrayList<DateChartPoint>();
-                        results.put(device, series);
+
+        if (timelineIds.size() > 0) {
+            dapController.getMeasurements(timelineIds, startDate, endDate, new MeasurementsCallback(callback) {
+                @Override
+                public void processMeasurements(List<Measurement> measurements) {
+                    List<Measurement> normalMeasurements = new ArrayList<>();
+                    List<Measurement> heatingMeasurements = new ArrayList<>();
+
+                    for (Measurement measurement : measurements) {
+                        if (getHeatingTimelineIds().contains(measurement.getTimelineId())) {
+                            heatingMeasurements.add(measurement);
+                        } else {
+                            normalMeasurements.add(measurement);
+                        }
                     }
-                    series.add(new DateChartPoint(m.getTimestamp(), m.getValue()));
+
+                    final Map<Device, List<DateChartPoint>> results = createSeries(normalMeasurements);
+                    getHeatingMeasurements(heatingMeasurements, startDate, endDate, new DevicesDateSeriesCallback() {
+                        @Override
+                        public void series(Map<Device, List<DateChartPoint>> series) {
+                            results.putAll(series);
+                            callback.series(results);
+                        }
+
+                        @Override
+                        public void onError(ErrorDetails errorDetails) {
+                            callback.onError(errorDetails);
+                        }
+                    });
                 }
-                callback.series(results);
+
+                private Map<Device, List<DateChartPoint>> createSeries(List<Measurement> measurements) {
+                    Map<Device, List<DateChartPoint>> results = new HashMap<>();
+                    for (Measurement m : measurements) {
+                        Device device = timelineIdToDevice.get(m.getTimelineId());
+                        List<DateChartPoint> series = results.get(device);
+                        if (series == null) {
+                            series = new ArrayList<DateChartPoint>();
+                            results.put(device, series);
+                        }
+                        series.add(new DateChartPoint(m.getTimestamp(), m.getValue()));
+                    }
+
+                    return results;
+                }
+            });
+        } else {
+            callback.series(new HashMap<Device, List<DateChartPoint>>());
+        }
+    }
+
+    public void getHeatingMeasurements(final List<Measurement> heatingMeasurements,
+                                       final Date startDate, final Date endDate, final DevicesDateSeriesCallback callback) {
+        GWT.log("Get last heating measurements before: " + startDate);
+        dapController.getLastMeasurements(getHeatingTimelineIds(), startDate, new MeasurementsCallback(callback) {
+            @Override
+            public void processMeasurements(List<Measurement> previousMeasurements) {
+                GWT.log("Preparing heating measurements");
+                Map<Device, List<DateChartPoint>> results = seriesWithEndPoint(seriesWithStartPoint(previousMeasurements));
+                Map<Device, List<DateChartPoint>> withIntermediateSteps = new HashMap<>();
+                for(Map.Entry<Device, List<DateChartPoint>> series : results.entrySet()) {
+                    withIntermediateSteps.put(series.getKey(), addIntermediateSteps(series.getValue()));
+                }
+
+                callback.series(withIntermediateSteps);
+            }
+
+            private List<DateChartPoint> addIntermediateSteps(List<DateChartPoint> series) {
+                List<DateChartPoint> withIntermediateSteps = new ArrayList<>();
+
+                withIntermediateSteps.add(series.get(0));
+                for (int i = 1; i < series.size() - 1; i++) {
+                    DateChartPoint point = series.get(i);
+                    DateChartPoint previous = series.get(i - 1);
+                    if(point.getY() != previous.getY()) {
+                        withIntermediateSteps.add(new DateChartPoint(point.getX(), previous.getY()));
+                    }
+                    withIntermediateSteps.add(point);
+                }
+
+                return withIntermediateSteps;
+            }
+
+            private Map<Device, List<DateChartPoint>> seriesWithEndPoint(Map<Device, List<DateChartPoint>> results) {
+                for(Measurement measurement : heatingMeasurements) {
+                    Device device = timelineIdToDevice.get(measurement.getTimelineId());
+                    List<DateChartPoint> series = results.get(device);
+                    series.add(new DateChartPoint(measurement.getTimestamp(), measurement.getValue()));
+                }
+
+                return addLastPoint(results);
+            }
+
+            private Map<Device, List<DateChartPoint>> addLastPoint(Map<Device, List<DateChartPoint>> results) {
+                for(List<DateChartPoint> series : results.values()) {
+                    if (series.size() > 0) {
+                        DateChartPoint lastPoint = series.get(series.size() - 1);
+                        if (lastPoint.getX().compareTo(endDate) < 0) {
+                            series.add(new DateChartPoint(endDate, lastPoint.getY()));
+                        }
+                    }
+                }
+
+                return results;
+            }
+
+            private Map<Device, List<DateChartPoint>> seriesWithStartPoint(List<Measurement> previousMeasurements) {
+                Map<Device, List<DateChartPoint>> results = new HashMap<>();
+                for (String timelineId : getHeatingTimelineIds()) {
+                    Device device = timelineIdToDevice.get(timelineId);
+                    List<DateChartPoint> series = new ArrayList<>();
+                    series.add(new DateChartPoint(startDate, 0f));
+
+                    results.put(device, series);
+                }
+
+                for (Measurement previousMeasurement : previousMeasurements) {
+                    Device device = timelineIdToDevice.get(previousMeasurement.getTimelineId());
+                    List<DateChartPoint> series = results.get(device);
+                    series.remove(0);
+                    series.add(new DateChartPoint(startDate, previousMeasurement.getValue()));
+                }
+
+                return results;
             }
         });
     }
 
-    private List<DateChartPoint> generateDateSeries(Device device, Date startDate, Date endDate) {
-        List<DateChartPoint> points = new ArrayList<>();
+    private List<String> getHeatingTimelineIds() {
+        // TODO ASP.HEATING_UPPER
+        return Arrays.asList("9028");
+    }
 
-        Random random = new Random();
-        while(startDate.before(endDate)) {
-            points.add(new DateChartPoint(startDate, random.nextInt(25) + 10));
-            startDate = new Date(startDate.getTime() + 86400000);
+    public List<Device> getHeatingDevices() {
+        List<Device> devies = new ArrayList<>();
+        for (String timelineId : getHeatingTimelineIds()) {
+            devies.add(timelineIdToDevice.get(timelineId));
         }
 
-        return points;
+        return devies;
     }
 
     @Override

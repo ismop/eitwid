@@ -386,7 +386,10 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				customizeYAxis(fibreChart.getNativeChart(), deviceChart.getNativeChart());
 				fibreChart.removeAllSeries();
 				fibreChart.hideLoading();
+
 				loadData(slider.getSelectedDate());
+				showHeatingDevices();
+
 				showSections(fetcher.getSections());
 				showDeviceAggregations();
 			}
@@ -403,6 +406,14 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				fibreChart.showLoading(messages.errorLoadingDataFromDap());
 			}
 		});
+	}
+
+	private void showHeatingDevices() {
+		for(Device heatingDevice : fetcher.getHeatingDevices()) {
+			selectedDevices.put(heatingDevice, new DeviceData(null));
+		}
+
+		updateSelectedDevicesSeries();
 	}
 
 	private void showDeviceAggregations() {
@@ -435,10 +446,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void updateSelectedDevicesSeries() {
-		Collection<Device> selected = selectedDevices.keySet();
-		if (selected.size() > 0) {
-			updateDevicesSeries(selected);
-		}
+		updateDevicesSeries(selectedDevices.keySet());
 	}
 
 	private void updateDevicesSeries(Collection<Device> devices) {
@@ -451,7 +459,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 				for (Map.Entry<Device, List<DateChartPoint>> s : series.entrySet()) {
 					DeviceData deviceData = selectedDevices.get(s.getKey());
-					if (deviceData != null) {
+					if (deviceData != null && s.getValue().size() > 0) {
 						Series measurements = deviceChart.createSeries().
 								setName(s.getKey().getCustomId()).
 								setType(Type.SPLINE);
