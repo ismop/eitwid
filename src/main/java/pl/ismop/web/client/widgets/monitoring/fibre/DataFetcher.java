@@ -42,7 +42,6 @@ public class DataFetcher implements IDataFetcher {
     private final Levee levee;
     private final DapController dapController;
     private final String contextId;
-    private boolean mock;
 
     private Map<String, Section> idToSections = new HashMap<>();
     private Map<String, DeviceAggregate> idToDeviceAggregation = new HashMap<>();
@@ -147,14 +146,6 @@ public class DataFetcher implements IDataFetcher {
 
     @Override
     public void getSeries(Date selectedDate, SeriesCallback callback) {
-        if (mock) {
-            getMockedSeries(selectedDate, callback);
-        } else {
-            getRealSeries(selectedDate, callback);
-        }
-    }
-
-    private void getRealSeries(Date selectedDate, final SeriesCallback callback) {
         dapController.getLastMeasurementsWith24HourMod(new ArrayList<>(timelineIdToDevice.keySet()),
                 selectedDate, new MeasurementsCallback(callback) {
             @Override
@@ -207,52 +198,6 @@ public class DataFetcher implements IDataFetcher {
         return series;
     }
 
-    private void getMockedSeries(Date selectedDate, final SeriesCallback callback) {
-        GWT.log("Generate mocked series");
-        com.google.gwt.user.client.Timer timer = new com.google.gwt.user.client.Timer() {
-            @Override
-            public void run() {
-                callback.series(generateSeries());
-                GWT.log("Mocked series generated");
-            }
-        };
-
-        timer.schedule(new Random().nextInt(2000));
-    }
-
-    private Map<DeviceAggregate, List<ChartPoint>> generateSeries() {
-        Map<DeviceAggregate, List<ChartPoint>> series = new HashMap<>();
-        Random random = new Random();
-        for (DeviceAggregate da : idToDeviceAggregation.values()) {
-
-            List<Device> devices = new ArrayList<>();
-            for(String deviceId : da.getDeviceIds()) {
-                devices.add(idToDevice.get(deviceId));
-
-            }
-            Collections.sort(devices, new Comparator<Device>() {
-                @Override
-                public int compare(Device o1, Device o2) {
-                    return o1.getLeveeDistanceMarker().
-                            compareTo(o2.getLeveeDistanceMarker());
-                }
-            });
-
-            List<ChartPoint> chartPoints = new ArrayList<>();
-            for (Device d : devices) {
-                ChartPoint point = new ChartPoint(d, idToSections.get(d.getSectionId()),
-                                                  d.getLeveeDistanceMarker(),
-                                                  random.nextInt(25) + 10);
-
-                chartPoints.add(point);
-            }
-
-            series.put(da, chartPoints);
-        }
-
-        return series;
-    }
-
     @Override
     public Section getDeviceSection(Device device) {
         return idToSections.get(device.getSectionId());
@@ -265,11 +210,18 @@ public class DataFetcher implements IDataFetcher {
 
     @Override
     public void getMeasurements(Device device, Date startDate, Date endDate, DateSeriesCallback callback) {
-        if (mock) {
-            getMockedMeasurements(device, startDate, endDate, callback);
-        } else {
-            getRealMeasurements(device, startDate, endDate, callback);
-        }
+        GWT.log("From " + startDate + " to " + endDate);
+        dapController.getMeasurements
+                (timelineIdToDevice.inverse().get(device), startDate, endDate, new MeasurementsCallback(callback) {
+            @Override
+            public void processMeasurements(List<Measurement> measurements) {
+                List<DateChartPoint> points = new ArrayList<>();
+                for (Measurement m : measurements) {
+                    points.add(new DateChartPoint(m.getTimestamp(), m.getValue()));
+                }
+                callback.series(points);
+            }
+        });
     }
 
     @Override
@@ -299,36 +251,6 @@ public class DataFetcher implements IDataFetcher {
         });
     }
 
-    private void getMockedMeasurements(final Device device,
-                                final Date startDate, final Date endDate,
-                                final DateSeriesCallback callback) {
-        com.google.gwt.user.client.Timer timer = new com.google.gwt.user.client.Timer() {
-            @Override
-            public void run() {
-                callback.series(generateDateSeries(device, startDate, endDate));
-            }
-        };
-
-        timer.schedule(new Random().nextInt(2000));
-    }
-
-    private void getRealMeasurements(Device device, Date startDate, Date endDate, final DateSeriesCallback callback) {
-        GWT.log("From " + startDate + " to " + endDate);
-        dapController.getMeasurements
-                (timelineIdToDevice.inverse().get(device), startDate, endDate, new MeasurementsCallback(callback) {
-                    @Override
-                    public void processMeasurements(List<Measurement> measurements) {
-                        List<DateChartPoint> points = new ArrayList<>();
-                        for (Measurement m : measurements) {
-                            points.add(new DateChartPoint(m.getTimestamp(), m.getValue()));
-                        }
-                        callback.series(points);
-                    }
-                });
-    }
-
-
-
     private List<DateChartPoint> generateDateSeries(Device device, Date startDate, Date endDate) {
         List<DateChartPoint> points = new ArrayList<>();
 
@@ -339,10 +261,6 @@ public class DataFetcher implements IDataFetcher {
         }
 
         return points;
-    }
-
-    public void setMock(boolean mock) {
-        this.mock = mock;
     }
 
     @Override
