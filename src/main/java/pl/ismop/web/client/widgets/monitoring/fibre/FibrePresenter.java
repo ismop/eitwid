@@ -105,7 +105,6 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		if (this.levee != levee) {
 			this.levee = levee;
 			fetcher = new DataFetcher(dapController, levee);
-			fetcher.setMock(false);
 		}
 		messages = view.getMessages();
 
