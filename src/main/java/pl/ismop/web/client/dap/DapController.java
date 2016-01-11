@@ -321,9 +321,16 @@ public class DapController {
 		});
 	}
 
-	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
-		String until = converter.format(date);
-		measurementService.getLastMeasurements(merge(timelineIds, ","), until,
+	public void getLastMeasurementsWith24HourMod(List<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
+		String until = converter.format(untilDate);
+		String from = converter.format(new Date(untilDate.getTime() - 86_400_000L));
+		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
+				new MeasurementsRestCallback(callback));
+	}
+	
+	public void getLastMeasurements(List<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
+		String until = converter.format(untilDate);
+		measurementService.getLastMeasurementsOnlyUntil(merge(timelineIds, ","), until,
 				new MeasurementsRestCallback(callback));
 	}
 
