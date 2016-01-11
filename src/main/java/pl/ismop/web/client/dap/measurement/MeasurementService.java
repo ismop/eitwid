@@ -19,8 +19,9 @@ public interface MeasurementService  extends RestService {
 						 MethodCallback<MeasurementsResponse> callback);
 
 	@GET
-	@Path("measurements?timeline_id={timelineIds}&limit=last")
+	@Path("measurements?timeline_id={timelineIds}&time_to={timeTo}&limit=last")
 	void getLastMeasurements(@PathParam("timelineIds") String timelineIds,
+							 @PathParam("timeTo") String timeTo,
 						 	 MethodCallback<MeasurementsResponse> callback);
 
 	@GET

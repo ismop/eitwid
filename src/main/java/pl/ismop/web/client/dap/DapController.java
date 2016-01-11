@@ -322,7 +322,9 @@ public class DapController {
 	}
 
 	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
-		measurementService.getLastMeasurements(merge(timelineIds, ","), new MeasurementsRestCallback(callback));
+		String until = converter.format(date);
+		measurementService.getLastMeasurements(merge(timelineIds, ","), until,
+				new MeasurementsRestCallback(callback));
 	}
 
 	public void getSections(float top, float left, float bottom, float right, final SectionsCallback callback) {
