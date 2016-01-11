@@ -102,7 +102,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			Date now = new Date(); 
 			Date twoWeeksAgo = CalendarUtil.copyDate(now);
 			CalendarUtil.addDaysToDate(twoWeeksAgo, -14);
-			dapController.getMeasurements(timeline.getId(), twoWeeksAgo, now, new MeasurementsCallback() {
+			dapController.getMeasurementsWithQuantity(timeline.getId(), 1000, new MeasurementsCallback() {
 				@Override
 				public void onError(ErrorDetails errorDetails) {
 					chartPresenter.setLoadingState(false);

@@ -300,9 +300,7 @@ public class DapController {
 	}
 	
 	public void getMeasurementsWithQuantity(String timelineId, Date startDate, Date endDate, int quantity, final MeasurementsCallback callback) {
-		String until = converter.format(endDate);
-		String from = converter.format(startDate);
-		measurementService.getMeasurementsWithQuantity(timelineId, from, until, quantity, new MeasurementsRestCallback(callback));
+		measurementService.getMeasurementsWithQuantity(timelineId, quantity, new MeasurementsRestCallback(callback));
 	}
 
 	public void getMeasurements(Collection<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
@@ -323,10 +321,16 @@ public class DapController {
 		});
 	}
 
-	public void getLastMeasurements(List<String> timelineIds, Date date, final MeasurementsCallback callback) {
-		String until = converter.format(date);
-		String from = converter.format(new Date(date.getTime() - 86_400_000L));
+	public void getLastMeasurementsWith24HourMod(List<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
+		String until = converter.format(untilDate);
+		String from = converter.format(new Date(untilDate.getTime() - 86_400_000L));
 		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
+				new MeasurementsRestCallback(callback));
+	}
+	
+	public void getLastMeasurements(List<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
+		String until = converter.format(untilDate);
+		measurementService.getLastMeasurementsOnlyUntil(merge(timelineIds, ","), until,
 				new MeasurementsRestCallback(callback));
 	}
 
@@ -638,9 +642,7 @@ public class DapController {
 	}
 
 	public void getMeasurementsForTimelineIdsWithQuantity(List<String> timelineIds, int quantity, final MeasurementsCallback callback) {
-		String until = converter.format(new Date());
-		String from = converter.format(monthEarlier());
-		measurementService.getMeasurementsWithQuantity(merge(timelineIds, ","), from, until, quantity, new MethodCallback<MeasurementsResponse>() {
+		measurementService.getMeasurementsWithQuantity(merge(timelineIds, ","), quantity, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));

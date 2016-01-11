@@ -146,7 +146,7 @@ public class DataFetcher implements IDataFetcher {
 
     @Override
     public void getSeries(Date selectedDate, SeriesCallback callback) {
-        dapController.getLastMeasurements(new ArrayList<>(timelineIdToDevice.keySet()),
+        dapController.getLastMeasurementsWith24HourMod(new ArrayList<>(timelineIdToDevice.keySet()),
                 selectedDate, new MeasurementsCallback(callback) {
             @Override
             public void processMeasurements(List<Measurement> measurements) {
