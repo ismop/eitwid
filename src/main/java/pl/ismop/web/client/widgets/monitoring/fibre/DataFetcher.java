@@ -209,7 +209,7 @@ public class DataFetcher implements IDataFetcher {
     }
 
     @Override
-    public void getMeasurements(Device device, Date startDate, Date endDate, DateSeriesCallback callback) {
+    public void getMeasurements(Device device, Date startDate, Date endDate, final DateSeriesCallback callback) {
         GWT.log("From " + startDate + " to " + endDate);
         dapController.getMeasurements
                 (timelineIdToDevice.inverse().get(device), startDate, endDate, new MeasurementsCallback(callback) {
