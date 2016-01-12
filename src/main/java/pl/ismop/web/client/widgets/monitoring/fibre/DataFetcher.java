@@ -293,9 +293,6 @@ public class DataFetcher implements IDataFetcher {
 
                             @Override
                             public void series(List<ChartSeries> heatingSeries) {
-                                GWT.log(Arrays.toString(
-                                        heatingSeries.get(0).getValues()));
-
                                 series.addAll(heatingSeries);
                                 callback.series(series);
                             }
