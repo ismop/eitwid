@@ -234,7 +234,7 @@ public class DataFetcher implements IDataFetcher {
         ChartSeries chartSeries = new ChartSeries();
         chartSeries.setDeviceId(device.getId());
         chartSeries.setParameterId(parameter.getId());
-        chartSeries.setName(device.getCustomId());
+        chartSeries.setName(parameter.getParameterName());
         chartSeries.setUnit(parameter.getMeasurementTypeUnit());
         chartSeries.setLabel(parameter.getMeasurementTypeName());
         Number[][] values = new Number[measurements.size()][2];
