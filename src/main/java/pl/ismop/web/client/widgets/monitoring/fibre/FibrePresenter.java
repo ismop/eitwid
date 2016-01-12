@@ -6,11 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.DateTimeLabelFormats;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -58,27 +56,6 @@ import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 
 @Presenter(view = FibreView.class)
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
-	private class DeviceData {
-		private PlotLine plotLine;
-		private Series series;
-
-		public DeviceData(PlotLine plotLine) {
-			this.plotLine = plotLine;
-		}
-
-		public PlotLine getPlotLine() {
-			return plotLine;
-		}
-
-		public Series getSeries() {
-			return series;
-		}
-
-		public void setSeries(Series series) {
-			this.series = series;
-		}
-	}
-
 	private final DapController dapController;
 	private final IsmopProperties properties;
 	private Chart fibreChart;
@@ -90,7 +67,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	Map<String, Device> deviceMapping = new HashMap<>();
 	Map<String, Series> seriesCache = new HashMap<>();
 	private Levee levee;
-	private Map<Device, DeviceData> selectedDevices = new HashMap<>();
+	private Map<Device, PlotLine> selectedDevices = new HashMap<>();
 
 	private FibreMessages messages;
 
@@ -124,8 +101,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void clearOldSelection() {
-		for(DeviceData dd : selectedDevices.values()) {
-			fibreChart.getXAxis().removePlotLine(dd.getPlotLine());
+		for(PlotLine plotLine : selectedDevices.values()) {
+			fibreChart.getXAxis().removePlotLine(plotLine);
 		}
 		selectedDevices.clear();
 		if (map != null) {
@@ -281,17 +258,17 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void selectDevice(final Device device) {
-		selectedDevices.put(device, new DeviceData(drawDeviceLine(device)));
+		selectedDevices.put(device, drawDeviceLine(device));
 
 		selectDeviceOnMinimap(device);
 		loadDeviceValues(device);
 	}
 
 	private void unselectDevice(Device device) {
-		DeviceData deviceData = selectedDevices.remove(device);
+		PlotLine plotLine = selectedDevices.remove(device);
 
 		unselectDeviceOnMinimap(device);
-		removePlotLine(deviceData.getPlotLine());
+		removePlotLine(plotLine);
 		removeDeviceSeries(device);
 	}
 
@@ -385,7 +362,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void showHeatingDevices() {
 		for(Device heatingDevice : fetcher.getHeatingDevices()) {
-			selectedDevices.put(heatingDevice, new DeviceData(null));
+			selectedDevices.put(heatingDevice, null);
 		}
 
 		updateSelectedDevicesSeries();
