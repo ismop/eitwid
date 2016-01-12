@@ -102,13 +102,14 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void clearOldSelection() {
 		for(PlotLine plotLine : selectedDevices.values()) {
-			fibreChart.getXAxis().removePlotLine(plotLine);
+			if (plotLine != null) {
+				fibreChart.getXAxis().removePlotLine(plotLine);
+			}
 		}
 		selectedDevices.clear();
 		if (map != null) {
 			map.reset(true);
 		}
-
 
 		if (fibreChart.getNativeChart() != null) {
 			zoomOut(fibreChart.getNativeChart());
@@ -321,7 +322,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void initSelectedDevicesChart() {
 		if(deviceChart != null) {
-			deviceChart.removeAllSeries();
+			deviceChart.reset();
 		} else {
 			deviceChart = eventBus.addHandler(ChartPresenter.class);
 			deviceChart.initChart();
@@ -407,7 +408,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			@Override
 			public void series(List<ChartSeries> series) {
 				deviceChart.hideLoading();
-				deviceChart.removeAllSeries();
+				deviceChart.reset();
 				for (ChartSeries s : series) {
 					deviceChart.addChartSeries(s);
 				}

@@ -159,11 +159,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		clearDataSeries();
 	}
 
-	public void removeAllSeries() {
-		dataSeriesMap.clear();
-		clearDataSeries();
-	}
-
 	public void showLoading(String msg) {
 		chart.showLoading(msg);
 	}
@@ -194,8 +189,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		
 		if(chart != null) {
 			chart.removeAllSeries();
-			chart.removeFromParent();
-			chart = null;
 		}
 	}
 	
