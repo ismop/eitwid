@@ -328,7 +328,7 @@ public class DapController {
 				new MeasurementsRestCallback(callback));
 	}
 	
-	public void getLastMeasurements(List<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
+	public void getLastMeasurements(Collection<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
 		String until = converter.format(untilDate);
 		measurementService.getLastMeasurementsOnlyUntil(merge(timelineIds, ","), until,
 				new MeasurementsRestCallback(callback));
@@ -583,7 +583,7 @@ public class DapController {
 		});
 	}
 
-	public void getTimelinesForParameterIds(String contextId, List<String> parameterIds, final TimelinesCallback callback) {
+	public void getTimelinesForParameterIds(String contextId, Collection<String> parameterIds, final TimelinesCallback callback) {
 		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
