@@ -7,6 +7,15 @@ import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Measurement {
+	public Measurement() {
+	}
+
+	public Measurement(String timelineId, Date timestamp, double value) {
+		this.timelineId = timelineId;
+		this.timestamp = timestamp;
+		this.value = value;
+	}
+
 	private String id;
 	
 	private double value;

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.json.client.JSONObject;
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -47,6 +46,8 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
+import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
+import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
 import pl.ismop.web.client.widgets.monitoring.fibre.IDataFetcher.ChartPoint;
@@ -82,7 +83,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private final DapController dapController;
 	private final IsmopProperties properties;
 	private Chart fibreChart;
-	private Chart deviceChart;
+	private ChartPresenter deviceChart;
 	private SliderPresenter slider;
 	private MapPresenter map;
 
@@ -135,7 +136,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		if (fibreChart.getNativeChart() != null) {
 			zoomOut(fibreChart.getNativeChart());
-			zoomOut(deviceChart.getNativeChart());
+			deviceChart.zoomOut();
 		}
 	}
 
@@ -292,12 +293,12 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		unselectDeviceOnMinimap(device);
 		removePlotLine(deviceData.getPlotLine());
-		removeDeviceSeries(deviceData.getSeries());
+		removeDeviceSeries(device);
 	}
 
-	private void removeDeviceSeries(Series series) {
-		if (series != null) {
-			deviceChart.removeSeries(series);
+	private void removeDeviceSeries(Device device) {
+		if (device != null) {
+			deviceChart.removeChartSeriesForDevice(device);
 		}
 	}
 
@@ -329,19 +330,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		deviceChart.showLoading(messages.loadingDeviceValues(selectedDevice.getCustomId()));
 		fetcher.getMeasurements(selectedDevice, slider.getStartDate(), slider.getEndDate(), new DateSeriesCallback() {
 			@Override
-			public void series(List<DateChartPoint> series) {
+			public void series(ChartSeries series) {
 				deviceChart.hideLoading();
-				DeviceData deviceData = selectedDevices.get(selectedDevice);
-				if (deviceData != null) {
-					Series measurements = deviceChart.createSeries().
-							setName(selectedDevice.getCustomId()).
-							setType(Type.SPLINE);
-					for (DateChartPoint point : series) {
-						measurements.addPoint(point.getX().getTime(), point.getY());
-					}
-					deviceChart.addSeries(measurements);
-					deviceData.setSeries(measurements);
-				}
+				deviceChart.addChartSeries(series);
 			}
 
 			@Override
@@ -356,23 +347,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		if(deviceChart != null) {
 			deviceChart.removeAllSeries();
 		} else {
-			deviceChart = new Chart().
-					setChartTitle(new ChartTitle().setText(messages.deviceChartInitTitle())).
-					setWidth100();
-			deviceChart.setHeight(view.getSelectedDevicesHeight());
-			deviceChart.setOption("/chart/zoomType", "x");
-			deviceChart.getXAxis()
-					.setType(Axis.Type.DATE_TIME)
-					.setDateTimeLabelFormats(new DateTimeLabelFormats()
-									.setMonth("%e. %b")
-									.setYear("%b")
-					);
-
-			deviceChart.setToolTip(new ToolTip().
-					setPointFormat("{point.series.name}: <b>{point.y:.2f} \u00B0C<b><br/>").
-					setShared(true));
-
-			view.setSelectedDevices(deviceChart);
+			deviceChart = eventBus.addHandler(ChartPresenter.class);
+			deviceChart.initChart();
+			view.setSelectedDevices(deviceChart.getView());
 		}
 	}
 
@@ -382,8 +359,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			@Override
 			public void ready() {
 				fibreChart.getYAxis().setAxisTitle(new AxisTitle().setText(fetcher.getXAxisTitle()));
-				deviceChart.getYAxis().setAxisTitle(new AxisTitle().setText(fetcher.getXAxisTitle()));
-				customizeYAxis(fibreChart.getNativeChart(), deviceChart.getNativeChart());
+				customizeYAxis(fibreChart.getNativeChart());
 				fibreChart.removeAllSeries();
 				fibreChart.hideLoading();
 
@@ -453,22 +429,11 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		deviceChart.showLoading(messages.loadingDevicesValues());
 		fetcher.getMeasurements(devices, slider.getStartDate(), slider.getEndDate(), new DevicesDateSeriesCallback() {
 			@Override
-			public void series(Map<Device, List<DateChartPoint>> series) {
+			public void series(List<ChartSeries> series) {
 				deviceChart.hideLoading();
 				deviceChart.removeAllSeries();
-
-				for (Map.Entry<Device, List<DateChartPoint>> s : series.entrySet()) {
-					DeviceData deviceData = selectedDevices.get(s.getKey());
-					if (deviceData != null && s.getValue().size() > 0) {
-						Series measurements = deviceChart.createSeries().
-								setName(s.getKey().getCustomId()).
-								setType(Type.SPLINE);
-						for (DateChartPoint point : s.getValue()) {
-							measurements.addPoint(point.getX().getTime(), point.getY());
-						}
-						deviceChart.addSeries(measurements);
-						deviceData.setSeries(measurements);
-					}
+				for (ChartSeries s : series) {
+					deviceChart.addChartSeries(s);
 				}
 			}
 
@@ -567,11 +532,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				points.length == newPoints.size();
 	}
 
-	private native void customizeYAxis(JavaScriptObject fiberChart, JavaScriptObject deviceChart) /*-{
+	private native void customizeYAxis(JavaScriptObject fiberChart) /*-{
 		fiberChart.yAxis[0].update({
-			showEmpty: false
-		});
-		deviceChart.yAxis[0].update({
 			showEmpty: false
 		});
 	}-*/;
