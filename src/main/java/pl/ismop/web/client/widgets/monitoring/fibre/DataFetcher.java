@@ -1,6 +1,7 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.HashBiMap;
 import com.google.gwt.core.client.GWT;
 import pl.ismop.web.client.dap.DapController;
@@ -50,6 +51,7 @@ public class DataFetcher implements IDataFetcher {
     private Map<String, Device> idToDevice = new HashMap<>();
     private Map<String, Parameter> idToPrameter = new HashMap<>();
     private BiMap<String, Device> timelineIdToDevice;
+    private Set<Device> heatingDevices = new HashSet<>();
     private boolean initialized = false;
     private String yAxisTitle;
 
@@ -90,6 +92,10 @@ public class DataFetcher implements IDataFetcher {
                             sectionIds.add(d.getSectionId());
 
                             idToDevice.put(d.getId(), d);
+
+                            if(!"fiber_optic_node".equals(d.getDeviceType())) {
+                                heatingDevices.add(d);
+                            }
                         }
 
                         GWT.log(devices.size() + " devices loaded, loading sections");
@@ -278,21 +284,25 @@ public class DataFetcher implements IDataFetcher {
                         }
                     }
 
-                    getHeatingChartSeries(heatingMeasurements, startDate, endDate, new DevicesDateSeriesCallback() {
-                        @Override
-                        public void onError(ErrorDetails errorDetails) {
-                            callback.onError(errorDetails);
-                        }
+                    if (heatingMeasurements.size() > 0) {
+                        getHeatingChartSeries(heatingMeasurements, startDate, endDate, new DevicesDateSeriesCallback() {
+                            @Override
+                            public void onError(ErrorDetails errorDetails) {
+                                callback.onError(errorDetails);
+                            }
 
-                        @Override
-                        public void series(List<ChartSeries> heatingSeries) {
-                            GWT.log(Arrays.toString(
-                                    heatingSeries.get(0).getValues()));
+                            @Override
+                            public void series(List<ChartSeries> heatingSeries) {
+                                GWT.log(Arrays.toString(
+                                        heatingSeries.get(0).getValues()));
 
-                            series.addAll(heatingSeries);
-                            callback.series(series);
-                        }
-                    });
+                                series.addAll(heatingSeries);
+                                callback.series(series);
+                            }
+                        });
+                    } else {
+                        callback.series(series);
+                    }
                 }
             });
         } else {
@@ -312,7 +322,6 @@ public class DataFetcher implements IDataFetcher {
                 List<ChartSeries> heatingSeries = new ArrayList<ChartSeries>();
                 for(Map.Entry<Device, List<Measurement>> series : results.entrySet()) {
                     heatingSeries.add(createChartSeries(series.getKey(), addIntermediateSteps(series.getValue())));
-//                    heatingSeries.add(createChartSeries(series.getKey(), series.getValue()));
                 }
 
                 callback.series(heatingSeries);
@@ -371,17 +380,20 @@ public class DataFetcher implements IDataFetcher {
     }
 
     private List<String> getHeatingTimelineIds() {
-        // TODO ASP.HEATING_UPPER
-        return Arrays.asList("9028");
-    }
-
-    public List<Device> getHeatingDevices() {
-        List<Device> devies = new ArrayList<>();
-        for (String timelineId : getHeatingTimelineIds()) {
-            devies.add(timelineIdToDevice.get(timelineId));
+        List<String> timelineIds = new ArrayList<>();
+        BiMap<Device, String> deviceToTimelineId = timelineIdToDevice.inverse();
+        for (Device device : heatingDevices) {
+            String timelineId = deviceToTimelineId.get(device);
+            if (timelineId != null) {
+                timelineIds.add(timelineId);
+            }
         }
 
-        return devies;
+        return timelineIds;
+    }
+
+    public Collection<Device> getHeatingDevices() {
+        return heatingDevices;
     }
 
     @Override
