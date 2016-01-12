@@ -134,7 +134,11 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 				chart.removeSeries(chartSeriesMap.remove(chartSeriesKey));
 			}
 		}
-		
+
+		clearDataSeries();
+	}
+
+	private void clearDataSeries() {
 		if(dataSeriesMap.size() == 0) {
 			yAxisMap.clear();
 			chart.removeAllSeries();
@@ -150,13 +154,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 				chart.removeSeries(chartSeriesMap.remove(chartSeriesKey));
 			}
 		}
-		
-		if(dataSeriesMap.size() == 0) {
-			yAxisMap.clear();
-			chart.removeAllSeries();
-			chart.removeFromParent();
-			chart = null;
-		}
+
+		clearDataSeries();
 	}
 
 	public int getSeriesCount() {
