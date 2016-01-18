@@ -30,6 +30,8 @@ import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresent
 import pl.ismop.web.client.widgets.monitoring.readings.ReadingsPresenter;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
 import pl.ismop.web.client.widgets.monitoring.weather.WeatherStationPresenter;
+import pl.ismop.web.client.widgets.realtime.main.RealTimePanelPresenter;
+import pl.ismop.web.client.widgets.realtime.side.RealTimeSidePanelPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
 import java.util.Date;
@@ -199,4 +201,10 @@ public interface MainEventBus extends EventBusWithLookup {
 	
 	@Event(handlers = ErrorPresenter.class)
 	void showSimpleError(String errorDetails);
+
+	@Event(handlers = RealTimePanelPresenter.class)
+	void refreshRealTimePanel();
+
+	@Event(handlers = RealTimeSidePanelPresenter.class)
+	void realDataContentLoaded();
 }

@@ -1,9 +1,19 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-		xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:style>
-	</ui:style>
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.realtime.side.RealTimeSidePanelMessages" field="messages"/>
 	<g:HTMLPanel>
-		Side TODO
+		<g:FocusPanel ui:field="progressFocus">
+			<b:Progress ui:field="progress" type="STRIPED" addStyleNames="{style.progress}" title="{messages.progressTitle}">
+				<b:ProgressBar ui:field="progressBar" type="WARNING"/>
+			</b:Progress>
+		</g:FocusPanel>
 	</g:HTMLPanel>
+	<ui:style>
+		.progress {
+			margin: 2px 2px 20px 2px;
+			cursor: pointer;
+		}
+	</ui:style>
 </ui:UiBinder>
