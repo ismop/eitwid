@@ -141,7 +141,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		private void selectDeviceAndSection(Device device, Section section) {
 			if (device != null) {
-				map.addDevice(device);
+				map.add(device);
 				if (section != null) {
 					map.highlightSection(section, true);
 				} else {
@@ -168,7 +168,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		private void unselectDeviceAndSection(Device device) {
 			if (device != null && !selectedDevices.keySet().contains(device)) {
-				map.removeDevice(device);
+				map.rm(device);
 			}
 			if(selectedDevice == device && selectedSection != null) {
 				map.highlightSection(selectedSection, false);
@@ -290,7 +290,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void unselectDeviceOnMinimap(Device device) {
-		map.removeDevice(device);
+		map.rm(device);
 	}
 
 	private PlotLine drawDeviceLine(Device selectedDevice) {
@@ -349,7 +349,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			private void showSections(Collection<Section> sections) {
 				for (Section section : sections) {
-					map.addSection(section);
+					map.add(section);
 				}
 			}
 
@@ -371,7 +371,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void showDeviceAggregations() {
 		for(DeviceAggregate da : fetcher.getDeviceAggregations()) {
-			map.addDeviceAggregate(da);
+			map.add(da);
 		}
 	}
 

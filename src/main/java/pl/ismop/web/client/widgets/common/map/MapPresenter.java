@@ -45,7 +45,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		deviceAggregates = new HashMap<>();
 	}
 	
-	public void addSection(Section section) {
+	public void add(Section section) {
 		if(!sections.keySet().contains(section.getId())) {
 			sections.put(section.getId(), section);
 			
@@ -55,12 +55,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			}
 		}
 	}
-	
-	public void highlightSection(Section section, boolean highlight) {
-		view.highlight("section-" + section.getId(), highlight);
-	}
 
-	public void addProfile(Profile profile) {
+	public void add(Profile profile) {
 		if(!profiles.keySet().contains(profile.getId())) {
 			profiles.put(profile.getId(), profile);
 			
@@ -71,10 +67,89 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 	}
 
+	public void add(Device device) {
+		if(device.getPlacement() != null && !devices.keySet().contains(device.getId())) {
+			devices.put(device.getId(), device);
+
+			PointShape shape = device.getPlacement();
+
+			if(shape != null) {
+				PointGeometry pointGeometry = new PointGeometry();
+				pointGeometry.setCoordinates(shape.getCoordinates());
+
+				GeoJsonFeature feature = new GeoJsonFeature();
+				feature.setGeometry(pointGeometry);
+				feature.setId("device-" + device.getId());
+				feature.setProperties(new HashMap<String, String>());
+				feature.getProperties().put("id", device.getId());
+				feature.getProperties().put("name", feature.getId());
+				feature.getProperties().put("type", "device");
+
+				List<GeoJsonFeature> features = new ArrayList<>();
+				features.add(feature);
+				view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+			}
+		}
+	}
+
+	public void add(DeviceAggregate deviceAggregate) {
+		if(deviceAggregate.getShape() != null && !deviceAggregates.keySet().contains(deviceAggregate.getId())) {
+			deviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
+
+			Geometry shape = deviceAggregate.getShape();
+
+			if(shape != null) {
+				GeoJsonFeature feature = new GeoJsonFeature();
+				feature.setGeometry(shape);
+				feature.setId("deviceAggregate-" + deviceAggregate.getId());
+				feature.setProperties(new HashMap<String, String>());
+				feature.getProperties().put("id", deviceAggregate.getId());
+				feature.getProperties().put("name", feature.getId());
+				feature.getProperties().put("type", "deviceAggregate");
+
+				List<GeoJsonFeature> features = new ArrayList<>();
+				features.add(feature);
+				view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+			}
+		}
+	}
+
+	public void rm(Device device) {
+		if(devices.keySet().contains(device.getId())) {
+			view.removeFeature("device-" + device.getId());
+			devices.remove(device.getId());
+		}
+	}
+
+	public void rm(Section section) {
+		if(sections.keySet().contains(section.getId())) {
+			view.removeFeature("section-" + section.getId());
+			sections.remove(section.getId());
+		}
+	}
+
+	public void rm(Profile profile) {
+		if(profiles.keySet().contains(profile.getId())) {
+			view.removeFeature("profile-" + profile.getId());
+			profiles.remove(profile.getId());
+		}
+	}
+
+	public void rm(DeviceAggregate deviceAggregate) {
+		if(deviceAggregates.containsKey(deviceAggregate.getId())) {
+			view.removeFeature("deviceAggregate-" + deviceAggregate.getId());
+			deviceAggregates.remove(deviceAggregate.getId());
+		}
+	}
+
+	public void highlightSection(Section section, boolean highlight) {
+		view.highlight("section-" + section.getId(), highlight);
+	}
+
 	public void reset(boolean leaveSections) {
 		if(!leaveSections) {
 			for(String sectionId : new ArrayList<>(sections.keySet())) {
-				removeSection(sections.get(sectionId));
+				rm(sections.get(sectionId));
 			}
 		}
 		
@@ -83,15 +158,15 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 		
 		for(String profileId : new ArrayList<>(profiles.keySet())) {
-			removeProfile(profiles.get(profileId));
+			rm(profiles.get(profileId));
 		}
 		
 		for(String deviceId : new ArrayList<>(devices.keySet())) {
-			removeDevice(devices.get(deviceId));
+			rm(devices.get(deviceId));
 		}
 		
 		for(String deviceAggregateId : new ArrayList<>(deviceAggregates.keySet())) {
-			removeDeviceAggregate(deviceAggregates.get(deviceAggregateId));
+			rm(deviceAggregates.get(deviceAggregateId));
 		}
 	}
 	
@@ -107,81 +182,6 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	 */
 	public void addClickListeners() {
 		clickListeners = true;
-	}
-	
-	public void addDevice(Device device) {
-		if(device.getPlacement() != null && !devices.keySet().contains(device.getId())) {
-			devices.put(device.getId(), device);
-			
-			PointShape shape = device.getPlacement();
-			
-			if(shape != null) {
-				PointGeometry pointGeometry = new PointGeometry();
-				pointGeometry.setCoordinates(shape.getCoordinates());
-				
-				GeoJsonFeature feature = new GeoJsonFeature();
-				feature.setGeometry(pointGeometry);
-				feature.setId("device-" + device.getId());
-				feature.setProperties(new HashMap<String, String>());
-				feature.getProperties().put("id", device.getId());
-				feature.getProperties().put("name", feature.getId());
-				feature.getProperties().put("type", "device");
-				
-				List<GeoJsonFeature> features = new ArrayList<>();
-				features.add(feature);
-				view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
-			}
-		}
-	}
-	
-	public void removeDevice(Device device) {
-		if(devices.keySet().contains(device.getId())) {
-			view.removeFeature("device-" + device.getId());
-			devices.remove(device.getId());
-		}
-	}
-	
-	public void removeSection(Section section) {
-		if(sections.keySet().contains(section.getId())) {
-			view.removeFeature("section-" + section.getId());
-			sections.remove(section.getId());
-		}
-	}
-	
-	public void removeProfile(Profile profile) {
-		if(profiles.keySet().contains(profile.getId())) {
-			view.removeFeature("profile-" + profile.getId());
-			profiles.remove(profile.getId());
-		}
-	}
-	
-	public void addDeviceAggregate(DeviceAggregate deviceAggregate) {
-		if(deviceAggregate.getShape() != null && !deviceAggregates.keySet().contains(deviceAggregate.getId())) {
-			deviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
-			
-			Geometry shape = deviceAggregate.getShape();
-			
-			if(shape != null) {
-				GeoJsonFeature feature = new GeoJsonFeature();
-				feature.setGeometry(shape);
-				feature.setId("deviceAggregate-" + deviceAggregate.getId());
-				feature.setProperties(new HashMap<String, String>());
-				feature.getProperties().put("id", deviceAggregate.getId());
-				feature.getProperties().put("name", feature.getId());
-				feature.getProperties().put("type", "deviceAggregate");
-				
-				List<GeoJsonFeature> features = new ArrayList<>();
-				features.add(feature);
-				view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
-			}
-		}
-	}
-	
-	public void removeDeviceAggregate(DeviceAggregate deviceAggregate) {
-		if(deviceAggregates.containsKey(deviceAggregate.getId())) {
-			view.removeFeature("deviceAggregate-" + deviceAggregate.getId());
-			deviceAggregates.remove(deviceAggregate.getId());
-		}
 	}
 	
 	public void addAction(String id, String label) {
@@ -293,7 +293,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void zoomOnSection(Section section) {
 		if(!sections.keySet().contains(section.getId())) {
-			addSection(section);
+			add(section);
 		}
 		
 		if(sections.keySet().contains(section.getId())) {
@@ -307,7 +307,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void selectDevice(Device device, boolean select) {
 		if(!devices.containsKey(device.getId())) {
-			addDevice(device);
+			add(device);
 		}
 		
 		String featureId = "device-" + device.getId();
@@ -316,7 +316,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void selectDeviceAggregate(DeviceAggregate deviceAggregate, boolean select) {
 		if(!deviceAggregates.containsKey(deviceAggregate.getId())) {
-			addDeviceAggregate(deviceAggregate);
+			add(deviceAggregate);
 		}
 		
 		String featureId = "deviceAggregate-" + deviceAggregate.getId();

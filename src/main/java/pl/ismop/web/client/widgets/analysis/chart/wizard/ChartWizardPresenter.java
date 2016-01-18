@@ -57,7 +57,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
             view.setMiniMap(miniMap.getView());
             for (Section section : selectedExperiment.getSections()) {
                 GWT.log(section.getId());
-                miniMap.addSection(section);
+                miniMap.add(section);
             }
         }
 
@@ -142,7 +142,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
         SensorPanelPresenter panel = panels.get(parameterName);
         if (panel != null) {
             removePanel(panel);
-            miniMap.removeDevice(panel.getParameter().getDevice());
+            miniMap.rm(panel.getParameter().getDevice());
         }
     }
 

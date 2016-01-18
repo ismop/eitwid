@@ -168,7 +168,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             public void processSections(List<Section> sections) {
                 selectedExperiment.setSections(sections);
                 for (Section section : sections) {
-                    miniMap.addSection(section);
+                    miniMap.add(section);
                 }
             }
 
@@ -233,7 +233,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         if (shownDevice == device) {
             miniMap.selectDevice(device, false);
         } else {
-            miniMap.removeDevice(device);
+            miniMap.rm(device);
         }
     }
 
@@ -243,7 +243,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             if (selectedDevices.contains(shownDevice)) {
                 miniMap.selectDevice(shownDevice, true);
             } else {
-                miniMap.removeDevice(shownDevice);
+                miniMap.rm(shownDevice);
             }
         }
         shownDevice = device;
@@ -264,16 +264,16 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void onShowProfile(Profile profile) {
         GWT.log("Show profile" + profile.getId());
         if (shownProfile != null) {
-            miniMap.removeProfile(shownProfile);
+            miniMap.rm(shownProfile);
         }
         shownProfile = profile;
-        miniMap.addProfile(profile);
+        miniMap.add(profile);
     }
 
     @SuppressWarnings("unused")
     public void onClearMinimap() {
         if(shownProfile != null) {
-            miniMap.removeProfile(shownProfile);
+            miniMap.rm(shownProfile);
             shownProfile = null;
         }
 
@@ -283,12 +283,12 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         }
 
         if (shownDevice != null) {
-            miniMap.removeDevice(shownDevice);
+            miniMap.rm(shownDevice);
             shownDevice = null;
         }
 
         for (Device selectedDevice : selectedDevices) {
-            miniMap.removeDevice(selectedDevice);
+            miniMap.rm(selectedDevice);
         }
         selectedDevices.clear();
     }

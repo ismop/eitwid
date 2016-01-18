@@ -86,7 +86,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			@Override
 			public void processSections(List<Section> sections) {
 				for(Section section : sections) {
-					mapPresenter.addSection(section);
+					mapPresenter.add(section);
 				}
 			}
 		});
@@ -261,7 +261,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 				displayedDevices.clear();
 				
 				for(Device device : devices) {
-					mapPresenter.addDevice(device);
+					mapPresenter.add(device);
 					displayedDevices.put(device.getId(), device);
 				}
 			}
