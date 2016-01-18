@@ -134,7 +134,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
         getView().addPanel(panelPresenter.getView());
 
         panels.put(parameterName, panelPresenter);
-        miniMap.selectDevice(parameter.getDevice(), true);
+        miniMap.select(parameter.getDevice());
     }
 
     @Override

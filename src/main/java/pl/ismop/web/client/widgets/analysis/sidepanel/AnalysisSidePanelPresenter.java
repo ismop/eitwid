@@ -224,14 +224,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     @SuppressWarnings("unused")
     public void onSelectDevice(Device device) {
-        miniMap.selectDevice(device, true);
+        miniMap.select(device);
         selectedDevices.add(device);
     }
 
     @SuppressWarnings("unused")
     public void onUnselectDevice(Device device) {
         if (shownDevice == device) {
-            miniMap.selectDevice(device, false);
+            miniMap.unselect(device);
         } else {
             miniMap.rm(device);
         }
@@ -241,13 +241,13 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void onShowDevice(Device device) {
         if (shownDevice != null) {
             if (selectedDevices.contains(shownDevice)) {
-                miniMap.selectDevice(shownDevice, true);
+                miniMap.select(shownDevice);
             } else {
                 miniMap.rm(shownDevice);
             }
         }
         shownDevice = device;
-        miniMap.selectDevice(device, false);
+        miniMap.unselect(device);
 
     }
 

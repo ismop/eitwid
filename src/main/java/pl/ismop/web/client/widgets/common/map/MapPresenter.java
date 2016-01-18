@@ -177,7 +177,41 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			rm(deviceAggregates.get(deviceAggregateId));
 		}
 	}
-	
+
+	public void select(Device device) {
+		select(device, true);
+	}
+
+	public void select(DeviceAggregate deviceAggregate) {
+		select(deviceAggregate, true);
+	}
+
+	public void unselect(Device device) {
+		select(device, false);
+	}
+
+	public void unselect(DeviceAggregate deviceAggregate) {
+		select(deviceAggregate, false);
+	}
+
+	private void select(Device device, boolean select) {
+		if(!devices.containsKey(device.getId())) {
+			add(device);
+		}
+
+		String featureId = "device-" + device.getId();
+		view.selectFeature(featureId, select);
+	}
+
+	private void select(DeviceAggregate deviceAggregate, boolean select) {
+		if(!deviceAggregates.containsKey(deviceAggregate.getId())) {
+			add(deviceAggregate);
+		}
+
+		String featureId = "deviceAggregate-" + deviceAggregate.getId();
+		view.selectFeature(featureId, select);
+	}
+
 	/**
 	 * Has to be invoked before the map widget is added to DOM.
 	 */
@@ -311,24 +345,6 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void zoomToAllSections() {
 		view.adjustBounds(collectAllPoints());
-	}
-
-	public void selectDevice(Device device, boolean select) {
-		if(!devices.containsKey(device.getId())) {
-			add(device);
-		}
-		
-		String featureId = "device-" + device.getId();
-		view.selectFeature(featureId, select);
-	}
-
-	public void selectDeviceAggregate(DeviceAggregate deviceAggregate, boolean select) {
-		if(!deviceAggregates.containsKey(deviceAggregate.getId())) {
-			add(deviceAggregate);
-		}
-		
-		String featureId = "deviceAggregate-" + deviceAggregate.getId();
-		view.selectFeature(featureId, select);
 	}
 
 	@Override

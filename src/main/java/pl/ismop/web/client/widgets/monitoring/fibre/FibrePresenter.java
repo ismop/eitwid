@@ -286,7 +286,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void selectDeviceOnMinimap(Device device) {
-		map.selectDevice(device, true);
+		map.select(device);
 	}
 
 	private void unselectDeviceOnMinimap(Device device) {

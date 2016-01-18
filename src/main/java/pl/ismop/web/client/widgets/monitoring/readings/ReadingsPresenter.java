@@ -65,7 +65,11 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 	
 	public void onDeviceSeriesHover(String deviceId, boolean hover) {
 		if(displayedDevices.containsKey(deviceId)) {
-			mapPresenter.selectDevice(displayedDevices.get(deviceId), hover);
+			if (hover) {
+				mapPresenter.select(displayedDevices.get(deviceId));
+			} else {
+				mapPresenter.unselect(displayedDevices.get(deviceId));
+			}
 		}
 	}
 
