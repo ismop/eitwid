@@ -6,4 +6,6 @@ public interface VerticalSliceMessages extends Messages {
 	String loadingTitle();
 
 	String noMeasurementsMessage();
+
+	String cannotRender();
 }

@@ -428,4 +428,14 @@ public class SideProfileView extends Composite implements ISideProfileView, Reve
 	private native void setShapeColor(int color, JavaScriptObject shape) /*-{
 		shape.material.color.setHex(color);
 	}-*/;
+
+	@Override
+	public native boolean canRender() /*-{
+		return $wnd.Detector.webgl;
+	}-*/;
+
+	@Override
+	public String cannotRenderMessages() {
+		return messages.cannotRender();
+	}
 }

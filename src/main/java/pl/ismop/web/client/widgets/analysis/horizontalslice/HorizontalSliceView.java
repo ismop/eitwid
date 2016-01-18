@@ -161,6 +161,16 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	@Override
+	public native boolean canRender() /*-{
+		return $wnd.Detector.webgl;
+	}-*/;
+
+	@Override
+	public String cannotRenderMessages() {
+		return messages.cannotRender();
+	}
+
+	@Override
 	public native void drawScale(double scale, double panX) /*-{
 		var material = new $wnd.THREE.LineBasicMaterial({
 			color: 0x0000ff

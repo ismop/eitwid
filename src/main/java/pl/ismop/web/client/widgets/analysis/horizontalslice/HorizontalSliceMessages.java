@@ -6,4 +6,6 @@ public interface HorizontalSliceMessages extends Messages {
 	String loadingTitle();
 
 	String noMeasurementsMessage();
+
+	String cannotRender();
 }

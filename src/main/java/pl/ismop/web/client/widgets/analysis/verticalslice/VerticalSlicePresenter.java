@@ -95,6 +95,12 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	}
 
 	private void refreshView() {
+		if (!view.canRender()) {
+			eventBus.showSimpleError(view.cannotRenderMessages());
+			
+			return;
+		}
+		
 		view.showLoadingState(true);
 		
 		final List<String> parameterIds = new ArrayList<>();
