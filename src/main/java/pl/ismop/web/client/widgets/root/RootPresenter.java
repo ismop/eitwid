@@ -18,6 +18,8 @@ import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
+import pl.ismop.web.client.widgets.realtime.main.RealTimePanelPresenter;
+import pl.ismop.web.client.widgets.realtime.side.RealTimeSidePanelPresenter;
 import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 
 @Presenter(view = RootPanel.class)
@@ -30,6 +32,10 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	
 	private ComparisonPresenter comparisonPresenter;
 	
+	private RealTimePanelPresenter realTimePanelPresenter;
+	
+	private RealTimeSidePanelPresenter realTimeSidePanelPresenter;
+	
 	private DapController dapController;
 	
 	private List<Parameter> malfunctioningParameters;
@@ -40,9 +46,10 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	}
 
 	public void onMonitoringPanel() {
-		initBrokenDevicesLink();
+		refreshBrokenDevicesLink();
 		view.markAnalysisOption(false);
 		view.markMonitoringOption(true);
+		view.markRealTimeOption(false);
 		view.clearPanels();
 		
 		if(monitoringSidePanelPresenter == null) {
@@ -60,8 +67,10 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	}
 	
 	public void onAnalysisPanel() {
+		refreshBrokenDevicesLink();
 		view.markAnalysisOption(true);
 		view.markMonitoringOption(false);
+		view.markRealTimeOption(false);
 		view.clearPanels();
 		
 		if(analysisPanelPresenter == null) {
@@ -78,6 +87,28 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		view.setMainPanelWidget(comparisonPresenter.getView());
 		comparisonPresenter.init();
 	}
+	
+	public void onRealTimePanel() {
+		refreshBrokenDevicesLink();
+		view.markAnalysisOption(false);
+		view.markMonitoringOption(false);
+		view.markRealTimeOption(true);
+		view.clearPanels();
+		
+		if(realTimeSidePanelPresenter == null) {
+			realTimeSidePanelPresenter = eventBus.addHandler(RealTimeSidePanelPresenter.class);
+		}
+		
+		view.setSidePanelWidget(realTimeSidePanelPresenter.getView());
+		realTimeSidePanelPresenter.init();
+		
+		if(realTimePanelPresenter == null) {
+			realTimePanelPresenter = eventBus.addHandler(RealTimePanelPresenter.class);
+		}
+
+		view.setMainPanelWidget(realTimePanelPresenter.getView());
+		realTimePanelPresenter.init();
+	}
 
 	@Override
 	public void onMonitoringViewOption() {
@@ -87,6 +118,11 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 	@Override
 	public void onAnalysisViewOption() {
 		eventBus.analysisPanel();
+	}
+
+	@Override
+	public void onRealTimeViewOption() {
+		eventBus.realTimePanel();
 	}
 
 	@Override
@@ -101,7 +137,7 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		view.showDetails(brokenParameters);
 	}
 
-	private void initBrokenDevicesLink() {
+	private void refreshBrokenDevicesLink() {
 		dapController.getMalfunctioningParameters(new MalfunctioningParametersCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {

@@ -67,7 +67,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 					.setZoomType(ZoomType.X)
 					.setLegend(new Legend()
 							.setMaxHeight(40));
-
 			chart.getXAxis().setType(Type.DATE_TIME);
 
 			if(height > 0) {

@@ -12,7 +12,7 @@ import javax.ws.rs.PathParam;
 @Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
 public interface ScenarioService extends RestService {
     @GET
-    @Path("scenarios?experiment_id={experimentId}")
+    @Path("scenarios?experiment_id=[{experimentId}]")
     void getExperimentScenarios(@PathParam("experimentId") String experimentId,
                                 MethodCallback<ScenariosResponse> callback);
 }

@@ -43,7 +43,7 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	Hidden csrf;
 	
 	@UiField
-	AnchorListItem monitoring, analysis;
+	AnchorListItem monitoring, analysis, realTime;
 	
 	@UiField
 	NavbarLink brokenDevices;
@@ -75,6 +75,11 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 		getPresenter().onMonitoringViewOption();
 	}
 	
+	@UiHandler("realTime")
+	void realTimeClicke(ClickEvent event) {
+		getPresenter().onRealTimeViewOption();
+	}
+	
 	@UiHandler("brokenDevices")
 	void brokenDevices(ClickEvent event) {
 		getPresenter().onBrokenDevicesClicked();
@@ -98,6 +103,11 @@ public class RootPanel extends Composite implements IRootPanelView, ReverseViewI
 	@Override
 	public void markMonitoringOption(boolean mark) {
 		monitoring.setActive(mark);
+	}
+
+	@Override
+	public void markRealTimeOption(boolean mark) {
+		realTime.setActive(mark);
 	}
 
 	@Override

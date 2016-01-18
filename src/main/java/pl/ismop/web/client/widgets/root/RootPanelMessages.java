@@ -12,4 +12,6 @@ public interface RootPanelMessages extends Messages {
 	String brokenDevicesLabel(int numberOfBrokenDevices);
 
 	String brokenParametersDetails(String string);
+	
+	String realTimeLabel();
 }

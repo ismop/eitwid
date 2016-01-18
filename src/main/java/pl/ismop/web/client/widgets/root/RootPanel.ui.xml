@@ -18,6 +18,7 @@
 					<b:NavbarNav>
 						<b:AnchorListItem ui:field="monitoring"><ui:text from="{messages.monitoringLabel}"/></b:AnchorListItem>
 						<b:AnchorListItem ui:field="analysis"><ui:text from="{messages.analysisLabel}"/></b:AnchorListItem>
+						<b:AnchorListItem ui:field="realTime"><ui:text from="{messages.realTimeLabel}"/></b:AnchorListItem>
 					</b:NavbarNav>
 					<b:NavbarText pull="RIGHT">
 						<b:NavbarLink ui:field="brokenDevices" visible="false" addStyleNames="{style.logout}"/>

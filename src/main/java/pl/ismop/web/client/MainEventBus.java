@@ -43,6 +43,9 @@ public interface MainEventBus extends EventBusWithLookup {
 	
 	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
 	void analysisPanel();
+	
+	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
+	void realTimePanel();
 
 	@Event(handlers = ErrorPresenter.class)
 	void showError(ErrorDetails errorDetails);

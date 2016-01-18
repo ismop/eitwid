@@ -11,6 +11,8 @@ public interface IRootPanelView extends IsWidget {
 		void onAnalysisViewOption();
 
 		void onBrokenDevicesClicked();
+
+		void onRealTimeViewOption();
 	}
 
 	void markAnalysisOption(boolean mark);
@@ -28,4 +30,6 @@ public interface IRootPanelView extends IsWidget {
 	void showBrokenDevicesLink(boolean show, boolean alert);
 
 	void showDetails(List<String> brokenParameters);
+
+	void markRealTimeOption(boolean mark);
 }
