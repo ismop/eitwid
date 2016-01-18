@@ -143,7 +143,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			if (device != null) {
 				map.add(device);
 				if (section != null) {
-					map.highlightSection(section, true);
+					map.highlight(section);
 				} else {
 					GWT.log("Device " + device.getCustomId() + " is not assigned to any section");
 				}
@@ -162,7 +162,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		private void unselectSection(Section section) {
 			if (section != null && selectedSection != section) {
-				map.highlightSection(section, false);
+				map.unhighlight(section);
 			}
 		}
 
@@ -171,7 +171,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				map.rm(device);
 			}
 			if(selectedDevice == device && selectedSection != null) {
-				map.highlightSection(selectedSection, false);
+				map.unhighlight(selectedSection);
 			}
 		}
 	}

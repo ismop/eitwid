@@ -254,10 +254,10 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     @SuppressWarnings("unused")
     public void onShowSection(Section section) {
         if (shownSection != null) {
-            miniMap.highlightSection(shownSection, false);
+            miniMap.unhighlight(shownSection);
         }
         shownSection = section;
-        miniMap.highlightSection(section, true);
+        miniMap.highlight(section);
     }
 
     @SuppressWarnings("unused")
@@ -278,7 +278,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         }
 
         if (shownSection != null) {
-            miniMap.highlightSection(shownSection, false);
+            miniMap.unhighlight(shownSection);
             shownSection = null;
         }
 

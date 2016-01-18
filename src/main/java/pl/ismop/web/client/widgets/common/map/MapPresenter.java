@@ -142,7 +142,15 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 	}
 
-	public void highlightSection(Section section, boolean highlight) {
+	public void highlight(Section section) {
+		highlightSection(section, true);
+	}
+
+	public void unhighlight(Section section) {
+		highlightSection(section, false);
+	}
+
+	private void highlightSection(Section section, boolean highlight) {
 		view.highlight("section-" + section.getId(), highlight);
 	}
 
