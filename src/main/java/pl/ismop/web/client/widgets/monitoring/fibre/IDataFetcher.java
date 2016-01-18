@@ -10,6 +10,7 @@ import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorCallback;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
+import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 
 /**
  * Created by marek on 11.09.15.
@@ -23,11 +24,11 @@ public interface IDataFetcher {
     }
 
     interface DateSeriesCallback extends ErrorCallback {
-        void series(List<DateChartPoint> series);
+        void series(ChartSeries series);
     }
 
     interface DevicesDateSeriesCallback extends ErrorCallback {
-        void series(Map<Device, List<DateChartPoint>> series);
+        void series(List<ChartSeries> series);
     }
 
     interface InitializeCallback extends  ErrorCallback {
