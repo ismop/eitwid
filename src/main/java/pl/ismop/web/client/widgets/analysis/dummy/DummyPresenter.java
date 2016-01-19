@@ -1,6 +1,5 @@
 package pl.ismop.web.client.widgets.analysis.dummy;
 
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
@@ -131,51 +130,51 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
 
     @Override
     public void showDevice1() {
-        selectionManager.showDevice(devices.get(0));
+        selectionManager.show(devices.get(0));
     }
 
     @Override
     public void showDevice2() {
-        selectionManager.showDevice(devices.get(1));
+        selectionManager.show(devices.get(1));
     }
 
     @Override
     public void selectDevice1() {
-        selectionManager.selectDevice(devices.get(0));
+        selectionManager.select(devices.get(0));
     }
 
     @Override
     public void unselectDevice1() {
-        selectionManager.unselectDevice(devices.get(0));
+        selectionManager.unselect(devices.get(0));
     }
 
     @Override
     public void selectDevice2() {
-        selectionManager.selectDevice(devices.get(1));
+        selectionManager.select(devices.get(1));
     }
 
     @Override
     public void unselectDevice2() {
-        selectionManager.unselectDevice(devices.get(1));
+        selectionManager.unselect(devices.get(1));
     }
 
     @Override
     public void showSection1() {
-        selectionManager.showSection(sections.get(0));
+        selectionManager.show(sections.get(0));
     }
 
     @Override
     public void showSection2() {
-        selectionManager.showSection(sections.get(1));
+        selectionManager.show(sections.get(1));
     }
 
     @Override
     public void showProfile1() {
-        selectionManager.showProfile(profiles.get(0));
+        selectionManager.show(profiles.get(0));
     }
 
     @Override
     public void showProfile2() {
-        selectionManager.showProfile(profiles.get(1));
+        selectionManager.show(profiles.get(1));
     }
 }

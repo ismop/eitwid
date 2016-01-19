@@ -10,7 +10,6 @@ import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.timeline.Timeline;
-import pl.ismop.web.client.error.ErrorCallback;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
 import pl.ismop.web.client.widgets.common.DateChartPoint;
@@ -140,7 +139,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             } else {
                 idToRealTimeline.put(timeline.getId(), timeline);
             }
-            selectionManager.selectDevice(timeline.getParameter().getDevice());
+            selectionManager.select(timeline.getParameter().getDevice());
         }
 
 
@@ -186,6 +185,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     @Override
     public void timelineSelected(Timeline timeline) {
-        selectionManager.showDevice(timeline.getParameter().getDevice());
+        selectionManager.show(timeline.getParameter().getDevice());
     }
 }

@@ -103,7 +103,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		this.selectionManager = selectionManager;
 		
 		for(Profile profile : configuration.getPickedProfiles().values()) {
-			selectionManager.showProfile(profile);
+			selectionManager.show(profile);
 		}
 	}
 

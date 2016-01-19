@@ -86,7 +86,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	@Override
 	public void setSelectionManager(ISelectionManager selectionManager) {
 		this.selectionManager = selectionManager;
-		selectionManager.showProfile(configuration.getPickedProfile());
+		selectionManager.show(configuration.getPickedProfile());
 	}
 
 	@Override

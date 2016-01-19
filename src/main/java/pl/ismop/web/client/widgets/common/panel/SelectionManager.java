@@ -21,29 +21,29 @@ public class SelectionManager implements ISelectionManager {
     }
 
     @Override
-    public void selectDevice(Device device) {
+    public void select(Device device) {
         selectedDevices.add(device);
         eventBus.selectDevice(device);
     }
 
     @Override
-    public void unselectDevice(Device device) {
+    public void unselect(Device device) {
         selectedDevices.remove(device);
         eventBus.unselectDevice(device);
     }
 
     @Override
-    public void showDevice(Device device) {
+    public void show(Device device) {
         eventBus.showDevice(device);
     }
 
     @Override
-    public void showSection(Section section) {
+    public void show(Section section) {
         eventBus.showSection(section);
     }
 
     @Override
-    public void showProfile(Profile profile) {
+    public void show(Profile profile) {
         eventBus.showProfile(profile);
     }
 
