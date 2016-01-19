@@ -8,4 +8,8 @@ public abstract class MapFeature {
     public String getFeatureId() {
         return getFeatureType() + "-" + getId();
     }
+
+    public boolean isAdjustBounds() {
+        return false;
+    }
 }

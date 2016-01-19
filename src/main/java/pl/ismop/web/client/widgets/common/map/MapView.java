@@ -248,16 +248,16 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		}
 	}-*/;
 
-	private void featureHoverIn(String type, String id) {
-		getPresenter().onFeatureHoverIn(type, id);
+	private void featureHoverIn(String type, String featureId) {
+		getPresenter().onFeatureHoverIn(type, featureId);
 	}
 	
-	private void featureHoverOut(String type, String id) {
-		getPresenter().onFeatureHoverOut(type, id);
+	private void featureHoverOut(String type, String featureId) {
+		getPresenter().onFeatureHoverOut(type, featureId);
 	}
 	
-	private void featureClick(String type, String id) {
-		getPresenter().onFeatureClick(type, id);
+	private void featureClick(String type, String featureId) {
+		getPresenter().onFeatureClick(type, featureId);
 	}
 	
 	private int getFeatureStrokeWidth(String featureId) {
@@ -373,11 +373,11 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		var thisObject = this;
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addListener('mouseover', function(event) {
 			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureHoverIn(Ljava/lang/String;Ljava/lang/String;)
-					(event.feature.getProperty('type'), event.feature.getProperty('id'));
+					(event.feature.getProperty('type'), event.feature.getId());
 		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addListener('mouseout', function(event) {
 			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureHoverOut(Ljava/lang/String;Ljava/lang/String;)
-					(event.feature.getProperty('type'), event.feature.getProperty('id'));
+					(event.feature.getProperty('type'), event.feature.getId());
 		});
 	}-*/;
 	
@@ -385,7 +385,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		var thisObject = this;
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addListener('click', function(event) {
 			thisObject.@pl.ismop.web.client.widgets.common.map.MapView::featureClick(Ljava/lang/String;Ljava/lang/String;)
-					(event.feature.getProperty('type'), event.feature.getProperty('id'));
+					(event.feature.getProperty('type'), event.feature.getId());
 		});
 	}-*/;
 

@@ -19,56 +19,41 @@ import java.util.Map;
 @Presenter(view = MapView.class, multiple = true)
 public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implements IMapPresenter {
 	private GeoJsonFeaturesEncDec geoJsonEncoderDecoder;
-	private Map<String, Section> sections;
-	private Map<String, Profile> profiles;
-	private Map<String, Device> devices;
-	private Map<String, DeviceAggregate> deviceAggregates;
+	private Map<String, MapFeature> mapFeatures;
 	private boolean hoverListeners;
 	private boolean clickListeners;
 	
 	@Inject
 	public MapPresenter(GeoJsonFeaturesEncDec geoJsonEncoderDecoder) {
 		this.geoJsonEncoderDecoder = geoJsonEncoderDecoder;
-		sections = new HashMap<>();
-		profiles = new HashMap<>();
-		devices = new HashMap<>();
-		deviceAggregates = new HashMap<>();
+		mapFeatures = new HashMap<>();
 	}
 	
-	public void add(Section section) {
-		if(!sections.keySet().contains(section.getId())) {
-			sections.put(section.getId(), section);
-			addMapFeature(section, true);
-		}
+	public void add(Section mapFeature) {
+		addMapFeature(mapFeature, mapFeature.isAdjustBounds());
 	}
 
-	public void add(Profile profile) {
-		if(!profiles.keySet().contains(profile.getId())) {
-			profiles.put(profile.getId(), profile);
-			addMapFeature(profile, true);
-		}
+	public void add(Profile mapFeature) {
+		addMapFeature(mapFeature, mapFeature.isAdjustBounds());
 	}
 
-	public void add(Device device) {
-		if(!devices.keySet().contains(device.getId())) {
-			devices.put(device.getId(), device);
-			addMapFeature(device, false);
-		}
+	public void add(Device mapFeature) {
+		addMapFeature(mapFeature, mapFeature.isAdjustBounds());
 	}
 
-	public void add(DeviceAggregate deviceAggregate) {
-		if(!deviceAggregates.keySet().contains(deviceAggregate.getId())) {
-			deviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
-			addMapFeature(deviceAggregate, false);
-		}
+	public void add(MapFeature mapFeature) {
+		addMapFeature(mapFeature, mapFeature.isAdjustBounds());
 	}
 
 	private void addMapFeature(MapFeature mapFeature, boolean adjustBounds) {
-		Geometry geometry = mapFeature.getFeatureGeometry();
-		if(geometry != null) {
-			view.addGeoJson(geoJson(mapFeature, geometry));
-			if(adjustBounds) {
-				view.adjustBounds(collectAllPoints());
+		if(!mapFeatures.keySet().contains(mapFeature.getFeatureId())) {
+			Geometry geometry = mapFeature.getFeatureGeometry();
+			if (geometry != null) {
+				mapFeatures.put(mapFeature.getFeatureId(), mapFeature);
+				view.addGeoJson(geoJson(mapFeature, geometry));
+				if (adjustBounds) {
+					view.adjustBounds(collectAllPoints());
+				}
 			}
 		}
 	}
@@ -78,26 +63,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		return geoJsonEncoderDecoder.encode(new GeoJsonFeatures(feature)).toString();
 	}
 
-	public void rm(Device device) {
-		rm(device, devices);
-	}
-
-	public void rm(Section section) {
-		rm(section, sections);
-	}
-
-	public void rm(Profile profile) {
-		rm(profile, profiles);
-	}
-
-	public void rm(DeviceAggregate deviceAggregate) {
-		rm(deviceAggregate, deviceAggregates);
-	}
-
-	private void rm(MapFeature mapFeature, Map<String, ? extends MapFeature> collection) {
-		if(collection.containsKey(mapFeature.getId())) {
+	public void rm(MapFeature mapFeature) {
+		if(mapFeatures.containsKey(mapFeature.getFeatureId())) {
 			view.removeFeature(mapFeature.getFeatureId());
-			collection.remove(mapFeature.getId());
+			mapFeatures.remove(mapFeature.getFeatureId());
 		}
 	}
 
@@ -114,7 +83,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void select(Device device) {
-		if(!devices.containsKey(device.getId())) {
+		if(!mapFeatures.containsKey(device.getFeatureId())) {
 			add(device);
 		}
 
@@ -122,7 +91,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void select(DeviceAggregate deviceAggregate) {
-		if(!deviceAggregates.containsKey(deviceAggregate.getId())) {
+		if(!mapFeatures.containsKey(deviceAggregate.getFeatureId())) {
 			add(deviceAggregate);
 		}
 
@@ -138,26 +107,12 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void reset(boolean leaveSections) {
-		if(!leaveSections) {
-			for(String sectionId : new ArrayList<>(sections.keySet())) {
-				rm(sections.get(sectionId));
+		for (MapFeature entry : mapFeatures.values()) {
+			if (entry.getFeatureType().equals("section") && leaveSections) {
+				unhighlight(entry);
+			} else {
+				rm(entry);
 			}
-		}
-
-		for(String sectionId : new ArrayList<>(sections.keySet())) {
-			highlight(sections.get(sectionId), false);
-		}
-
-		for(String profileId : new ArrayList<>(profiles.keySet())) {
-			rm(profiles.get(profileId));
-		}
-
-		for(String deviceId : new ArrayList<>(devices.keySet())) {
-			rm(devices.get(deviceId));
-		}
-
-		for(String deviceAggregateId : new ArrayList<>(deviceAggregates.keySet())) {
-			rm(deviceAggregates.get(deviceAggregateId));
 		}
 	}
 
@@ -184,73 +139,52 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	@Override
-	public void onFeatureHoverOut(String type, String id) {
-		switch(type) {
-		case "profile":
-			Profile profile = profiles.get(id);
-			if(profile != null) {
-				view.highlight(profile.getFeatureId(), false);
-				eventBus.showProfileMetadata(profile, false);
-			}
-			
-			break;
-		case "section":
-			Section section = sections.get(id);
-			if(section != null) {
-				view.highlight(section.getFeatureId(), false);
-				eventBus.showSectionMetadata(sections.get(id), false);
-			}
-			
-			break;
-		case "device":
-			Device device = devices.get(id);
-			if(device != null) {
-				eventBus.showDeviceMetadata(device, false);
-				view.hidePopup(device.getFeatureId());
-			}
-			
-			break;
-		case "deviceAggregate":
-			DeviceAggregate deviceAggregate = deviceAggregates.get(id);
-			if(deviceAggregate != null) {
-				eventBus.showDeviceAggregateMetadata(deviceAggregate, false);
-				view.hidePopup(deviceAggregate.getFeatureId());
+	public void onFeatureHoverOut(String type, String featureId) {
+		MapFeature mapFeature = mapFeatures.get(featureId);
+		if(mapFeature != null) {
+			switch (type) {
+				case "profile":
+					view.highlight(featureId, false);
+					eventBus.showProfileMetadata((Profile) mapFeature, false);
+					break;
+				case "section":
+					view.highlight(featureId, false);
+					eventBus.showSectionMetadata((Section) mapFeature, false);
+					break;
+				case "device":
+					eventBus.showDeviceMetadata((Device) mapFeature, false);
+					view.hidePopup(featureId);
+					break;
+				case "deviceAggregate":
+					eventBus.showDeviceAggregateMetadata((DeviceAggregate) mapFeature, false);
+					view.hidePopup(featureId);
 			}
 		}
 	}
 
 	@Override
-	public void onFeatureHoverIn(String type, String id) {
-		switch(type) {
-		case "profile":
-			Profile profile = profiles.get(id);
-			if(profile != null) {
-				view.highlight(profile.getFeatureId(), true);
-				eventBus.showProfileMetadata(profile, true);
-			}
-			
-			break;
-		case "section":
-			Section section = sections.get(id);
-			if(section != null) {
-				view.highlight(section.getFeatureId(), true);
-				eventBus.showSectionMetadata(section, true);
-			}
-			
-			break;
-		case "device":
-			Device device = devices.get(id);
-			if(device != null) {
-				eventBus.showDeviceMetadata(device, true);
-				view.showPopup(device.getFeatureId(), device.getCustomId());
-			}
-			
-			break;
-		case "deviceAggregate":
-			DeviceAggregate deviceAggregate = deviceAggregates.get(id);
-			if(deviceAggregate != null) {
-				eventBus.showDeviceAggregateMetadata(deviceAggregate, true);
-				view.showPopup(deviceAggregate.getFeatureId(), deviceAggregate.getCustomId());
+	public void onFeatureHoverIn(String type, String featureId) {
+		MapFeature mapFeature = mapFeatures.get(featureId);
+		if(mapFeature != null) {
+			switch (type) {
+				case "profile":
+					view.highlight(featureId, true);
+					eventBus.showProfileMetadata((Profile) mapFeature, true);
+
+					break;
+				case "section":
+					view.highlight(featureId, true);
+					eventBus.showSectionMetadata((Section) mapFeature, true);
+					break;
+				case "device":
+					Device device = (Device) mapFeature;
+					eventBus.showDeviceMetadata(device, true);
+					view.showPopup(featureId, device.getCustomId());
+					break;
+				case "deviceAggregate":
+					DeviceAggregate deviceAggregate = (DeviceAggregate) mapFeature;
+					eventBus.showDeviceAggregateMetadata(deviceAggregate, true);
+					view.showPopup(featureId, deviceAggregate.getCustomId());
 			}
 		}
 	}
@@ -266,36 +200,31 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	@Override
-	public void onFeatureClick(String type, String id) {
-		switch(type) {
-			case "profile":
-				if(profiles.get(id) != null) {
-					eventBus.profileClicked(profiles.get(id));
-				}
-			break;
-			case "section":
-				if(sections.get(id) != null) {
-					eventBus.sectionClicked(sections.get(id));
-				}
-			break;
-			case "device":
-				if(devices.get(id) != null) {
-					eventBus.deviceClicked(devices.get(id));
-				}
-			break;
-			case "deviceAggregate":
-				if(deviceAggregates.get(id) != null) {
-					eventBus.deviceAggregateClicked(deviceAggregates.get(id));
-				}
+	public void onFeatureClick(String type, String featureId) {
+		MapFeature mapFeature = mapFeatures.get(featureId);
+		if (mapFeature != null) {
+			switch (type) {
+				case "profile":
+					eventBus.profileClicked((Profile) mapFeature);
+					break;
+				case "section":
+					eventBus.sectionClicked((Section) mapFeature);
+					break;
+				case "device":
+					eventBus.deviceClicked((Device) mapFeature);
+					break;
+				case "deviceAggregate":
+					eventBus.deviceAggregateClicked((DeviceAggregate) mapFeature);
+			}
 		}
 	}
 
 	public void zoomOnSection(Section section) {
-		if(!sections.keySet().contains(section.getId())) {
+		if(!mapFeatures.keySet().contains(section.getFeatureId())) {
 			add(section);
 		}
 		
-		if(sections.keySet().contains(section.getId())) {
+		if(mapFeatures.keySet().contains(section.getFeatureId())) {
 			view.adjustBounds(section.getShape().getCoordinates());
 		}
 	}
@@ -314,17 +243,12 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	private List<List<Double>> collectAllPoints() {
-		List<List<Double>> allPoints = new ArrayList<List<Double>>();
-
-		for(Section section : sections.values()) {
-			if(section.getShape() != null) {
-				allPoints.addAll(section.getShape().getCoordinates());
-			}
-		}
-		
-		for(Profile profile : profiles.values()) {
-			if(profile.getShape() != null) {
-				allPoints.addAll(profile.getShape().getCoordinates());
+		List<List<Double>> allPoints = new ArrayList<>();
+		for (MapFeature mapFeature : mapFeatures.values()) {
+			if(mapFeature.getFeatureType().equals("section")) {
+				allPoints.addAll(((Section) mapFeature).getShape().getCoordinates());
+			} else if (mapFeature.getFeatureType().equals("profile")) {
+				allPoints.addAll(((Profile) mapFeature).getShape().getCoordinates());
 			}
 		}
 		

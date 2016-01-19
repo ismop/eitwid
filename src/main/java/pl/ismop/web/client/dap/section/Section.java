@@ -59,6 +59,10 @@ public class Section extends MapFeature {
 		}
 	}
 
+	public boolean isAdjustBounds() {
+		return true;
+	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
