@@ -28,7 +28,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		this.geoJsonEncoderDecoder = geoJsonEncoderDecoder;
 		mapFeatures = new HashMap<>();
 	}
-	
+
 	public void add(MapFeature mapFeature) {
 		if(!mapFeatures.keySet().contains(mapFeature.getFeatureId())) {
 			Geometry geometry = mapFeature.getFeatureGeometry();
@@ -42,11 +42,6 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 	}
 
-	private String geoJson(MapFeature mapFeature, Geometry geometry) {
-		GeoJsonFeature feature = new GeoJsonFeature(mapFeature, geometry);
-		return geoJsonEncoderDecoder.encode(new GeoJsonFeatures(feature)).toString();
-	}
-
 	public void rm(MapFeature mapFeature) {
 		if(mapFeatures.containsKey(mapFeature.getFeatureId())) {
 			view.removeFeature(mapFeature.getFeatureId());
@@ -55,34 +50,17 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void highlight(MapFeature mapFeature) {
-		highlight(mapFeature, true);
+		view.highlight(mapFeature.getFeatureId(), true);
 	}
 
 	public void unhighlight(MapFeature mapFeature) {
-		highlight(mapFeature, false);
-	}
-
-	private void highlight(MapFeature mapFeature, boolean highlight) {
-		view.highlight(mapFeature.getFeatureId(), highlight);
-	}
-
-	public void select(Device device) {
-		if(!mapFeatures.containsKey(device.getFeatureId())) {
-			add(device);
-		}
-
-		view.selectFeature(device.getFeatureId(), true);
-	}
-
-	public void select(DeviceAggregate deviceAggregate) {
-		if(!mapFeatures.containsKey(deviceAggregate.getFeatureId())) {
-			add(deviceAggregate);
-		}
-
-		view.selectFeature(deviceAggregate.getFeatureId(), true);
+		view.highlight(mapFeature.getFeatureId(), false);
 	}
 
 	public void select(MapFeature mapFeature) {
+		if(!mapFeatures.containsKey(mapFeature.getFeatureId())) {
+			add(mapFeature);
+		}
 		view.selectFeature(mapFeature.getFeatureId(), true);
 	}
 
@@ -224,6 +202,11 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void setLoadingState(boolean loading) {
 		view.showLoadingPanel(loading);
+	}
+
+	private String geoJson(MapFeature mapFeature, Geometry geometry) {
+		GeoJsonFeature feature = new GeoJsonFeature(mapFeature, geometry);
+		return geoJsonEncoderDecoder.encode(new GeoJsonFeatures(feature)).toString();
 	}
 
 	private List<List<Double>> collectAllPoints() {
