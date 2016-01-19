@@ -29,29 +29,13 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		mapFeatures = new HashMap<>();
 	}
 	
-	public void add(Section mapFeature) {
-		addMapFeature(mapFeature, mapFeature.isAdjustBounds());
-	}
-
-	public void add(Profile mapFeature) {
-		addMapFeature(mapFeature, mapFeature.isAdjustBounds());
-	}
-
-	public void add(Device mapFeature) {
-		addMapFeature(mapFeature, mapFeature.isAdjustBounds());
-	}
-
 	public void add(MapFeature mapFeature) {
-		addMapFeature(mapFeature, mapFeature.isAdjustBounds());
-	}
-
-	private void addMapFeature(MapFeature mapFeature, boolean adjustBounds) {
 		if(!mapFeatures.keySet().contains(mapFeature.getFeatureId())) {
 			Geometry geometry = mapFeature.getFeatureGeometry();
 			if (geometry != null) {
 				mapFeatures.put(mapFeature.getFeatureId(), mapFeature);
 				view.addGeoJson(geoJson(mapFeature, geometry));
-				if (adjustBounds) {
+				if (mapFeature.isAdjustBounds()) {
 					view.adjustBounds(collectAllPoints());
 				}
 			}
