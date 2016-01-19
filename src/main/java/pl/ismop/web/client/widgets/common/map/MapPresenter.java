@@ -48,9 +48,15 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	public void add(Section section) {
 		if(!sections.keySet().contains(section.getId())) {
 			sections.put(section.getId(), section);
-			
-			if(section.getShape() != null) {
-				view.addGeoJson(geoJsonEncoderDecoder.encode(sectionToGeoJsonFeatures(section)).toString());
+			PolygonShape shape = section.getShape();
+
+			if(isValid(shape)) {
+				List<List<List<Double>>> polygonCoordinates = new ArrayList<List<List<Double>>>();
+				polygonCoordinates.add(shape.getCoordinates());
+				PolygonGeometry polygonGeometry = new PolygonGeometry();
+				polygonGeometry.setCoordinates(polygonCoordinates);
+
+				view.addGeoJson(geoJson(section.getId(), "section", polygonGeometry));
 				view.adjustBounds(collectAllPoints());
 			}
 		}
@@ -59,9 +65,13 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	public void add(Profile profile) {
 		if(!profiles.keySet().contains(profile.getId())) {
 			profiles.put(profile.getId(), profile);
-			
-			if(profile.getShape() != null) {
-				view.addGeoJson(geoJsonEncoderDecoder.encode(profileToGeoJsonFeatures(profile)).toString());
+			PolygonShape shape = profile.getShape();
+
+			if(shape != null) {
+				LineGeometry lineGeometry = new LineGeometry();
+				lineGeometry.setCoordinates(shape.getCoordinates());
+
+				view.addGeoJson(geoJson(profile.getId(), "profile", lineGeometry));
 				view.adjustBounds(collectAllPoints());
 			}
 		}
@@ -70,47 +80,37 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	public void add(Device device) {
 		if(device.getPlacement() != null && !devices.keySet().contains(device.getId())) {
 			devices.put(device.getId(), device);
-
 			PointShape shape = device.getPlacement();
 
 			if(shape != null) {
 				PointGeometry pointGeometry = new PointGeometry();
 				pointGeometry.setCoordinates(shape.getCoordinates());
 
-				GeoJsonFeature feature = new GeoJsonFeature();
-				feature.setGeometry(pointGeometry);
-				feature.setId("device-" + device.getId());
-				feature.setProperties(new HashMap<String, String>());
-				feature.getProperties().put("id", device.getId());
-				feature.getProperties().put("name", feature.getId());
-				feature.getProperties().put("type", "device");
-
-				List<GeoJsonFeature> features = new ArrayList<>();
-				features.add(feature);
-				view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
+				view.addGeoJson(geoJson(device.getId(), "device", pointGeometry));
 			}
 		}
 	}
 
 	public void add(DeviceAggregate deviceAggregate) {
-		if(deviceAggregate.getShape() != null && !deviceAggregates.keySet().contains(deviceAggregate.getId())) {
+		Geometry shape = deviceAggregate.getShape();
+		if(shape != null && !deviceAggregates.keySet().contains(deviceAggregate.getId())) {
 			deviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
+			view.addGeoJson(geoJson(deviceAggregate.getId(), "deviceAggregate", shape));
+		}
+	}
 
-			Geometry shape = deviceAggregate.getShape();
+	private String geoJson(String id, String type, Geometry geometry) {
+		GeoJsonFeature feature = new GeoJsonFeature(id, type, geometry);
+		return geoJsonEncoderDecoder.encode(new GeoJsonFeatures(feature)).toString();
+	}
 
-			if(shape != null) {
-				GeoJsonFeature feature = new GeoJsonFeature();
-				feature.setGeometry(shape);
-				feature.setId("deviceAggregate-" + deviceAggregate.getId());
-				feature.setProperties(new HashMap<String, String>());
-				feature.getProperties().put("id", deviceAggregate.getId());
-				feature.getProperties().put("name", feature.getId());
-				feature.getProperties().put("type", "deviceAggregate");
-
-				List<GeoJsonFeature> features = new ArrayList<>();
-				features.add(feature);
-				view.addGeoJson(geoJsonEncoderDecoder.encode(new GeoJsonFeatures(features)).toString());
-			}
+	private boolean isValid(PolygonShape shape) {
+		if (shape != null) {
+			List<List<Double>> coordinates = shape.getCoordinates();
+			return String.valueOf(coordinates.get(0).get(0)).
+					equals(String.valueOf(coordinates.get(coordinates.size() - 1).get(0)));
+		} else {
+			return false;
 		}
 	}
 
@@ -354,50 +354,6 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void setLoadingState(boolean loading) {
 		view.showLoadingPanel(loading);
-	}
-
-	private GeoJsonFeatures sectionToGeoJsonFeatures(Section section) {
-		PolygonShape shape = section.getShape();
-		List<List<List<Double>>> polygonCoordinates = new ArrayList<List<List<Double>>>();
-		polygonCoordinates.add(shape.getCoordinates());
-		PolygonGeometry polygonGeometry = new PolygonGeometry();
-		polygonGeometry.setCoordinates(polygonCoordinates);
-		
-		GeoJsonFeature feature = new GeoJsonFeature();
-		feature.setGeometry(polygonGeometry);
-		feature.setId("section-" + section.getId());
-		feature.setProperties(new HashMap<String, String>());
-		feature.getProperties().put("id", section.getId());
-		feature.getProperties().put("name", feature.getId());
-		feature.getProperties().put("type", "section");
-		
-		List<GeoJsonFeature> features = new ArrayList<>();
-
-		//checking if the multipoint shape is closed, if not it is not drawn so there are no map errors
-		if(String.valueOf(polygonCoordinates.get(0).get(0).get(0)).equals(String.valueOf(polygonCoordinates.get(0).get(polygonCoordinates.get(0).size() - 1).get(0)))) {
-			features.add(feature);
-		}
-		
-		return new GeoJsonFeatures(features);
-	}
-
-	private GeoJsonFeatures profileToGeoJsonFeatures(Profile profile) {
-		PolygonShape shape = profile.getShape();
-		LineGeometry lineGeometry = new LineGeometry();
-		lineGeometry.setCoordinates(shape.getCoordinates());
-		
-		GeoJsonFeature feature = new GeoJsonFeature();
-		feature.setGeometry(lineGeometry);
-		feature.setId("profile-" + profile.getId());
-		feature.setProperties(new HashMap<String, String>());
-		feature.getProperties().put("id", profile.getId());
-		feature.getProperties().put("name", feature.getId());
-		feature.getProperties().put("type", "profile");
-		
-		List<GeoJsonFeature> features = new ArrayList<>();
-		features.add(feature);
-		
-		return new GeoJsonFeatures(features);
 	}
 
 	private List<List<Double>> collectAllPoints() {

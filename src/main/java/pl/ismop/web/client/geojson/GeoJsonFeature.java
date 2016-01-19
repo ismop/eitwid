@@ -1,5 +1,6 @@
 package pl.ismop.web.client.geojson;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class GeoJsonFeature {
@@ -10,6 +11,18 @@ public class GeoJsonFeature {
 	
 	public GeoJsonFeature() {
 		setType("Feature");
+	}
+
+	public GeoJsonFeature(String id, String type, Geometry geometry) {
+		this();
+
+		this.geometry = geometry;
+		this.id = type + "-" + id;
+		this.properties = new HashMap<>();
+
+		properties.put("id", id);
+		properties.put("name", id);
+		properties.put("type", type);
 	}
 	
 	public String getId() {
