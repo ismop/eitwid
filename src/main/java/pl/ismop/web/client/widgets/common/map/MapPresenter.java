@@ -1,5 +1,6 @@
 package pl.ismop.web.client.widgets.common.map;
 
+import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.MainEventBus;
@@ -102,15 +103,15 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void highlight(Section section) {
-		highlightSection(section, true);
+		highlight(section, true);
 	}
 
 	public void unhighlight(Section section) {
-		highlightSection(section, false);
+		highlight(section, false);
 	}
 
-	private void highlightSection(Section section, boolean highlight) {
-		view.highlight("section-" + section.getId(), highlight);
+	private void highlight(MapFeature mapFeature, boolean highlight) {
+		view.highlight(mapFeature.getFeatureId(), highlight);
 	}
 
 	public void reset(boolean leaveSections) {
@@ -121,7 +122,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 		
 		for(String sectionId : new ArrayList<>(sections.keySet())) {
-			highlightSection(sections.get(sectionId), false);
+			highlight(sections.get(sectionId), false);
 		}
 		
 		for(String profileId : new ArrayList<>(profiles.keySet())) {
@@ -197,30 +198,34 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	public void onFeatureHoverOut(String type, String id) {
 		switch(type) {
 		case "profile":
-			if(profiles.get(id) != null) {
-				view.highlight("profile-" + id, false);
-				eventBus.showProfileMetadata(profiles.get(id), false);
+			Profile profile = profiles.get(id);
+			if(profile != null) {
+				view.highlight(profile.getFeatureId(), false);
+				eventBus.showProfileMetadata(profile, false);
 			}
 			
 			break;
 		case "section":
-			if(sections.get(id) != null) {
-				view.highlight("section-" + id, false);
+			Section section = sections.get(id);
+			if(section != null) {
+				view.highlight(section.getFeatureId(), false);
 				eventBus.showSectionMetadata(sections.get(id), false);
 			}
 			
 			break;
 		case "device":
-			if(devices.get(id) != null) {
-				eventBus.showDeviceMetadata(devices.get(id), false);
-				view.hidePopup("device-" + id);
+			Device device = devices.get(id);
+			if(device != null) {
+				eventBus.showDeviceMetadata(device, false);
+				view.hidePopup(device.getFeatureId());
 			}
 			
 			break;
 		case "deviceAggregate":
-			if(deviceAggregates.get(id) != null) {
-				eventBus.showDeviceAggregateMetadata(deviceAggregates.get(id), false);
-				view.hidePopup("deviceAggregate-" + id);
+			DeviceAggregate deviceAggregate = deviceAggregates.get(id);
+			if(deviceAggregate != null) {
+				eventBus.showDeviceAggregateMetadata(deviceAggregate, false);
+				view.hidePopup(deviceAggregate.getFeatureId());
 			}
 		}
 	}
@@ -229,30 +234,34 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	public void onFeatureHoverIn(String type, String id) {
 		switch(type) {
 		case "profile":
-			if(profiles.get(id) != null) {
-				view.highlight("profile-" + id, true);
-				eventBus.showProfileMetadata(profiles.get(id), true);
+			Profile profile = profiles.get(id);
+			if(profile != null) {
+				view.highlight(profile.getFeatureId(), true);
+				eventBus.showProfileMetadata(profile, true);
 			}
 			
 			break;
 		case "section":
-			if(sections.get(id) != null) {
-				view.highlight("section-" + id, true);
-				eventBus.showSectionMetadata(sections.get(id), true);
+			Section section = sections.get(id);
+			if(section != null) {
+				view.highlight(section.getFeatureId(), true);
+				eventBus.showSectionMetadata(section, true);
 			}
 			
 			break;
 		case "device":
-			if(devices.get(id) != null) {
-				eventBus.showDeviceMetadata(devices.get(id), true);
-				view.showPopup("device-" + id, devices.get(id).getCustomId());
+			Device device = devices.get(id);
+			if(device != null) {
+				eventBus.showDeviceMetadata(device, true);
+				view.showPopup(device.getFeatureId(), device.getCustomId());
 			}
 			
 			break;
 		case "deviceAggregate":
-			if(deviceAggregates.get(id) != null) {
-				eventBus.showDeviceAggregateMetadata(deviceAggregates.get(id), true);
-				view.showPopup("deviceAggregate-" + id, deviceAggregates.get(id).getCustomId());
+			DeviceAggregate deviceAggregate = deviceAggregates.get(id);
+			if(deviceAggregate != null) {
+				eventBus.showDeviceAggregateMetadata(deviceAggregate, true);
+				view.showPopup(deviceAggregate.getFeatureId(), deviceAggregate.getCustomId());
 			}
 		}
 	}

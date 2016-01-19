@@ -125,9 +125,18 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		
 		if(feature) {
 			if(highlight) {
+				var thisObject = this;
+                var icon = {
+                    anchor: {
+                        x: 6,
+                        y: 6
+                    },
+                    url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getHighlightedFeatureIcon(Ljava/lang/String;)(feature.getId())
+                };
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
 					fillOpacity: 1.0,
-					strokeOpacity: 1.0
+					strokeOpacity: 1.0,
+					icon: icon
 				});
 			} else {
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
@@ -241,6 +250,14 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 	
 	private String getSelectedFeatureIcon(String featureId) {
+		if(featureId.startsWith("deviceAggregate")) {
+			return "/icons/aggregate-selected.png";
+		} else {
+			return "/icons/device-fiber-selected.png";
+		}
+	}
+
+	private String getHighlightedFeatureIcon(String featureId) {
 		if(featureId.startsWith("deviceAggregate")) {
 			return "/icons/aggregate-selected.png";
 		} else {
