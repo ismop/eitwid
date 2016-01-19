@@ -206,6 +206,9 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 				}
 
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
+                    fillOpacity: 0.85,
+                    strokeOpacity: 0.85,
+                    strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeWidth(Ljava/lang/String;)(featureId) + 3,
 					icon: icon
 				});
                 this.@pl.ismop.web.client.widgets.common.map.MapView::addSelected(Ljava/lang/String;)(featureId);

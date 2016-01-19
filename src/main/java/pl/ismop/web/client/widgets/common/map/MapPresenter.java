@@ -114,62 +114,52 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		view.highlight(mapFeature.getFeatureId(), highlight);
 	}
 
+	public void select(Device device) {
+		if(!devices.containsKey(device.getId())) {
+			add(device);
+		}
+
+		view.selectFeature(device.getFeatureId(), true);
+	}
+
+	public void select(DeviceAggregate deviceAggregate) {
+		if(!deviceAggregates.containsKey(deviceAggregate.getId())) {
+			add(deviceAggregate);
+		}
+
+		view.selectFeature(deviceAggregate.getFeatureId(), true);
+	}
+
+	public void select(MapFeature mapFeature) {
+		view.selectFeature(mapFeature.getFeatureId(), true);
+	}
+
+	public void unselect(MapFeature mapFeature) {
+		view.selectFeature(mapFeature.getFeatureId(), false);
+	}
+
 	public void reset(boolean leaveSections) {
 		if(!leaveSections) {
 			for(String sectionId : new ArrayList<>(sections.keySet())) {
 				rm(sections.get(sectionId));
 			}
 		}
-		
+
 		for(String sectionId : new ArrayList<>(sections.keySet())) {
 			highlight(sections.get(sectionId), false);
 		}
-		
+
 		for(String profileId : new ArrayList<>(profiles.keySet())) {
 			rm(profiles.get(profileId));
 		}
-		
+
 		for(String deviceId : new ArrayList<>(devices.keySet())) {
 			rm(devices.get(deviceId));
 		}
-		
+
 		for(String deviceAggregateId : new ArrayList<>(deviceAggregates.keySet())) {
 			rm(deviceAggregates.get(deviceAggregateId));
 		}
-	}
-
-	public void select(Device device) {
-		select(device, true);
-	}
-
-	public void select(DeviceAggregate deviceAggregate) {
-		select(deviceAggregate, true);
-	}
-
-	public void unselect(Device device) {
-		select(device, false);
-	}
-
-	public void unselect(DeviceAggregate deviceAggregate) {
-		select(deviceAggregate, false);
-	}
-
-	private void select(Device device, boolean select) {
-		if(!devices.containsKey(device.getId())) {
-			add(device);
-		}
-
-		String featureId = "device-" + device.getId();
-		view.selectFeature(featureId, select);
-	}
-
-	private void select(DeviceAggregate deviceAggregate, boolean select) {
-		if(!deviceAggregates.containsKey(deviceAggregate.getId())) {
-			add(deviceAggregate);
-		}
-
-		String featureId = "deviceAggregate-" + deviceAggregate.getId();
-		view.selectFeature(featureId, select);
 	}
 
 	/**
