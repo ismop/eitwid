@@ -13,16 +13,16 @@ public class GeoJsonFeature {
 		setType("Feature");
 	}
 
-	public GeoJsonFeature(String id, String type, Geometry geometry) {
+	public GeoJsonFeature(MapFeature mapFeature, Geometry geometry) {
 		this();
 
 		this.geometry = geometry;
-		this.id = type + "-" + id;
+		this.id = mapFeature.getFeatureId();
 		this.properties = new HashMap<>();
 
-		properties.put("id", id);
-		properties.put("name", id);
-		properties.put("type", type);
+		properties.put("id", mapFeature.getId());
+		properties.put("name", mapFeature.getId());
+		properties.put("type", mapFeature.getFeatureType());
 	}
 
 	public String getId() {

@@ -1,30 +1,20 @@
 package pl.ismop.web.client.widgets.common.map;
 
+import com.mvp4g.client.annotation.Presenter;
+import com.mvp4g.client.presenter.BasePresenter;
+import pl.ismop.web.client.MainEventBus;
+import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
+import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.geojson.*;
+import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
+
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;
-
-import com.mvp4g.client.annotation.Presenter;
-import com.mvp4g.client.presenter.BasePresenter;
-
-import pl.ismop.web.client.MainEventBus;
-import pl.ismop.web.client.dap.device.Device;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
-import pl.ismop.web.client.dap.deviceaggregation.PointShape;
-import pl.ismop.web.client.dap.levee.PolygonShape;
-import pl.ismop.web.client.dap.profile.Profile;
-import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.geojson.GeoJsonFeature;
-import pl.ismop.web.client.geojson.GeoJsonFeatures;
-import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
-import pl.ismop.web.client.geojson.Geometry;
-import pl.ismop.web.client.geojson.LineGeometry;
-import pl.ismop.web.client.geojson.PointGeometry;
-import pl.ismop.web.client.geojson.PolygonGeometry;
-import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
 
 @Presenter(view = MapView.class, multiple = true)
 public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implements IMapPresenter {
@@ -48,97 +38,66 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	public void add(Section section) {
 		if(!sections.keySet().contains(section.getId())) {
 			sections.put(section.getId(), section);
-			PolygonShape shape = section.getShape();
-
-			if(isValid(shape)) {
-				List<List<List<Double>>> polygonCoordinates = new ArrayList<List<List<Double>>>();
-				polygonCoordinates.add(shape.getCoordinates());
-				PolygonGeometry polygonGeometry = new PolygonGeometry();
-				polygonGeometry.setCoordinates(polygonCoordinates);
-
-				view.addGeoJson(geoJson(section.getId(), section.getFeatureType(), polygonGeometry));
-				view.adjustBounds(collectAllPoints());
-			}
+			addMapFeature(section, true);
 		}
 	}
 
 	public void add(Profile profile) {
 		if(!profiles.keySet().contains(profile.getId())) {
 			profiles.put(profile.getId(), profile);
-			PolygonShape shape = profile.getShape();
+			addMapFeature(profile, true);
+		}
+	}
 
-			if(shape != null) {
-				LineGeometry lineGeometry = new LineGeometry();
-				lineGeometry.setCoordinates(shape.getCoordinates());
+	public void add(Device device) {
+		if(!devices.keySet().contains(device.getId())) {
+			devices.put(device.getId(), device);
+			addMapFeature(device, false);
+		}
+	}
 
-				view.addGeoJson(geoJson(profile.getId(), profile.getFeatureType(), lineGeometry));
+	public void add(DeviceAggregate deviceAggregate) {
+		if(!deviceAggregates.keySet().contains(deviceAggregate.getId())) {
+			deviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
+			addMapFeature(deviceAggregate, false);
+		}
+	}
+
+	private void addMapFeature(MapFeature mapFeature, boolean adjustBounds) {
+		Geometry geometry = mapFeature.getFeatureGeometry();
+		if(geometry != null) {
+			view.addGeoJson(geoJson(mapFeature, geometry));
+			if(adjustBounds) {
 				view.adjustBounds(collectAllPoints());
 			}
 		}
 	}
 
-	public void add(Device device) {
-		if(device.getPlacement() != null && !devices.keySet().contains(device.getId())) {
-			devices.put(device.getId(), device);
-			PointShape shape = device.getPlacement();
-
-			if(shape != null) {
-				PointGeometry pointGeometry = new PointGeometry();
-				pointGeometry.setCoordinates(shape.getCoordinates());
-
-				view.addGeoJson(geoJson(device.getId(), device.getFeatureType(), pointGeometry));
-			}
-		}
-	}
-
-	public void add(DeviceAggregate deviceAggregate) {
-		Geometry shape = deviceAggregate.getShape();
-		if(shape != null && !deviceAggregates.keySet().contains(deviceAggregate.getId())) {
-			deviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
-			view.addGeoJson(geoJson(deviceAggregate.getId(), deviceAggregate.getFeatureType(), shape));
-		}
-	}
-
-	private String geoJson(String id, String type, Geometry geometry) {
-		GeoJsonFeature feature = new GeoJsonFeature(id, type, geometry);
+	private String geoJson(MapFeature mapFeature, Geometry geometry) {
+		GeoJsonFeature feature = new GeoJsonFeature(mapFeature, geometry);
 		return geoJsonEncoderDecoder.encode(new GeoJsonFeatures(feature)).toString();
 	}
 
-	private boolean isValid(PolygonShape shape) {
-		if (shape != null) {
-			List<List<Double>> coordinates = shape.getCoordinates();
-			return String.valueOf(coordinates.get(0).get(0)).
-					equals(String.valueOf(coordinates.get(coordinates.size() - 1).get(0)));
-		} else {
-			return false;
-		}
-	}
-
 	public void rm(Device device) {
-		if(devices.keySet().contains(device.getId())) {
-			view.removeFeature(device.getFeatureId());
-			devices.remove(device.getId());
-		}
+		rm(device, devices);
 	}
 
 	public void rm(Section section) {
-		if(sections.keySet().contains(section.getId())) {
-			view.removeFeature(section.getFeatureId());
-			sections.remove(section.getId());
-		}
+		rm(section, sections);
 	}
 
 	public void rm(Profile profile) {
-		if(profiles.keySet().contains(profile.getId())) {
-			view.removeFeature(profile.getFeatureId());
-			profiles.remove(profile.getId());
-		}
+		rm(profile, profiles);
 	}
 
 	public void rm(DeviceAggregate deviceAggregate) {
-		if(deviceAggregates.containsKey(deviceAggregate.getId())) {
-			view.removeFeature(deviceAggregate.getFeatureId());
-			deviceAggregates.remove(deviceAggregate.getId());
+		rm(deviceAggregate, deviceAggregates);
+	}
+
+	private void rm(MapFeature mapFeature, Map<String, ? extends MapFeature> collection) {
+		if(collection.containsKey(mapFeature.getId())) {
+			view.removeFeature(mapFeature.getFeatureId());
+			collection.remove(mapFeature.getId());
 		}
 	}
 

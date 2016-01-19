@@ -1,11 +1,14 @@
 package pl.ismop.web.client.dap.section;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import org.fusesource.restygwt.client.Json;
-
 import pl.ismop.web.client.dap.levee.PolygonShape;
+import pl.ismop.web.client.geojson.Geometry;
 import pl.ismop.web.client.geojson.MapFeature;
+import pl.ismop.web.client.geojson.PolygonGeometry;
+
+import javax.xml.bind.annotation.XmlElement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Section extends MapFeature {
 	private String id;
@@ -31,6 +34,29 @@ public class Section extends MapFeature {
 	@Override
 	public String getFeatureType() {
 		return "section";
+	}
+
+	@Override
+	public Geometry getFeatureGeometry() {
+		if (isValidShape()) {
+			List<List<List<Double>>> polygonCoordinates = new ArrayList<List<List<Double>>>();
+			polygonCoordinates.add(getShape().getCoordinates());
+			PolygonGeometry polygonGeometry = new PolygonGeometry();
+			polygonGeometry.setCoordinates(polygonCoordinates);
+			return polygonGeometry;
+		} else {
+			return null;
+		}
+	}
+
+	private boolean isValidShape() {
+		if (getShape() != null) {
+			List<List<Double>> coordinates = getShape().getCoordinates();
+			return String.valueOf(coordinates.get(0).get(0)).
+					equals(String.valueOf(coordinates.get(coordinates.size() - 1).get(0)));
+		} else {
+			return false;
+		}
 	}
 
 	public void setId(String id) {

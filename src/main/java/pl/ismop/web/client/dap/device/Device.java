@@ -1,12 +1,13 @@
 package pl.ismop.web.client.dap.device;
 
+import org.fusesource.restygwt.client.Json;
+import pl.ismop.web.client.dap.deviceaggregation.PointShape;
+import pl.ismop.web.client.geojson.Geometry;
+import pl.ismop.web.client.geojson.MapFeature;
+import pl.ismop.web.client.geojson.PointGeometry;
+
 import java.util.List;
 import java.util.Map;
-
-import org.fusesource.restygwt.client.Json;
-
-import pl.ismop.web.client.dap.deviceaggregation.PointShape;
-import pl.ismop.web.client.geojson.MapFeature;
 
 public class Device extends MapFeature {
 	private String id;
@@ -53,6 +54,17 @@ public class Device extends MapFeature {
 	@Override
 	public String getFeatureType() {
 		return "device";
+	}
+
+	@Override
+	public Geometry getFeatureGeometry() {
+		if (getPlacement() != null) {
+			PointGeometry pointGeometry = new PointGeometry();
+			pointGeometry.setCoordinates(getPlacement().getCoordinates());
+			return pointGeometry;
+		} else {
+			return null;
+		}
 	}
 
 	public void setId(String id) {
