@@ -56,7 +56,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				PolygonGeometry polygonGeometry = new PolygonGeometry();
 				polygonGeometry.setCoordinates(polygonCoordinates);
 
-				view.addGeoJson(geoJson(section.getId(), "section", polygonGeometry));
+				view.addGeoJson(geoJson(section.getId(), section.getFeatureType(), polygonGeometry));
 				view.adjustBounds(collectAllPoints());
 			}
 		}
@@ -71,7 +71,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				LineGeometry lineGeometry = new LineGeometry();
 				lineGeometry.setCoordinates(shape.getCoordinates());
 
-				view.addGeoJson(geoJson(profile.getId(), "profile", lineGeometry));
+				view.addGeoJson(geoJson(profile.getId(), profile.getFeatureType(), lineGeometry));
 				view.adjustBounds(collectAllPoints());
 			}
 		}
@@ -86,7 +86,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				PointGeometry pointGeometry = new PointGeometry();
 				pointGeometry.setCoordinates(shape.getCoordinates());
 
-				view.addGeoJson(geoJson(device.getId(), "device", pointGeometry));
+				view.addGeoJson(geoJson(device.getId(), device.getFeatureType(), pointGeometry));
 			}
 		}
 	}
@@ -95,7 +95,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		Geometry shape = deviceAggregate.getShape();
 		if(shape != null && !deviceAggregates.keySet().contains(deviceAggregate.getId())) {
 			deviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
-			view.addGeoJson(geoJson(deviceAggregate.getId(), "deviceAggregate", shape));
+			view.addGeoJson(geoJson(deviceAggregate.getId(), deviceAggregate.getFeatureType(), shape));
 		}
 	}
 
@@ -116,28 +116,28 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void rm(Device device) {
 		if(devices.keySet().contains(device.getId())) {
-			view.removeFeature("device-" + device.getId());
+			view.removeFeature(device.getFeatureId());
 			devices.remove(device.getId());
 		}
 	}
 
 	public void rm(Section section) {
 		if(sections.keySet().contains(section.getId())) {
-			view.removeFeature("section-" + section.getId());
+			view.removeFeature(section.getFeatureId());
 			sections.remove(section.getId());
 		}
 	}
 
 	public void rm(Profile profile) {
 		if(profiles.keySet().contains(profile.getId())) {
-			view.removeFeature("profile-" + profile.getId());
+			view.removeFeature(profile.getFeatureId());
 			profiles.remove(profile.getId());
 		}
 	}
 
 	public void rm(DeviceAggregate deviceAggregate) {
 		if(deviceAggregates.containsKey(deviceAggregate.getId())) {
-			view.removeFeature("deviceAggregate-" + deviceAggregate.getId());
+			view.removeFeature(deviceAggregate.getFeatureId());
 			deviceAggregates.remove(deviceAggregate.getId());
 		}
 	}

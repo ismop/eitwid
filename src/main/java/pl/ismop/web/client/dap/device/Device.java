@@ -6,8 +6,9 @@ import java.util.Map;
 import org.fusesource.restygwt.client.Json;
 
 import pl.ismop.web.client.dap.deviceaggregation.PointShape;
+import pl.ismop.web.client.geojson.MapFeature;
 
-public class Device {
+public class Device extends MapFeature {
 	private String id;
 	
 	@Json(name = "custom_id")
@@ -47,6 +48,11 @@ public class Device {
 
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String getFeatureType() {
+		return "device";
 	}
 
 	public void setId(String id) {

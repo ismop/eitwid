@@ -24,7 +24,7 @@ public class GeoJsonFeature {
 		properties.put("name", id);
 		properties.put("type", type);
 	}
-	
+
 	public String getId() {
 		return id;
 	}

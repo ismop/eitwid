@@ -5,8 +5,9 @@ import javax.xml.bind.annotation.XmlElement;
 import org.fusesource.restygwt.client.Json;
 
 import pl.ismop.web.client.dap.levee.PolygonShape;
+import pl.ismop.web.client.geojson.MapFeature;
 
-public class Section {
+public class Section extends MapFeature {
 	private String id;
 	private String name;
 	private PolygonShape shape;
@@ -26,7 +27,12 @@ public class Section {
 	public String getId() {
 		return id;
 	}
-	
+
+	@Override
+	public String getFeatureType() {
+		return "section";
+	}
+
 	public void setId(String id) {
 		this.id = id;
 	}

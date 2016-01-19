@@ -5,8 +5,9 @@ import java.util.List;
 import org.fusesource.restygwt.client.Json;
 
 import pl.ismop.web.client.dap.levee.PolygonShape;
+import pl.ismop.web.client.geojson.MapFeature;
 
-public class Profile {
+public class Profile extends MapFeature {
 	private String id;
 	
 	
@@ -24,6 +25,11 @@ public class Profile {
 
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String getFeatureType() {
+		return "profile";
 	}
 
 	public void setId(String id) {
