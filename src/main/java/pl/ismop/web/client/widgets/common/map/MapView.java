@@ -2,7 +2,9 @@ package pl.ismop.web.client.widgets.common.map;
 
 import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.gwtbootstrap3.client.ui.Button;
 
@@ -33,6 +35,9 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	private JavaScriptObject map, layer, infoWindow;
 	
 	private boolean initialized;
+
+	private Set<String> selected = new HashSet<>();
+	private Set<String> highlighted = new HashSet<>();
 
 	@UiField
 	FlowPanel panel, loadingPanel, mapContainer;
@@ -124,25 +129,57 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
 		
 		if(feature) {
-			if(highlight) {
-				var thisObject = this;
+            if(highlight) {
+                var thisObject = this;
                 var icon = {
                     anchor: {
-                        x: 6,
-                        y: 6
+                        x: 8,
+                        y: 8
                     },
-                    url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getHighlightedFeatureIcon(Ljava/lang/String;)(feature.getId())
+                    url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getHighlightedFeatureIcon(Ljava/lang/String;)(featureId)
                 };
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
 					fillOpacity: 1.0,
 					strokeOpacity: 1.0,
 					icon: icon
 				});
+                this.@pl.ismop.web.client.widgets.common.map.MapView::addHighlighted(Ljava/lang/String;)(featureId);
 			} else {
-				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
+                this.@pl.ismop.web.client.widgets.common.map.MapView::removeHighlighted(Ljava/lang/String;)(featureId);
+                if(this.@pl.ismop.web.client.widgets.common.map.MapView::isSelected(Ljava/lang/String;)(featureId)) {
+                    this.@pl.ismop.web.client.widgets.common.map.MapView::selectFeature(Ljava/lang/String;Z)(featureId, true);
+                } else {
+                    this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
+                }
 			}
 		}
 	}-*/;
+
+	private void addHighlighted(String featureId) {
+		highlighted.add(featureId);
+	}
+
+	private void removeHighlighted(String featureId) {
+		highlighted.remove(featureId);
+	}
+
+	private boolean isHighlighted(String featureId) {
+		return highlighted.contains(featureId);
+	}
+
+	private void addSelected(String featureId) {
+		selected.add(featureId);
+	}
+
+	private void removeSelected(String featureId) {
+		selected.remove(featureId);
+	}
+
+	private boolean isSelected(String featureId) {
+		return selected.contains(featureId);
+	}
+
+
 
 	@Override
 	public native void addGeoJson(String geoJsonValue) /*-{
@@ -163,11 +200,22 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 					},
 					url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getSelectedFeatureIcon(Ljava/lang/String;)(feature.getId())
 				};
+				if(this.@pl.ismop.web.client.widgets.common.map.MapView::isHighlighted(Ljava/lang/String;)(featureId)) {
+					icon['anchor']['x'] = 8
+                    icon['anchor']['y'] = 8
+				}
+
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
 					icon: icon
 				});
+                this.@pl.ismop.web.client.widgets.common.map.MapView::addSelected(Ljava/lang/String;)(featureId);
 			} else {
-				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
+                this.@pl.ismop.web.client.widgets.common.map.MapView::removeSelected(Ljava/lang/String;)(featureId);
+                if(this.@pl.ismop.web.client.widgets.common.map.MapView::isHighlighted(Ljava/lang/String;)(featureId)) {
+                    this.@pl.ismop.web.client.widgets.common.map.MapView::highlight(Ljava/lang/String;Z)(featureId, true);
+                } else {
+                    this.@pl.ismop.web.client.widgets.common.map.MapView::layer.revertStyle(feature);
+                }
 			}
 		}
 	}-*/;
@@ -251,17 +299,33 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	
 	private String getSelectedFeatureIcon(String featureId) {
 		if(featureId.startsWith("deviceAggregate")) {
-			return "/icons/aggregate-selected.png";
+			if(isHighlighted(featureId)) {
+				return "/icons/aggregate-selected-highlighted.png";
+			} else {
+				return "/icons/aggregate-selected.png";
+			}
 		} else {
-			return "/icons/device-fiber-selected.png";
+			if(isHighlighted(featureId)) {
+				return "/icons/device-fiber-selected-highlighted.png";
+			} else {
+				return "/icons/device-fiber-selected.png";
+			}
 		}
 	}
 
 	private String getHighlightedFeatureIcon(String featureId) {
 		if(featureId.startsWith("deviceAggregate")) {
-			return "/icons/aggregate-selected.png";
+			if(isSelected(featureId)) {
+				return "/icons/aggregate-selected-highlighted.png";
+			} else {
+				return "/icons/aggregate-highlighted.png";
+			}
 		} else {
-			return "/icons/device-fiber-selected.png";
+			if(isSelected(featureId)) {
+				return "/icons/device-fiber-selected-highlighted.png";
+			} else {
+				return "/icons/device-fiber-highlighted.png";
+			}
 		}
 	}
 	

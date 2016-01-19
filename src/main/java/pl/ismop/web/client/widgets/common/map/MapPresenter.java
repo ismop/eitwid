@@ -102,12 +102,12 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		}
 	}
 
-	public void highlight(Section section) {
-		highlight(section, true);
+	public void highlight(MapFeature mapFeature) {
+		highlight(mapFeature, true);
 	}
 
-	public void unhighlight(Section section) {
-		highlight(section, false);
+	public void unhighlight(MapFeature mapFeature) {
+		highlight(mapFeature, false);
 	}
 
 	private void highlight(MapFeature mapFeature, boolean highlight) {
