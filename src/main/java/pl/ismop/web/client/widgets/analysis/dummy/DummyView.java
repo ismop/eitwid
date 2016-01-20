@@ -65,16 +65,6 @@ public class DummyView extends Composite implements IDummyView, ReverseViewInter
         getPresenter().unselectDevice2();
     }
 
-    @UiHandler("showSection1")
-    void onShowSection1(ClickEvent event) {
-        getPresenter().showSection1();
-    }
-
-    @UiHandler("showSection2")
-    void onShowSections2(ClickEvent event) {
-        getPresenter().showSection2();
-    }
-
     @UiHandler("showProfile1")
     void onShowProfile1(ClickEvent event) {
         getPresenter().showProfile1();

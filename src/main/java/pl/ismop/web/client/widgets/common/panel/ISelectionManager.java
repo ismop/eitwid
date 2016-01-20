@@ -31,13 +31,6 @@ public interface ISelectionManager {
     void show(Device device);
 
     /**
-     * Show section. Only one section can be shown on minimap in the same time.
-     *
-     * @param section Section to be shown.
-     */
-    void show(Section section);
-
-    /**
      * Show profile. Only one profile can be shown on minimap in the same time.
      *
      * @param profile Profile to be shown.

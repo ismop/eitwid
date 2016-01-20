@@ -38,11 +38,6 @@ public class SelectionManager implements ISelectionManager {
     }
 
     @Override
-    public void show(Section section) {
-        eventBus.showSection(section);
-    }
-
-    @Override
     public void show(Profile profile) {
         eventBus.showProfile(profile);
     }

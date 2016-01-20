@@ -13,9 +13,6 @@
         <b:Button ui:field="selectDevice2" text="Select device 2" />
         <b:Button ui:field="unselectDevice2" text="Unselect device 2" />
 
-        <b:Button ui:field="showSection1" text="Show section 1" />
-        <b:Button ui:field="showSection2" text="Show section 2" />
-
         <b:Button ui:field="showProfile1" text="Show profile 1" />
         <b:Button ui:field="showProfile2" text="Show profile 2" />
     </g:HTMLPanel>

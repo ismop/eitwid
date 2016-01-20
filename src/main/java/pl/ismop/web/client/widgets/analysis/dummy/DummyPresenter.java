@@ -159,16 +159,6 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
     }
 
     @Override
-    public void showSection1() {
-        selectionManager.show(sections.get(0));
-    }
-
-    @Override
-    public void showSection2() {
-        selectionManager.show(sections.get(1));
-    }
-
-    @Override
     public void showProfile1() {
         selectionManager.show(profiles.get(0));
     }

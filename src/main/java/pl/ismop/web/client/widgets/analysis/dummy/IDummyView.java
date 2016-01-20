@@ -10,8 +10,6 @@ public interface IDummyView {
         void unselectDevice1();
         void selectDevice2();
         void unselectDevice2();
-        void showSection1();
-        void showSection2();
         void showProfile1();
         void showProfile2();
     }
