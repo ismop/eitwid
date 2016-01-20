@@ -71,6 +71,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		if(this.configuration == configuration) {
 			refreshView();
 		}
+
+		addProfilesToMinimap();
 	}
 	
 	public void onDateChanged(Date selectedDate) {
@@ -101,7 +103,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	@Override
 	public void setSelectionManager(ISelectionManager selectionManager) {
 		this.selectionManager = selectionManager;
-		
+		addProfilesToMinimap();
+	}
+
+	private void addProfilesToMinimap() {
+		selectionManager.clear();
 		for(Profile profile : configuration.getPickedProfiles().values()) {
 			selectionManager.add(profile);
 		}
