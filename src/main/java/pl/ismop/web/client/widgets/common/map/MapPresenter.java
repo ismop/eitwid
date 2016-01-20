@@ -69,7 +69,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void reset(boolean leaveSections) {
-		for (MapFeature entry : mapFeatures.values()) {
+		List<MapFeature> features = new ArrayList<>(mapFeatures.values());
+		for (MapFeature entry : features) {
 			if (entry.getFeatureType().equals("section") && leaveSections) {
 				unhighlight(entry);
 			} else {
