@@ -65,7 +65,11 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 	
 	public void onDeviceSeriesHover(String deviceId, boolean hover) {
 		if(displayedDevices.containsKey(deviceId)) {
-			mapPresenter.selectDevice(displayedDevices.get(deviceId), hover);
+			if (hover) {
+				mapPresenter.select(displayedDevices.get(deviceId));
+			} else {
+				mapPresenter.unselect(displayedDevices.get(deviceId));
+			}
 		}
 	}
 
@@ -86,7 +90,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			@Override
 			public void processSections(List<Section> sections) {
 				for(Section section : sections) {
-					mapPresenter.addSection(section);
+					mapPresenter.add(section);
 				}
 			}
 		});
@@ -261,7 +265,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 				displayedDevices.clear();
 				
 				for(Device device : devices) {
-					mapPresenter.addDevice(device);
+					mapPresenter.add(device);
 					displayedDevices.put(device.getId(), device);
 				}
 			}

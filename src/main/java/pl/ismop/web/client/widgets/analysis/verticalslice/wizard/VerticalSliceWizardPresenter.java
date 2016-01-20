@@ -156,7 +156,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 				List<String> sectionIds = new ArrayList<>();
 				
 				for(Section section : sections) {
-					mapPresenter.addSection(section);
+					mapPresenter.add(section);
 					sectionIds.add(section.getId());
 //					configuration.getSections().put(section.getId(), section);
 				}
@@ -173,7 +173,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 						mapPresenter.setLoadingState(false);
 						
 						for(Profile profile : profiles) {
-							mapPresenter.addProfile(profile);
+							mapPresenter.add(profile);
 						}
 					}
 				});
