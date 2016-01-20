@@ -118,6 +118,24 @@ public interface MainEventBus extends EventBusWithLookup {
 	void experimentChanged(Experiment selectedExperiment);
 
 	/**
+	 * Add map feature into minimap.
+	 * To remove feature from the minimap use {@link #rm(MapFeature)}.
+	 *
+	 * @param mapFeature Map feature te be added.
+     */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void add(MapFeature mapFeature);
+
+	/**
+	 * Remove map feature from minimap.
+	 * To add feature from the minimap use {@link #add(MapFeature)}.
+	 *
+	 * @param mapFeature Map feature te be removed.
+	 */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void rm(MapFeature mapFeature);
+
+	/**
 	 * Select map feature on minimap.
 	 * To unselect map feature use {@link #unselect(MapFeature)}.
 	 *
@@ -135,20 +153,22 @@ public interface MainEventBus extends EventBusWithLookup {
 	void unselect(MapFeature mapFeature);
 
 	/**
-	 * Show device. Only one device can be shown on minimap in the same time (red marker will be used).
+	 * Highlight map feature on minimap.
+	 * To unhighlight map feature use {@link #unhighlight(MapFeature)}.
 	 *
-	 * @param device Device to be shown.
+	 * @param mapFeature MapFeature to be highlighted.
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
-	void showDevice(Device device);
+	void highlight(MapFeature mapFeature);
 
 	/**
-	 * Show profile. Only one profile can be shown on minimap in the same time.
+	 * Unhighlight map feature on minimap.
+	 * To highlight map feature use {@link #highlight(MapFeature)}.
 	 *
-	 * @param profile Profile to be shown.
+	 * @param mapFeature MapFeature to be unhighlighted.
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
-	void showProfile(Profile profile);
+	void unhighlight(MapFeature mapFeature);
 
 	/**
 	 * Remove all selections and shows from the minimap.

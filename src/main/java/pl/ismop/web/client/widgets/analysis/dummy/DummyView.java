@@ -35,44 +35,94 @@ public class DummyView extends Composite implements IDummyView, ReverseViewInter
         label.setText(title);
     }
 
-    @UiHandler("showDevice1")
-    void onShowDevice1(ClickEvent event) {
-        getPresenter().showDevice1();
+    @UiHandler("addDevice")
+    void addDevice(ClickEvent event) {
+        getPresenter().addDevice();
     }
 
-    @UiHandler("showDevice2")
-    void onShowDevice2(ClickEvent event) {
-        getPresenter().showDevice2();
+    @UiHandler("rmDevice")
+    void rmDevice(ClickEvent event) {
+        getPresenter().rmDevice();
     }
 
-    @UiHandler("selectDevice1")
-    void onSelectDevice1(ClickEvent event) {
-        getPresenter().selectDevice1();
+    @UiHandler("addSection")
+    void addSection(ClickEvent event) {
+        getPresenter().addSection();
     }
 
-    @UiHandler("unselectDevice1")
-    void onUnselectDevice1(ClickEvent event) {
-        getPresenter().unselectDevice1();
+    @UiHandler("rmSection")
+    void rmSection(ClickEvent event) {
+        getPresenter().rmSection();
     }
 
-    @UiHandler("selectDevice2")
-    void onSelectDevice2(ClickEvent event) {
-        getPresenter().selectDevice2();
+    @UiHandler("addProfile")
+    void addProfile(ClickEvent event) {
+        getPresenter().addProfile();
     }
 
-    @UiHandler("unselectDevice2")
-    void onUnselectDevice2(ClickEvent event) {
-        getPresenter().unselectDevice2();
+    @UiHandler("rmProfile")
+    void rmProfile(ClickEvent event) {
+        getPresenter().rmProfile();
     }
 
-    @UiHandler("showProfile1")
-    void onShowProfile1(ClickEvent event) {
-        getPresenter().showProfile1();
+    @UiHandler("selectDevice")
+    void selectDevice(ClickEvent event) {
+        getPresenter().selectDevice();
     }
 
-    @UiHandler("showProfile2")
-    void onShowProfile2(ClickEvent event) {
-        getPresenter().showProfile2();
+    @UiHandler("unselectDevice")
+    void unselectDevice(ClickEvent event) {
+        getPresenter().unselectDevice();
+    }
+
+    @UiHandler("selectSection")
+    void selectSection(ClickEvent event) {
+        getPresenter().selectSection();
+    }
+
+    @UiHandler("unselectSection")
+    void unselectSection(ClickEvent event) {
+        getPresenter().unselectSection();
+    }
+
+    @UiHandler("selectProfile")
+    void selectProfile(ClickEvent event) {
+        getPresenter().selectProfile();
+    }
+
+    @UiHandler("unselectProfile")
+    void unselectProfile(ClickEvent event) {
+        getPresenter().unselectProfile();
+    }
+
+    @UiHandler("highlightDevice")
+    void highlightDevice(ClickEvent event) {
+        getPresenter().highlightDevice();
+    }
+
+    @UiHandler("unhighlightDevice")
+    void unhighlightDevice(ClickEvent event) {
+        getPresenter().unhighlightDevice();
+    }
+
+    @UiHandler("highlightSection")
+    void highlightSection(ClickEvent event) {
+        getPresenter().highlightSection();
+    }
+
+    @UiHandler("unhighlightSection")
+    void unhighlightSection(ClickEvent event) {
+        getPresenter().unhighlightSection();
+    }
+
+    @UiHandler("highlightProfile")
+    void highlightProfile(ClickEvent event) {
+        getPresenter().highlightProfile();
+    }
+
+    @UiHandler("unhighlightProfile")
+    void unhighlightProfile(ClickEvent event) {
+        getPresenter().highlightProfile();
     }
 
     @Override

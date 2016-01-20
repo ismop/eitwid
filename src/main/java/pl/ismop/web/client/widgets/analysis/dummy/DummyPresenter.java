@@ -26,12 +26,8 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
     private Date date;
     private Experiment experiment;
 
-    // dummy 2 devices with hardcoded ids, just for tests.
     private List<Device> devices;
-
-    // dummy 2 sections with hardcoded ids, just for tests.
     private List<Section> sections;
-    // dummy 2 profiles with hardcoded ids, just for tests.
     private List<Profile> profiles;
 
     @Inject
@@ -41,7 +37,7 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
 
     @Override
     public void bind() {
-        dapController.getDevices(Arrays.asList("100", "1264"), new DapController.DevicesCallback() {
+        dapController.getDevices(Arrays.asList("1264"), new DapController.DevicesCallback() {
             @Override
             public void processDevices(List<Device> devices) {
                 DummyPresenter.this.devices = devices;
@@ -128,43 +124,94 @@ public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>
         setSelectedExperiment(selectedExperiment);
     }
 
+
     @Override
-    public void showDevice1() {
-        selectionManager.show(devices.get(0));
+    public void addDevice() {
+        selectionManager.add(devices.get(0));
     }
 
     @Override
-    public void showDevice2() {
-        selectionManager.show(devices.get(1));
+    public void rmDevice() {
+        selectionManager.rm(devices.get(0));
     }
 
     @Override
-    public void selectDevice1() {
+    public void addSection() {
+        selectionManager.add(sections.get(0));
+    }
+
+    @Override
+    public void rmSection() {
+        selectionManager.rm(sections.get(0));
+    }
+
+    @Override
+    public void addProfile() {
+        selectionManager.add(profiles.get(0));
+    }
+
+    @Override
+    public void rmProfile() {
+        selectionManager.rm(profiles.get(0));
+    }
+
+    @Override
+    public void selectDevice() {
         selectionManager.select(devices.get(0));
     }
 
     @Override
-    public void unselectDevice1() {
+    public void unselectDevice() {
         selectionManager.unselect(devices.get(0));
     }
 
     @Override
-    public void selectDevice2() {
-        selectionManager.select(devices.get(1));
+    public void selectSection() {
+        selectionManager.select(sections.get(0));
     }
 
     @Override
-    public void unselectDevice2() {
-        selectionManager.unselect(devices.get(1));
+    public void unselectSection() {
+        selectionManager.unselect(sections.get(0));
     }
 
     @Override
-    public void showProfile1() {
-        selectionManager.show(profiles.get(0));
+    public void selectProfile() {
+        selectionManager.select(profiles.get(0));
     }
 
     @Override
-    public void showProfile2() {
-        selectionManager.show(profiles.get(1));
+    public void unselectProfile() {
+        selectionManager.unselect(profiles.get(0));
+    }
+
+    @Override
+    public void highlightDevice() {
+        selectionManager.highlight(devices.get(0));
+    }
+
+    @Override
+    public void unhighlightDevice() {
+        selectionManager.unhighlight(devices.get(0));
+    }
+
+    @Override
+    public void highlightSection() {
+        selectionManager.highlight(sections.get(0));
+    }
+
+    @Override
+    public void unhighlightSection() {
+        selectionManager.unhighlight(sections.get(0));
+    }
+
+    @Override
+    public void highlightProfile() {
+        selectionManager.highlight(profiles.get(0));
+    }
+
+    @Override
+    public void unhighlightProfile() {
+        selectionManager.unhighlight(profiles.get(0));
     }
 }

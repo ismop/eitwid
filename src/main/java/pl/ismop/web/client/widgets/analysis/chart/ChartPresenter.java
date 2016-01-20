@@ -7,6 +7,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.timeline.Timeline;
@@ -28,6 +29,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     ChartMessages messages;
     private ISelectionManager selectionManager;
     private ChartWizardPresenter wizard;
+    private Device selectedDevice;
 
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
@@ -139,7 +141,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             } else {
                 idToRealTimeline.put(timeline.getId(), timeline);
             }
-            selectionManager.select(timeline.getParameter().getDevice());
+            selectionManager.add(timeline.getParameter().getDevice());
         }
 
 
@@ -185,6 +187,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     @Override
     public void timelineSelected(Timeline timeline) {
-        selectionManager.show(timeline.getParameter().getDevice());
+        if (selectedDevice != null) {
+            selectionManager.unselect(selectedDevice);
+        }
+        selectedDevice = timeline.getParameter().getDevice();
+        selectionManager.select(selectedDevice);
     }
 }

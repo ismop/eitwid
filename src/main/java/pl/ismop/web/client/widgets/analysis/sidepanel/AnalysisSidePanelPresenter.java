@@ -35,9 +35,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private Experiment selectedExperiment;
     private AnalysisSidePanelMessages messages;
-    private Device shownDevice;
-    private Set<MapFeature> selectedMapFeatures = new HashSet<>();
-    private Profile shownProfile;
 
     @Inject
     public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
@@ -223,59 +220,37 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     @SuppressWarnings("unused")
+    public void onAdd(MapFeature mapFeature) {
+        miniMap.add(mapFeature);
+    }
+
+    @SuppressWarnings("unused")
+    public void onRm(MapFeature mapFeature) {
+        miniMap.rm(mapFeature);
+    }
+
+    @SuppressWarnings("unused")
     public void onSelect(MapFeature mapFeature) {
         miniMap.select(mapFeature);
-        selectedMapFeatures.add(mapFeature);
     }
 
     @SuppressWarnings("unused")
     public void onUnselect(MapFeature mapFeature) {
-        if (shownDevice == mapFeature) {
-            miniMap.unselect(mapFeature);
-        } else {
-            miniMap.rm(mapFeature);
-        }
+        miniMap.unselect(mapFeature);
     }
 
     @SuppressWarnings("unused")
-    public void onShowDevice(Device device) {
-        if (shownDevice != null) {
-            if (selectedMapFeatures.contains(shownDevice)) {
-                miniMap.select(shownDevice);
-            } else {
-                miniMap.rm(shownDevice);
-            }
-        }
-        shownDevice = device;
-        miniMap.unselect(device);
-
+    public void onHighlight(MapFeature mapFeature) {
+        miniMap.highlight(mapFeature);
     }
 
     @SuppressWarnings("unused")
-    public void onShowProfile(Profile profile) {
-        GWT.log("Show profile" + profile.getId());
-        if (shownProfile != null) {
-            miniMap.rm(shownProfile);
-        }
-        shownProfile = profile;
-        miniMap.add(profile);
+    public void onUnhighlight(MapFeature mapFeature) {
+        miniMap.unhighlight(mapFeature);
     }
 
     @SuppressWarnings("unused")
     public void onClearMinimap() {
-        if(shownProfile != null) {
-            miniMap.rm(shownProfile);
-            shownProfile = null;
-        }
-
-        if (shownDevice != null) {
-            miniMap.rm(shownDevice);
-            shownDevice = null;
-        }
-
-        for (MapFeature mapFeature : selectedMapFeatures) {
-            miniMap.rm(mapFeature);
-        }
-        selectedMapFeatures.clear();
+        miniMap.reset(true);
     }
 }
