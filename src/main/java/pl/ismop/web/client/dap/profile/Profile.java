@@ -1,12 +1,14 @@
 package pl.ismop.web.client.dap.profile;
 
+import org.fusesource.restygwt.client.Json;
+import pl.ismop.web.client.dap.levee.PolygonShape;
+import pl.ismop.web.client.geojson.Geometry;
+import pl.ismop.web.client.geojson.LineGeometry;
+import pl.ismop.web.client.geojson.MapFeature;
+
 import java.util.List;
 
-import org.fusesource.restygwt.client.Json;
-
-import pl.ismop.web.client.dap.levee.PolygonShape;
-
-public class Profile {
+public class Profile extends MapFeature {
 	private String id;
 	
 	
@@ -24,6 +26,26 @@ public class Profile {
 
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String getFeatureType() {
+		return "profile";
+	}
+
+	@Override
+	public Geometry getFeatureGeometry() {
+		if (getShape() != null) {
+			LineGeometry lineGeometry = new LineGeometry();
+			lineGeometry.setCoordinates(getShape().getCoordinates());
+			return lineGeometry;
+		} else {
+			return null;
+		}
+	}
+
+	public boolean isAdjustBounds() {
+		return true;
 	}
 
 	public void setId(String id) {

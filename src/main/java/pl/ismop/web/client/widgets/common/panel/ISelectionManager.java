@@ -1,50 +1,57 @@
 package pl.ismop.web.client.widgets.common.panel;
 
-import com.mvp4g.client.annotation.Event;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
+import pl.ismop.web.client.geojson.MapFeature;
 
 /**
  * Created by marek on 07.10.15.
  */
 public interface ISelectionManager {
+
     /**
-    * Select device on minima. Many devices can be selected on minimap (yellow marker will be used).
-    * To unselect device use {@link #unselectDevice(pl.ismop.web.client.dap.device.Device)}.
+     * Add map feature into minimap. To remove map feature use {@link #rm(MapFeature)}.
+     *
+     * @param mapFeature Map feature to be added.
+     */
+    void add(MapFeature mapFeature);
+
+    /**
+     * Remove map feature from minimap. To add map feature use {@link #add(MapFeature)}.
+     *
+     * @param mapFeature Map feature to be removed.
+     */
+    void rm(MapFeature mapFeature);
+
+    /**
+    * Select map feature on minimap. If map feature was not added to the map is will be added at the
+    * beginning and next selected. To unselect map feature use {@link #unselect(MapFeature)}.
     *
-    * @param device Device to be selected.
+    * @param mapFeature Map feature to be selected.
     */
-    void selectDevice(Device device);
+    void select(MapFeature mapFeature);
 
     /**
-     * Unselect device. To select device use {@link #selectDevice(Device)}.
+     * Unselect map feature on minimap. To select device use {@link #select(MapFeature)}.
      *
-     * @param device Device to be unselected
+     * @param mapFeature Map feature to be unselected
      */
-    void unselectDevice(Device device);
+    void unselect(MapFeature mapFeature);
 
     /**
-     * Show device. Only one device can be shown on minimap in the same time (red marker will be used).
+     * Highlight map feature on minimap. To unhighlight map feature use {@link #unhighlight(MapFeature)}.
      *
-     * @param device Device to be shown.
+     * @param mapFeature Map feature to be highlighted.
      */
-    void showDevice(Device device);
+    void highlight(MapFeature mapFeature);
 
     /**
-     * Show section. Only one section can be shown on minimap in the same time.
+     * Unhighlight map feature on minimap. To highlight map feature use {@link #highlight(MapFeature)}.
      *
-     * @param section Section to be shown.
+     * @param mapFeature Map feature to be unhighlighted.
      */
-    void showSection(Section section);
-
-    /**
-     * Show profile. Only one profile can be shown on minimap in the same time.
-     *
-     * @param profile Profile to be shown.
-     */
-    void showProfile(Profile profile);
+    void unhighlight(MapFeature mapFeature);
 
     void clear();
 }
