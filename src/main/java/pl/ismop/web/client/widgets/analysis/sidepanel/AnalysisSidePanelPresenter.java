@@ -16,6 +16,7 @@ import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.geojson.MapFeature;
 import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
@@ -35,8 +36,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private Experiment selectedExperiment;
     private AnalysisSidePanelMessages messages;
     private Device shownDevice;
-    private Set<Device> selectedDevices = new HashSet<>();
-    private Section shownSection;
+    private Set<MapFeature> selectedMapFeatures = new HashSet<>();
     private Profile shownProfile;
 
     @Inject
@@ -223,24 +223,24 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     @SuppressWarnings("unused")
-    public void onSelectDevice(Device device) {
-        miniMap.select(device);
-        selectedDevices.add(device);
+    public void onSelect(MapFeature mapFeature) {
+        miniMap.select(mapFeature);
+        selectedMapFeatures.add(mapFeature);
     }
 
     @SuppressWarnings("unused")
-    public void onUnselectDevice(Device device) {
-        if (shownDevice == device) {
-            miniMap.unselect(device);
+    public void onUnselect(MapFeature mapFeature) {
+        if (shownDevice == mapFeature) {
+            miniMap.unselect(mapFeature);
         } else {
-            miniMap.rm(device);
+            miniMap.rm(mapFeature);
         }
     }
 
     @SuppressWarnings("unused")
     public void onShowDevice(Device device) {
         if (shownDevice != null) {
-            if (selectedDevices.contains(shownDevice)) {
+            if (selectedMapFeatures.contains(shownDevice)) {
                 miniMap.select(shownDevice);
             } else {
                 miniMap.rm(shownDevice);
@@ -249,15 +249,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         shownDevice = device;
         miniMap.unselect(device);
 
-    }
-
-    @SuppressWarnings("unused")
-    public void onShowSection(Section section) {
-        if (shownSection != null) {
-            miniMap.unhighlight(shownSection);
-        }
-        shownSection = section;
-        miniMap.highlight(section);
     }
 
     @SuppressWarnings("unused")
@@ -277,19 +268,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             shownProfile = null;
         }
 
-        if (shownSection != null) {
-            miniMap.unhighlight(shownSection);
-            shownSection = null;
-        }
-
         if (shownDevice != null) {
             miniMap.rm(shownDevice);
             shownDevice = null;
         }
 
-        for (Device selectedDevice : selectedDevices) {
-            miniMap.rm(selectedDevice);
+        for (MapFeature mapFeature : selectedMapFeatures) {
+            miniMap.rm(mapFeature);
         }
-        selectedDevices.clear();
+        selectedMapFeatures.clear();
     }
 }
