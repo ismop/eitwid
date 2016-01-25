@@ -128,20 +128,20 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		
 		if(feature) {
             if(highlight) {
+                this.@pl.ismop.web.client.widgets.common.map.MapView::addHighlighted(Ljava/lang/String;)(featureId);
                 var thisObject = this;
                 var icon = {
                     anchor: {
                         x: 8,
                         y: 8
                     },
-                    url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getHighlightedFeatureIcon(Ljava/lang/String;)(featureId)
+                    url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureIcon(*)(featureId, feature.getProperty("colour_type"))
                 };
 				this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
 					fillOpacity: 1.0,
 					strokeOpacity: 1.0,
 					icon: icon
 				});
-                this.@pl.ismop.web.client.widgets.common.map.MapView::addHighlighted(Ljava/lang/String;)(featureId);
 			} else {
                 this.@pl.ismop.web.client.widgets.common.map.MapView::removeHighlighted(Ljava/lang/String;)(featureId);
                 if(this.@pl.ismop.web.client.widgets.common.map.MapView::isSelected(Ljava/lang/String;)(featureId)) {
@@ -190,13 +190,14 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		
 		if(feature) {
 			if(select) {
+                this.@pl.ismop.web.client.widgets.common.map.MapView::addSelected(Ljava/lang/String;)(featureId);
 				var thisObject = this;
 				var icon = {
 					anchor: {
 						x: 6,
 						y: 6
 					},
-					url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getSelectedFeatureIcon(Ljava/lang/String;)(feature.getId())
+					url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureIcon(*)(feature.getId(), feature.getProperty("colour_type"))
 				};
 				if(this.@pl.ismop.web.client.widgets.common.map.MapView::isHighlighted(Ljava/lang/String;)(featureId)) {
 					icon['anchor']['x'] = 8
@@ -209,7 +210,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
                     strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeWidth(Ljava/lang/String;)(featureId) + 3,
 					icon: icon
 				});
-                this.@pl.ismop.web.client.widgets.common.map.MapView::addSelected(Ljava/lang/String;)(featureId);
 			} else {
                 this.@pl.ismop.web.client.widgets.common.map.MapView::removeSelected(Ljava/lang/String;)(featureId);
                 if(this.@pl.ismop.web.client.widgets.common.map.MapView::isHighlighted(Ljava/lang/String;)(featureId)) {
@@ -316,46 +316,22 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		return "#ec8108";
 	}
 
-	private String getFeatureIcon(String featureId) {
-		if(featureId.startsWith("deviceAggregate")) {
-			return "/icons/aggregate.png";
-		} else {
-			return "/icons/device-fiber.png";
+	private String getFeatureIcon(String featureId, String colourType) {
+		String postfix = "neosentio".equals(colourType) ? "-neosentio" : "";
+		if(isSelected(featureId)) {
+			postfix += "-selected";
 		}
-	}
-	
-	private String getSelectedFeatureIcon(String featureId) {
+		if(isHighlighted(featureId)) {
+			postfix += "-highlighted";
+		}
+
 		if(featureId.startsWith("deviceAggregate")) {
-			if(isHighlighted(featureId)) {
-				return "/icons/aggregate-selected-highlighted.png";
-			} else {
-				return "/icons/aggregate-selected.png";
-			}
+			return "/icons/aggregate" + postfix + ".png";
 		} else {
-			if(isHighlighted(featureId)) {
-				return "/icons/device-fiber-selected-highlighted.png";
-			} else {
-				return "/icons/device-fiber-selected.png";
-			}
+			return "/icons/device" + postfix + ".png";
 		}
 	}
 
-	private String getHighlightedFeatureIcon(String featureId) {
-		if(featureId.startsWith("deviceAggregate")) {
-			if(isSelected(featureId)) {
-				return "/icons/aggregate-selected-highlighted.png";
-			} else {
-				return "/icons/aggregate-highlighted.png";
-			}
-		} else {
-			if(isSelected(featureId)) {
-				return "/icons/device-fiber-selected-highlighted.png";
-			} else {
-				return "/icons/device-fiber-highlighted.png";
-			}
-		}
-	}
-	
 	private native void initMap() /*-{
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
 			zoom: 8,
@@ -367,23 +343,24 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			disableDoubleClickZoom: true
 		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
-		
+
 		var layerData = new $wnd.google.maps.Data();
 		var thisObject = this;
 		layerData.setStyle(function(feature) {
+            var colourType = feature.getProperty('colour_type');
 			var icon = {
 				anchor: {
 					x: 6,
 					y: 6
 				},
-				url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureIcon(Ljava/lang/String;)(feature.getId())
+				url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureIcon(*)(feature.getId(), colourType)
 			};
 
 			return {
-				strokeColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeColor(*)(feature.getId(), feature.getProperty('colour_type')),
+				strokeColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeColor(*)(feature.getId(), colourType),
 				fillOpacity: 0.5,
 				strokeOpacity: 0.7,
-				fillColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureFillColor(*)(feature.getId(), feature.getProperty('colour_type')),
+				fillColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureFillColor(*)(feature.getId(), colourType),
 				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeWidth(Ljava/lang/String;)(feature.getId()),
 				icon: icon
 			};
