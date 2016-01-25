@@ -1,5 +1,8 @@
 package pl.ismop.web.client.geojson;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class MapFeature {
     public abstract String getId();
     public abstract String getFeatureType();
@@ -11,5 +14,9 @@ public abstract class MapFeature {
 
     public boolean isAdjustBounds() {
         return false;
+    }
+
+    public Map<String, String> getAdditionalFeatureProperties() {
+        return new HashMap<>();
     }
 }

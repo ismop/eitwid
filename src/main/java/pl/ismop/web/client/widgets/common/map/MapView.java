@@ -1,13 +1,5 @@
 package pl.ismop.web.client.widgets.common.map;
 
-import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.gwtbootstrap3.client.ui.Button;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -20,8 +12,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
-
+import org.gwtbootstrap3.client.ui.Button;
 import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
 
 public class MapView extends Composite implements IMapView, ReverseViewInterface<IMapPresenter> {
 	private static MapViewUiBinder uiBinder = GWT.create(MapViewUiBinder.class);
@@ -268,30 +266,56 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		}
 	}
 	
-	private String getFeatureFillColor(String featureId) {
+	private String getFeatureFillColor(String featureId, String colourType) {
 		if(featureId.startsWith("profile")) {
 			return "#41a7ec";
 		} else if(featureId.startsWith("section")) {
-			return "#afafaf";
+			return getSectionFillColor(colourType);
 		} else if(featureId.startsWith("deviceAggregate")) {
 			return "#ebf56f";
 		} else {
 			return "#aaaaaa";
 		}
 	}
-	
-	private String getFeatureStrokeColor(String featureId) {
+
+	private String getSectionFillColor(String colourType) {
+		if(colourType.equals("A")) {
+			return "#cccccc";
+		} else if (colourType.equals("B")) {
+			return "#fbffb9";
+		} else if (colourType.equals("C")) {
+			return "#c0c776";
+		} else if (colourType.equals("D")) {
+			return "#f3f2f3";
+		}
+		return "#f9aa4b";
+	}
+
+	private String getFeatureStrokeColor(String featureId, String colourType) {
 		if(featureId.startsWith("profile")) {
 			return "#41a7ec";
 		} else if(featureId.startsWith("section")) {
-			return "#626262";
+			return getSectionStrokeColor(colourType);
 		} else if(featureId.startsWith("deviceAggregate")) {
 			return "#ebf56f";
 		} else {
 			return "#aaaaaa";
 		}
 	}
-	
+
+	private String getSectionStrokeColor(String colourType) {
+		if(colourType.equals("A")) {
+			return "#a6a6a6";
+		} else if (colourType.equals("B")) {
+			return "#fff734";
+		} else if (colourType.equals("C")) {
+			return "#878f39";
+		} else if (colourType.equals("D")) {
+			return "#afbacc";
+		}
+		return "#ec8108";
+	}
+
 	private String getFeatureIcon(String featureId) {
 		if(featureId.startsWith("deviceAggregate")) {
 			return "/icons/aggregate.png";
@@ -354,12 +378,12 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 				},
 				url: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureIcon(Ljava/lang/String;)(feature.getId())
 			};
-		
+
 			return {
-				strokeColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeColor(Ljava/lang/String;)(feature.getId()),
+				strokeColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeColor(*)(feature.getId(), feature.getProperty('colour_type')),
 				fillOpacity: 0.5,
 				strokeOpacity: 0.7,
-				fillColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureFillColor(Ljava/lang/String;)(feature.getId()),
+				fillColor: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureFillColor(*)(feature.getId(), feature.getProperty('colour_type')),
 				strokeWeight: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getFeatureStrokeWidth(Ljava/lang/String;)(feature.getId()),
 				icon: icon
 			};

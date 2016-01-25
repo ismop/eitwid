@@ -55,8 +55,14 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		view.clearMetadata();
 		
 		if(show) {
-			view.addMetadata(view.getTypeLabel(), view.getSectionTypeLabel());
-			view.addMetadata(view.getInternalIdLabel(), section.getId());
+			view.addMetadata(view.getSectionTypeLabel(), view.getInternalIdLabel() + ": " + section.getId());
+			view.addMetadata(view.getMessages().soilType(), section.getSoilTypeLabel() + " (" + section.getSoilTypeName() + ")");
+			view.addMetadata(view.getMessages().granularDensity(), view.getMessages().maxMinAvg(
+					section.getGranularDensityMax(), section.getGranularDensityMin(), section.getGranularDensityAvg()));
+			view.addMetadata(view.getMessages().bulkDensity(), view.getMessages().maxMinAvg(
+					section.getBulkDensityMax(), section.getBulkDensityMin(), section.getBulkDensityAvg()));
+			view.addMetadata(view.getMessages().filtrationCoefficient(), view.getMessages().maxMinAvg(
+					section.getFiltrationCoefficientMax(), section.getFiltrationCoefficientMin(), section.getFiltrationCoefficientAvg()));
 		}
 	}
 	

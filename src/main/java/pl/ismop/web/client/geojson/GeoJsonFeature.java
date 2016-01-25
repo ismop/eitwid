@@ -23,6 +23,7 @@ public class GeoJsonFeature {
 		properties.put("id", mapFeature.getId());
 		properties.put("name", mapFeature.getId());
 		properties.put("type", mapFeature.getFeatureType());
+		properties.putAll(mapFeature.getAdditionalFeatureProperties());
 	}
 
 	public String getId() {
