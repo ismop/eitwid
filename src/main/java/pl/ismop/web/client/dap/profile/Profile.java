@@ -6,7 +6,9 @@ import pl.ismop.web.client.geojson.Geometry;
 import pl.ismop.web.client.geojson.LineGeometry;
 import pl.ismop.web.client.geojson.MapFeature;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Profile extends MapFeature {
 	private String id;
@@ -23,6 +25,8 @@ public class Profile extends MapFeature {
 	
 	@Json(name = "device_aggregation_ ids")
 	private List<String> deviceAggregationIds;
+
+	private List<String> vendors;
 
 	public String getId() {
 		return id;
@@ -46,6 +50,16 @@ public class Profile extends MapFeature {
 
 	public boolean isAdjustBounds() {
 		return true;
+	}
+
+	@Override
+	public Map<String, String> getAdditionalFeatureProperties() {
+		Map<String, String> properties = new HashMap<>();
+		if (getVendors() != null && getVendors().size() > 0) {
+			properties.put("colour_type", getVendors().get(0));
+		}
+
+		return properties;
 	}
 
 	public void setId(String id) {
@@ -82,5 +96,13 @@ public class Profile extends MapFeature {
 
 	public void setDeviceAggregationIds(List<String> deviceAggregationIds) {
 		this.deviceAggregationIds = deviceAggregationIds;
+	}
+
+	public List<String> getVendors() {
+		return vendors;
+	}
+
+	public void setVendors(List<String> vendors) {
+		this.vendors = vendors;
 	}
 }

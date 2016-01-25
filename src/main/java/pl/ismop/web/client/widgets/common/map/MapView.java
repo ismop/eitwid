@@ -268,7 +268,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	
 	private String getFeatureFillColor(String featureId, String colourType) {
 		if(featureId.startsWith("profile")) {
-			return "#41a7ec";
+			return getProfileFillColor(colourType);
 		} else if(featureId.startsWith("section")) {
 			return getSectionFillColor(colourType);
 		} else if(featureId.startsWith("deviceAggregate")) {
@@ -276,6 +276,10 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		} else {
 			return "#aaaaaa";
 		}
+	}
+
+	private String getProfileFillColor(String colourType) {
+		return "neosentio".equals(colourType) ? "#eceff3" : "#f6e0dd";
 	}
 
 	private String getSectionFillColor(String colourType) {
@@ -293,7 +297,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 
 	private String getFeatureStrokeColor(String featureId, String colourType) {
 		if(featureId.startsWith("profile")) {
-			return "#41a7ec";
+			return getProfileStrokeColor(colourType);
 		} else if(featureId.startsWith("section")) {
 			return getSectionStrokeColor(colourType);
 		} else if(featureId.startsWith("deviceAggregate")) {
@@ -301,6 +305,10 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		} else {
 			return "#aaaaaa";
 		}
+	}
+
+	private String getProfileStrokeColor(String colourType) {
+		return "neosentio".equals(colourType) ? "#3880ff" : "#ff5538";
 	}
 
 	private String getSectionStrokeColor(String colourType) {
