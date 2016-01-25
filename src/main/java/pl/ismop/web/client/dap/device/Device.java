@@ -6,6 +6,7 @@ import pl.ismop.web.client.geojson.Geometry;
 import pl.ismop.web.client.geojson.MapFeature;
 import pl.ismop.web.client.geojson.PointGeometry;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,8 @@ public class Device extends MapFeature {
 	@Json(name = "metadata")
 	private Map<String, String> metadata;
 
+	private String vendor;
+
 	public String getId() {
 		return id;
 	}
@@ -65,6 +68,14 @@ public class Device extends MapFeature {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public Map<String, String> getAdditionalFeatureProperties() {
+		Map<String, String> properties = new HashMap<>();
+		properties.put("colour_type", getVendor());
+
+		return properties;
 	}
 
 	public void setId(String id) {
@@ -165,6 +176,14 @@ public class Device extends MapFeature {
 
 	public void setMetadata(Map<String, String> metadata) {
 		this.metadata = metadata;
+	}
+
+	public String getVendor() {
+		return vendor;
+	}
+
+	public void setVendor(String vendor) {
+		this.vendor = vendor;
 	}
 
 	public Float getLeveeDistanceMarker() {
