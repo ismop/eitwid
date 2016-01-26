@@ -36,6 +36,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				mapFeatures.put(mapFeature.getFeatureId(), mapFeature);
 				view.addGeoJson(geoJson(mapFeature, geometry));
 				if (mapFeature.isAdjustBounds()) {
+					view.resetLimits();
 					view.adjustBounds(collectAllPoints());
 				}
 			}

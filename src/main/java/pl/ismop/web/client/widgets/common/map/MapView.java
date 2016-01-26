@@ -30,7 +30,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	
 	private String elementId;
 	
-	private JavaScriptObject map, layer, infoWindow;
+	private JavaScriptObject map, layer, infoWindow, strictBounds, minZoom;
 	
 	private boolean initialized;
 
@@ -86,7 +86,13 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			applyBounds(bounds);
 		}
 	}
-	
+
+	@Override
+	public void resetLimits() {
+		minZoom = null;
+		strictBounds = null;
+	};
+
 	@Override
 	public void addButton(final String id, String label) {
 		Button button = new Button(label);
@@ -346,16 +352,45 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
 			zoom: 8,
 			scaleControl: true,
-			draggable: false,
+			draggable: true,
 			zoomControl: false,
 			streetViewControl: false,
-			scrollwheel: false,
+			scrollwheel: true,
 			disableDoubleClickZoom: true
 		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
 
+        var thisObject = this;
+        $wnd.google.maps.event.addListener(map, 'zoom_changed', function() {
+			if (!thisObject.@pl.ismop.web.client.widgets.common.map.MapView::minZoom) {
+                thisObject.@pl.ismop.web.client.widgets.common.map.MapView::minZoom = map.getZoom();
+                map.setOptions({ minZoom: map.getZoom() - 1 });
+			}
+        });
+
+        $wnd.google.maps.event.addListener(map, 'dragend', function() {
+			console.log("dragged " + map.getCenter())
+            strictBounds = thisObject.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds
+            if (strictBounds.contains(map.getCenter())) return;
+
+            // We're out of bounds - Move the map back within the bounds
+            var c = map.getCenter(),
+                x = c.lng(),
+                y = c.lat(),
+                maxX = strictBounds.getNorthEast().lng(),
+                maxY = strictBounds.getNorthEast().lat(),
+                minX = strictBounds.getSouthWest().lng(),
+                minY = strictBounds.getSouthWest().lat();
+
+            if (x < minX) x = minX;
+            if (x > maxX) x = maxX;
+            if (y < minY) y = minY;
+            if (y > maxY) y = maxY;
+
+            map.setCenter(new $wnd.google.maps.LatLng(y, x));
+        });
+
 		var layerData = new $wnd.google.maps.Data();
-		var thisObject = this;
 		layerData.setStyle(function(feature) {
             var colourType = feature.getProperty('colour_type');
 			var icon = {
@@ -410,6 +445,9 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 
 	private native void applyBounds(JavaScriptObject bounds) /*-{
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map.fitBounds(bounds);
+		if (!this.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds) {
+            this.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds = bounds;
+        }
 	}-*/;
 
 	private native void addMiddleButton(Element element) /*-{
