@@ -283,14 +283,15 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 
 	private String getSectionFillColor(String colourType) {
-		if(colourType.equals("A")) {
-			return "#cccccc";
-		} else if (colourType.equals("B")) {
-			return "#fbffb9";
-		} else if (colourType.equals("C")) {
-			return "#c0c776";
-		} else if (colourType.equals("D")) {
-			return "#f3f2f3";
+		switch (colourType) {
+			case "A":
+				return "#cccccc";
+			case "B":
+				return "#fbffb9";
+			case "C":
+				return "#c0c776";
+			case "D":
+				return "#f3f2f3";
 		}
 		return "#f9aa4b";
 	}
@@ -312,14 +313,15 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 
 	private String getSectionStrokeColor(String colourType) {
-		if(colourType.equals("A")) {
-			return "#a6a6a6";
-		} else if (colourType.equals("B")) {
-			return "#fff734";
-		} else if (colourType.equals("C")) {
-			return "#878f39";
-		} else if (colourType.equals("D")) {
-			return "#afbacc";
+		switch (colourType) {
+			case "A":
+				return "#a6a6a6";
+			case "B":
+				return "#fff734";
+			case "C":
+				return "#878f39";
+			case "D":
+				return "#afbacc";
 		}
 		return "#ec8108";
 	}
