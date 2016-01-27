@@ -346,6 +346,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				showSections(fetcher.getSections());
 				showDeviceAggregations();
 				slider.setEalierDate(fetcher.getEarliestMeasurementTime());
+				slider.setEnabled(true);
+				slider.setAllowEditDateIntervals(true);
 			}
 
 			private void showSections(Collection<Section> sections) {
@@ -395,6 +397,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					updateSelectedDevicesSeries();
 				}
 			});
+			slider.setEnabled(false);
 			view.setSlider(slider.getView());
 		}
 	}
