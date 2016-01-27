@@ -67,6 +67,11 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     }
 
     @Override
+    public void setEalierDate(Date date) {
+        startDate.setStartDate(date);
+    }
+
+    @Override
     public void setStartDate(Date date) {
         startDate.setValue(date);
         endDate.setStartDate(date);

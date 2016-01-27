@@ -53,6 +53,10 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
         onEndDateChanged(date);
     }
 
+    public void setEalierDate(Date date) {
+        view.setEalierDate(date);
+    }
+
     public Date getSelectedDate() {
         return getDate(view.getSelectedPoint());
     }

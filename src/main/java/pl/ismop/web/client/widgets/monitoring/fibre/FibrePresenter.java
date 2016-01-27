@@ -345,6 +345,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 				showSections(fetcher.getSections());
 				showDeviceAggregations();
+				slider.setEalierDate(fetcher.getEarliestMeasurementTime());
 			}
 
 			private void showSections(Collection<Section> sections) {
