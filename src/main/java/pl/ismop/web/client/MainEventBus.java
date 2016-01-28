@@ -39,7 +39,8 @@ import java.util.List;
 @Events(startPresenter = RootPresenter.class, historyOnStart = true)
 public interface MainEventBus extends EventBusWithLookup {
 	@InitHistory
-	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
+	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class,
+			deactivate = {VerticalSliceWizardPresenter.class, HorizontalSliceWizardPresenter.class})
 	void monitoringPanel();
 	
 	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
@@ -72,7 +73,8 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show);
 
-	@Event(handlers = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class, VerticalSliceWizardPresenter.class})
+	@Event(handlers = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class,
+			VerticalSliceWizardPresenter.class})
 	void profileClicked(Profile profile);
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
@@ -111,7 +113,8 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ComparisonPresenter.class)
 	void addPanel(String panelTitle, IPanelContent<?, ?> content);
 
-	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class, HorizontalSlicePresenter.class, VerticalSlicePresenter.class})
+	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class,
+			HorizontalSlicePresenter.class, VerticalSlicePresenter.class})
 	void dateChanged(Date selectedDate);
 
 	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })
@@ -179,32 +182,39 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ChartWizardPresenter.class)
 	void timelineSelectionChanged();
 
-	@Event(handlers = HorizontalSliceWizardPresenter.class, activate = HorizontalSliceWizardPresenter.class,
-			deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
+	@Event(handlers = HorizontalSliceWizardPresenter.class,
+			activate = HorizontalSliceWizardPresenter.class,
+			deactivate = LeveeNavigatorPresenter.class)
 	void showHorizontalCrosssectionWizard(Experiment experiment);
 
-	@Event(handlers = HorizontalSliceWizardPresenter.class, activate = HorizontalSliceWizardPresenter.class,
-			deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
-	void showHorizontalCrosssectionWizardWithConfig(HorizontalCrosssectionConfiguration configuration);
+	@Event(handlers = HorizontalSliceWizardPresenter.class,
+			activate = HorizontalSliceWizardPresenter.class,
+			deactivate = LeveeNavigatorPresenter.class)
+	void showHorizontalCrosssectionWizardWithConfig(
+			HorizontalCrosssectionConfiguration configuration);
 
 	@Event(handlers = HorizontalSlicePresenter.class)
 	void updateHorizontalSliceConfiguration(HorizontalCrosssectionConfiguration configuration);
 
-	@Event(activate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class}, deactivate = HorizontalSliceWizardPresenter.class)
+	@Event(activate = LeveeNavigatorPresenter.class,
+			deactivate = HorizontalSliceWizardPresenter.class)
 	void horizontalCrosssectionWizardHidden();
 
-	@Event(handlers = VerticalSliceWizardPresenter.class, activate = VerticalSliceWizardPresenter.class,
-			deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	@Event(handlers = VerticalSliceWizardPresenter.class,
+			activate = VerticalSliceWizardPresenter.class,
+			deactivate = LeveeNavigatorPresenter.class)
 	void showVerticalCrosssectionWizard(Experiment experiment);
 	
-	@Event(handlers = VerticalSliceWizardPresenter.class, activate = VerticalSliceWizardPresenter.class,
-			deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	@Event(handlers = VerticalSliceWizardPresenter.class,
+			activate = VerticalSliceWizardPresenter.class,
+			deactivate = LeveeNavigatorPresenter.class)
 	void showVerticalCrosssectionWizardWithConfig(VerticalCrosssectionConfiguration configuration);
 
 	@Event(handlers = VerticalSlicePresenter.class)
 	void updateVerticalSliceConfiguration(VerticalCrosssectionConfiguration configuration);
 	
-	@Event(activate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class}, deactivate = VerticalSliceWizardPresenter.class)
+	@Event(activate = LeveeNavigatorPresenter.class,
+			deactivate = VerticalSliceWizardPresenter.class)
 	void verticalCrosssectionWizardHidden();
 	
 	@Event(handlers = ErrorPresenter.class)

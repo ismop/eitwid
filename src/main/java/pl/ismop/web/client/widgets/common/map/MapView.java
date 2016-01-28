@@ -1,5 +1,13 @@
 package pl.ismop.web.client.widgets.common.map;
 
+import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.gwtbootstrap3.client.ui.Button;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -12,14 +20,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
-import org.gwtbootstrap3.client.ui.Button;
+
 import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
 
 public class MapView extends Composite implements IMapView, ReverseViewInterface<IMapPresenter> {
 	private static MapViewUiBinder uiBinder = GWT.create(MapViewUiBinder.class);
@@ -35,6 +37,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	private boolean initialized;
 
 	private Set<String> selected = new HashSet<>();
+	
 	private Set<String> highlighted = new HashSet<>();
 
 	@UiField
@@ -158,32 +161,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			}
 		}
 	}-*/;
-
-	private void addHighlighted(String featureId) {
-		highlighted.add(featureId);
-	}
-
-	private void removeHighlighted(String featureId) {
-		highlighted.remove(featureId);
-	}
-
-	private boolean isHighlighted(String featureId) {
-		return highlighted.contains(featureId);
-	}
-
-	private void addSelected(String featureId) {
-		selected.add(featureId);
-	}
-
-	private void removeSelected(String featureId) {
-		selected.remove(featureId);
-	}
-
-	private boolean isSelected(String featureId) {
-		return selected.contains(featureId);
-	}
-
-
 
 	@Override
 	public native void addGeoJson(String geoJsonValue) /*-{
@@ -348,6 +325,30 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		}
 	}
 
+	private void addHighlighted(String featureId) {
+		highlighted.add(featureId);
+	}
+
+	private void removeHighlighted(String featureId) {
+		highlighted.remove(featureId);
+	}
+
+	private boolean isHighlighted(String featureId) {
+		return highlighted.contains(featureId);
+	}
+
+	private void addSelected(String featureId) {
+		selected.add(featureId);
+	}
+
+	private void removeSelected(String featureId) {
+		selected.remove(featureId);
+	}
+
+	private boolean isSelected(String featureId) {
+		return selected.contains(featureId);
+	}
+
 	private native void initMap() /*-{
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
 			zoom: 8,
@@ -445,6 +446,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 
 	private native void applyBounds(JavaScriptObject bounds) /*-{
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map.fitBounds(bounds);
+		
 		if (!this.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds) {
             this.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds = bounds;
         }

@@ -115,7 +115,8 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	public void onProfileClicked(final Profile profile) {
 		if(profilePresenter == null) {
 			profilePresenter = eventBus.addHandler(SideProfilePresenter.class);
-			profilePresenter.setWidthAndHeight(view.getProfileContainerWidth(), view.getProfileContainerHeight());
+			profilePresenter.setWidthAndHeight(view.getProfileContainerWidth(),
+					view.getProfileContainerHeight());
 			view.setProfile(profilePresenter.getView());
 		}
 		
@@ -247,7 +248,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				if(device != null) {
 					eventBus.deviceSelected(device, false);
 					selectedDevices.remove(device.getId());
-					profilePresenter.markDevice(device.getId(), false);
+					
+					if (profilePresenter != null) {
+						profilePresenter.markDevice(device.getId(), false);
+					}
 				}
 			}
 			
@@ -305,7 +309,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			if(selectedDevices.containsKey(deviceId)) {
 				selectedDevices.remove(deviceId);
 				eventBus.deviceSelected(profileDevices.get(deviceId), false);
-				profilePresenter.markDevice(deviceId, false);
+				
+				if (profilePresenter != null) {
+					profilePresenter.markDevice(deviceId, false);
+				}
 				
 				for(DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
 					if(deviceAggregate.getDeviceIds().containsAll(deviceIds) && selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
@@ -318,7 +325,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			} else {
 				selectedDevices.put(deviceId, profileDevices.get(deviceId));
 				eventBus.deviceSelected(profileDevices.get(deviceId), true);
-				profilePresenter.markDevice(deviceId, true);
+				
+				if (profilePresenter != null) {
+					profilePresenter.markDevice(deviceId, true);
+				}
 				
 				boolean found = false;
 				
