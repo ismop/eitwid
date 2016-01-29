@@ -186,4 +186,9 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	public MonitoringSidePanelMessages getMessages() {
 		return messages;
 	}
+
+	@Override
+	public void showChart(boolean show) {
+		chart.setVisible(show);
+	}
 }

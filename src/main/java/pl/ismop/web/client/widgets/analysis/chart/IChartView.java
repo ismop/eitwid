@@ -11,15 +11,17 @@ import java.util.Map;
  * Created by marek on 07.10.15.
  */
 public interface IChartView {
-    ChartMessages getMessages();
+	interface IChartPresenter {
+		void timelineSelected(Timeline timeline);
+	}
+	
     void showLoading(String message);
+    
     void setSeries(Map<Timeline, List<DateChartPoint>> timelineToMeasurements);
 
     void selectDate(Date selectedDate, String color);
 
     void setInterval(Date startDate, Date endDate);
 
-    interface IChartPresenter {
-        void timelineSelected(Timeline timeline);
-    }
+	String getLoadingMeasurementsMessage();
 }

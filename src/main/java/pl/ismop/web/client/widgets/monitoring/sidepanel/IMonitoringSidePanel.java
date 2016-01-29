@@ -54,4 +54,6 @@ public interface IMonitoringSidePanel extends IsWidget {
 	String getNoMeasurementsForDeviceMessage();
 
 	MonitoringSidePanelMessages getMessages();
+
+	void showChart(boolean show);
 }

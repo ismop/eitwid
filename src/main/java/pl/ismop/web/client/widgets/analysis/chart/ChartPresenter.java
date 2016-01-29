@@ -1,9 +1,16 @@
 package pl.ismop.web.client.widgets.analysis.chart;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -17,29 +24,25 @@ import pl.ismop.web.client.widgets.common.DateChartPoint;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 
-import java.util.*;
-
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         implements IPanelContent<IChartView, MainEventBus>, IChartView.IChartPresenter {
     private final DapController dapController;
+    
     private final IsmopProperties properties;
+    
     private Experiment selectedExperiment;
-    private List<Timeline> timelines;
-    ChartMessages messages;
+    
     private ISelectionManager selectionManager;
+    
     private ChartWizardPresenter wizard;
+    
     private Device selectedDevice;
 
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
         this.properties = properties;
-    }
-
-    @Override
-    public void bind() {
-        messages = getView().getMessages();
     }
 
     @Override
@@ -127,9 +130,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     }
 
     public void setTimelines(List<Timeline> timelines) {
-        getView().showLoading(messages.loadingMeasurements());
+        getView().showLoading(getView().getLoadingMeasurementsMessage());
 
-        this.timelines = timelines;
         final Map<String, Timeline> idToRealTimeline = new HashMap<>();
         final Map<String, Timeline> idToScenarioTimeline = new HashMap<>();
         selectionManager.clear();
@@ -141,6 +143,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             } else {
                 idToRealTimeline.put(timeline.getId(), timeline);
             }
+            
             selectionManager.add(timeline.getParameter().getDevice());
         }
 
@@ -159,24 +162,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         }
     }
 
-    private void loadScenarioTimelines(final Map<Timeline, List<DateChartPoint>> realTimelineToMeasurements,
-                                       final Map<String, Timeline> idToScenarioTimeline) {
-        if (idToScenarioTimeline.size() > 0) {
-            GWT.log("Loading scenarios measurements");
-            dapController.getAllMeasurements(idToScenarioTimeline.keySet(),
-                    new ChartPointMeasurementsCallback(idToScenarioTimeline, new ChartPointsCallback() {
-                        @Override
-                        public void processChartPoints(Map<Timeline, List<DateChartPoint>> scenarioTimelineToMeasurements) {
-                            realTimelineToMeasurements.putAll(scenarioTimelineToMeasurements);
-                            getView().setSeries(realTimelineToMeasurements);
-                        }
-                    }));
-        } else {
-            getView().setSeries(realTimelineToMeasurements);
-        }
-    }
-
-    @SuppressWarnings("unused")
     public void onDateChanged(Date selectedDate) {
         getView().selectDate(selectedDate, properties.selectionColor());
     }
@@ -190,7 +175,25 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         if (selectedDevice != null) {
             selectionManager.unselect(selectedDevice);
         }
+        
         selectedDevice = timeline.getParameter().getDevice();
         selectionManager.select(selectedDevice);
     }
+
+	private void loadScenarioTimelines(final Map<Timeline, List<DateChartPoint>> realTimelineToMeasurements,
+	                                   final Map<String, Timeline> idToScenarioTimeline) {
+	    if (idToScenarioTimeline.size() > 0) {
+	        GWT.log("Loading scenarios measurements");
+	        dapController.getAllMeasurements(idToScenarioTimeline.keySet(),
+	                new ChartPointMeasurementsCallback(idToScenarioTimeline, new ChartPointsCallback() {
+	                    @Override
+	                    public void processChartPoints(Map<Timeline, List<DateChartPoint>> scenarioTimelineToMeasurements) {
+	                        realTimelineToMeasurements.putAll(scenarioTimelineToMeasurements);
+	                        getView().setSeries(realTimelineToMeasurements);
+	                    }
+	                }));
+	    } else {
+	        getView().setSeries(realTimelineToMeasurements);
+	    }
+	}
 }

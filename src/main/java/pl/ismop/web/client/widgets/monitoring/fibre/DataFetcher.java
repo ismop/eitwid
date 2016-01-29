@@ -252,6 +252,11 @@ public class DataFetcher implements IDataFetcher {
         chartSeries.setName(parameter.getParameterName());
         chartSeries.setUnit(parameter.getMeasurementTypeUnit());
         chartSeries.setLabel(parameter.getMeasurementTypeName());
+        
+        if (measurements.size() > 0) {
+        	chartSeries.setTimelineId(measurements.get(0).getTimelineId());
+        }
+        
         Number[][] values = new Number[measurements.size()][2];
         chartSeries.setValues(values);
 

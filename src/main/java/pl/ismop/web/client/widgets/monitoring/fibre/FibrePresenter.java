@@ -43,6 +43,7 @@ import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
@@ -326,6 +327,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		} else {
 			deviceChart = eventBus.addHandler(ChartPresenter.class);
 			deviceChart.initChart();
+			deviceChart.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
+					eventBus, deviceChart));
 			view.setSelectedDevices(deviceChart.getView());
 		}
 	}

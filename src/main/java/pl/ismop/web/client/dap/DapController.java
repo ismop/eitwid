@@ -284,31 +284,36 @@ public class DapController {
 			}
 		});
 	}
-
-	public void getMeasurements(String timelineId, final MeasurementsCallback callback) {
-		getMeasurements(timelineId, monthEarlier(), new Date(), callback);
-	}
 	
-	public void getMeasurementsWithQuantity(String timelineId, int quantity, final MeasurementsCallback callback) {
-		getMeasurementsWithQuantity(timelineId, monthEarlier(), new Date(), quantity, callback);
+	public void getMeasurementsWithQuantity(String timelineId, int quantity,
+			MeasurementsCallback callback) {
+		measurementService.getMeasurementsWithQuantity(timelineId, quantity,
+				new MeasurementsRestCallback(callback));
 	}
 
-	public void getMeasurements(String timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
+	public void getMeasurements(String timelineId, Date startDate, Date endDate,
+			MeasurementsCallback callback) {
 		String until = converter.format(endDate);
 		String from = converter.format(startDate);
-		measurementService.getMeasurements(timelineId, from, until, new MeasurementsRestCallback(callback));
+		measurementService.getMeasurements(timelineId, from, until,
+				new MeasurementsRestCallback(callback));
 	}
 	
-	public void getMeasurementsWithQuantity(String timelineId, Date startDate, Date endDate, int quantity, final MeasurementsCallback callback) {
-		measurementService.getMeasurementsWithQuantity(timelineId, quantity, new MeasurementsRestCallback(callback));
+	public void getMeasurementsWithQuantityAndTime(List<String> timelineIds, Date startDate, Date endDate,
+			int quantity, MeasurementsCallback callback) {
+		String from = converter.format(startDate);
+		String until = converter.format(endDate);
+		measurementService.getMeasurementsWithQuantityAndTime(merge(timelineIds), from, until,
+				quantity, new MeasurementsRestCallback(callback));
 	}
 
-	public void getMeasurements(Collection<String> timelineId, Date startDate, Date endDate, final MeasurementsCallback callback) {
-		getMeasurements(merge(timelineId), startDate, endDate, callback);
+	public void getMeasurements(Collection<String> timelineIds, Date startDate, Date endDate,
+			MeasurementsCallback callback) {
+		getMeasurements(merge(timelineIds), startDate, endDate, callback);
 	}
 
 	public void getAllMeasurements(Collection<String> timelineIds, final MeasurementsCallback callback) {
-		measurementService.getAllLastMeasurements(merge(timelineIds), new MethodCallback<MeasurementsResponse>() {
+		measurementService.getAllMeasurements(merge(timelineIds), new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
