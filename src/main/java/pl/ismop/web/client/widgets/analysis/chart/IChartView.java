@@ -11,17 +11,5 @@ import java.util.Map;
  * Created by marek on 07.10.15.
  */
 public interface IChartView {
-	interface IChartPresenter {
-		void timelineSelected(Timeline timeline);
-	}
-	
-    void showLoading(String message);
-    
-    void setSeries(Map<Timeline, List<DateChartPoint>> timelineToMeasurements);
-
-    void selectDate(Date selectedDate, String color);
-
-    void setInterval(Date startDate, Date endDate);
-
-	String getLoadingMeasurementsMessage();
+    void setChart(pl.ismop.web.client.widgets.common.chart.IChartView view);
 }

@@ -1,46 +1,27 @@
 package pl.ismop.web.client.widgets.common.chart;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.moxieapps.gwt.highcharts.client.Axis.Type;
-import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.Legend;
-import org.moxieapps.gwt.highcharts.client.Point;
-import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.ToolTip;
-import org.moxieapps.gwt.highcharts.client.ToolTipData;
-import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
-import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
-import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEventHandler;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
-
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-
+import org.moxieapps.gwt.highcharts.client.Axis.Type;
+import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
+import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.events.*;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.widgets.common.chart.IChartView.IChartPresenter;
 
+import java.util.*;
+
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		implements IChartPresenter, ChartSelectionEventHandler {
-	
+
 	private Chart chart;
 	
 	private int height;
@@ -54,11 +35,20 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	private boolean seriesHoverListener;
 	
 	private ZoomDataCallback zoomDataCallback;
-	
+
+	private PlotLine currentTimePlotLine;
+
+	private DeviceSelectHandler deviceSelectHandler;
+
 	public interface ZoomDataCallback {
 		void onZoom(Date startDate, Date endDate, List<String> timelineIds, DataCallback callback);
 	}
-	
+
+	public interface DeviceSelectHandler {
+		void select(ChartSeries series);
+		void unselect(ChartSeries series);
+	}
+
 	public interface DataCallback {
 		void updateData(Map<String, Number[][]> data);
 	}
@@ -67,6 +57,19 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		dataSeriesMap = new HashMap<>();
 		chartSeriesMap = new HashMap<>();
 		yAxisMap = new HashMap<>();
+
+		deviceSelectHandler = new DeviceSelectHandler() {
+
+			@Override
+			public void select(ChartSeries series) {
+				eventBus.deviceSeriesHover(series.getDeviceId(), true);
+			}
+
+			@Override
+			public void unselect(ChartSeries series) {
+				eventBus.deviceSeriesHover(series.getDeviceId(), false);
+			}
+		};
 	}
 
 	public void addChartSeries(ChartSeries series) {
@@ -106,7 +109,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 						@Override
 						public boolean onMouseOver(SeriesMouseOverEvent event) {
 							if(seriesHoverListener) {
-								eventBus.deviceSeriesHover(dataSeriesMap.get(event.getSeriesId()).getDeviceId(), true);
+								deviceSelectHandler.select(dataSeriesMap.get(event.getSeriesId()));
 							}
 
 							return true;
@@ -116,7 +119,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 						@Override
 						public boolean onMouseOut(SeriesMouseOutEvent event) {
 							if(seriesHoverListener) {
-								eventBus.deviceSeriesHover(dataSeriesMap.get(event.getSeriesId()).getDeviceId(), false);
+								deviceSelectHandler.unselect(dataSeriesMap.get(event.getSeriesId()));
 							}
 
 							return true;
@@ -268,6 +271,16 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		return true;
 	}
 
+	public void setInterval(Date startDate, Date endDate) {
+		initChart();
+		chart.getXAxis().setMin(startDate.getTime());
+        chart.getXAxis().setMax(endDate.getTime());
+	}
+
+	public void setDeviceSelectHandler(DeviceSelectHandler deviceSelectHandler) {
+		this.deviceSelectHandler = deviceSelectHandler;
+	}
+
 	private Number getYAxisIndex(ChartSeries series) {
 		String yAxisLabel = series.getLabel() + ", [" + series.getUnit() + "]";
 		
@@ -286,6 +299,16 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			
 			return index;
 		}
+	}
+
+	public void selectDate(Date selectedDate, String color) {
+		initChart();
+		if (currentTimePlotLine != null) {
+			chart.getXAxis().removePlotLine(currentTimePlotLine);
+		}
+		currentTimePlotLine = chart.getXAxis().createPlotLine().
+				setWidth(2).setColor(color).setValue(selectedDate.getTime());
+		chart.getXAxis().addPlotLines(currentTimePlotLine);
 	}
 
 	private void clearDataSeries() {
