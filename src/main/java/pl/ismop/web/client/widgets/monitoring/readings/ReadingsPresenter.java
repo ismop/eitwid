@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 @Presenter(view = ReadingsView.class)
-public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus> implements IReadingsPresenter {
+public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus>
+		implements IReadingsPresenter {
 	private static final String PICK_VALUE = "pick";
 
 	private DapController dapController;
@@ -120,12 +121,16 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 
 	@Override
 	public void onAdditionalReadingsPicked(String parameterId) {
-		if(additionalParameters.containsKey(parameterId)) {
+		if(additionalParameters.containsKey(parameterId)
+				&& !chosenAdditionalReadings.contains(parameterId)) {
 			if(chosenAdditionalReadings.size() == 0) {
 				view.showNoAdditionalReadingsLabel(false);
 			}
 			
-			view.addAdditionalReadingsLabel(parameterId, additionalParameters.get(parameterId).getParameterName());
+			Parameter parameter = additionalParameters.get(parameterId);
+			view.addAdditionalReadingsLabel(parameterId,
+					additionalDevices.get(parameter.getDeviceId()).getCustomId()
+					+ " - " + parameter.getParameterName());
 			view.setSelectedAdditionalReadings(PICK_VALUE);
 			chosenAdditionalReadings.add(parameterId);
 			addAdditionalReadings(parameterId);
@@ -158,7 +163,8 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			@Override
 			public void processContexts(List<Context> contexts) {
 				if(contexts.size() > 0) {
-					dapController.getTimeline(contexts.get(0).getId(), parameterId, new TimelinesCallback() {
+					dapController.getTimeline(contexts.get(0).getId(), parameterId,
+							new TimelinesCallback() {
 						@Override
 						public void onError(ErrorDetails errorDetails) {
 							eventBus.showError(errorDetails);
@@ -169,7 +175,8 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 						public void processTimelines(List<Timeline> timelines) {
 							if(timelines.size() > 0) {
 								final Timeline timeline = timelines.get(0);
-								dapController.getMeasurementsWithQuantity(timeline.getId(), 1000, new MeasurementsCallback() {
+								dapController.getMeasurementsWithQuantity(timeline.getId(), 1000,
+										new MeasurementsCallback() {
 									@Override
 									public void onError(ErrorDetails errorDetails) {
 										eventBus.showError(errorDetails);
@@ -177,25 +184,32 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 									}
 									
 									@Override
-									public void processMeasurements(List<Measurement> measurements) {
+									public void processMeasurements(
+											List<Measurement> measurements) {
 										chartPresenter.setLoadingState(false);
 										
 										if(measurements.size() > 0) {
 											ChartSeries chartSeries = new ChartSeries();
-											String  additionalDeviceId = additionalParameters.get(parameterId).getDeviceId();
-											chartSeries.setName(additionalDevices.get(additionalDeviceId).getCustomId() +
-													" (" + additionalParameters.get(parameterId).getMeasurementTypeName() + ")");
+											String  additionalDeviceId = additionalParameters.get(
+													parameterId).getDeviceId();
+											chartSeries.setName(additionalDevices
+													.get(additionalDeviceId).getCustomId() +
+													" (" + additionalParameters.get(parameterId)
+													.getMeasurementTypeName() + ")");
 											chartSeries.setDeviceId(additionalDeviceId);
 											chartSeries.setParameterId(parameterId);
-											chartSeries.setLabel(additionalParameters.get(parameterId).getMeasurementTypeName());
-											chartSeries.setUnit(additionalParameters.get(parameterId).getMeasurementTypeUnit());
+											chartSeries.setLabel(additionalParameters
+													.get(parameterId).getMeasurementTypeName());
+											chartSeries.setUnit(additionalParameters
+													.get(parameterId).getMeasurementTypeUnit());
 											chartSeries.setTimelineId(timeline.getId());
 											
 											Number[][] values = new Number[measurements.size()][2];
 											int index = 0;
 											
 											for(Measurement measurement : measurements) {
-												values[index][0] = measurement.getTimestamp().getTime();
+												values[index][0] = measurement.getTimestamp()
+														.getTime();
 												values[index][1] = measurement.getValue();
 												index++;
 											}
@@ -222,6 +236,8 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 		view.showNoAdditionalReadingsLabel(true);
 		view.addAdditionalReadingsOption(PICK_VALUE, view.pickAdditionalReadingLabel());
 		additionalDevices.clear();
+		additionalParameters.clear();
+		chosenAdditionalReadings.clear();
 		dapController.getDevicesForType("weather_station", new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
@@ -248,7 +264,9 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 						additionalParameters.clear();
 						
 						for(Parameter parameter : parameters) {
-							view.addAdditionalReadingsOption(parameter.getId(), parameter.getParameterName());
+							view.addAdditionalReadingsOption(parameter.getId(),
+									additionalDevices.get(parameter.getDeviceId()).getCustomId()
+									+ " - " + parameter.getParameterName());
 							additionalParameters.put(parameter.getId(), parameter);
 						}
 					}
