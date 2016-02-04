@@ -15,23 +15,39 @@ public interface MeasurementService  extends RestService {
 	@GET
 	@Path("measurements?timeline_id={timelineIds}&time_from={timeFrom}&time_to={timeTo}")
 	void getMeasurements(@PathParam("timelineIds") String timelineIds,
-						 @PathParam("timeFrom") String timeFrom, @PathParam("timeTo") String timeTo,
-						 MethodCallback<MeasurementsResponse> callback);
+			 @PathParam("timeFrom") String timeFrom, @PathParam("timeTo") String timeTo,
+			 MethodCallback<MeasurementsResponse> callback);
 
 	@GET
 	@Path("measurements?timeline_id={timelineIds}&time_from={timeFrom}&time_to={timeTo}&limit=last")
 	void getLastMeasurements(@PathParam("timelineIds") String timelineIds,
-							 @PathParam("timeFrom") String timeFrom, @PathParam("timeTo") String timeTo,
-						 	 MethodCallback<MeasurementsResponse> callback);
+			 @PathParam("timeFrom") String timeFrom,
+			 @PathParam("timeTo") String timeTo,
+		 	 MethodCallback<MeasurementsResponse> callback);
+	
+	@GET
+	@Path("measurements?timeline_id={timelineIds}&time_to={timeTo}&limit=last")
+	void getLastMeasurementsOnlyUntil(@PathParam("timelineIds") String timelineIds,
+			 @PathParam("timeTo") String timeTo,
+		 	 MethodCallback<MeasurementsResponse> callback);
 
 	@GET
-	@Path("measurements?timeline_id={timelineIds}&time_from={timeFrom}&time_to={timeTo}&quantity={quantity}")
+	@Path("measurements?timeline_id={timelineIds}&quantity={quantity}")
 	void getMeasurementsWithQuantity(@PathParam("timelineIds") String timelineIds,
-						 @PathParam("timeFrom") String timeFrom, @PathParam("timeTo") String timeTo, @PathParam("quantity") int quantity,
-						 MethodCallback<MeasurementsResponse> callback);
+			@PathParam("quantity") int quantity,
+			MethodCallback<MeasurementsResponse> callback);
+	
+	@GET
+	@Path("measurements?timeline_id={timelineIds}&time_from={timeFrom}&time_to={timeTo}"
+			+ "&quantity={quantity}")
+	void getMeasurementsWithQuantityAndTime(@PathParam("timelineIds") String timelineIds,
+			@PathParam("timeFrom") String timeFrom,
+			@PathParam("timeTo") String timeTo,
+			@PathParam("quantity") int quantity,
+			MethodCallback<MeasurementsResponse> callback);
 
 	@GET
 	@Path("measurements?timeline_id={timelineIds}")
-	void getAllLastMeasurements(@PathParam("timelineIds") String timelineIds,
-							 	MethodCallback<MeasurementsResponse> callback);
+	void getAllMeasurements(@PathParam("timelineIds") String timelineIds,
+			MethodCallback<MeasurementsResponse> callback);
 }

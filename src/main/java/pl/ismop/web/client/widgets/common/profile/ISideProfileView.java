@@ -29,4 +29,8 @@ public interface ISideProfileView extends IsWidget {
 	void drawDevices(Map<List<String>, List<Double>> devicePositions, double xShift);
 
 	void markDevice(String deviceId, boolean mark);
+
+	boolean canRender();
+
+	String cannotRenderMessages();
 }

@@ -6,4 +6,5 @@ public interface SideProfileViewMessages extends Messages {
 	String profileName(String profileName);
 	String noMeasurementLabel();
 	String backLabel();
+	String cannotRender();
 }

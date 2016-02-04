@@ -11,6 +11,7 @@ import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.geojson.MapFeature;
 import pl.ismop.web.client.widgets.analysis.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
@@ -38,7 +39,8 @@ import java.util.List;
 @Events(startPresenter = RootPresenter.class, historyOnStart = true)
 public interface MainEventBus extends EventBusWithLookup {
 	@InitHistory
-	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
+	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class,
+			deactivate = {VerticalSliceWizardPresenter.class, HorizontalSliceWizardPresenter.class})
 	void monitoringPanel();
 	
 	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
@@ -71,7 +73,8 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show);
 
-	@Event(handlers = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class, VerticalSliceWizardPresenter.class})
+	@Event(handlers = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class,
+			VerticalSliceWizardPresenter.class})
 	void profileClicked(Profile profile);
 
 	@Event(handlers = LeveeNavigatorPresenter.class)
@@ -110,52 +113,65 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ComparisonPresenter.class)
 	void addPanel(String panelTitle, IPanelContent<?, ?> content);
 
-	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class, HorizontalSlicePresenter.class, VerticalSlicePresenter.class})
+	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class,
+			HorizontalSlicePresenter.class, VerticalSlicePresenter.class})
 	void dateChanged(Date selectedDate);
 
 	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })
 	void experimentChanged(Experiment selectedExperiment);
 
 	/**
-	 * Select device on minima. Many devices can be selected on minimap (yellow marker will be used).
-	 * To unselect device use {@link #unselectDevice(Device)}.
+	 * Add map feature into minimap.
+	 * To remove feature from the minimap use {@link #rm(MapFeature)}.
 	 *
-	 * @param device Device to be selected.
-	 */
+	 * @param mapFeature Map feature te be added.
+     */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
-	void selectDevice(Device device);
+	void add(MapFeature mapFeature);
 
 	/**
-	 * Unselect device. To select device use {@link #selectDevice(Device)}.
+	 * Remove map feature from minimap.
+	 * To add feature from the minimap use {@link #add(MapFeature)}.
 	 *
-	 * @param device Device to be unselected
+	 * @param mapFeature Map feature te be removed.
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
-	void unselectDevice(Device device);
+	void rm(MapFeature mapFeature);
 
 	/**
-	 * Show device. Only one device can be shown on minimap in the same time (red marker will be used).
+	 * Select map feature on minimap.
+	 * To unselect map feature use {@link #unselect(MapFeature)}.
 	 *
-	 * @param device Device to be shown.
+	 * @param mapFeature MapFeature to be selected.
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
-	void showDevice(Device device);
+	void select(MapFeature mapFeature);
 
 	/**
-	 * Show section. Only one section can be shown on minimap in the same time.
+	 * Unselect device. To select device use {@link #select(MapFeature)}.
 	 *
-	 * @param section Section to be shown.
+	 * @param mapFeature MapFeature to be unselected.
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
-	void showSection(Section section);
+	void unselect(MapFeature mapFeature);
 
 	/**
-	 * Show profile. Only one profile can be shown on minimap in the same time.
+	 * Highlight map feature on minimap.
+	 * To unhighlight map feature use {@link #unhighlight(MapFeature)}.
 	 *
-	 * @param profile Profile to be shown.
+	 * @param mapFeature MapFeature to be highlighted.
 	 */
 	@Event(handlers = AnalysisSidePanelPresenter.class )
-	void showProfile(Profile profile);
+	void highlight(MapFeature mapFeature);
+
+	/**
+	 * Unhighlight map feature on minimap.
+	 * To highlight map feature use {@link #highlight(MapFeature)}.
+	 *
+	 * @param mapFeature MapFeature to be unhighlighted.
+	 */
+	@Event(handlers = AnalysisSidePanelPresenter.class )
+	void unhighlight(MapFeature mapFeature);
 
 	/**
 	 * Remove all selections and shows from the minimap.
@@ -166,32 +182,39 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = ChartWizardPresenter.class)
 	void timelineSelectionChanged();
 
-	@Event(handlers = HorizontalSliceWizardPresenter.class, activate = HorizontalSliceWizardPresenter.class,
-			deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
+	@Event(handlers = HorizontalSliceWizardPresenter.class,
+			activate = HorizontalSliceWizardPresenter.class,
+			deactivate = LeveeNavigatorPresenter.class)
 	void showHorizontalCrosssectionWizard(Experiment experiment);
 
-	@Event(handlers = HorizontalSliceWizardPresenter.class, activate = HorizontalSliceWizardPresenter.class,
-			deactivate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
-	void showHorizontalCrosssectionWizardWithConfig(HorizontalCrosssectionConfiguration configuration);
+	@Event(handlers = HorizontalSliceWizardPresenter.class,
+			activate = HorizontalSliceWizardPresenter.class,
+			deactivate = LeveeNavigatorPresenter.class)
+	void showHorizontalCrosssectionWizardWithConfig(
+			HorizontalCrosssectionConfiguration configuration);
 
 	@Event(handlers = HorizontalSlicePresenter.class)
 	void updateHorizontalSliceConfiguration(HorizontalCrosssectionConfiguration configuration);
 
-	@Event(activate = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class}, deactivate = HorizontalSliceWizardPresenter.class)
+	@Event(activate = LeveeNavigatorPresenter.class,
+			deactivate = HorizontalSliceWizardPresenter.class)
 	void horizontalCrosssectionWizardHidden();
 
-	@Event(handlers = VerticalSliceWizardPresenter.class, activate = VerticalSliceWizardPresenter.class,
-			deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	@Event(handlers = VerticalSliceWizardPresenter.class,
+			activate = VerticalSliceWizardPresenter.class,
+			deactivate = LeveeNavigatorPresenter.class)
 	void showVerticalCrosssectionWizard(Experiment experiment);
 	
-	@Event(handlers = VerticalSliceWizardPresenter.class, activate = VerticalSliceWizardPresenter.class,
-			deactivate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class})
+	@Event(handlers = VerticalSliceWizardPresenter.class,
+			activate = VerticalSliceWizardPresenter.class,
+			deactivate = LeveeNavigatorPresenter.class)
 	void showVerticalCrosssectionWizardWithConfig(VerticalCrosssectionConfiguration configuration);
 
 	@Event(handlers = VerticalSlicePresenter.class)
 	void updateVerticalSliceConfiguration(VerticalCrosssectionConfiguration configuration);
 	
-	@Event(activate = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class}, deactivate = VerticalSliceWizardPresenter.class)
+	@Event(activate = LeveeNavigatorPresenter.class,
+			deactivate = VerticalSliceWizardPresenter.class)
 	void verticalCrosssectionWizardHidden();
 	
 	@Event(handlers = ErrorPresenter.class)

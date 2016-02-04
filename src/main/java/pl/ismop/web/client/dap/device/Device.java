@@ -1,13 +1,16 @@
 package pl.ismop.web.client.dap.device;
 
+import org.fusesource.restygwt.client.Json;
+import pl.ismop.web.client.dap.deviceaggregation.PointShape;
+import pl.ismop.web.client.geojson.Geometry;
+import pl.ismop.web.client.geojson.MapFeature;
+import pl.ismop.web.client.geojson.PointGeometry;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.fusesource.restygwt.client.Json;
-
-import pl.ismop.web.client.dap.deviceaggregation.PointShape;
-
-public class Device {
+public class Device extends MapFeature {
 	private String id;
 	
 	@Json(name = "custom_id")
@@ -45,8 +48,34 @@ public class Device {
 	@Json(name = "metadata")
 	private Map<String, String> metadata;
 
+	private String vendor;
+
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String getFeatureType() {
+		return "device";
+	}
+
+	@Override
+	public Geometry getFeatureGeometry() {
+		if (getPlacement() != null) {
+			PointGeometry pointGeometry = new PointGeometry();
+			pointGeometry.setCoordinates(getPlacement().getCoordinates());
+			return pointGeometry;
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public Map<String, String> getAdditionalFeatureProperties() {
+		Map<String, String> properties = new HashMap<>();
+		properties.put("colour_type", getVendor());
+
+		return properties;
 	}
 
 	public void setId(String id) {
@@ -147,6 +176,14 @@ public class Device {
 
 	public void setMetadata(Map<String, String> metadata) {
 		this.metadata = metadata;
+	}
+
+	public String getVendor() {
+		return vendor;
+	}
+
+	public void setVendor(String vendor) {
+		this.vendor = vendor;
 	}
 
 	public Float getLeveeDistanceMarker() {

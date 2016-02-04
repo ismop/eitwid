@@ -1,5 +1,6 @@
 package pl.ismop.web.client.geojson;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class GeoJsonFeatures {
@@ -14,6 +15,10 @@ public class GeoJsonFeatures {
 	public GeoJsonFeatures(List<GeoJsonFeature> shapes) {
 		this();
 		setFeatures(shapes);
+	}
+
+	public GeoJsonFeatures(GeoJsonFeature... shapes) {
+		this(Arrays.asList(shapes));
 	}
 
 	public String getType() {

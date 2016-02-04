@@ -177,6 +177,16 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 	}
 
 	@Override
+	public String cannotRenderMessages() {
+		return messages.cannotRender();
+	}
+
+	@Override
+	public native boolean canRender() /*-{
+		return $wnd.Detector.webgl;
+	}-*/;
+
+	@Override
 	public native void clear() /*-{
 		if(this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes) {
 			for(var i = 0; i < this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes.length; i++) {

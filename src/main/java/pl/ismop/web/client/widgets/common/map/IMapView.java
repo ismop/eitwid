@@ -38,4 +38,6 @@ public interface IMapView extends IsWidget {
 	void showPopup(String featureId, String contents);
 
 	void hidePopup(String featureId);
+
+	void resetLimits();
 }

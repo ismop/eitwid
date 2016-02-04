@@ -4,19 +4,31 @@
     <g:HTMLPanel>
         <b:Label ui:field="label" text="No experiment and date selected"/>
 
-        <b:Button ui:field="showDevice1" text="Show device 1" />
-        <b:Button ui:field="showDevice2" text="Show device 2" />
+        <b:Button ui:field="addDevice" text="Add device" />
+        <b:Button ui:field="rmDevice" text="Rm device" />
 
-        <b:Button ui:field="selectDevice1" text="Select device 1" />
-        <b:Button ui:field="unselectDevice1" text="Unselect device 1" />
+        <b:Button ui:field="addSection" text="Add section" />
+        <b:Button ui:field="rmSection" text="Rm section" />
 
-        <b:Button ui:field="selectDevice2" text="Select device 2" />
-        <b:Button ui:field="unselectDevice2" text="Unselect device 2" />
+        <b:Button ui:field="addProfile" text="Add profile" />
+        <b:Button ui:field="rmProfile" text="Rm profile" />
 
-        <b:Button ui:field="showSection1" text="Show section 1" />
-        <b:Button ui:field="showSection2" text="Show section 2" />
+        <b:Button ui:field="selectDevice" text="Select device" />
+        <b:Button ui:field="unselectDevice" text="Unselect device" />
 
-        <b:Button ui:field="showProfile1" text="Show profile 1" />
-        <b:Button ui:field="showProfile2" text="Show profile 2" />
+        <b:Button ui:field="selectSection" text="Select section" />
+        <b:Button ui:field="unselectSection" text="Unselect section" />
+
+        <b:Button ui:field="selectProfile" text="Select profile" />
+        <b:Button ui:field="unselectProfile" text="Unselect profile" />
+
+        <b:Button ui:field="highlightDevice" text="Highlight device" />
+        <b:Button ui:field="unhighlightDevice" text="Unhighlight device" />
+
+        <b:Button ui:field="highlightSection" text="Highlight section" />
+        <b:Button ui:field="unhighlightSection" text="Unhighlight section" />
+
+        <b:Button ui:field="highlightProfile" text="Highlight profile" />
+        <b:Button ui:field="unhighlightProfile" text="Unhighlight profile" />
     </g:HTMLPanel>
 </ui:UiBinder>

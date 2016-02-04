@@ -8,6 +8,7 @@ import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -35,7 +36,7 @@ public class IsmopWebEntryPoint implements EntryPoint {
 	//this is the place to do global initialization once
 	private void globalInitialization(GlobalMessages globalMessages) {
 		//configuring highcharts exporting capabilities
-		configureHighchartsGlobalSettings(globalMessages.exportPngLabel(), globalMessages.exportPdfLabel(), globalMessages.exportSvgLabel());
+		configureHighchartsGlobalSettings(globalMessages);
 		
 		//Bootbox setup
 		Bootbox.createDefaults().setCloseButton(false).setDefaults();
@@ -47,33 +48,47 @@ public class IsmopWebEntryPoint implements EntryPoint {
 		return format.format(new Date());
 	}
 
-	private native void configureHighchartsGlobalSettings(String pngLabel, String pdfLabel, String svgLabel) /*-{
+	private native void configureHighchartsGlobalSettings(GlobalMessages messages) /*-{
 		var object = this;
 		$wnd.Highcharts.setOptions({
+			lang: {
+				resetZoom: messages.@pl.ismop.web.client.GlobalMessages::resetZoomLabel()(),
+				resetZoomTitle:
+						messages.@pl.ismop.web.client.GlobalMessages::resetZoomTitleLabel()(),
+				months: object.@pl.ismop.web.client.IsmopWebEntryPoint::toStringArray(Ljava/lang/String;)(
+						messages.@pl.ismop.web.client.GlobalMessages::months()()),
+				shortMonths: object.@pl.ismop.web.client.IsmopWebEntryPoint::toStringArray(Ljava/lang/String;)(
+						messages.@pl.ismop.web.client.GlobalMessages::shortMonths()()),
+				weekdays: object.@pl.ismop.web.client.IsmopWebEntryPoint::toStringArray(Ljava/lang/String;)(
+						messages.@pl.ismop.web.client.GlobalMessages::weekDays()()),
+			},
 			exporting: {
 				buttons: {
 					contextButton: {
 						menuItems: [{
-							text: pngLabel,
+							text: messages.@pl.ismop.web.client.GlobalMessages::exportPngLabel()(),
 							onclick: function() {
 								this.exportChart({
-									filename: "ismop-data-export-" + object.@pl.ismop.web.client.IsmopWebEntryPoint::getCurrentDate()(),
+									filename: "ismop-data-export-"
+										+ object.@pl.ismop.web.client.IsmopWebEntryPoint::getCurrentDate()(),
 									type: "image/png"
 								})
 							}
 						}, {
-							text: pdfLabel,
+							text: messages.@pl.ismop.web.client.GlobalMessages::exportPdfLabel()(),
 							onclick: function() {
 								this.exportChart({
-									filename: "ismop-data-export-" + object.@pl.ismop.web.client.IsmopWebEntryPoint::getCurrentDate()(),
+									filename: "ismop-data-export-"
+										+ object.@pl.ismop.web.client.IsmopWebEntryPoint::getCurrentDate()(),
 									type: "application/pdf"
 								})
 							}
 						}, {
-							text: svgLabel,
+							text: messages.@pl.ismop.web.client.GlobalMessages::exportSvgLabel()(),
 							onclick: function() {
 								this.exportChart({
-									filename: "ismop-data-export-" + object.@pl.ismop.web.client.IsmopWebEntryPoint::getCurrentDate()(),
+									filename: "ismop-data-export-"
+										+ object.@pl.ismop.web.client.IsmopWebEntryPoint::getCurrentDate()(),
 									type: "image/svg+xml"
 								})
 							}
@@ -83,4 +98,8 @@ public class IsmopWebEntryPoint implements EntryPoint {
 			}
 		});
 	}-*/;
+	
+	private native JavaScriptObject toStringArray(String values) /*-{
+		return values.split(",");
+	}-*/; 
 }

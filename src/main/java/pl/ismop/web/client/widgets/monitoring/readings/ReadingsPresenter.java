@@ -13,6 +13,7 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
@@ -65,7 +66,11 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 	
 	public void onDeviceSeriesHover(String deviceId, boolean hover) {
 		if(displayedDevices.containsKey(deviceId)) {
-			mapPresenter.selectDevice(displayedDevices.get(deviceId), hover);
+			if (hover) {
+				mapPresenter.select(displayedDevices.get(deviceId));
+			} else {
+				mapPresenter.unselect(displayedDevices.get(deviceId));
+			}
 		}
 	}
 
@@ -86,7 +91,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			@Override
 			public void processSections(List<Section> sections) {
 				for(Section section : sections) {
-					mapPresenter.addSection(section);
+					mapPresenter.add(section);
 				}
 			}
 		});
@@ -95,6 +100,8 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);
 			chartPresenter.setHeight(view.getChartContainerHeight());
 			chartPresenter.addSeriesHoverListener();
+			chartPresenter.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
+					eventBus, chartPresenter));
 			view.setChart(chartPresenter.getView());
 		}
 		
@@ -161,7 +168,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 						@Override
 						public void processTimelines(List<Timeline> timelines) {
 							if(timelines.size() > 0) {
-								Timeline timeline = timelines.get(0);
+								final Timeline timeline = timelines.get(0);
 								dapController.getMeasurementsWithQuantity(timeline.getId(), 1000, new MeasurementsCallback() {
 									@Override
 									public void onError(ErrorDetails errorDetails) {
@@ -182,6 +189,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 											chartSeries.setParameterId(parameterId);
 											chartSeries.setLabel(additionalParameters.get(parameterId).getMeasurementTypeName());
 											chartSeries.setUnit(additionalParameters.get(parameterId).getMeasurementTypeUnit());
+											chartSeries.setTimelineId(timeline.getId());
 											
 											Number[][] values = new Number[measurements.size()][2];
 											int index = 0;
@@ -261,7 +269,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 				displayedDevices.clear();
 				
 				for(Device device : devices) {
-					mapPresenter.addDevice(device);
+					mapPresenter.add(device);
 					displayedDevices.put(device.getId(), device);
 				}
 			}

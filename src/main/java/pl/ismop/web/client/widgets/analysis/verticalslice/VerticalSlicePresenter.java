@@ -55,6 +55,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		if(this.configuration == configuration) {
 			refreshView();
 		}
+		selectChosenProfileOnMinimap();
 	}
 	
 	public void onDateChanged(Date selectedDate) {
@@ -86,7 +87,13 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	@Override
 	public void setSelectionManager(ISelectionManager selectionManager) {
 		this.selectionManager = selectionManager;
-		selectionManager.showProfile(configuration.getPickedProfile());
+		selectionManager.select(configuration.getPickedProfile());
+		selectChosenProfileOnMinimap();
+	}
+
+	public void selectChosenProfileOnMinimap() {
+		selectionManager.clear();
+		selectionManager.select(configuration.getPickedProfile());
 	}
 
 	@Override
@@ -95,6 +102,12 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	}
 
 	private void refreshView() {
+		if (!view.canRender()) {
+			eventBus.showSimpleError(view.cannotRenderMessages());
+			
+			return;
+		}
+		
 		view.showLoadingState(true);
 		
 		final List<String> parameterIds = new ArrayList<>();

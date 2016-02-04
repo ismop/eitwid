@@ -1,10 +1,22 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.*;
+import pl.ismop.web.client.dap.DapController.ContextsCallback;
+import pl.ismop.web.client.dap.DapController.LeveesCallback;
+import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
+import pl.ismop.web.client.dap.DapController.ParametersCallback;
+import pl.ismop.web.client.dap.DapController.TimelinesCallback;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
@@ -15,15 +27,10 @@ import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.IMonitoringSidePanel.IMonitoringSidePanelPresenter;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 @Presenter(view = MonitoringSidePanelView.class, multiple = true)
 public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSidePanel, MainEventBus> implements IMonitoringSidePanelPresenter {
@@ -55,8 +62,14 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		view.clearMetadata();
 		
 		if(show) {
-			view.addMetadata(view.getTypeLabel(), view.getSectionTypeLabel());
-			view.addMetadata(view.getInternalIdLabel(), section.getId());
+			view.addMetadata(view.getSectionTypeLabel(), view.getInternalIdLabel() + ": " + section.getId());
+			view.addMetadata(view.getMessages().soilType(), section.getSoilTypeLabel() + " (" + section.getSoilTypeName() + ")");
+			view.addMetadata(view.getMessages().granularDensity(), view.getMessages().maxMinAvg(
+					section.getGranularDensityMax(), section.getGranularDensityMin(), section.getGranularDensityAvg()));
+			view.addMetadata(view.getMessages().bulkDensity(), view.getMessages().maxMinAvg(
+					section.getBulkDensityMax(), section.getBulkDensityMin(), section.getBulkDensityAvg()));
+			view.addMetadata(view.getMessages().filtrationCoefficient(), view.getMessages().maxMinAvg(
+					section.getFiltrationCoefficientMax(), section.getFiltrationCoefficientMin(), section.getFiltrationCoefficientAvg()));
 		}
 	}
 	
@@ -84,11 +97,12 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		if(selected) {
 			addChartSeries(device);
 		} else {
-			if(chartPresenter != null) {
+			if (chartPresenter != null) {
 				chartPresenter.removeChartSeriesForDevice(device);
 				
 				if(chartPresenter.getSeriesCount() == 0) {
 					view.showChartButtons(false);
+					view.showChart(false);
 				}
 			}
 		}
@@ -125,9 +139,12 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		if(chartPresenter == null) {
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);
 			chartPresenter.setHeight(view.getChartHeight());
+			chartPresenter.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
+					eventBus, chartPresenter));
 			view.setChart(chartPresenter.getView());
 		}
 		
+		view.showChart(true);
 		chartPresenter.setLoadingState(true);
 		dapController.getParameters(device.getId(), new ParametersCallback() {
 			@Override
@@ -208,6 +225,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 														series.setParameterId(parameter.getId());
 														series.setLabel(parameter.getMeasurementTypeName());
 														series.setUnit(parameter.getMeasurementTypeUnit());
+														series.setTimelineId(timelineId);
 														
 														Number[][] values = new Number[parameterMeasurements.size()][2];
 														int index = 0;

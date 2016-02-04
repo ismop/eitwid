@@ -43,6 +43,12 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 	}
 	
 	public void setProfileAndDevices(Profile profile, List<Device> devices) {
+		if (!view.canRender()) {
+			eventBus.showSimpleError(view.cannotRenderMessages());
+			
+			return;
+		}
+		
 		view.setScene(profile.getId(), width, height);
 		
 		List<List<Double>> fullProfile = createFullProfile(coordinatesUtil.projectCoordinates(profile.getShape().getCoordinates()));

@@ -28,4 +28,8 @@ public interface IHorizontalSliceView extends IsWidget {
 	void clear();
 
 	String noMeasurementsMessage();
+
+	boolean canRender();
+
+	String cannotRenderMessages();
 }

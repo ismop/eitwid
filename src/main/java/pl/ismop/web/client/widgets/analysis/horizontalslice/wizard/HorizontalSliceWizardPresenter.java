@@ -170,7 +170,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 				List<String> sectionIds = new ArrayList<>();
 				
 				for(Section section : sections) {
-					mapPresenter.addSection(section);
+					mapPresenter.add(section);
 					sectionIds.add(section.getId());
 					configuration.getSections().put(section.getId(), section);
 				}
@@ -187,7 +187,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 						mapPresenter.setLoadingState(false);
 						
 						for(Profile profile : profiles) {
-							mapPresenter.addProfile(profile);
+							mapPresenter.add(profile);
 						}
 					}
 				});

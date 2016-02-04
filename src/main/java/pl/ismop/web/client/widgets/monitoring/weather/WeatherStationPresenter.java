@@ -26,6 +26,7 @@ import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.monitoring.weather.IWeatherStationView.IWeatherStationPresenter;
@@ -66,6 +67,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);
 			chartPresenter.setHeight(view.getChartContainerHeight());
 			chartPresenter.addSeriesHoverListener();
+			chartPresenter.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
+					eventBus, chartPresenter));
 			view.setChart(chartPresenter.getView());
 		}
 		
@@ -102,7 +105,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			Date now = new Date(); 
 			Date twoWeeksAgo = CalendarUtil.copyDate(now);
 			CalendarUtil.addDaysToDate(twoWeeksAgo, -14);
-			dapController.getMeasurements(timeline.getId(), twoWeeksAgo, now, new MeasurementsCallback() {
+			dapController.getMeasurementsWithQuantity(timeline.getId(), 1000, new MeasurementsCallback() {
 				@Override
 				public void onError(ErrorDetails errorDetails) {
 					chartPresenter.setLoadingState(false);
@@ -287,9 +290,13 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		s1.setUnit(parameter.getMeasurementTypeUnit());
 		s1.setLabel(parameter.getMeasurementTypeName());
 		
+		if (measurements.size() > 0) {
+			s1.setTimelineId(measurements.get(0).getTimelineId());
+		}
+		
 		Number[][] values = new Number[measurements.size()][2];
 		
-		for (int j = 0; j<measurements.size(); j++) {
+		for (int j = 0; j < measurements.size(); j++) {
 			Measurement measurement = measurements.get(j);
 			values[j][0] = measurement.getTimestamp().getTime();
 			values[j][1] = normalizeValue(measurement);
@@ -303,5 +310,4 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	private void showError(ErrorDetails errorDetails) {
 		eventBus.showSimpleError("Error: " + errorDetails.getMessage());
 	}
-	
 }
