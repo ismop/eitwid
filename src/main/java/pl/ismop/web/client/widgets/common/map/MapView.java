@@ -1,13 +1,5 @@
 package pl.ismop.web.client.widgets.common.map;
 
-import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.gwtbootstrap3.client.ui.Button;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -20,8 +12,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
-
+import org.gwtbootstrap3.client.ui.Button;
 import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
 
 public class MapView extends Composite implements IMapView, ReverseViewInterface<IMapPresenter> {
 	private static MapViewUiBinder uiBinder = GWT.create(MapViewUiBinder.class);
@@ -85,16 +83,24 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			for(List<Double> point : points) {
 				extendBounds(bounds, point.get(1), point.get(0));
 			}
-			
+			resetLimits();
 			applyBounds(bounds);
 		}
 	}
 
-	@Override
-	public void resetLimits() {
+	private void resetLimits() {
 		minZoom = null;
 		strictBounds = null;
+		resetMapMinZoom();
 	};
+
+	private native void resetMapMinZoom() /*-{
+		console.log("reset map min zoom")
+		if (this.@pl.ismop.web.client.widgets.common.map.MapView::map != null) {
+			console.log("min zoom set to 3");
+            this.@pl.ismop.web.client.widgets.common.map.MapView::map.setOptions({ minZoom: 3 });
+        }
+    }-*/;
 
 	@Override
 	public void addButton(final String id, String label) {
@@ -362,7 +368,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
 
         var thisObject = this;
-        $wnd.google.maps.event.addListener(map, 'zoom_changed', function() {
+        $wnd.google.maps.event.addListener(map, 'bounds_changed', function() {
 			if (!thisObject.@pl.ismop.web.client.widgets.common.map.MapView::minZoom) {
                 thisObject.@pl.ismop.web.client.widgets.common.map.MapView::minZoom = map.getZoom();
                 map.setOptions({ minZoom: map.getZoom() - 1 });
