@@ -100,7 +100,17 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 		if(chartPresenter == null) {
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);
 			chartPresenter.setHeight(view.getChartContainerHeight());
-			chartPresenter.addSeriesHoverListener();
+			chartPresenter.setDeviceSelectHandler(new ChartPresenter.DeviceSelectHandler() {
+				@Override
+				public void select(ChartSeries series) {
+					eventBus.deviceSeriesHover(series.getDeviceId(), true);
+				}
+
+				@Override
+				public void unselect(ChartSeries series) {
+					eventBus.deviceSeriesHover(series.getDeviceId(), false);
+				}
+			});
 			chartPresenter.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
 					eventBus, chartPresenter));
 			view.setChart(chartPresenter.getView());
