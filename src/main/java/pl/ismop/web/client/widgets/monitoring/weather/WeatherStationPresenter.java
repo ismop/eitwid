@@ -105,7 +105,8 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			Date now = new Date(); 
 			Date twoWeeksAgo = CalendarUtil.copyDate(now);
 			CalendarUtil.addDaysToDate(twoWeeksAgo, -14);
-			dapController.getMeasurementsWithQuantity(timeline.getId(), 1000, new MeasurementsCallback() {
+			dapController.getMeasurementsWithQuantity(timeline.getId(), 1000,
+					new MeasurementsCallback() {
 				@Override
 				public void onError(ErrorDetails errorDetails) {
 					chartPresenter.setLoadingState(false);
@@ -159,7 +160,10 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 									public void processContexts(List<Context> contexts) {
 										if(contexts.size() > 0) {
 											readings.setContext(contexts.get(0));
-											dapController.getTimelinesForParameterIds(readings.context.getId(), readings.parameterIds, new TimelinesCallback() {
+											dapController.getTimelinesForParameterIds(
+													readings.context.getId(),
+													readings.parameterIds,
+													new TimelinesCallback() {
 												
 												@Override
 												public void onError(ErrorDetails errorDetails) {
@@ -168,18 +172,24 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 												}
 												
 												@Override
-												public void processTimelines(List<Timeline> timelines) {
+												public void processTimelines(
+														List<Timeline> timelines) {
 													if(timelines.size() > 0) {
 														readings.addTimelines(timelines);
-														dapController.getLastMeasurements(readings.timelineIds, new Date(), new MeasurementsCallback() {
+														dapController.getLastMeasurementsWith24HourMod(
+																readings.timelineIds,
+																new Date(),
+																new MeasurementsCallback() {
 															@Override
-															public void onError(ErrorDetails errorDetails) {
+															public void onError(
+																	ErrorDetails errorDetails) {
 																view.showProgress(false);
 																showError(errorDetails);
 															}
 															
 															@Override
-															public void processMeasurements(List<Measurement> measurements) {
+															public void processMeasurements(
+																	List<Measurement> measurements) {
 																updateParamPreview(measurements);
 																view.showProgress(false);
 															}
