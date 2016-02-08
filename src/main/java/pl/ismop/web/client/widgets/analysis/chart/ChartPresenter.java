@@ -199,7 +199,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     private pl.ismop.web.client.widgets.common.chart.ChartPresenter getChart() {
         if(chartPresenter == null) {
             chartPresenter = eventBus.addHandler(pl.ismop.web.client.widgets.common.chart.ChartPresenter.class);
-            chartPresenter.addSeriesHoverListener();
             chartPresenter.setDeviceSelectHandler(new pl.ismop.web.client.widgets.common.chart.ChartPresenter.DeviceSelectHandler() {
                 @Override
                 public void select(ChartSeries series) {

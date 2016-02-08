@@ -32,8 +32,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	
 	private Map<String, Integer> yAxisMap;
 	
-	private boolean seriesHoverListener;
-	
 	private ZoomDataCallback zoomDataCallback;
 
 	private PlotLine currentTimePlotLine;
@@ -57,19 +55,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		dataSeriesMap = new HashMap<>();
 		chartSeriesMap = new HashMap<>();
 		yAxisMap = new HashMap<>();
-
-		deviceSelectHandler = new DeviceSelectHandler() {
-
-			@Override
-			public void select(ChartSeries series) {
-				eventBus.deviceSeriesHover(series.getDeviceId(), true);
-			}
-
-			@Override
-			public void unselect(ChartSeries series) {
-				eventBus.deviceSeriesHover(series.getDeviceId(), false);
-			}
-		};
 	}
 
 	public void addChartSeries(ChartSeries series) {
@@ -108,20 +93,14 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 					.setSeriesMouseOverEventHandler(new SeriesMouseOverEventHandler() {
 						@Override
 						public boolean onMouseOver(SeriesMouseOverEvent event) {
-							if(seriesHoverListener) {
-								deviceSelectHandler.select(dataSeriesMap.get(event.getSeriesId()));
-							}
-
+							getDeviceSelectHandler().select(dataSeriesMap.get(event.getSeriesId()));
 							return true;
 						}
 					})
 					.setSeriesMouseOutEventHandler(new SeriesMouseOutEventHandler() {
 						@Override
 						public boolean onMouseOut(SeriesMouseOutEvent event) {
-							if(seriesHoverListener) {
-								deviceSelectHandler.unselect(dataSeriesMap.get(event.getSeriesId()));
-							}
-
+							getDeviceSelectHandler().unselect(dataSeriesMap.get(event.getSeriesId()));
 							return true;
 						}
 					})
@@ -215,10 +194,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		}
 	}
 	
-	public void addSeriesHoverListener() {
-		seriesHoverListener = true;
-	}
-
 	public void setLoadingState(boolean loading) {
 		if (chart != null) {
 			if (loading) {
@@ -279,6 +254,19 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
 	public void setDeviceSelectHandler(DeviceSelectHandler deviceSelectHandler) {
 		this.deviceSelectHandler = deviceSelectHandler;
+	}
+
+	public DeviceSelectHandler getDeviceSelectHandler() {
+		if (deviceSelectHandler == null) {
+			return new DeviceSelectHandler() {
+				@Override
+				public void select(ChartSeries series) {}
+				@Override
+				public void unselect(ChartSeries series) {}
+			};
+		}
+
+		return deviceSelectHandler;
 	}
 
 	private Number getYAxisIndex(ChartSeries series) {

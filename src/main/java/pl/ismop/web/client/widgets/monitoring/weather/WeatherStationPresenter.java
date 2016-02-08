@@ -66,7 +66,6 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		if (chartPresenter == null) {
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);
 			chartPresenter.setHeight(view.getChartContainerHeight());
-			chartPresenter.addSeriesHoverListener();
 			chartPresenter.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
 					eventBus, chartPresenter));
 			view.setChart(chartPresenter.getView());
