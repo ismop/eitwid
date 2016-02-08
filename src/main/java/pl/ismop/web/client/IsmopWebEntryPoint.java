@@ -1,6 +1,7 @@
 package pl.ismop.web.client;
 
 import java.util.Date;
+import java.util.List;
 
 import org.fusesource.restygwt.client.Defaults;
 import org.fusesource.restygwt.client.ServiceRoots;
@@ -9,14 +10,20 @@ import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.Mvp4gModule;
 
 public class IsmopWebEntryPoint implements EntryPoint {
+	private IsmopConverter ismopConverter;
+	
 	public static Dictionary properties;
+	
+	public IsmopWebEntryPoint() {
+		ismopConverter = new IsmopConverter();
+	}
 
 	@Override
 	public void onModuleLoad() {
@@ -36,31 +43,40 @@ public class IsmopWebEntryPoint implements EntryPoint {
 	//this is the place to do global initialization once
 	private void globalInitialization(GlobalMessages globalMessages) {
 		//configuring highcharts exporting capabilities
-		configureHighchartsGlobalSettings(globalMessages);
+		configureHighchartsGlobalSettings(globalMessages,
+				toStringArray(ismopConverter.shortMonths()),
+				toStringArray(ismopConverter.months()),
+				toStringArray(ismopConverter.days()));
 		
 		//Bootbox setup
 		Bootbox.createDefaults().setCloseButton(false).setDefaults();
 	}
 	
 	private String getCurrentDate() {
-		DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd_HH:mm:ss");
-		
-		return format.format(new Date());
+		return ismopConverter.formatForFileSafeName(new Date());
 	}
 
-	private native void configureHighchartsGlobalSettings(GlobalMessages messages) /*-{
+	private JavaScriptObject toStringArray(List<String> values) {
+		JsArrayString result = (JsArrayString) JsArrayString.createArray();
+		
+		for (String value : values) {
+			result.push(value);
+		}
+		
+		return result;
+	}
+
+	private native void configureHighchartsGlobalSettings(GlobalMessages messages,
+			JavaScriptObject shortMonths, JavaScriptObject months, JavaScriptObject days) /*-{
 		var object = this;
 		$wnd.Highcharts.setOptions({
 			lang: {
 				resetZoom: messages.@pl.ismop.web.client.GlobalMessages::resetZoomLabel()(),
 				resetZoomTitle:
 						messages.@pl.ismop.web.client.GlobalMessages::resetZoomTitleLabel()(),
-				months: object.@pl.ismop.web.client.IsmopWebEntryPoint::toStringArray(Ljava/lang/String;)(
-						messages.@pl.ismop.web.client.GlobalMessages::months()()),
-				shortMonths: object.@pl.ismop.web.client.IsmopWebEntryPoint::toStringArray(Ljava/lang/String;)(
-						messages.@pl.ismop.web.client.GlobalMessages::shortMonths()()),
-				weekdays: object.@pl.ismop.web.client.IsmopWebEntryPoint::toStringArray(Ljava/lang/String;)(
-						messages.@pl.ismop.web.client.GlobalMessages::weekDays()()),
+				months: months,
+				shortMonths: shortMonths,
+				weekdays: days
 			},
 			exporting: {
 				buttons: {
@@ -101,5 +117,5 @@ public class IsmopWebEntryPoint implements EntryPoint {
 	
 	private native JavaScriptObject toStringArray(String values) /*-{
 		return values.split(",");
-	}-*/; 
+	}-*/;; 
 }

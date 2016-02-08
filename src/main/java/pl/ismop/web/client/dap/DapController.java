@@ -293,16 +293,16 @@ public class DapController {
 
 	public void getMeasurements(String timelineId, Date startDate, Date endDate,
 			MeasurementsCallback callback) {
-		String until = converter.format(endDate);
-		String from = converter.format(startDate);
+		String until = converter.formatForDto(endDate);
+		String from = converter.formatForDto(startDate);
 		measurementService.getMeasurements(timelineId, from, until,
 				new MeasurementsRestCallback(callback));
 	}
 	
 	public void getMeasurementsWithQuantityAndTime(List<String> timelineIds, Date startDate, Date endDate,
 			int quantity, MeasurementsCallback callback) {
-		String from = converter.format(startDate);
-		String until = converter.format(endDate);
+		String from = converter.formatForDto(startDate);
+		String until = converter.formatForDto(endDate);
 		measurementService.getMeasurementsWithQuantityAndTime(merge(timelineIds), from, until,
 				quantity, new MeasurementsRestCallback(callback));
 	}
@@ -327,14 +327,14 @@ public class DapController {
 	}
 
 	public void getLastMeasurementsWith24HourMod(List<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
-		String until = converter.format(untilDate);
-		String from = converter.format(new Date(untilDate.getTime() - 86_400_000L));
+		String until = converter.formatForDto(untilDate);
+		String from = converter.formatForDto(new Date(untilDate.getTime() - 86_400_000L));
 		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
 				new MeasurementsRestCallback(callback));
 	}
 	
 	public void getLastMeasurements(Collection<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
-		String until = converter.format(untilDate);
+		String until = converter.formatForDto(untilDate);
 		measurementService.getLastMeasurementsOnlyUntil(merge(timelineIds, ","), until,
 				new MeasurementsRestCallback(callback));
 	}
@@ -631,8 +631,8 @@ public class DapController {
 	}
 
 	public void getMeasurementsForTimelineIds(Collection<String> timelineIds, final MeasurementsCallback callback) {
-		String until = converter.format(new Date());
-		String from = converter.format(monthEarlier());
+		String until = converter.formatForDto(new Date());
+		String from = converter.formatForDto(monthEarlier());
 		measurementService.getMeasurements(merge(timelineIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {

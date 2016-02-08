@@ -115,4 +115,10 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     public ISliderPresenter getPresenter() {
         return presenter;
     }
+
+	@Override
+	public void setDateFormat(String format) {
+		startDate.setFormat(format);
+		endDate.setFormat(format);
+	}
 }

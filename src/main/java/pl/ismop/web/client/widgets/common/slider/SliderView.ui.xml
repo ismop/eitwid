@@ -12,16 +12,16 @@
     <g:HTMLPanel>
         <b:Container ui:field="container" fluid="true">
             <b:Row>
-                <b:Column size="MD_2">
+                <b:Column size="MD_3">
                     <b2:DateTimePicker ui:field="startDate" autoClose="true" minuteStep="15"/>
                 </b:Column>
-                <b:Column size="MD_8">
+                <b:Column size="MD_6">
                     <!-- flow panel is needed since s:Slider is buggy and there is not possible to add style -->
                     <g:FlowPanel addStyleNames="{style.slider}">
                         <s:Slider ui:field="slider" min="0" max="200" value="1" step="1" width="100%"/>
                     </g:FlowPanel>
                 </b:Column>
-                <b:Column size="MD_2">
+                <b:Column size="MD_3">
                     <b2:DateTimePicker ui:field="endDate" autoClose="true" minuteStep="15"/>
                 </b:Column>
             </b:Row>

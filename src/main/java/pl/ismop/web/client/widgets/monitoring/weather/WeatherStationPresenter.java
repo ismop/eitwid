@@ -6,13 +6,12 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.ContextsCallback;
@@ -39,10 +38,13 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 	private ChartPresenter chartPresenter;
 	
 	final WeatherReadings readings = new WeatherReadings();
+
+	private IsmopConverter ismopConverter;
 	
 	@Inject
-	public WeatherStationPresenter(DapController dapController) {
+	public WeatherStationPresenter(DapController dapController, IsmopConverter ismopConverter) {
 		this.dapController = dapController;
+		this.ismopConverter = ismopConverter;
 	}
 
 	public void onShowWeatherPanel() {
@@ -60,6 +62,19 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		chartPresenter.reset();
 	}
 	
+	@Override
+	public void loadParameter(String parameterId, Boolean value) {
+		Parameter parameter = readings.parameterMap.get(parameterId);
+		
+		if (parameter != null) {
+			if (value){
+				loadParameter(parameter);
+			} else {
+				unloadParameter(parameter);
+			}
+		}
+	}
+
 	private void initPresenter() {
 		view.getContentVisibility().setVisible(false);
 		
@@ -78,19 +93,6 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		preloadParametersWithLatestReadings();
 	}
 	
-	@Override
-	public void loadParameter(String parameterId, Boolean value) {
-		Parameter parameter = readings.parameterMap.get(parameterId);
-		
-		if (parameter != null) {
-			if (value){
-				loadParameter(parameter);
-			} else {
-				unloadParameter(parameter);
-			}
-		}
-	}
-		
 	private void unloadParameter(Parameter parameter) {
 		chartPresenter.removeChartSeriesForParameter(parameter);
 	}
@@ -228,8 +230,13 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			for (Parameter parameter : parameters) {
 				if (lastMeasurements.get(parameter.getId()) != null) {
 					view.addLatestReading1(parameter.getId(), 
-							parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
-							DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));
+							parameter.getParameterName(), parameter.getMeasurementTypeName(),
+							NumberFormat.getFormat("0.00").format(
+									normalizeValue(lastMeasurements.get(parameter.getId()))),
+										parameter.getMeasurementTypeUnit(),
+										ismopConverter.formatForDisplay(
+												lastMeasurements.get(
+														parameter.getId()).getTimestamp()));
 				} else {
 					view.addLatestReading1(
 						parameter.getId(), 
@@ -250,7 +257,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 				if (lastMeasurements.get(parameter.getId()) != null) {
 					view.addLatestReading2(parameter.getId(), 
 							parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
-							DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(lastMeasurements.get(parameter.getId()).getTimestamp()));
+							ismopConverter.formatForDisplay(lastMeasurements.get(parameter.getId()).getTimestamp()));
 				} else {
 					view.addLatestReading2(
 						parameter.getId(), 

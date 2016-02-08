@@ -13,10 +13,4 @@ public interface GlobalMessages extends Messages {
 	String resetZoomLabel();
 	
 	String resetZoomTitleLabel();
-	
-	String months();
-	
-	String shortMonths();
-	
-	String weekDays();
 }
