@@ -95,9 +95,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	};
 
 	private native void resetMapMinZoom() /*-{
-		console.log("reset map min zoom")
 		if (this.@pl.ismop.web.client.widgets.common.map.MapView::map != null) {
-			console.log("min zoom set to 3");
             this.@pl.ismop.web.client.widgets.common.map.MapView::map.setOptions({ minZoom: 3 });
         }
     }-*/;
@@ -376,7 +374,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
         });
 
         $wnd.google.maps.event.addListener(map, 'dragend', function() {
-			console.log("dragged " + map.getCenter())
             strictBounds = thisObject.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds
             if (strictBounds.contains(map.getCenter())) return;
 
