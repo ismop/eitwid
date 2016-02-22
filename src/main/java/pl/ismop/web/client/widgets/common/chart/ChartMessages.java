@@ -6,4 +6,6 @@ public interface ChartMessages extends Messages {
 	String chartTitle();
 
 	String loadingMessage();
+
+	String downloadCSV();
 }

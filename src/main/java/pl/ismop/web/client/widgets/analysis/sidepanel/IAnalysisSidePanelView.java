@@ -20,5 +20,6 @@ public interface IAnalysisSidePanelView extends IsWidget {
 
 	interface IAnalysisSidePanelPresenter {
 		void selectExperiment(Experiment selectedExperiment);
+		void export();
 	}
 }
