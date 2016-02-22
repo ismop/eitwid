@@ -205,6 +205,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		view.showLoadingPanel(loading);
 	}
 
+	public void setMoveable(boolean moveable) {
+		getView().setMovable(moveable);
+	}
+
 	private String geoJson(MapFeature mapFeature, Geometry geometry) {
 		GeoJsonFeature feature = new GeoJsonFeature(mapFeature, geometry);
 		return geoJsonEncoderDecoder.encode(new GeoJsonFeatures(feature)).toString();
