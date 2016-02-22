@@ -303,17 +303,17 @@ public class DapController {
 			int quantity, MeasurementsCallback callback) {
 		String from = converter.formatForDto(startDate);
 		String until = converter.formatForDto(endDate);
-		measurementService.getMeasurementsWithQuantityAndTime(merge(timelineIds), from, until,
+		measurementService.getMeasurementsWithQuantityAndTime(converter.merge(timelineIds), from, until,
 				quantity, new MeasurementsRestCallback(callback));
 	}
 
 	public void getMeasurements(Collection<String> timelineIds, Date startDate, Date endDate,
 			MeasurementsCallback callback) {
-		getMeasurements(merge(timelineIds), startDate, endDate, callback);
+		getMeasurements(converter.merge(timelineIds), startDate, endDate, callback);
 	}
 
 	public void getAllMeasurements(Collection<String> timelineIds, final MeasurementsCallback callback) {
-		measurementService.getAllMeasurements(merge(timelineIds), new MethodCallback<MeasurementsResponse>() {
+		measurementService.getAllMeasurements(converter.merge(timelineIds), new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -329,18 +329,19 @@ public class DapController {
 	public void getLastMeasurementsWith24HourMod(List<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
 		String until = converter.formatForDto(untilDate);
 		String from = converter.formatForDto(new Date(untilDate.getTime() - 86_400_000L));
-		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
+		measurementService.getLastMeasurements(converter.merge(timelineIds), from, until,
 				new MeasurementsRestCallback(callback));
 	}
 	
 	public void getLastMeasurements(Collection<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
 		String until = converter.formatForDto(untilDate);
-		measurementService.getLastMeasurementsOnlyUntil(merge(timelineIds, ","), until,
+		measurementService.getLastMeasurementsOnlyUntil(converter.merge(timelineIds), until,
 				new MeasurementsRestCallback(callback));
 	}
 
 	public void getSections(float top, float left, float bottom, float right, final SectionsCallback callback) {
-		sectionService.getSections(createSelectionQuery(top, left, bottom, right), new MethodCallback<SectionsResponse>() {
+		sectionService.getSections(converter.createSelectionQuery(top, left, bottom, right),
+				new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -354,7 +355,7 @@ public class DapController {
 	}
 
 	public void getSections(List<String> sectionIds, final SectionsCallback callback) {
-		sectionService.getSectionsById(merge(sectionIds, ","), new MethodCallback<SectionsResponse>() {
+		sectionService.getSectionsById(converter.merge(sectionIds), new MethodCallback<SectionsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -396,7 +397,7 @@ public class DapController {
 	}
 	
 	public void getExperiments(List<String> experimentIds, final ThreatAssessmentCallback callback) {
-		threatAssessmentService.getExperiments(merge(experimentIds, ","), new MethodCallback<ThreatAssessmentResponse>() {
+		threatAssessmentService.getExperiments(converter.merge(experimentIds), new MethodCallback<ThreatAssessmentResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -452,7 +453,7 @@ public class DapController {
 	}
 	
 	public void getProfiles(List<String> sectionIds, final ProfilesCallback callback) {
-		profileService.getProfilesForSection(merge(sectionIds, ","), new MethodCallback<ProfilesResponse>() {
+		profileService.getProfilesForSection(converter.merge(sectionIds), new MethodCallback<ProfilesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -505,7 +506,7 @@ public class DapController {
 	}
 
 	public void getParameters(List<String> deviceIds, final ParametersCallback callback) {
-		parameterService.getParameters(merge(deviceIds, ","), new MethodCallback<ParametersResponse>() {
+		parameterService.getParameters(converter.merge(deviceIds), new MethodCallback<ParametersResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -519,7 +520,7 @@ public class DapController {
 	}
 
 	public void getParametersById(Collection<String> ids, final ParametersCallback callback) {
-		parameterService.getParametersById(merge(ids), new MethodCallback<ParametersResponse>() {
+		parameterService.getParametersById(converter.merge(ids), new MethodCallback<ParametersResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -561,7 +562,7 @@ public class DapController {
 	}
 
 	public void getContexts(List<String> contextIds, final ContextsCallback callback) {
-		contextService.getContextsById(merge(contextIds), new MethodCallback<ContextsResponse>() {
+		contextService.getContextsById(converter.merge(contextIds), new MethodCallback<ContextsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -589,7 +590,8 @@ public class DapController {
 	}
 
 	public void getTimelinesForParameterIds(String contextId, Collection<String> parameterIds, final TimelinesCallback callback) {
-		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
+		timelineService.getTimelines(contextId, converter.merge(parameterIds),
+				new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -633,7 +635,8 @@ public class DapController {
 	public void getMeasurementsForTimelineIds(Collection<String> timelineIds, final MeasurementsCallback callback) {
 		String until = converter.formatForDto(new Date());
 		String from = converter.formatForDto(monthEarlier());
-		measurementService.getMeasurements(merge(timelineIds, ","), from, until, new MethodCallback<MeasurementsResponse>() {
+		measurementService.getMeasurements(converter.merge(timelineIds), from, until,
+				new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -647,7 +650,8 @@ public class DapController {
 	}
 
 	public void getMeasurementsForTimelineIdsWithQuantity(List<String> timelineIds, int quantity, final MeasurementsCallback callback) {
-		measurementService.getMeasurementsWithQuantity(merge(timelineIds, ","), quantity, new MethodCallback<MeasurementsResponse>() {
+		measurementService.getMeasurementsWithQuantity(converter.merge(timelineIds),
+				quantity, new MethodCallback<MeasurementsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -675,7 +679,8 @@ public class DapController {
 	}
 	
 	public void getDeviceAggregations(List<String> profileIds, final DeviceAggregatesCallback callback) {
-		deviceAggregationService.getDeviceAggregations(merge(profileIds, ","), new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregations(converter.merge(profileIds),
+				new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -717,7 +722,8 @@ public class DapController {
 	}
 
 	public void getDevicesRecursivelyForAggregates(List<String> deviceAggregationIds, final DevicesCallback callback) {
-		deviceAggregationService.getDeviceAggregationsForIds(merge(deviceAggregationIds, ","), new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregationsForIds(converter.merge(deviceAggregationIds),
+				new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -801,7 +807,7 @@ public class DapController {
 	}
 
 	public void getDevices(List<String> deviceIds, final DevicesCallback callback) {
-		deviceService.getDevicesForIds(merge(deviceIds, ","), new MethodCallback<DevicesResponse>() {
+		deviceService.getDevicesForIds(converter.merge(deviceIds), new MethodCallback<DevicesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -916,7 +922,7 @@ public class DapController {
 				
 				if(deviceAggregation.getChildernIds() != null && deviceAggregation.getChildernIds().size() > 0) {
 					requestCounter.increment();
-					deviceAggregationService.getDeviceAggregationsForIds(merge(deviceAggregation.getChildernIds(), ","),
+					deviceAggregationService.getDeviceAggregationsForIds(converter.merge(deviceAggregation.getChildernIds()),
 							new MethodCallback<DeviceAggregationsResponse>() {
 						@Override
 						public void onFailure(Method method, Throwable exception) {
@@ -942,36 +948,5 @@ public class DapController {
 		} else {
 			devicesCallback.processDevices(result);
 		}
-	}
-
-	private String merge(Collection<String> chunks, String delimeter) {
-		StringBuilder result = new StringBuilder();
-		
-		for(String chunk : chunks) {
-			result.append(chunk).append(delimeter);
-		}
-		
-		if(result.length() > 0) {
-			result.delete(result.length() - delimeter.length(), result.length());
-		}
-		
-		return result.toString();
-	}
-
-	private String merge(Collection<String> chunks) {
-		return merge(chunks, ",");
-	}
-
-	private String createSelectionQuery(double top, double left, double bottom, double right) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("POLYGON ((")
-				.append(left).append(" ").append(top).append(", ")
-				.append(right).append(" ").append(top).append(", ")
-				.append(right).append(" ").append(bottom).append(", ")
-				.append(left).append(" ").append(bottom).append(", ")
-				.append(left).append(" ").append(top)
-				.append("))");
-		
-		return builder.toString();
 	}
 }

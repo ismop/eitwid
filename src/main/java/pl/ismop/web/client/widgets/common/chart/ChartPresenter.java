@@ -5,6 +5,8 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.Window;
+import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
@@ -12,6 +14,8 @@ import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+import pl.ismop.web.client.IsmopConverter;
+import pl.ismop.web.client.IsmopWebEntryPoint;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.parameter.Parameter;
@@ -22,6 +26,8 @@ import java.util.*;
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		implements IChartPresenter, ChartSelectionEventHandler {
+
+	private final IsmopConverter converter;
 
 	private Chart chart;
 	
@@ -52,7 +58,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		void updateData(Map<String, Number[][]> data);
 	}
 
-	public ChartPresenter() {
+	@Inject
+	public ChartPresenter(IsmopConverter converter) {
+		this.converter = converter;
+
 		dataSeriesMap = new HashMap<>();
 		chartSeriesMap = new HashMap<>();
 		yAxisMap = new HashMap<>();
@@ -146,14 +155,21 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
                 thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::exportCSV()()
             }
         })
-		return exportsq
+		return exports
     }-*/;
 
 	private void exportCSV() {
+		List<String> parameterIds = new ArrayList<>();
+		for (ChartSeries chartSeries : getSeries()) {
+			parameterIds.add(chartSeries.getParameterId());
+		}
+
 		Extremes xExtremes = chart.getXAxis().getExtremes();
-		GWT.log("Export CSV for " + collectTimelineIds() +
-				" from " + new Date(xExtremes.getDataMin().longValue()) +
-				" to " + new Date(xExtremes.getDataMax().longValue()));
+		Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint") +
+				"/chart_exporter?time_from=" + converter.formatForDto(new Date(xExtremes.getDataMin().longValue())) +
+				"&time_to=" + converter.formatForDto(new Date(xExtremes.getDataMax().longValue())) +
+				"&parameters=" + converter.merge(parameterIds) +
+				"&private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
 	}
 
 	private String getDownloadCSVMessage() {

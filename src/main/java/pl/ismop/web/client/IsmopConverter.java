@@ -1,6 +1,7 @@
 package pl.ismop.web.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -66,5 +67,36 @@ public class IsmopConverter {
 
 	public String getDisplayDateFormat() {
 		return displayDateTimeFormat.getPattern();
+	}
+
+	public String merge(Collection<String> chunks, String delimeter) {
+		StringBuilder result = new StringBuilder();
+
+		for(String chunk : chunks) {
+			result.append(chunk).append(delimeter);
+		}
+
+		if(result.length() > 0) {
+			result.delete(result.length() - delimeter.length(), result.length());
+		}
+
+		return result.toString();
+	}
+
+	public String merge(Collection<String> chunks) {
+		return merge(chunks, ",");
+	}
+
+	public String createSelectionQuery(double top, double left, double bottom, double right) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("POLYGON ((")
+				.append(left).append(" ").append(top).append(", ")
+				.append(right).append(" ").append(top).append(", ")
+				.append(right).append(" ").append(bottom).append(", ")
+				.append(left).append(" ").append(bottom).append(", ")
+				.append(left).append(" ").append(top)
+				.append("))");
+
+		return builder.toString();
 	}
 }
