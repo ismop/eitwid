@@ -1,11 +1,13 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import org.moxieapps.gwt.highcharts.client.*;
 import pl.ismop.web.client.IsmopProperties;
+import pl.ismop.web.client.IsmopWebEntryPoint;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.experiment.Experiment;
@@ -103,6 +105,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             loadExperimentLevee();
             eventBus.experimentChanged(selectedExperiment);
         }
+    }
+
+    @Override
+    public void export() {
+        Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint")
+                + "/experiment_exporter/" + selectedExperiment.getId() +
+                "?private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
+
     }
 
     private void loadExperimentWaveShape() {
