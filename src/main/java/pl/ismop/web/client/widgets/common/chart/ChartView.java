@@ -44,6 +44,11 @@ public class ChartView extends Composite implements IChartView {
 	}
 
 	@Override
+	public String getDownloadCSVMessage() {
+		return messages.downloadCSV();
+	}
+
+	@Override
 	public void showLoadingMessage(boolean show) {
 		loadingPanel.setVisible(show);
 	}

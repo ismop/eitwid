@@ -1,5 +1,6 @@
 package pl.ismop.web.client.widgets.common.chart;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -131,8 +132,32 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
                     return nativePoint.color;
                 }-*/;
 			}).setShared(true));
+			chart.setOption("exporting/buttons/contextButton/menuItems", getExportCSVChartBtn());
 			view.addChart(chart);
 		}
+	}
+
+	private native JavaScriptObject getExportCSVChartBtn() /*-{
+		var thisObject = this
+		var exports = $wnd.Highcharts.getOptions().exporting.buttons.contextButton.menuItems.slice(0)
+        exports.push({
+            text: thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::getDownloadCSVMessage()(),
+            onclick: function () {
+                thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::exportCSV()()
+            }
+        })
+		return exportsq
+    }-*/;
+
+	private void exportCSV() {
+		Extremes xExtremes = chart.getXAxis().getExtremes();
+		GWT.log("Export CSV for " + collectTimelineIds() +
+				" from " + new Date(xExtremes.getDataMin().longValue()) +
+				" to " + new Date(xExtremes.getDataMax().longValue()));
+	}
+
+	private String getDownloadCSVMessage() {
+		return getView().getDownloadCSVMessage();
 	}
 
 	public void setHeight(int height) {
