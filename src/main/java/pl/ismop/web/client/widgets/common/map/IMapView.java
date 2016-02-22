@@ -35,6 +35,8 @@ public interface IMapView extends IsWidget {
 
 	void showLoadingPanel(boolean show);
 
+	void setMovable(boolean moveable);
+
 	void showPopup(String featureId, String contents);
 
 	void hidePopup(String featureId);

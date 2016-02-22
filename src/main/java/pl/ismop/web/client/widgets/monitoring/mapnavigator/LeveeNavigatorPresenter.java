@@ -68,6 +68,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				mapPresenter = eventBus.addHandler(MapPresenter.class);
 				mapPresenter.addHoverListeners();
 				mapPresenter.addClickListeners();
+				mapPresenter.setMoveable(true);
 			}
 			
 			mapPresenter.reset(false);

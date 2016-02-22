@@ -38,6 +38,8 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	
 	private Set<String> highlighted = new HashSet<>();
 
+	private boolean moveable = false;
+
 	@UiField
 	FlowPanel panel, loadingPanel, mapContainer;
 	
@@ -95,9 +97,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	};
 
 	private native void resetMapMinZoom() /*-{
-		console.log("reset map min zoom")
 		if (this.@pl.ismop.web.client.widgets.common.map.MapView::map != null) {
-			console.log("min zoom set to 3");
             this.@pl.ismop.web.client.widgets.common.map.MapView::map.setOptions({ minZoom: 3 });
         }
     }-*/;
@@ -355,14 +355,29 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		return selected.contains(featureId);
 	}
 
+	@Override
+	public void setMovable(boolean moveable) {
+		this.moveable = moveable;
+		updateMoveable();
+	}
+	public native void updateMoveable() /*-{
+        if(this.@pl.ismop.web.client.widgets.common.map.MapView::map != null) {
+            var moveable = this.@pl.ismop.web.client.widgets.common.map.MapView::moveable
+            this.@pl.ismop.web.client.widgets.common.map.MapView::map.scaleControl = moveable
+            this.@pl.ismop.web.client.widgets.common.map.MapView::map.draggable = moveable
+            this.@pl.ismop.web.client.widgets.common.map.MapView::map.scrollwheel = moveable
+        }
+    }-*/;
+
 	private native void initMap() /*-{
+        var moveable = this.@pl.ismop.web.client.widgets.common.map.MapView::moveable
 		var map = new $wnd.google.maps.Map($doc.getElementById(this.@pl.ismop.web.client.widgets.common.map.MapView::elementId), {
 			zoom: 8,
-			scaleControl: true,
-			draggable: true,
+			scaleControl: moveable,
+			draggable: moveable,
 			zoomControl: false,
 			streetViewControl: false,
-			scrollwheel: true,
+			scrollwheel: moveable,
 			disableDoubleClickZoom: true
 		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map = map;
@@ -376,7 +391,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
         });
 
         $wnd.google.maps.event.addListener(map, 'dragend', function() {
-			console.log("dragged " + map.getCenter())
             strictBounds = thisObject.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds
             if (strictBounds.contains(map.getCenter())) return;
 
