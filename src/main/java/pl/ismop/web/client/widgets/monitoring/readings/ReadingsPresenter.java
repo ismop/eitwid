@@ -20,10 +20,7 @@ import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.monitoring.readings.IReadingsView.IReadingsPresenter;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Presenter(view = ReadingsView.class)
 public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus>
@@ -248,7 +245,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 		additionalDevices.clear();
 		additionalParameters.clear();
 		chosenAdditionalReadings.clear();
-		dapController.getDevicesForType("weather_station", new DevicesCallback() {
+		dapController.getDevicesForType(Arrays.asList("weather_station", "pump"), new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);

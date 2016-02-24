@@ -778,6 +778,10 @@ public class DapController {
 		});
 	}
 
+	public void getDevicesForType(Collection<String> deviceType, final DevicesCallback callback) {
+		getDevicesForType(converter.merge(deviceType), callback);
+	}
+
 	public void getDevicesForSection(String sectionId, final DevicesCallback callback) {
 		deviceService.getDevicesForSectionId(sectionId, new MethodCallback<DevicesResponse>() {
 			@Override
