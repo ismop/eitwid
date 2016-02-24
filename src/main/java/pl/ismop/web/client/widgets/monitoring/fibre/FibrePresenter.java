@@ -326,6 +326,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			deviceChart.reset();
 		} else {
 			deviceChart = eventBus.addHandler(ChartPresenter.class);
+			deviceChart.setHeight(view.getSelectedDevicesHeight());
 			view.setSelectedDevices(deviceChart.getView());
 			deviceChart.initChart();
 			deviceChart.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
