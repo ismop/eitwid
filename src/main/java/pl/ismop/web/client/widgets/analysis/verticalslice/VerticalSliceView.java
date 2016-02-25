@@ -51,13 +51,23 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 	}
 
 	@Override
-	public void drawCrosssection(String parameterUnit, double minValue, double maxValue, boolean leftBank,
-			Map<Double, Double> profileAndDevicePositionsWithValues) {
-		int topColor = 0xecf330;
-		int bottomColor = 0x307bf3;
-		drawLegend(topColor, bottomColor, minValue, maxValue, parameterUnit);
+	public void drawCrosssection(String parameterUnit, boolean leftBank,
+			Map<Double, List<Double>> profileAndDevicePositionsWithValuesAndColors,
+			Map<Double, List<Double>> legend) {
+		JsArray<JsArrayNumber> nativeLegend = (JsArray<JsArrayNumber>) JsArray.createArray();
 		
-		List<Double> xList = new ArrayList<Double>(profileAndDevicePositionsWithValues.keySet());
+		for (Double colorBoundary : legend.keySet()) {
+			JsArrayNumber boundaryAndColor = (JsArrayNumber) JsArrayNumber.createArray();
+			boundaryAndColor.push(colorBoundary);
+			boundaryAndColor.push(legend.get(colorBoundary).get(0));
+			boundaryAndColor.push(legend.get(colorBoundary).get(1));
+			boundaryAndColor.push(legend.get(colorBoundary).get(2));
+			nativeLegend.push(boundaryAndColor);
+		}
+		
+		drawLegend(nativeLegend, parameterUnit);
+		
+		List<Double> xList = new ArrayList<Double>(profileAndDevicePositionsWithValuesAndColors.keySet());
 		double bottomWidth = xList.get(xList.size() - 1);
 		double leftUpperCorner = (bottomWidth - PROFILE_TOP_WIDTH) / 2;
 		double rightUpperCorner = leftUpperCorner + PROFILE_TOP_WIDTH;
@@ -67,10 +77,10 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		double scale = Math.min((panel.getOffsetHeight() - shiftY) / PROFILE_HEIGHT, (panel.getOffsetWidth() - shiftX) / xList.get(xList.size() - 1));
 		drawScale(scale, shiftX);
 		
-		Iterator<Double> i = profileAndDevicePositionsWithValues.keySet().iterator();
+		Iterator<Double> i = profileAndDevicePositionsWithValuesAndColors.keySet().iterator();
 		@SuppressWarnings("unchecked")
 		JsArray<JsArray<JsArrayNumber>> localCoordinates = (JsArray<JsArray<JsArrayNumber>>) JsArray.createArray();
-		JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
+		JsArray<JsArrayNumber> valuesWithColors = (JsArray<JsArrayNumber>) JsArray.createArray();
 		boolean leftAdded = false, rightAdded = false;
 		double previousCoordinate = 0.0;
 		
@@ -97,14 +107,29 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 					//right slope
 					if(!rightAdded) {
 						rightAdded = true;
-						values.push(calculateValueProportionallyToDistance(profileAndDevicePositionsWithValues.get(xCoordinate),
-								values.get(values.length() - 1), xCoordinate, previousCoordinate, rightUpperCorner));
+						
+						double value = calculateValueProportionallyToDistance(
+								profileAndDevicePositionsWithValuesAndColors
+										.get(xCoordinate).get(0),
+								valuesWithColors.get(valuesWithColors.length() - 1).get(0),
+										xCoordinate, previousCoordinate, rightUpperCorner);
+						JsArrayNumber valueWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+						valueWithColor.push(value);
+						valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+								.get(xCoordinate).get(1));
+						valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+								.get(xCoordinate).get(2));
+						valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+								.get(xCoordinate).get(3));
+						valuesWithColors.push(valueWithColor);
 						
 						@SuppressWarnings("unchecked")
-						JsArray<JsArrayNumber> additionalCoordinates = (JsArray<JsArrayNumber>) JsArrayNumber.createArray();
+						JsArray<JsArrayNumber> additionalCoordinates =
+								(JsArray<JsArrayNumber>) JsArrayNumber.createArray();
 						localCoordinates.push(additionalCoordinates);
 						
-						JsArrayNumber cornerCoordinates = (JsArrayNumber) JsArrayNumber.createArray();
+						JsArrayNumber cornerCoordinates =
+								(JsArrayNumber) JsArrayNumber.createArray();
 						additionalCoordinates.push(cornerCoordinates);
 						cornerCoordinates.push(rightUpperCorner * scale + shiftX);
 						cornerCoordinates.push(0.0 + shiftY);
@@ -125,8 +150,21 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 					//middle section
 					if(!leftAdded) {
 						leftAdded = true;
-						values.push(calculateValueProportionallyToDistance(profileAndDevicePositionsWithValues.get(xCoordinate),
-								values.get(values.length() - 1), xCoordinate, previousCoordinate, leftUpperCorner));
+						
+						double value = calculateValueProportionallyToDistance(
+								profileAndDevicePositionsWithValuesAndColors
+										.get(xCoordinate).get(0),
+								valuesWithColors.get(valuesWithColors.length() - 1).get(0),
+										xCoordinate, previousCoordinate, leftUpperCorner);
+						JsArrayNumber valueWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+						valueWithColor.push(value);
+						valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+								.get(xCoordinate).get(1));
+						valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+								.get(xCoordinate).get(2));
+						valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+								.get(xCoordinate).get(3));
+						valuesWithColors.push(valueWithColor);
 						
 						@SuppressWarnings("unchecked")
 						JsArray<JsArrayNumber> additionalCoordinates = (JsArray<JsArrayNumber>) JsArrayNumber.createArray();
@@ -150,7 +188,16 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 				}
 			}
 			
-			values.push(profileAndDevicePositionsWithValues.get(xCoordinate));
+			double value = profileAndDevicePositionsWithValuesAndColors.get(xCoordinate).get(0);
+			JsArrayNumber valueWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+			valueWithColor.push(value);
+			valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+					.get(xCoordinate).get(1));
+			valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+					.get(xCoordinate).get(2));
+			valueWithColor.push(profileAndDevicePositionsWithValuesAndColors
+					.get(xCoordinate).get(3));
+			valuesWithColors.push(valueWithColor);
 			localCoordinates.push(lineCoordinates);
 			previousCoordinate = xCoordinate;
 		}
@@ -168,7 +215,7 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 			waterXs.push(bottomWidth * scale + shiftX);
 		}
 		
-		drawSlice(localCoordinates, values, topColor, bottomColor, maxValue, minValue, waterXs, waterYs);
+		drawSlice(localCoordinates, valuesWithColors, waterXs, waterYs);
 	}
 
 	@Override
@@ -209,17 +256,17 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		return NumberFormat.getFormat("0.00").format(number);
 	}
 
-	private double calculateValueProportionallyToDistance(double currentValue, double previousValue, double rightX, double leftX, double currentX) {
-		double result = previousValue + (currentValue - previousValue) * ((currentX - leftX) / (rightX - leftX));
+	private double calculateValueProportionallyToDistance(double currentValue, double previousValue,
+			double rightX, double leftX, double currentX) {
+		double result = previousValue + (currentValue - previousValue) * ((currentX - leftX)
+				/ (rightX - leftX));
 		
 		return result; 
 	}
 
-	private native void drawSlice(JsArray<JsArray<JsArrayNumber>> localCoordinates, JsArrayNumber values, int topColor, int bottomColor,
-			double maxValue, double minValue, JsArrayNumber waterXs, JsArrayNumber waterYs) /*-{
-		var top = new $wnd.THREE.Color(topColor);
-		var bottom = new $wnd.THREE.Color(bottomColor);
-		
+	private native void drawSlice(JsArray<JsArray<JsArrayNumber>> localCoordinates,
+			JsArray<JsArrayNumber> valuesWithColors, JsArrayNumber waterXs,
+			JsArrayNumber waterYs) /*-{
 		for(var i = 0; i < localCoordinates.length - 1; i++) {
 			var geometry = new $wnd.THREE.Geometry();
 			
@@ -231,9 +278,15 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 				);
 				
 				var face = new $wnd.THREE.Face3(0, 1, 2);
-				face.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i] - minValue) / (maxValue - minValue)));
-				face.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i + 1] - minValue) / (maxValue - minValue)));
-				face.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i + 1] - minValue) / (maxValue - minValue)));
+				face.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i][1], valuesWithColors[i][2], valuesWithColors[i][3]
+				);
+				face.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i + 1][1], valuesWithColors[i + 1][2], valuesWithColors[i + 1][3]
+				);
+				face.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i + 1][1], valuesWithColors[i + 1][2], valuesWithColors[i + 1][3]
+				);
 				
 				geometry.faces.push(face);
 			} else if(localCoordinates[i + 1].length == 1) {
@@ -244,9 +297,15 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 				);
 				
 				var face = new $wnd.THREE.Face3(0, 1, 2);
-				face.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i] - minValue) / (maxValue - minValue)));
-				face.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i + 1] - minValue) / (maxValue - minValue)));
-				face.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i] - minValue) / (maxValue - minValue)));
+				face.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i][1], valuesWithColors[i][2], valuesWithColors[i][3]
+				);
+				face.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i + 1][1], valuesWithColors[i + 1][2], valuesWithColors[i + 1][3]
+				);
+				face.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i][1], valuesWithColors[i][2], valuesWithColors[i][3]
+				);
 				
 				geometry.faces.push(face);
 			} else {
@@ -258,14 +317,26 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 				);
 				
 				var face1 = new $wnd.THREE.Face3(0, 1, 2);
-				face1.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i] - minValue) / (maxValue - minValue)));
-				face1.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i + 1] - minValue) / (maxValue - minValue)));
-				face1.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i + 1] - minValue) / (maxValue - minValue)));
+				face1.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i][1], valuesWithColors[i][2], valuesWithColors[i][3]
+				);
+				face1.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i + 1][1], valuesWithColors[i + 1][2], valuesWithColors[i + 1][3]
+				);
+				face1.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i + 1][1], valuesWithColors[i + 1][2], valuesWithColors[i + 1][3]
+				);
 				
 				var face2 = new $wnd.THREE.Face3(2, 3, 0);
-				face2.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i + 1] - minValue) / (maxValue - minValue)));
-				face2.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i] - minValue) / (maxValue - minValue)));
-				face2.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (values[i] - minValue) / (maxValue - minValue)));
+				face2.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i + 1][1], valuesWithColors[i + 1][2], valuesWithColors[i + 1][3]
+				);
+				face2.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i][1], valuesWithColors[i][2], valuesWithColors[i][3]
+				);
+				face2.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::buildColor(DDD)(
+					valuesWithColors[i][1], valuesWithColors[i][2], valuesWithColors[i][3]
+				);
 				
 				geometry.faces.push(face1);
 				geometry.faces.push(face2);
@@ -317,10 +388,10 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		render();
 	}-*/;
 	
-	private native void drawLegend(int topColor, int bottomColor, double bottomValue, double topValue, String parameterUnit) /*-{
+	private native void drawLegend(JsArray<JsArrayNumber> legend, String parameterUnit) /*-{
 		var bottom = new $wnd.THREE.Color(bottomColor);
 		var top = new $wnd.THREE.Color(topColor);
-		var levels = 5;
+		var levels = legend.length - 1;
 		var height = 290;
 		var lift = 5;
 		var moveLeft = 5;
@@ -433,5 +504,15 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		var scaleTextMesh = new $wnd.THREE.Mesh(scaleText, scaleTextMaterial);
 		scaleTextMesh.position.set(shiftX, 10, 0);
 		this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(scaleTextMesh);
+	}-*/;
+	
+	private native void buildColor(double r, double g, double b) /*-{
+		var rgbValue = "rgb("
+				+ r + ", "
+				+ g + ", "
+				+ b
+				+ ")";
+		
+		return new $wnd.THREE.Color(rgbValue);
 	}-*/;
 }

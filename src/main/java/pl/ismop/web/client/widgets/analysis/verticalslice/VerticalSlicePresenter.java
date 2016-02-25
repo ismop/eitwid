@@ -1,6 +1,9 @@
 package pl.ismop.web.client.widgets.analysis.verticalslice;
 
+import static java.util.Arrays.asList;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -28,6 +31,8 @@ import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.util.CoordinatesUtil;
+import pl.ismop.web.client.util.GradientsUtil;
+import pl.ismop.web.client.util.GradientsUtil.Color;
 import pl.ismop.web.client.widgets.analysis.verticalslice.IVerticalSliceView.IVerticalSlicePresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
@@ -45,10 +50,14 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 	private ISelectionManager selectionManager;
 
+	private GradientsUtil gradientsUtil;
+
 	@Inject
-	public VerticalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil) {
+	public VerticalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil,
+			GradientsUtil gradientsUtil) {
 		this.dapController = dapController;
 		this.coordinatesUtil = coordinatesUtil;
+		this.gradientsUtil = gradientsUtil;
 	}
 	
 	public void onUpdateVerticalSliceConfiguration(VerticalCrosssectionConfiguration configuration) {
@@ -160,7 +169,6 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 							
 							Date queryDate = configuration.getDataSelector().equals("0") ? currentDate :
 								new Date(currentDate.getTime() - configuration.getExperiment().getStart().getTime());
-							
 							dapController.getLastMeasurements(timelineIds, queryDate, new MeasurementsCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {
@@ -173,29 +181,27 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 									view.showLoadingState(false);
 									view.clear();
 									
-									if(measurements.size() > 0) {
-										double minValue = Double.MAX_VALUE, maxValue = Double.MIN_VALUE;
-										
-										for(Measurement measurement : measurements) {
-											if(measurement.getValue() > maxValue) {
-												maxValue = measurement.getValue();
-											}
-											
-											if(measurement.getValue() < minValue) {
-												minValue = measurement.getValue();
-											}
+									if (measurements.size() > 0) {
+										for (Measurement measurement : measurements) {
+											gradientsUtil.updateValues("analysis:" + parameterUnit,
+													measurement.getValue());
 										}
 										
 										//TODO: come up with a better way of telling where the water is
 										boolean leftBank = true;
 										
-										if(configuration.getPickedProfile().getShape().getCoordinates().get(0).get(0) > 19.676851838778) {
+										if (configuration.getPickedProfile().getShape()
+												.getCoordinates().get(0).get(0) > 19.676851838778) {
 											leftBank = false;
 										}
 										
 										view.init();
-										view.drawCrosssection(parameterUnit, minValue, maxValue, leftBank,
-												calculateProfileAndDevicePositionsWithValues(measurements, timelines, configuration.getPickedProfile()));
+										view.drawCrosssection(parameterUnit, leftBank,
+												calculateProfileAndDevicePositionsWithValuesAndColors(
+														measurements,
+														timelines,
+														configuration.getPickedProfile(),
+														parameterUnit), createLegend());
 									} else {
 										eventBus.showSimpleError(view.noMeasurementsMessage());
 									}
@@ -208,8 +214,29 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		});
 	}
 	
-	private Map<Double, Double> calculateProfileAndDevicePositionsWithValues(List<Measurement> measurements, List<Timeline> timelines, Profile profile) {
-		Map<Double, Double> result = new LinkedHashMap<>();
+	private Map<Double, List<Double>> createLegend() {
+		Map<Double, List<Double>> result = new LinkedHashMap<>();
+		
+		for (Double colorBoundary : gradientsUtil.getGradient().keySet()) {
+			result.put(colorBoundary, asList(new Double[] {
+				new Double(gradientsUtil.getMinValue()),
+				new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
+				new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
+				new Double(gradientsUtil.getGradient().get(colorBoundary).getB())
+			}));
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param parameterUnit 
+	 * @return Map<x coordinate, List<value, color R, color G, color B>>
+	 */
+	private Map<Double, List<Double>> calculateProfileAndDevicePositionsWithValuesAndColors(
+			List<Measurement> measurements, List<Timeline> timelines, Profile profile, String parameterUnit) {
+		Map<Double, List<Double>> result = new LinkedHashMap<>();
 		List<List<Double>> toBeProjected = new ArrayList<>();
 		toBeProjected.addAll(profile.getShape().getCoordinates());
 		
@@ -221,10 +248,9 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 			}
 		});
 		
-		for(Device device : devices) {
+		for (Device device : devices) {
 			toBeProjected.add(device.getPlacement().getCoordinates());
 		}
-		
 		
 		Collections.sort(toBeProjected, new Comparator<List<Double>>() {
 			@Override
@@ -234,34 +260,53 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		});
 		
 		List<List<Double>> projected = coordinatesUtil.projectCoordinates(toBeProjected);
-		
 		double minX = projected.get(0).get(0);
 		
-		for(List<Double> point : projected) {
+		for (List<Double> point : projected) {
 			point.set(0, point.get(0) - minX);
 		}
 		
-		for(int i = 0; i < projected.size(); i++) {
-			if(i == 0) {
+		for (int i = 0; i < projected.size(); i++) {
+			List<Double> valueAndColors = new ArrayList<>();
+			
+			if (i == 0) {
 				//left profile coordinate
-				result.put(projected.get(i).get(0), getDeviceValue(devices.get(0), measurements, timelines));
-			} else if(i == projected.size() - 1) {
-				//right profile coordinate 
-				result.put(projected.get(i).get(0), getDeviceValue(devices.get(devices.size() - 1), measurements, timelines));
+				double value = getDeviceValue(devices.get(0), measurements, timelines);
+				valueAndColors.add(value);
+				completeColors(valueAndColors, value, "analysis:" + parameterUnit);
+				result.put(projected.get(i).get(0), valueAndColors);
+			} else if (i == projected.size() - 1) {
+				//right profile coordinate
+				double value = getDeviceValue(devices.get(devices.size() - 1), measurements,
+						timelines);
+				valueAndColors.add(value);
+				completeColors(valueAndColors, value, "analysis:" + parameterUnit);
+				result.put(projected.get(i).get(0), valueAndColors);
 			} else {
 				//device coordinates
-				result.put(projected.get(i).get(0), getDeviceValue(devices.get(i - 1), measurements, timelines));
+				double value = getDeviceValue(devices.get(i - 1), measurements, timelines);
+				valueAndColors.add(value);
+				completeColors(valueAndColors, value, "analysis:" + parameterUnit);
+				result.put(projected.get(i).get(0), valueAndColors);
 			}
 		}
 		
 		return result;
 	}
 
-	private Double getDeviceValue(Device device, List<Measurement> measurements, List<Timeline> timelines) {
-		for(Timeline timeline : timelines) {
-			if(device.getParameterIds().contains(timeline.getParameterId())) {
-				for(Measurement measurement : measurements) {
-					if(measurement.getTimelineId().equals(timeline.getId())) {
+	private void completeColors(List<Double> valueAndColors, double value, String gradientId) {
+		Color color = gradientsUtil.getColor(gradientId, value);
+		valueAndColors.add(new Integer(color.getR()).doubleValue());
+		valueAndColors.add(new Integer(color.getG()).doubleValue());
+		valueAndColors.add(new Integer(color.getB()).doubleValue());
+	}
+
+	private Double getDeviceValue(Device device, List<Measurement> measurements,
+			List<Timeline> timelines) {
+		for (Timeline timeline : timelines) {
+			if (device.getParameterIds().contains(timeline.getParameterId())) {
+				for (Measurement measurement : measurements) {
+					if (measurement.getTimelineId().equals(timeline.getId())) {
 						return measurement.getValue();
 					}
 				}
