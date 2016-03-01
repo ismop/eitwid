@@ -23,4 +23,14 @@ public class GradientUtilTest {
 		Color color = gradientsUtil.getColor("testId", 0.6);
 		assertEquals(new Color(101, 0, 0), color);
 	}
+	
+	@Test
+	public void testConreteExample() {
+		GradientsUtil gradientsUtil = new GradientsUtil();
+		gradientsUtil.updateValues("testId", 15.24);
+		gradientsUtil.updateValues("testId", 17.79);
+		
+		Color color = gradientsUtil.getColor("testId", 17.1);
+		assertEquals(new Color(234, 255, 0), color);
+	}
 }

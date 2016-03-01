@@ -201,7 +201,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 														measurements,
 														timelines,
 														configuration.getPickedProfile(),
-														parameterUnit), createLegend());
+														parameterUnit), createLegend(parameterUnit));
 									} else {
 										eventBus.showSimpleError(view.noMeasurementsMessage());
 									}
@@ -214,15 +214,15 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		});
 	}
 	
-	private Map<Double, List<Double>> createLegend() {
+	private Map<Double, List<Double>> createLegend(String parameterUnit) {
 		Map<Double, List<Double>> result = new LinkedHashMap<>();
 		
 		for (Double colorBoundary : gradientsUtil.getGradient().keySet()) {
 			result.put(colorBoundary, asList(new Double[] {
-				new Double(gradientsUtil.getMinValue()),
-				new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
-				new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
-				new Double(gradientsUtil.getGradient().get(colorBoundary).getB())
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getB()),
+					gradientsUtil.getValue("analysis:" + parameterUnit, colorBoundary)
 			}));
 		}
 		

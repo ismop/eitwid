@@ -64,7 +64,8 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 	}
 	
 	public void onProfileClicked(final Profile profile) {
-		if(configuration.getPickedProfile() == null || !configuration.getPickedProfile().getId().equals(profile.getId())) {
+		if(configuration.getPickedProfile() == null
+				|| !configuration.getPickedProfile().getId().equals(profile.getId())) {
 			view.setProfile(profile.getId());
 			configuration.setPickedProfile(profile);
 			view.showLoadingState(true);

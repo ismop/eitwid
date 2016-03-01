@@ -164,7 +164,7 @@
 			<version>1.6.0</version>
 		</dependency>
 		
-		<!-- GWT highstock dependency -->
+		<!-- GWT highcharts dependency -->
 		<dependency>
 			<groupId>org.moxieapps</groupId>
 			<artifactId>gwt-highcharts</artifactId>

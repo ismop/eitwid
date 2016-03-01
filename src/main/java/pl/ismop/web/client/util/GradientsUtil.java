@@ -1,7 +1,5 @@
 package pl.ismop.web.client.util;
 
-import static java.lang.Math.abs;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -148,17 +146,20 @@ public class GradientsUtil {
 			return new Color(
 						new Double(((normalizedColor - lowerBoundary)
 								/ (upperBoundary - lowerBoundary))
-								* abs((upperColor.getR() - lowerColor.getR()))).intValue(),
+								* (upperColor.getR() - lowerColor.getR()) + lowerColor.getR())
+								.intValue(),
 						new Double(((normalizedColor - lowerBoundary)
 								/ (upperBoundary - lowerBoundary))
-								* abs((upperColor.getG() - lowerColor.getG()))).intValue(),
+								* (upperColor.getG() - lowerColor.getG()) + lowerColor.getG())
+								.intValue(),
 						new Double(((normalizedColor - lowerBoundary)
 								/ (upperBoundary - lowerBoundary))
-								* abs((upperColor.getB() - lowerColor.getB()))).intValue()
+								* (upperColor.getB() - lowerColor.getB()) + lowerColor.getB())
+								.intValue()
 					);
 		} else {
 			throw new IllegalArgumentException("Could not find gradient range for value " + value
-					+ " and gradien id " + gradientId);
+					+ " and gradient id " + gradientId);
 		}
 	}
 	
@@ -166,11 +167,12 @@ public class GradientsUtil {
 		return new LinkedHashMap<>(gradient);
 	}
 
-	public double getMinValue(String gradientId) {
-		return values.get(gradientId).min;
-	}
-	
-	public double getMaxValue(String gradientId) {
-		return values.get(gradientId).max;
+	public double getValue(String gradientId, double gradientPosition) {
+		if (values.containsKey(gradientId)) {
+			return gradientPosition * (values.get(gradientId).max - values.get(gradientId).min)
+					+ values.get(gradientId).min;
+		}
+		
+		throw new IllegalArgumentException("gradient with id " + gradientId + " does not exist");
 	}
 }
