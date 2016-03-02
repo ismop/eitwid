@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -56,15 +57,15 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 	private CoordinatesUtil coordinatesUtil;
 	
-	private double shiftX, shiftY;
-
-	private double scale;
-
-	private double panX;
+	private double shiftX, shiftY, scale, panX;
 
 	private Date currentDate;
 
 	private GradientsUtil gradientsUtil;
+	
+	private double gradientMin, gradientMax;
+	
+	private String gradientId;
 	
 	@Inject
 	public HorizontalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil,
@@ -113,10 +114,19 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		this.selectionManager = selectionManager;
 		addProfilesToMinimap();
 	}
+	
+	public void onGradientExtended(String gradientId) {
+		if (gradientId.equals(this.gradientId)
+				&& gradientsUtil.isExtended(gradientId, gradientMin, gradientMax)) {
+			GWT.log("Gradient " + gradientId + " extended");
+			refreshView();
+		}
+	}
 
 	private void addProfilesToMinimap() {
 		selectionManager.clear();
-		for(Profile profile : configuration.getPickedProfiles().values()) {
+		
+		for (Profile profile : configuration.getPickedProfiles().values()) {
 			selectionManager.add(profile);
 		}
 	}
@@ -217,19 +227,33 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 									}
 									
 									if(measurements.size() > 0) {
+										gradientId = "analysis:" + parameterUnit;
+										
+										if (gradientsUtil.contains(gradientId)) {
+											gradientMin = gradientsUtil.getMinValue(gradientId);
+											gradientMax = gradientsUtil.getMaxValue(gradientId);
+										}
+										
 										for(Measurement measurement : measurements) {
-											gradientsUtil.updateValues("analysis:" + parameterUnit,
+											gradientsUtil.updateValues(gradientId,
 													measurement.getValue());
 										}
 										
 										view.init();
 										drawMuteSections(configuration.getSections().values(),
 												muteSections);
-										view.drawCrosssection(createLegend(parameterUnit),
+										view.drawCrosssection(createLegend(gradientId),
 												parameterUnit,
 												createDeviceLocationsWithValuesAndColors(
 														measurements, timelines, contexts.get(0),
-														parameterUnit));
+														gradientId));
+										
+										if (gradientsUtil.isExtended(gradientId, gradientMin,
+												gradientMax)) {
+											gradientMin = gradientsUtil.getMinValue(gradientId);
+											gradientMax = gradientsUtil.getMaxValue(gradientId);
+											eventBus.gradientExtended(gradientId);
+										}
 									} else {
 										eventBus.showSimpleError(view.noMeasurementsMessage());
 									}
@@ -250,7 +274,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 	private Map<List<List<Double>>, Map<List<Double>, List<Double>>>
 			createDeviceLocationsWithValuesAndColors(List<Measurement> measurements,
-					List<Timeline> timelines, Context context, String parameterUnit) {
+					List<Timeline> timelines, Context context, String gradientId) {
 		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = new HashMap<>();
 		
 		for(Profile profile : configuration.getPickedProfiles().values()) {
@@ -312,7 +336,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			
 			for(List<Double> key : keys) {
 				Double finalValue = temp.get(key);
-				Color color = gradientsUtil.getColor("analysis:" + parameterUnit, finalValue);
+				Color color = gradientsUtil.getColor(gradientId, finalValue);
 				List<Double> valueWithColor = new ArrayList<>();
 				valueWithColor.add(finalValue);
 				valueWithColor.add(new Integer(color.getR()).doubleValue());
@@ -459,7 +483,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		}
 	}
 	
-	private Map<Double, List<Double>> createLegend(String parameterUnit) {
+	private Map<Double, List<Double>> createLegend(String gradientId) {
 		Map<Double, List<Double>> result = new LinkedHashMap<>();
 		
 		for (Double colorBoundary : gradientsUtil.getGradient().keySet()) {
@@ -467,7 +491,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
 					new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
 					new Double(gradientsUtil.getGradient().get(colorBoundary).getB()),
-					gradientsUtil.getValue("analysis:" + parameterUnit, colorBoundary)
+					gradientsUtil.getValue(gradientId, colorBoundary)
 			}));
 		}
 		

@@ -219,4 +219,7 @@ public interface MainEventBus extends EventBusWithLookup {
 	
 	@Event(handlers = ErrorPresenter.class)
 	void showSimpleError(String errorDetails);
+
+	@Event(handlers = { VerticalSlicePresenter.class, HorizontalSlicePresenter.class })
+	void gradientExtended(String gradientId);
 }

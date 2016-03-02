@@ -3,7 +3,6 @@ package pl.ismop.web.client.widgets.analysis.verticalslice;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,6 +13,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -38,7 +38,8 @@ import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 
 @Presenter(view = VerticalSliceView.class, multiple = true)
-public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, MainEventBus> implements IVerticalSlicePresenter, 
+public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, MainEventBus>
+		implements IVerticalSlicePresenter, 
 		IPanelContent<IVerticalSliceView, MainEventBus> {
 	private DapController dapController;
 	
@@ -51,6 +52,10 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	private ISelectionManager selectionManager;
 
 	private GradientsUtil gradientsUtil;
+	
+	private double gradientMin, gradientMax;
+	
+	private String gradientId;
 
 	@Inject
 	public VerticalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil,
@@ -60,7 +65,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		this.gradientsUtil = gradientsUtil;
 	}
 	
-	public void onUpdateVerticalSliceConfiguration(VerticalCrosssectionConfiguration configuration) {
+	public void onUpdateVerticalSliceConfiguration(
+			VerticalCrosssectionConfiguration configuration) {
 		if(this.configuration == configuration) {
 			refreshView();
 		}
@@ -109,6 +115,14 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	public void destroy() {
 		
 	}
+	
+	public void onGradientExtended(String gradientId) {
+		if (gradientId.equals(this.gradientId)
+				&& gradientsUtil.isExtended(gradientId, gradientMin, gradientMax)) {
+			GWT.log("Gradient " + gradientId + " extended");
+			refreshView();
+		}
+	}
 
 	private void refreshView() {
 		if (!view.canRender()) {
@@ -122,10 +136,12 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		final List<String> parameterIds = new ArrayList<>();
 		Parameter parameter = null;
 		
-		for(Device device : configuration.getProfileDevicesMap().get(configuration.getPickedProfile())) {
+		for(Device device : configuration.getProfileDevicesMap().get(
+				configuration.getPickedProfile())) {
 			for(String parameterId : device.getParameterIds()) {
 				if(configuration.getParameterMap().get(parameterId) != null
-						&& configuration.getParameterMap().get(parameterId).getMeasurementTypeName().equals(configuration.getPickedParameterName())) {
+						&& configuration.getParameterMap().get(parameterId).getMeasurementTypeName()
+						.equals(configuration.getPickedParameterName())) {
 					parameterIds.add(parameterId);
 					parameter = configuration.getParameterMap().get(parameterId);
 				}
@@ -144,7 +160,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 			@Override
 			public void processContexts(List<Context> contexts) {
 				if(contexts.size() > 0) {
-					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
+					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds,
+							new TimelinesCallback() {
 						@Override
 						public void onError(ErrorDetails errorDetails) {
 							view.showLoadingState(false);
@@ -155,7 +172,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 						public void processTimelines(final List<Timeline> timelines) {
 							if(!configuration.getDataSelector().equals("0")) {
 								for(Iterator<Timeline> i = timelines.iterator(); i.hasNext();) {
-									if(!i.next().getScenarioId().equals(configuration.getDataSelector())) {
+									if(!i.next().getScenarioId().equals(
+											configuration.getDataSelector())) {
 										i.remove();
 									}
 								}
@@ -167,9 +185,11 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 								timelineIds.add(timeline.getId());
 							}
 							
-							Date queryDate = configuration.getDataSelector().equals("0") ? currentDate :
-								new Date(currentDate.getTime() - configuration.getExperiment().getStart().getTime());
-							dapController.getLastMeasurements(timelineIds, queryDate, new MeasurementsCallback() {
+							Date queryDate = configuration.getDataSelector().equals("0")
+									? currentDate :	new Date(currentDate.getTime()
+											- configuration.getExperiment().getStart().getTime());
+							dapController.getLastMeasurements(timelineIds, queryDate,
+									new MeasurementsCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {
 									view.showLoadingState(false);
@@ -182,8 +202,15 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 									view.clear();
 									
 									if (measurements.size() > 0) {
+										gradientId = "analysis:" + parameterUnit;
+										
+										if (gradientsUtil.contains(gradientId)) {
+											gradientMin = gradientsUtil.getMinValue(gradientId);
+											gradientMax = gradientsUtil.getMaxValue(gradientId);
+										}
+										
 										for (Measurement measurement : measurements) {
-											gradientsUtil.updateValues("analysis:" + parameterUnit,
+											gradientsUtil.updateValues(gradientId,
 													measurement.getValue());
 										}
 										
@@ -201,7 +228,14 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 													measurements,
 													timelines,
 													configuration.getPickedProfile(),
-													parameterUnit), createLegend(parameterUnit));
+													parameterUnit), createLegend(gradientId));
+										
+										if (gradientsUtil.isExtended(gradientId, gradientMin,
+												gradientMax)) {
+											gradientMin = gradientsUtil.getMinValue(gradientId);
+											gradientMax = gradientsUtil.getMaxValue(gradientId);
+											eventBus.gradientExtended(gradientId);
+										}
 									} else {
 										eventBus.showSimpleError(view.noMeasurementsMessage());
 									}
@@ -214,7 +248,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		});
 	}
 	
-	private Map<Double, List<Double>> createLegend(String parameterUnit) {
+	private Map<Double, List<Double>> createLegend(String gradientId) {
 		Map<Double, List<Double>> result = new LinkedHashMap<>();
 		
 		for (Double colorBoundary : gradientsUtil.getGradient().keySet()) {
@@ -222,7 +256,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 					new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
 					new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
 					new Double(gradientsUtil.getGradient().get(colorBoundary).getB()),
-					gradientsUtil.getValue("analysis:" + parameterUnit, colorBoundary)
+					gradientsUtil.getValue(gradientId, colorBoundary)
 			}));
 		}
 		
@@ -235,7 +269,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	 * @return Map<x coordinate, List<value, color R, color G, color B>>
 	 */
 	private Map<Double, List<Double>> calculateProfileAndDevicePositionsWithValuesAndColors(
-			List<Measurement> measurements, List<Timeline> timelines, Profile profile, String parameterUnit) {
+			List<Measurement> measurements, List<Timeline> timelines, Profile profile,
+			String parameterUnit) {
 		Map<Double, List<Double>> result = new LinkedHashMap<>();
 		List<List<Double>> toBeProjected = new ArrayList<>();
 		toBeProjected.addAll(profile.getShape().getCoordinates());
@@ -244,7 +279,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		Collections.sort(devices, new Comparator<Device>() {
 			@Override
 			public int compare(Device o1, Device o2) {
-				return o1.getPlacement().getCoordinates().get(0).compareTo(o2.getPlacement().getCoordinates().get(0));
+				return o1.getPlacement().getCoordinates().get(0).compareTo(
+						o2.getPlacement().getCoordinates().get(0));
 			}
 		});
 		

@@ -175,4 +175,21 @@ public class GradientsUtil {
 		
 		throw new IllegalArgumentException("gradient with id " + gradientId + " does not exist");
 	}
+
+	public boolean contains(String gradientId) {
+		return values.containsKey(gradientId);
+	}
+
+	public double getMinValue(String gradientId) {
+		return values.get(gradientId) == null ? 0.0 : values.get(gradientId).min;
+	}
+	
+	public double getMaxValue(String gradientId) {
+		return values.get(gradientId) == null ? 0.0 : values.get(gradientId).max;
+	}
+
+	public boolean isExtended(String gradientId, double min, double max) {
+		return values.get(gradientId) == null ? false :
+			(values.get(gradientId).min < min || values.get(gradientId).max > max);
+	}
 }
