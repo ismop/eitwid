@@ -18,7 +18,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HorizontalSliceView extends Composite implements IHorizontalSliceView {
-	private static HorizontalSliceViewUiBinder uiBinder = GWT.create(HorizontalSliceViewUiBinder.class);
+	private static HorizontalSliceViewUiBinder uiBinder =
+			GWT.create(HorizontalSliceViewUiBinder.class);
 
 	interface HorizontalSliceViewUiBinder extends UiBinder<Widget, HorizontalSliceView> {}
 	
@@ -40,25 +41,39 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	@Override
-	public void drawCrosssection(String parameterUnit, double minValue, double maxValue,
-			Map<List<List<Double>>, Map<List<Double>, Double>> locationsWithValues) {
-		int topColor = 0xecf330;
-		int bottomColor = 0x307bf3;
-		drawLegend(topColor, bottomColor, minValue, maxValue, parameterUnit);
+	public void drawCrosssection(Map<Double, List<Double>> legend, String parameterUnit,
+			Map<List<List<Double>>, Map<List<Double>, List<Double>>> locationsWithValues) {
+		@SuppressWarnings("unchecked")
+		JsArray<JsArrayNumber> nativeLegend = (JsArray<JsArrayNumber>) JsArray.createArray();
+		
+		for (Double colorBoundary : legend.keySet()) {
+			JsArrayNumber boundaryAndColor = (JsArrayNumber) JsArrayNumber.createArray();
+			boundaryAndColor.push(colorBoundary);
+			boundaryAndColor.push(legend.get(colorBoundary).get(0)); //R
+			boundaryAndColor.push(legend.get(colorBoundary).get(1)); //G
+			boundaryAndColor.push(legend.get(colorBoundary).get(2)); //B
+			boundaryAndColor.push(legend.get(colorBoundary).get(3)); //value
+			nativeLegend.push(boundaryAndColor);
+		}
+		drawLegend(nativeLegend, parameterUnit);
 		drawDevices(locationsWithValues);
 		
 		for(List<List<Double>> sectionCorners : locationsWithValues.keySet()) {
 			@SuppressWarnings("unchecked")
-			JsArray<JsArrayNumber> coordinatesAndValues = (JsArray<JsArrayNumber>) JsArray.createArray();
+			JsArray<JsArrayNumber> coordinatesAndValues =
+					(JsArray<JsArrayNumber>) JsArray.createArray();
 			List<Double> topLeftCorner = sectionCorners.get(0);
 			List<Double> topRightCorner = sectionCorners.get(1);
-			Iterator<List<Double>> iterator = locationsWithValues.get(sectionCorners).keySet().iterator();
-			Double previousValue = null; 
+			Iterator<List<Double>> iterator = locationsWithValues.get(sectionCorners)
+					.keySet().iterator();
+			List<Double> previousValue = null; 
 
 			while(iterator.hasNext()) {
 				List<Double> next = iterator.next();
-				List<Double> bottomLeftCorner = calculateCorner(sectionCorners.get(0), sectionCorners.get(1), next, sectionCorners.get(0));
-				List<Double> bottomRightCorner = calculateCorner(sectionCorners.get(0), sectionCorners.get(1), next, sectionCorners.get(1));
+				List<Double> bottomLeftCorner = calculateCorner(sectionCorners.get(0),
+						sectionCorners.get(1), next, sectionCorners.get(0));
+				List<Double> bottomRightCorner = calculateCorner(sectionCorners.get(0),
+						sectionCorners.get(1), next, sectionCorners.get(1));
 				JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
 				topLeft.push(topLeftCorner.get(0));
 				topLeft.push(topLeftCorner.get(1));
@@ -80,8 +95,29 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 				coordinatesAndValues.push(bottomLeft);
 				
 				JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
-				values.push(previousValue == null ? locationsWithValues.get(sectionCorners).get(next) : previousValue);
-				values.push(locationsWithValues.get(sectionCorners).get(next));
+				
+				if (previousValue != null) {
+					values.push(previousValue.get(0));
+					values.push(new Double(previousValue.get(1)).intValue());
+					values.push(new Double(previousValue.get(2)).intValue());
+					values.push(new Double(previousValue.get(3)).intValue());
+				} else {
+					values.push(locationsWithValues.get(sectionCorners).get(next).get(0));
+					values.push(new Double(
+							locationsWithValues.get(sectionCorners).get(next).get(1)).intValue());
+					values.push(new Double(
+							locationsWithValues.get(sectionCorners).get(next).get(2)).intValue());
+					values.push(new Double(
+							locationsWithValues.get(sectionCorners).get(next).get(3)).intValue());
+				}
+				
+				values.push(locationsWithValues.get(sectionCorners).get(next).get(0));
+				values.push(new Double(
+						locationsWithValues.get(sectionCorners).get(next).get(1)).intValue());
+				values.push(new Double(
+						locationsWithValues.get(sectionCorners).get(next).get(2)).intValue());
+				values.push(new Double(
+						locationsWithValues.get(sectionCorners).get(next).get(3)).intValue());
 				coordinatesAndValues.push(values);
 				
 				topLeftCorner = bottomLeftCorner;
@@ -110,11 +146,17 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			coordinatesAndValues.push(bottomLeft);
 			
 			JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
-			values.push(previousValue);
-			values.push(previousValue);
+			values.push(previousValue.get(0));
+			values.push(new Double(previousValue.get(1)).intValue());
+			values.push(new Double(previousValue.get(2)).intValue());
+			values.push(new Double(previousValue.get(3)).intValue());
+			values.push(previousValue.get(0));
+			values.push(new Double(previousValue.get(1)).intValue());
+			values.push(new Double(previousValue.get(2)).intValue());
+			values.push(new Double(previousValue.get(3)).intValue());
 			coordinatesAndValues.push(values);
 			
-			drawHeatSection(coordinatesAndValues, topColor, bottomColor, minValue, maxValue);
+			drawHeatSection(coordinatesAndValues);
 		}
 	};
 	
@@ -122,7 +164,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	public void drawMuteSections(List<List<List<Double>>> coordinates) {
 		for(List<List<Double>> sectionCoordinates : coordinates) {
 			@SuppressWarnings("unchecked")
-			JsArray<JsArrayNumber> nativeCoordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
+			JsArray<JsArrayNumber> nativeCoordinates =
+					(JsArray<JsArrayNumber>) JsArray.createArray();
 			
 			for(List<Double> pointCoordinates : sectionCoordinates) {
 				JsArrayNumber nativePointCoordinates = (JsArrayNumber) JsArray.createArray();
@@ -226,8 +269,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		return result;
 	}
 
-	private void drawDevices(Map<List<List<Double>>, Map<List<Double>, Double>> locationsWithValues) {
-		for(Map<List<Double>, Double> locationWithValue : locationsWithValues.values()) {
+	private void drawDevices(Map<List<List<Double>>, Map<List<Double>, List<Double>>> locationsWithValues) {
+		for(Map<List<Double>, List<Double>> locationWithValue : locationsWithValues.values()) {
 			for(List<Double> location : locationWithValue.keySet()) {
 				JsArrayNumber coordinates = (JsArrayNumber) JsArrayNumber.createArray();
 				
@@ -269,37 +312,44 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(wireframe);
 	}-*/;
 
-	private native void drawLegend(int topColor, int bottomColor, double bottomValue, double topValue, String parameterUnit) /*-{
-		var bottom = new $wnd.THREE.Color(bottomColor);
-		var top = new $wnd.THREE.Color(topColor);
-		var levels = 5;
+	private native void drawLegend(JsArray<JsArrayNumber> legend, String parameterUnit) /*-{
 		var height = 290;
 		var lift = 5;
-		var moveLeft = 5;
-		var levelHeight = height / levels;
+		var moveRight = 5;
 		var levelWidth = 50
-		var valueStep = (topValue - bottomValue) / levels;
 		var textSpacing = 5;
 		var textSize = 12;
 		
-		for(var i = 0; i < levels; i++) {
+		for (var i = 0; i < legend.length - 1; i++) {
 			var geometry = new $wnd.THREE.Geometry();
 			geometry.vertices.push(
-				new $wnd.THREE.Vector3(moveLeft, i * levelHeight + lift, 0),
-				new $wnd.THREE.Vector3(levelWidth + moveLeft, i * levelHeight + lift, 0),
-				new $wnd.THREE.Vector3(levelWidth + moveLeft, i * levelHeight + levelHeight + lift, 0),
-				new $wnd.THREE.Vector3(moveLeft, i * levelHeight + levelHeight + lift, 0)
+				new $wnd.THREE.Vector3(moveRight, legend[i][0] * height + lift, 0),
+				new $wnd.THREE.Vector3(levelWidth + moveRight, legend[i][0] * height + lift, 0),
+				new $wnd.THREE.Vector3(levelWidth + moveRight, legend[i + 1][0] * height + lift, 0),
+				new $wnd.THREE.Vector3(moveRight, legend[i + 1][0] * height + lift, 0)
 			);
 			
 			var face1 = new $wnd.THREE.Face3(0, 1, 2);
-			face1.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (i * levelHeight) / height));
-			face1.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (i * levelHeight) / height));
-			face1.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, ((i + 1) * levelHeight) / height));
+			face1.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				legend[i][1], legend[i][2], legend[i][3]
+			);
+			face1.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				legend[i][1], legend[i][2], legend[i][3]
+			);
+			face1.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				legend[i + 1][1], legend[i + 1][2], legend[i + 1][3]
+			);
 			
 			var face2 = new $wnd.THREE.Face3(2, 3, 0);
-			face2.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, ((i + 1) * levelHeight) / height));
-			face2.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, ((i + 1) * levelHeight) / height));
-			face2.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (i * levelHeight) / height));
+			face2.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				legend[i + 1][1], legend[i + 1][2], legend[i + 1][3]
+			);
+			face2.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				legend[i + 1][1], legend[i + 1][2], legend[i + 1][3]
+			);
+			face2.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				legend[i][1], legend[i][2], legend[i][3]
+			);
 			
 			geometry.faces.push(face1);
 			geometry.faces.push(face2);
@@ -310,7 +360,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
 			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(wireframe);
 			
-			var text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(bottomValue + valueStep * i)
+			var text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(legend[i][4])
 					+ " " + parameterUnit;
 			var tickMaterial = new $wnd.THREE.MeshLambertMaterial();
 			tickMaterial.color.setHex(0x555555);
@@ -328,11 +378,11 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 				textPositionShift = 0;
 			}
 			
-			tickMesh.position.set(levelWidth + moveLeft + textSpacing, i * levelHeight + lift + textPositionShift, 0);
+			tickMesh.position.set(levelWidth + moveRight + textSpacing, legend[i][0] * height + lift + textPositionShift, 0);
 			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(tickMesh);
 			
-			if(i == levels -1) {
-				text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(bottomValue + valueStep * (i + 1))
+			if(i == legend.length - 2) {
+				text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(legend[i + 1][4])
 					+ " " + parameterUnit;
 				tick = new $wnd.THREE.TextGeometry(text, {
 					font: 'optimer',
@@ -340,7 +390,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 					height: 1
 				});
 				tickMesh = new $wnd.THREE.Mesh(tick, tickMaterial);
-				tickMesh.position.set(levelWidth + moveLeft + textSpacing, (i + 1) * levelHeight + lift - textSize, 0);
+				tickMesh.position.set(levelWidth + moveRight + textSpacing, legend[i + 1][0] * height + lift - textSize, 0);
 				this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(tickMesh);
 			}
 		}
@@ -373,9 +423,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		render();
 	}-*/;
 
-	private native void drawHeatSection(JsArray<JsArrayNumber> coordinates, int topColor, int bottomColor, double minValue, double maxValue) /*-{
-		var bottom = new $wnd.THREE.Color(bottomColor);
-		var top = new $wnd.THREE.Color(topColor);
+	private native void drawHeatSection(JsArray<JsArrayNumber> coordinates) /*-{
+		$wnd.console.log("coords, values and colors: " + coordinates);
 		for(var i = 0; i < coordinates.length; i = i + 5) {
 			var geometry = new $wnd.THREE.Geometry();
 			geometry.vertices.push(
@@ -386,14 +435,26 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			);
 			
 			var face1 = new $wnd.THREE.Face3(0, 3, 2);
-			face1.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][0] - minValue) / (maxValue - minValue)));
-			face1.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][1] - minValue) / (maxValue - minValue)));
-			face1.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][1] - minValue) / (maxValue - minValue)));
+			face1.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinates[i + 4][1], coordinates[i + 4][2], coordinates[i + 4][3]
+			);
+			face1.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinates[i + 4][5], coordinates[i + 4][6], coordinates[i + 4][7]
+			);
+			face1.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinates[i + 4][5], coordinates[i + 4][6], coordinates[i + 4][7]
+			);
 			
 			var face2 = new $wnd.THREE.Face3(2, 1, 0);
-			face2.vertexColors[0] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][1] - minValue) / (maxValue - minValue)));
-			face2.vertexColors[1] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][0] - minValue) / (maxValue - minValue)));
-			face2.vertexColors[2] = new $wnd.THREE.Color(bottom.clone().lerp(top, (coordinates[i + 4][0] - minValue) / (maxValue - minValue)));
+			face2.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinates[i + 4][5], coordinates[i + 4][6], coordinates[i + 4][7]
+			);
+			face2.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinates[i + 4][1], coordinates[i + 4][2], coordinates[i + 4][3]
+			);
+			face2.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinates[i + 4][1], coordinates[i + 4][2], coordinates[i + 4][3]
+			);
 			
 			geometry.faces.push(face1);
 			geometry.faces.push(face2);
@@ -407,5 +468,15 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	private native void addMesh(JavaScriptObject mesh) /*-{
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::meshes.push(mesh);
+	}-*/;
+	
+	private native void buildColor(double r, double g, double b) /*-{
+		var rgbValue = "rgb("
+				+ r + ", "
+				+ g + ", "
+				+ b
+				+ ")";
+		
+		return new $wnd.THREE.Color(rgbValue);
 	}-*/;
 }

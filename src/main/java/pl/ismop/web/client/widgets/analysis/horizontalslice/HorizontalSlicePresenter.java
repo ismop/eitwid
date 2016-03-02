@@ -5,6 +5,7 @@ import static java.lang.Math.abs;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.Math.sin;
+import static java.util.Arrays.asList;
 import static java.util.Collections.sort;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -37,14 +39,16 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.util.CoordinatesUtil;
+import pl.ismop.web.client.util.GradientsUtil;
+import pl.ismop.web.client.util.GradientsUtil.Color;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.IHorizontalSliceView.IHorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 
 @Presenter(view = HorizontalSliceView.class, multiple = true)
-public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView, MainEventBus> implements IHorizontalSlicePresenter,
+public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView, MainEventBus>
+		implements IHorizontalSlicePresenter,
 		IPanelContent<IHorizontalSliceView, MainEventBus> {
-	
 	private HorizontalCrosssectionConfiguration configuration;
 	
 	private ISelectionManager selectionManager;
@@ -53,21 +57,26 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 	private CoordinatesUtil coordinatesUtil;
 	
-	private double shiftX, shiftY;
-
-	private double scale;
-
-	private double panX;
+	private double shiftX, shiftY, scale, panX;
 
 	private Date currentDate;
+
+	private GradientsUtil gradientsUtil;
+	
+	private double gradientMin, gradientMax;
+	
+	private String gradientId;
 	
 	@Inject
-	public HorizontalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil) {
+	public HorizontalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil,
+			GradientsUtil gradientsUtil) {
 		this.dapController = dapController;
 		this.coordinatesUtil = coordinatesUtil;
+		this.gradientsUtil = gradientsUtil;
 	}
 	
-	public void onUpdateHorizontalSliceConfiguration(HorizontalCrosssectionConfiguration configuration) {
+	public void onUpdateHorizontalSliceConfiguration(
+			HorizontalCrosssectionConfiguration configuration) {
 		if(this.configuration == configuration) {
 			refreshView();
 		}
@@ -105,10 +114,19 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		this.selectionManager = selectionManager;
 		addProfilesToMinimap();
 	}
+	
+	public void onGradientExtended(String gradientId) {
+		if (gradientId.equals(this.gradientId)
+				&& gradientsUtil.isExtended(gradientId, gradientMin, gradientMax)) {
+			GWT.log("Gradient " + gradientId + " extended");
+			refreshView();
+		}
+	}
 
 	private void addProfilesToMinimap() {
 		selectionManager.clear();
-		for(Profile profile : configuration.getPickedProfiles().values()) {
+		
+		for (Profile profile : configuration.getPickedProfiles().values()) {
 			selectionManager.add(profile);
 		}
 	}
@@ -129,7 +147,9 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			for(Device device : configuration.getHeightDevicesmap().get(height)) {
 				for(String parameterId : device.getParameterIds()) {
 					if(configuration.getParameterMap().get(parameterId) != null
-							&& configuration.getParameterMap().get(parameterId).getMeasurementTypeName().equals(configuration.getPickedParameterName())) {
+							&& configuration.getParameterMap().get(parameterId)
+							.getMeasurementTypeName().equals(
+									configuration.getPickedParameterName())) {
 						parameterIds.add(parameterId);
 						parameter = configuration.getParameterMap().get(parameterId);
 					}
@@ -149,7 +169,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			@Override
 			public void processContexts(final List<Context> contexts) {
 				if(contexts.size() > 0) {
-					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
+					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds,
+							new TimelinesCallback() {
 						@Override
 						public void onError(ErrorDetails errorDetails) {
 							view.showLoadingState(false);
@@ -160,7 +181,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 						public void processTimelines(final List<Timeline> timelines) {
 							if(!configuration.getDataSelector().equals("0")) {
 								for(Iterator<Timeline> i = timelines.iterator(); i.hasNext();) {
-									if(!i.next().getScenarioId().equals(configuration.getDataSelector())) {
+									if(!i.next().getScenarioId()
+											.equals(configuration.getDataSelector())) {
 										i.remove();
 									}
 								}
@@ -172,10 +194,13 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 								timelineIds.add(timeline.getId());
 							}
 							
-							Date queryDate = configuration.getDataSelector().equals("0") ? currentDate :
-								new Date(currentDate.getTime() - configuration.getExperiment().getStart().getTime());
+							Date queryDate = configuration.getDataSelector().equals("0")
+									? currentDate :
+								new Date(currentDate.getTime()
+										- configuration.getExperiment().getStart().getTime());
 							
-							dapController.getLastMeasurements(timelineIds, queryDate, new MeasurementsCallback() {
+							dapController.getLastMeasurements(
+									timelineIds, queryDate, new MeasurementsCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {
 									view.showLoadingState(false);
@@ -191,7 +216,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 									
 									SECTION:
 									for(Section section : configuration.getSections().values()) {
-										for(Profile profile : configuration.getPickedProfiles().values()) {
+										for(Profile profile
+												: configuration.getPickedProfiles().values()) {
 											if(profile.getSectionId().equals(section.getId())) {
 												continue SECTION;
 											}
@@ -201,22 +227,33 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 									}
 									
 									if(measurements.size() > 0) {
-										double minValue = Double.MAX_VALUE, maxValue = Double.MIN_VALUE;
+										gradientId = "analysis:" + parameterUnit;
+										
+										if (gradientsUtil.contains(gradientId)) {
+											gradientMin = gradientsUtil.getMinValue(gradientId);
+											gradientMax = gradientsUtil.getMaxValue(gradientId);
+										}
 										
 										for(Measurement measurement : measurements) {
-											if(measurement.getValue() > maxValue) {
-												maxValue = measurement.getValue();
-											}
-											
-											if(measurement.getValue() < minValue) {
-												minValue = measurement.getValue();
-											}
+											gradientsUtil.updateValues(gradientId,
+													measurement.getValue());
 										}
 										
 										view.init();
-										drawMuteSections(configuration.getSections().values(), muteSections);
-										view.drawCrosssection(parameterUnit, minValue, maxValue,
-												createDeviceLocationsWithValues(measurements, timelines, contexts.get(0)));
+										drawMuteSections(configuration.getSections().values(),
+												muteSections);
+										view.drawCrosssection(createLegend(gradientId),
+												parameterUnit,
+												createDeviceLocationsWithValuesAndColors(
+														measurements, timelines, contexts.get(0),
+														gradientId));
+										
+										if (gradientsUtil.isExtended(gradientId, gradientMin,
+												gradientMax)) {
+											gradientMin = gradientsUtil.getMinValue(gradientId);
+											gradientMax = gradientsUtil.getMaxValue(gradientId);
+											eventBus.gradientExtended(gradientId);
+										}
 									} else {
 										eventBus.showSimpleError(view.noMeasurementsMessage());
 									}
@@ -235,8 +272,10 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		
 	}
 
-	private Map<List<List<Double>>, Map<List<Double>, Double>> createDeviceLocationsWithValues(List<Measurement> measurements, List<Timeline> timelines, Context context) {
-		Map<List<List<Double>>, Map<List<Double>, Double>> result = new HashMap<>();
+	private Map<List<List<Double>>, Map<List<Double>, List<Double>>>
+			createDeviceLocationsWithValuesAndColors(List<Measurement> measurements,
+					List<Timeline> timelines, Context context, String gradientId) {
+		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = new HashMap<>();
 		
 		for(Profile profile : configuration.getPickedProfiles().values()) {
 			Map<List<Double>, Double> temp = new LinkedHashMap<>();
@@ -247,9 +286,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				PARAMETER:
 				for(Parameter parameter : configuration.getParameterMap().values()) {
 					if(device.getParameterIds().contains(parameter.getId())
-							&& parameter.getMeasurementTypeName().equals(configuration.getPickedParameterName())) {
+							&& parameter.getMeasurementTypeName().equals(
+									configuration.getPickedParameterName())) {
 						for(Timeline timeline : timelines) {
-							if(timeline.getContextId().equals(context.getId()) && parameter.getTimelineIds().contains(timeline.getId())) {
+							if(timeline.getContextId().equals(context.getId())
+									&& parameter.getTimelineIds().contains(timeline.getId())) {
 								for(Measurement measurement : measurements) {
 									if(measurement.getTimelineId().equals(timeline.getId())) {
 										value = measurement.getValue();
@@ -262,11 +303,13 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					}
 				}
 				
-				if(device.getPlacement() != null && device.getPlacement().getCoordinates() != null) {
+				if(device.getPlacement() != null
+						&& device.getPlacement().getCoordinates() != null) {
 					List<List<Double>> coordinates = new ArrayList<>();
 					coordinates.add(device.getPlacement().getCoordinates());
 					
-					List<List<Double>> projectedCoordinates = coordinatesUtil.projectCoordinates(coordinates);
+					List<List<Double>> projectedCoordinates = coordinatesUtil.projectCoordinates(
+							coordinates);
 					rotate(projectedCoordinates);
 					
 					for(List<Double> pointCoordinates : projectedCoordinates) {
@@ -289,15 +332,23 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				}
 			});
 			
-			Map<List<Double>, Double> locationsWithReadings = new LinkedHashMap<>();
+			Map<List<Double>, List<Double>> locationsWithReadings = new LinkedHashMap<>();
 			
 			for(List<Double> key : keys) {
-				locationsWithReadings.put(key, temp.get(key));
+				Double finalValue = temp.get(key);
+				Color color = gradientsUtil.getColor(gradientId, finalValue);
+				List<Double> valueWithColor = new ArrayList<>();
+				valueWithColor.add(finalValue);
+				valueWithColor.add(new Integer(color.getR()).doubleValue());
+				valueWithColor.add(new Integer(color.getG()).doubleValue());
+				valueWithColor.add(new Integer(color.getB()).doubleValue());
+				locationsWithReadings.put(key, valueWithColor);
 			}
 			
 			Section section = configuration.getSections().get(profile.getSectionId());
 			//removing last element which is just there to close the loop
-			List<List<Double>> corners = section.getShape().getCoordinates().subList(0, section.getShape().getCoordinates().size() - 1);
+			List<List<Double>> corners = section.getShape().getCoordinates()
+					.subList(0, section.getShape().getCoordinates().size() - 1);
 			List<List<Double>> projectedCorners = coordinatesUtil.projectCoordinates(corners);
 			rotate(projectedCorners);
 			
@@ -342,7 +393,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		
 		for(Section section : muteSections) {
 			if(section.getShape() != null) {
-				List<List<Double>> projected = coordinatesUtil.projectCoordinates(section.getShape().getCoordinates());
+				List<List<Double>> projected = coordinatesUtil.projectCoordinates(
+						section.getShape().getCoordinates());
 				rotate(projected);
 				coordinates.add(projected);
 				
@@ -380,7 +432,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		view.drawMuteSections(coordinates);
 	}
 
-	private double computeScale(List<List<List<Double>>> coordinates, double panX, double height, double width) {
+	private double computeScale(List<List<List<Double>>> coordinates, double panX, double height,
+			double width) {
 		double 	minY = Double.MAX_VALUE,
 				maxY = Double.MIN_VALUE,
 				minX = Double.MAX_VALUE,
@@ -428,5 +481,20 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			point.set(0, newX);
 			point.set(1, newY);
 		}
+	}
+	
+	private Map<Double, List<Double>> createLegend(String gradientId) {
+		Map<Double, List<Double>> result = new LinkedHashMap<>();
+		
+		for (Double colorBoundary : gradientsUtil.getGradient().keySet()) {
+			result.put(colorBoundary, asList(new Double[] {
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getB()),
+					gradientsUtil.getValue(gradientId, colorBoundary)
+			}));
+		}
+		
+		return result;
 	}
 }
