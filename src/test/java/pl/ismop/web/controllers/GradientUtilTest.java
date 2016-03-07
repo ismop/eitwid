@@ -19,9 +19,10 @@ public class GradientUtilTest {
 	public void testIntermediateColor() {
 		GradientsUtil gradientsUtil = new GradientsUtil();
 		gradientsUtil.updateValues("testId", 1.0);
+		gradientsUtil.updateValues("testId", 0.0);
 		
 		Color color = gradientsUtil.getColor("testId", 0.6);
-		assertEquals(new Color(101, 0, 0), color);
+		assertEquals(new Color(101, 255, 0), color);
 	}
 	
 	@Test
