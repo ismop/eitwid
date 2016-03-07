@@ -31,8 +31,8 @@ import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.monitoring.weather.IWeatherStationView.IWeatherStationPresenter;
 
 @Presenter(view = WeatherStationView.class)
-public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, MainEventBus> implements IWeatherStationPresenter {
-	
+public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, MainEventBus>
+		implements IWeatherStationPresenter {
 	private DapController dapController;
 	
 	private ChartPresenter chartPresenter;
@@ -232,7 +232,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 					view.addLatestReading1(parameter.getId(), 
 							parameter.getParameterName(), parameter.getMeasurementTypeName(),
 							NumberFormat.getFormat("0.00").format(
-									normalizeValue(lastMeasurements.get(parameter.getId()))),
+									lastMeasurements.get(parameter.getId()).getValue()),
 										parameter.getMeasurementTypeUnit(),
 										ismopConverter.formatForDisplay(
 												lastMeasurements.get(
@@ -256,8 +256,12 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 			for (Parameter parameter : parameters) {
 				if (lastMeasurements.get(parameter.getId()) != null) {
 					view.addLatestReading2(parameter.getId(), 
-							parameter.getParameterName(), parameter.getMeasurementTypeName(), NumberFormat.getFormat("0.00").format(normalizeValue(lastMeasurements.get(parameter.getId()))), parameter.getMeasurementTypeUnit(),
-							ismopConverter.formatForDisplay(lastMeasurements.get(parameter.getId()).getTimestamp()));
+							parameter.getParameterName(), parameter.getMeasurementTypeName(),
+							NumberFormat.getFormat("0.00").format(
+									lastMeasurements.get(parameter.getId()).getValue()),
+							parameter.getMeasurementTypeUnit(),
+							ismopConverter.formatForDisplay(
+									lastMeasurements.get(parameter.getId()).getTimestamp()));
 				} else {
 					view.addLatestReading2(
 						parameter.getId(), 
@@ -271,30 +275,6 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		} 
 		
 		view.getContentVisibility().setVisible(true);
-	}
-	
-	
-	private Number normalizeValue(Measurement measurement) {
-		Timeline timeline = readings.timelineMap.get(measurement.getTimelineId());
-		Parameter parameter = readings.parameterMap.get(timeline.getParameterId());
-		Device device = readings.deviceMap.get(parameter.getDeviceId());
-		if (device.getCustomId().equals("Stacja pogodowa KI")) {
-			double value = measurement.getValue();
-			switch (parameter.getMeasurementTypeUnit()) {
-				case "mm":
-					return 0.001 * value;
-				case "m/s":
-					return 0.1 * value;
-				case "C":
-					return 0.1 * value;
-				case "%":
-					return 0.1 * value;
-				case "stopnie":
-					double calc = (((value) / 16.0)) * 360.0;
-					return calc;
-			}
-		}
-		return measurement.getValue();
 	}
 	
 	private ChartSeries series(Parameter parameter, List<Measurement> measurements) {
@@ -315,7 +295,7 @@ public class WeatherStationPresenter extends BasePresenter<IWeatherStationView, 
 		for (int j = 0; j < measurements.size(); j++) {
 			Measurement measurement = measurements.get(j);
 			values[j][0] = measurement.getTimestamp().getTime();
-			values[j][1] = normalizeValue(measurement);
+			values[j][1] = measurement.getValue();
 		}
 		
 		s1.setValues(values);
