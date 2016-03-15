@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Singleton;
 
 import pl.ismop.web.client.IsmopConverter;
@@ -512,6 +514,23 @@ public class DapController {
 			}
 		});
 	}
+	
+	public ListenableFuture<List<Parameter>> getParameters(List<String> deviceIds) {
+		SettableFuture<List<Parameter>> result = SettableFuture.create();
+		parameterService.getParameters(merge(deviceIds, ","), new MethodCallback<ParametersResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(exception);
+			}
+
+			@Override
+			public void onSuccess(Method method, ParametersResponse response) {
+				result.set(response.getParameters());
+			}
+		});
+		
+		return result;
+	}
 
 	public void getParametersById(Collection<String> ids, final ParametersCallback callback) {
 		parameterService.getParametersById(merge(ids), new MethodCallback<ParametersResponse>() {
@@ -765,6 +784,23 @@ public class DapController {
 				callback.processDevices(response.getDevices());
 			}
 		});
+	}
+	
+	public ListenableFuture<List<Device>> getDevicesForType(String deviceType) {
+		final SettableFuture<List<Device>> result = SettableFuture.create();
+		deviceService.getDevicesForType(deviceType, new MethodCallback<DevicesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(exception);
+			}
+
+			@Override
+			public void onSuccess(Method method, DevicesResponse response) {
+				result.set(response.getDevices());
+			}
+		});
+		
+		return result;
 	}
 
 	public void getDevicesForSection(String sectionId, final DevicesCallback callback) {
