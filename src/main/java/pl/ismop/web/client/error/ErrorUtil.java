@@ -6,10 +6,22 @@ import org.fusesource.restygwt.client.Method;
 
 @Singleton
 public class ErrorUtil {
+	public static class CommunicationException extends Exception {
+		private static final long serialVersionUID = 1562686931404313175L;
+
+		public CommunicationException(String message) {
+			super(message);
+		}
+	}
+	
 	public ErrorDetails processErrors(Method method, Throwable exception) {
 		ErrorDetails details = new ErrorDetails();
 		details.setMessage(exception.getMessage());
 		
 		return details;
+	}
+	
+	public CommunicationException processErrorsForException(Method method, Throwable exception) {
+		return new CommunicationException(exception.getMessage());
 	}
 }

@@ -330,10 +330,51 @@ public class DapController {
 				new MeasurementsRestCallback(callback));
 	}
 	
+	public ListenableFuture<List<Measurement>> getLastMeasurementsWith24HourMod(
+			List<String> timelineIds, Date untilDate) {
+		SettableFuture<List<Measurement>> result = SettableFuture.create();
+		String until = converter.format(untilDate);
+		String from = converter.format(new Date(untilDate.getTime() - 86_400_000L));
+		measurementService.getLastMeasurements(merge(timelineIds, ","), from, until,
+				new MethodCallback<MeasurementsResponse>() {
+					@Override
+					public void onFailure(Method method, Throwable exception) {
+						result.setException(errorUtil.processErrorsForException(method, exception));
+					}
+
+					@Override
+					public void onSuccess(Method method, MeasurementsResponse response) {
+						result.set(response.getMeasurements());
+					}
+				});
+		
+		return result;
+	}
+	
 	public void getLastMeasurements(Collection<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
 		String until = converter.format(untilDate);
 		measurementService.getLastMeasurementsOnlyUntil(merge(timelineIds, ","), until,
 				new MeasurementsRestCallback(callback));
+	}
+	
+	public ListenableFuture<List<Measurement>> getLastMeasurements(List<String> timelineIds,
+			Date untilDate) {
+		SettableFuture<List<Measurement>> result = SettableFuture.create();
+		String until = converter.format(untilDate);
+		measurementService.getLastMeasurementsOnlyUntil(merge(timelineIds, ","), until,
+				new MethodCallback<MeasurementsResponse>() {
+					@Override
+					public void onFailure(Method method, Throwable exception) {
+						result.setException(errorUtil.processErrorsForException(method, exception));
+					}
+
+					@Override
+					public void onSuccess(Method method, MeasurementsResponse response) {
+						result.set(response.getMeasurements());
+					}
+				});
+		
+		return result;
 	}
 
 	public void getSections(float top, float left, float bottom, float right, final SectionsCallback callback) {
@@ -520,7 +561,7 @@ public class DapController {
 		parameterService.getParameters(merge(deviceIds, ","), new MethodCallback<ParametersResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				result.setException(exception);
+				result.setException(errorUtil.processErrorsForException(method, exception));
 			}
 
 			@Override
@@ -573,6 +614,23 @@ public class DapController {
 			}
 		});
 	}
+	
+	public ListenableFuture<List<Context>> getContext(String contextType) {
+		SettableFuture<List<Context>> result = SettableFuture.create();
+		contextService.getContexts(contextType, new MethodCallback<ContextsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ContextsResponse response) {
+				result.set(response.getContexts());
+			}
+		});
+		
+		return result;
+	}
 
 	public void getContexts(List<String> contextIds, final ContextsCallback callback) {
 		contextService.getContextsById(merge(contextIds), new MethodCallback<ContextsResponse>() {
@@ -602,8 +660,10 @@ public class DapController {
 		});
 	}
 
-	public void getTimelinesForParameterIds(String contextId, Collection<String> parameterIds, final TimelinesCallback callback) {
-		timelineService.getTimelines(contextId, merge(parameterIds, ","), new MethodCallback<TimelinesResponse>() {
+	public void getTimelinesForParameterIds(String contextId, Collection<String> parameterIds,
+			final TimelinesCallback callback) {
+		timelineService.getTimelines(contextId, merge(parameterIds, ","),
+				new MethodCallback<TimelinesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -614,6 +674,25 @@ public class DapController {
 				callback.processTimelines(response.getTimelines());
 			}
 		});
+	}
+	
+	public ListenableFuture<List<Timeline>> getTimelinesForParameterIds(String contextId,
+			List<String> parameterIds) {
+		SettableFuture<List<Timeline>> result = SettableFuture.create();
+		timelineService.getTimelines(contextId, merge(parameterIds, ","),
+				new MethodCallback<TimelinesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, TimelinesResponse response) {
+				result.set(response.getTimelines());
+			}
+		});
+		
+		return result;
 	}
 
 	public void getParameterTimelines(String parameterId, final TimelinesCallback callback) {
@@ -787,11 +866,11 @@ public class DapController {
 	}
 	
 	public ListenableFuture<List<Device>> getDevicesForType(String deviceType) {
-		final SettableFuture<List<Device>> result = SettableFuture.create();
+		SettableFuture<List<Device>> result = SettableFuture.create();
 		deviceService.getDevicesForType(deviceType, new MethodCallback<DevicesResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
-				result.setException(exception);
+				result.setException(errorUtil.processErrorsForException(method, exception));
 			}
 
 			@Override
