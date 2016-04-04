@@ -64,7 +64,8 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 	}
 	
 	public void onProfileClicked(final Profile profile) {
-		if(configuration.getPickedProfile() == null || !configuration.getPickedProfile().getId().equals(profile.getId())) {
+		if(configuration.getPickedProfile() == null
+				|| !configuration.getPickedProfile().getId().equals(profile.getId())) {
 			view.setProfile(profile.getId());
 			configuration.setPickedProfile(profile);
 			view.showLoadingState(true);
@@ -156,7 +157,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 				List<String> sectionIds = new ArrayList<>();
 				
 				for(Section section : sections) {
-					mapPresenter.addSection(section);
+					mapPresenter.add(section);
 					sectionIds.add(section.getId());
 //					configuration.getSections().put(section.getId(), section);
 				}
@@ -173,7 +174,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 						mapPresenter.setLoadingState(false);
 						
 						for(Profile profile : profiles) {
-							mapPresenter.addProfile(profile);
+							mapPresenter.add(profile);
 						}
 					}
 				});

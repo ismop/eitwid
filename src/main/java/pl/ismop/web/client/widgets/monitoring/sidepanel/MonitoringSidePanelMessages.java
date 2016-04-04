@@ -42,4 +42,14 @@ public interface MonitoringSidePanelMessages extends Messages {
 	String clearChartTitle();
 
 	String aggregateContents();
+
+	String soilType();
+
+	String granularDensity();
+
+	String bulkDensity();
+
+	String filtrationCoefficient();
+
+	String maxMinAvg(String max, String min, String avg);
 }

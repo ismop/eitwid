@@ -1,16 +1,7 @@
 package pl.ismop.web.client.widgets.monitoring.mapnavigator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.DeviceAggregatesCallback;
@@ -27,6 +18,9 @@ import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.common.profile.SideProfilePresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.ILeveeNavigatorView.ILeveeNavigatorPresenter;
+
+import javax.inject.Inject;
+import java.util.*;
 
 @Presenter(view = LeveeNavigatorView.class, multiple = true)
 public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, MainEventBus> implements ILeveeNavigatorPresenter {
@@ -74,6 +68,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				mapPresenter = eventBus.addHandler(MapPresenter.class);
 				mapPresenter.addHoverListeners();
 				mapPresenter.addClickListeners();
+				mapPresenter.setMoveable(true);
 			}
 			
 			mapPresenter.reset(false);
@@ -104,11 +99,11 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 							view.setMap(mapPresenter.getView());
 							
 							for(Section section : sections) {
-								mapPresenter.addSection(section);
+								mapPresenter.add(section);
 							}
 							
 							for(Profile profile : profiles) {
-								mapPresenter.addProfile(profile);
+								mapPresenter.add(profile);
 								LeveeNavigatorPresenter.this.profiles.put(profile.getId(), profile);
 							}
 						}
@@ -121,7 +116,8 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	public void onProfileClicked(final Profile profile) {
 		if(profilePresenter == null) {
 			profilePresenter = eventBus.addHandler(SideProfilePresenter.class);
-			profilePresenter.setWidthAndHeight(view.getProfileContainerWidth(), view.getProfileContainerHeight());
+			profilePresenter.setWidthAndHeight(view.getProfileContainerWidth(),
+					view.getProfileContainerHeight());
 			view.setProfile(profilePresenter.getView());
 		}
 		
@@ -180,10 +176,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				displayedDevices.addAll(devices);
 				
 				for(Device device : devices) {
-					mapPresenter.addDevice(device);
+					mapPresenter.add(device);
 					
 					if(selectedDevices.containsKey(device.getId())) {
-						mapPresenter.selectDevice(device, true);
+						mapPresenter.select(device);
 						selectedDevices.put(device.getId(), device);
 					}
 				}
@@ -212,10 +208,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 						displayedDeviceAggregations.addAll(deviceAggreagates);
 						
 						for(DeviceAggregate deviceAggregate : deviceAggreagates) {
-							mapPresenter.addDeviceAggregate(deviceAggregate);
+							mapPresenter.add(deviceAggregate);
 							
 							if(selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
-								mapPresenter.selectDeviceAggregate(deviceAggregate, true);
+								mapPresenter.select(deviceAggregate);
 								selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
 							}
 						}
@@ -227,16 +223,16 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 
 	public void onDeviceClicked(Device device) {
 		if(selectedDevices.containsKey(device.getId())) {
-			mapPresenter.selectDevice(device, false);
+			mapPresenter.unselect(device);
 			selectedDevices.remove(device.getId());
 			eventBus.deviceSelected(device, false);
 			
 			if(selectedSection == null || !device.getSectionId().equals(selectedSection.getId())) {
 				selectedDevices.remove(device.getId());
-				mapPresenter.removeDevice(device);
+				mapPresenter.rm(device);
 			}
 		} else {
-			mapPresenter.selectDevice(device, true);
+			mapPresenter.select(device);
 			selectedDevices.put(device.getId(), device);
 			eventBus.deviceSelected(device, true);
 		}
@@ -244,7 +240,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	
 	public void onDeviceAggregateClicked(final DeviceAggregate deviceAggregate) {
 		if(selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
-			mapPresenter.selectDeviceAggregate(deviceAggregate, false);
+			mapPresenter.unselect(deviceAggregate);
 			selectedDeviceAggregates.remove(deviceAggregate.getId());
 			
 			for(String deviceId : deviceAggregate.getDeviceIds()) {
@@ -253,16 +249,19 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				if(device != null) {
 					eventBus.deviceSelected(device, false);
 					selectedDevices.remove(device.getId());
-					profilePresenter.markDevice(device.getId(), false);
+					
+					if (profilePresenter != null) {
+						profilePresenter.markDevice(device.getId(), false);
+					}
 				}
 			}
 			
 			if(selectedSection == null || !profiles.get(deviceAggregate.getProfileId()).getSectionId().equals(selectedSection.getId())) {
 				selectedDeviceAggregates.remove(deviceAggregate.getId());
-				mapPresenter.removeDeviceAggregate(deviceAggregate);
+				mapPresenter.rm(deviceAggregate);
 			}
 		} else {
-			mapPresenter.selectDeviceAggregate(deviceAggregate, true);
+			mapPresenter.select(deviceAggregate);
 			selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
 			mapPresenter.setLoadingState(true);
 			dapController.getDevicesRecursivelyForAggregate(deviceAggregate.getId(), new DevicesCallback() {
@@ -311,11 +310,14 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			if(selectedDevices.containsKey(deviceId)) {
 				selectedDevices.remove(deviceId);
 				eventBus.deviceSelected(profileDevices.get(deviceId), false);
-				profilePresenter.markDevice(deviceId, false);
+				
+				if (profilePresenter != null) {
+					profilePresenter.markDevice(deviceId, false);
+				}
 				
 				for(DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
 					if(deviceAggregate.getDeviceIds().containsAll(deviceIds) && selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
-						mapPresenter.selectDeviceAggregate(deviceAggregate, false);
+						mapPresenter.unselect(deviceAggregate);
 						selectedDeviceAggregates.remove(deviceAggregate.getId());
 						
 						break;
@@ -324,7 +326,10 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 			} else {
 				selectedDevices.put(deviceId, profileDevices.get(deviceId));
 				eventBus.deviceSelected(profileDevices.get(deviceId), true);
-				profilePresenter.markDevice(deviceId, true);
+				
+				if (profilePresenter != null) {
+					profilePresenter.markDevice(deviceId, true);
+				}
 				
 				boolean found = false;
 				
@@ -333,8 +338,8 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 						found = true;
 						
 						if(!selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
-							mapPresenter.addDeviceAggregate(deviceAggregate);
-							mapPresenter.selectDeviceAggregate(deviceAggregate, true);
+							mapPresenter.add(deviceAggregate);
+							mapPresenter.select(deviceAggregate);
 							selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
 							found = true;
 							
@@ -353,8 +358,8 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 						@Override
 						public void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations) {
 							if(deviceAggreagations.size() > 0) {
-								mapPresenter.addDeviceAggregate(deviceAggreagations.get(0));
-								mapPresenter.selectDeviceAggregate(deviceAggreagations.get(0), true);
+								mapPresenter.add(deviceAggreagations.get(0));
+								mapPresenter.select(deviceAggreagations.get(0));
 								selectedDeviceAggregates.put(deviceAggreagations.get(0).getId(), deviceAggreagations.get(0));
 							}
 						}
@@ -401,7 +406,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				
 				if(!selectedDevices.containsKey(device.getId())) {
 					i.remove();
-					mapPresenter.removeDevice(device);
+					mapPresenter.rm(device);
 				}
 			}
 		}
@@ -412,7 +417,7 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				
 				if(!selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
 					i.remove();
-					mapPresenter.removeDeviceAggregate(deviceAggregate);
+					mapPresenter.rm(deviceAggregate);
 				}
 			}
 		}

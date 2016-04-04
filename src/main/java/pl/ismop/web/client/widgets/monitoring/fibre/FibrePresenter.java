@@ -43,6 +43,7 @@ import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
@@ -141,9 +142,9 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		private void selectDeviceAndSection(Device device, Section section) {
 			if (device != null) {
-				map.addDevice(device);
+				map.add(device);
 				if (section != null) {
-					map.highlightSection(section, true);
+					map.highlight(section);
 				} else {
 					GWT.log("Device " + device.getCustomId() + " is not assigned to any section");
 				}
@@ -162,16 +163,16 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		private void unselectSection(Section section) {
 			if (section != null && selectedSection != section) {
-				map.highlightSection(section, false);
+				map.unhighlight(section);
 			}
 		}
 
 		private void unselectDeviceAndSection(Device device) {
 			if (device != null && !selectedDevices.keySet().contains(device)) {
-				map.removeDevice(device);
+				map.rm(device);
 			}
 			if(selectedDevice == device && selectedSection != null) {
-				map.highlightSection(selectedSection, false);
+				map.unhighlight(selectedSection);
 			}
 		}
 	}
@@ -286,11 +287,11 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	}
 
 	private void selectDeviceOnMinimap(Device device) {
-		map.selectDevice(device, true);
+		map.select(device);
 	}
 
 	private void unselectDeviceOnMinimap(Device device) {
-		map.removeDevice(device);
+		map.rm(device);
 	}
 
 	private PlotLine drawDeviceLine(Device selectedDevice) {
@@ -325,8 +326,11 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			deviceChart.reset();
 		} else {
 			deviceChart = eventBus.addHandler(ChartPresenter.class);
-			deviceChart.initChart();
+			deviceChart.setHeight(view.getSelectedDevicesHeight());
 			view.setSelectedDevices(deviceChart.getView());
+			deviceChart.initChart();
+			deviceChart.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
+					eventBus, deviceChart));
 		}
 	}
 
@@ -345,11 +349,14 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 				showSections(fetcher.getSections());
 				showDeviceAggregations();
+				slider.setEalierDate(fetcher.getEarliestMeasurementTime());
+				slider.setEnabled(true);
+				slider.setAllowEditDateIntervals(true);
 			}
 
 			private void showSections(Collection<Section> sections) {
 				for (Section section : sections) {
-					map.addSection(section);
+					map.add(section);
 				}
 			}
 
@@ -371,7 +378,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void showDeviceAggregations() {
 		for(DeviceAggregate da : fetcher.getDeviceAggregations()) {
-			map.addDeviceAggregate(da);
+			map.add(da);
 		}
 	}
 
@@ -394,6 +401,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 					updateSelectedDevicesSeries();
 				}
 			});
+			slider.setEnabled(false);
 			view.setSlider(slider.getView());
 		}
 	}

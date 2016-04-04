@@ -1,42 +1,67 @@
 package pl.ismop.web.client.widgets.common.chart;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.moxieapps.gwt.highcharts.client.*;
-import org.moxieapps.gwt.highcharts.client.Axis.Type;
-import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
-import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEventHandler;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
-
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.Window;
+import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-
+import org.moxieapps.gwt.highcharts.client.Axis.Type;
+import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
+import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.events.*;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+import pl.ismop.web.client.IsmopConverter;
+import pl.ismop.web.client.IsmopWebEntryPoint;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.widgets.common.chart.IChartView.IChartPresenter;
 
-@Presenter(view = ChartView.class, multiple = true)
-public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> implements IChartPresenter {
-	private Chart chart;
-	private int height;
-	private Map<String, ChartSeries> dataSeriesMap;
-	private Map<String, Series> chartSeriesMap;
-	private Map<String, Integer> yAxisMap;
-	private boolean seriesHoverListener;
+import java.util.*;
 
-	public ChartPresenter() {
+@Presenter(view = ChartView.class, multiple = true)
+public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
+		implements IChartPresenter, ChartSelectionEventHandler {
+
+	private final IsmopConverter converter;
+
+	private Chart chart;
+	
+	private int height;
+	
+	private Map<String, ChartSeries> dataSeriesMap;
+	
+	private Map<String, Series> chartSeriesMap;
+	
+	private Map<String, Integer> yAxisMap;
+	
+	private ZoomDataCallback zoomDataCallback;
+
+	private PlotLine currentTimePlotLine;
+
+	private DeviceSelectHandler deviceSelectHandler;
+
+	public interface ZoomDataCallback {
+		void onZoom(Date startDate, Date endDate, List<String> timelineIds, DataCallback callback);
+	}
+
+	public interface DeviceSelectHandler {
+		void select(ChartSeries series);
+		void unselect(ChartSeries series);
+	}
+
+	public interface DataCallback {
+		void updateData(Map<String, Number[][]> data);
+	}
+
+	@Inject
+	public ChartPresenter(IsmopConverter converter) {
+		this.converter = converter;
+
 		dataSeriesMap = new HashMap<>();
 		chartSeriesMap = new HashMap<>();
 		yAxisMap = new HashMap<>();
@@ -54,7 +79,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			.setPoints(series.getValues())
 			.setYAxis(getYAxisIndex(series));
 		chart.addSeries(chartSeries);
-
 	}
 
 	public void initChart() {
@@ -66,7 +90,9 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 							new ChartSubtitle())
 					.setZoomType(ZoomType.X)
 					.setLegend(new Legend()
-							.setMaxHeight(40));
+							.setMaxHeight(40))
+					.setSelectionEventHandler(this);
+
 			chart.getXAxis().setType(Type.DATE_TIME);
 
 			if(height > 0) {
@@ -77,20 +103,14 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 					.setSeriesMouseOverEventHandler(new SeriesMouseOverEventHandler() {
 						@Override
 						public boolean onMouseOver(SeriesMouseOverEvent event) {
-							if(seriesHoverListener) {
-								eventBus.deviceSeriesHover(dataSeriesMap.get(event.getSeriesId()).getDeviceId(), true);
-							}
-
+							getDeviceSelectHandler().select(dataSeriesMap.get(event.getSeriesId()));
 							return true;
 						}
 					})
 					.setSeriesMouseOutEventHandler(new SeriesMouseOutEventHandler() {
 						@Override
 						public boolean onMouseOut(SeriesMouseOutEvent event) {
-							if(seriesHoverListener) {
-								eventBus.deviceSeriesHover(dataSeriesMap.get(event.getSeriesId()).getDeviceId(), false);
-							}
-
+							getDeviceSelectHandler().unselect(dataSeriesMap.get(event.getSeriesId()));
 							return true;
 						}
 					})
@@ -121,8 +141,39 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
                     return nativePoint.color;
                 }-*/;
 			}).setShared(true));
+			chart.setOption("exporting/buttons/contextButton/menuItems", getExportCSVChartBtn());
 			view.addChart(chart);
 		}
+	}
+
+	private native JavaScriptObject getExportCSVChartBtn() /*-{
+		var thisObject = this
+		var exports = $wnd.Highcharts.getOptions().exporting.buttons.contextButton.menuItems.slice(0)
+        exports.push({
+            text: thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::getDownloadCSVMessage()(),
+            onclick: function () {
+                thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::exportCSV()()
+            }
+        })
+		return exports
+    }-*/;
+
+	private void exportCSV() {
+		List<String> parameterIds = new ArrayList<>();
+		for (ChartSeries chartSeries : getSeries()) {
+			parameterIds.add(chartSeries.getParameterId());
+		}
+
+		Extremes xExtremes = chart.getXAxis().getExtremes();
+		Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint") +
+				"/chart_exporter?time_from=" + converter.formatForDto(new Date(xExtremes.getDataMin().longValue())) +
+				"&time_to=" + converter.formatForDto(new Date(xExtremes.getDataMax().longValue())) +
+				"&parameters=" + converter.merge(parameterIds) +
+				"&private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
+	}
+
+	private String getDownloadCSVMessage() {
+		return getView().getDownloadCSVMessage();
 	}
 
 	public void setHeight(int height) {
@@ -138,13 +189,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		}
 
 		clearDataSeries();
-	}
-
-	private void clearDataSeries() {
-		if(dataSeriesMap.size() == 0) {
-			yAxisMap.clear();
-			chart.removeAllSeries();
-		}
 	}
 
 	public void removeChartSeriesForParameter(Parameter parameter) {
@@ -191,13 +235,9 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		}
 	}
 	
-	public void addSeriesHoverListener() {
-		seriesHoverListener = true;
-	}
-
 	public void setLoadingState(boolean loading) {
-		if(chart != null) {
-			if(loading) {
+		if (chart != null) {
+			if (loading) {
 				chart.showLoading(view.getLoadingMessage());
 			} else {
 				chart.hideLoading();
@@ -205,6 +245,69 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 		} else {
 			view.showLoadingMessage(loading);
 		}
+	}
+	
+	public void setZoomDataCallback(ZoomDataCallback zoomDataCallback) {
+		this.zoomDataCallback = zoomDataCallback;
+	}
+
+	@Override
+	public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
+		if (zoomDataCallback != null) {
+			if (hasXAxis(chartSelectionEvent.getNativeEvent())) {
+				long startMillis = chartSelectionEvent.getXAxisMinAsLong();
+				long endMillis = chartSelectionEvent.getXAxisMaxAsLong();
+				setLoadingState(true);
+				zoomDataCallback.onZoom(new Date(startMillis), new Date(endMillis),
+						collectTimelineIds(), new DataCallback() {
+					@Override
+					public void updateData(Map<String, Number[][]> data) {
+						setLoadingState(false);
+						
+						for (String timelineId : data.keySet()) {
+							for (String chartSeriesId : dataSeriesMap.keySet()) {
+								if (dataSeriesMap.get(chartSeriesId).getTimelineId().equals(timelineId)) {
+									chartSeriesMap.get(chartSeriesId).setPoints(data.get(timelineId));
+									
+									break;
+								}
+							}
+						}
+					}
+				});
+			} else {
+				//zoom was just reset
+				for (String chartSeriesId : dataSeriesMap.keySet()) {
+					chartSeriesMap.get(chartSeriesId).setPoints(
+							dataSeriesMap.get(chartSeriesId).getValues());
+				}
+			}
+		}
+		
+		return true;
+	}
+
+	public void setInterval(Date startDate, Date endDate) {
+		initChart();
+		chart.getXAxis().setMin(startDate.getTime());
+        chart.getXAxis().setMax(endDate.getTime());
+	}
+
+	public void setDeviceSelectHandler(DeviceSelectHandler deviceSelectHandler) {
+		this.deviceSelectHandler = deviceSelectHandler;
+	}
+
+	public DeviceSelectHandler getDeviceSelectHandler() {
+		if (deviceSelectHandler == null) {
+			return new DeviceSelectHandler() {
+				@Override
+				public void select(ChartSeries series) {}
+				@Override
+				public void unselect(ChartSeries series) {}
+			};
+		}
+
+		return deviceSelectHandler;
 	}
 
 	private Number getYAxisIndex(ChartSeries series) {
@@ -225,6 +328,33 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 			
 			return index;
 		}
+	}
+
+	public void selectDate(Date selectedDate, String color) {
+		initChart();
+		if (currentTimePlotLine != null) {
+			chart.getXAxis().removePlotLine(currentTimePlotLine);
+		}
+		currentTimePlotLine = chart.getXAxis().createPlotLine().
+				setWidth(2).setColor(color).setValue(selectedDate.getTime());
+		chart.getXAxis().addPlotLines(currentTimePlotLine);
+	}
+
+	private void clearDataSeries() {
+		if (dataSeriesMap.size() == 0) {
+			yAxisMap.clear();
+			chart.removeAllSeries();
+		}
+	}
+	
+	private List<String> collectTimelineIds() {
+		List<String> result = new ArrayList<>();
+		
+		for (ChartSeries chartSeries : dataSeriesMap.values()) {
+			result.add(chartSeries.getTimelineId());
+		}
+		
+		return result;
 	}
 
 	private native void updateFirstYAxis(JavaScriptObject nativeChart, String yAxisLabel) /*-{
@@ -255,4 +385,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus> impl
 	private native void zoomOut(JavaScriptObject nativeChart) /*-{
         nativeChart.zoomOut();
     }-*/;
+
+	private native boolean hasXAxis(JavaScriptObject selectionEvent) /*-{
+		return selectionEvent.xAxis != null;
+	}-*/;
 }

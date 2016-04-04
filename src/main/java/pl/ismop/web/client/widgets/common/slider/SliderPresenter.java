@@ -2,9 +2,13 @@ package pl.ismop.web.client.widgets.common.slider;
 
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.MainEventBus;
 
 import java.util.Date;
+
+import javax.inject.Inject;
 
 /**
  * Created by marek on 09.09.15.
@@ -23,9 +27,12 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
     private Date endDate;
     private Date startDate;
     private Events eventsListener;
+	private IsmopConverter ismopConverter;
 
-    public SliderPresenter() {
-        // Initialize with NullObject
+    @Inject
+    public SliderPresenter(IsmopConverter ismopConverter) {
+        this.ismopConverter = ismopConverter;
+		// Initialize with NullObject
         setEventsListener(null);
     }
 
@@ -36,6 +43,7 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
     }
 
     private void initDates() {
+    	view.setDateFormat(ismopConverter.getDisplayDateFormat());
         endDate = new Date();
         startDate = new Date(endDate.getTime() - 14 * DAY_IN_MS);
 
@@ -51,6 +59,10 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
     public void setEndDate(Date date) {
         view.setEndDate(date);
         onEndDateChanged(date);
+    }
+
+    public void setEalierDate(Date date) {
+        view.setEalierDate(date);
     }
 
     public Date getSelectedDate() {
@@ -87,7 +99,7 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
 
     @Override
     public String getLabel(double point) {
-        return getDate(point).toString();
+        return ismopConverter.formatForDisplay(getDate(point));
     }
 
     @Override

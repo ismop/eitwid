@@ -1,21 +1,22 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 import org.moxieapps.gwt.highcharts.client.*;
 import pl.ismop.web.client.IsmopProperties;
+import pl.ismop.web.client.IsmopWebEntryPoint;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
-import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.geojson.MapFeature;
 import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAnalysisSidePanelPresenter;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
@@ -34,10 +35,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private Experiment selectedExperiment;
     private AnalysisSidePanelMessages messages;
-    private Device shownDevice;
-    private Set<Device> selectedDevices = new HashSet<>();
-    private Section shownSection;
-    private Profile shownProfile;
 
     @Inject
     public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
@@ -110,6 +107,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         }
     }
 
+    @Override
+    public void export() {
+        Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint")
+                + "/experiment_exporter/" + selectedExperiment.getId() +
+                "?private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
+
+    }
+
     private void loadExperimentWaveShape() {
         if (selectedExperiment != null) {
             waterWave.showLoading(messages.loadingWaterWave());
@@ -168,7 +173,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             public void processSections(List<Section> sections) {
                 selectedExperiment.setSections(sections);
                 for (Section section : sections) {
-                    miniMap.addSection(section);
+                    miniMap.add(section);
                 }
             }
 
@@ -223,73 +228,37 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     @SuppressWarnings("unused")
-    public void onSelectDevice(Device device) {
-        miniMap.selectDevice(device, true);
-        selectedDevices.add(device);
+    public void onAdd(MapFeature mapFeature) {
+        miniMap.add(mapFeature);
     }
 
     @SuppressWarnings("unused")
-    public void onUnselectDevice(Device device) {
-        if (shownDevice == device) {
-            miniMap.selectDevice(device, false);
-        } else {
-            miniMap.removeDevice(device);
-        }
+    public void onRm(MapFeature mapFeature) {
+        miniMap.rm(mapFeature);
     }
 
     @SuppressWarnings("unused")
-    public void onShowDevice(Device device) {
-        if (shownDevice != null) {
-            if (selectedDevices.contains(shownDevice)) {
-                miniMap.selectDevice(shownDevice, true);
-            } else {
-                miniMap.removeDevice(shownDevice);
-            }
-        }
-        shownDevice = device;
-        miniMap.selectDevice(device, false);
-
+    public void onSelect(MapFeature mapFeature) {
+        miniMap.select(mapFeature);
     }
 
     @SuppressWarnings("unused")
-    public void onShowSection(Section section) {
-        if (shownSection != null) {
-            miniMap.highlightSection(shownSection, false);
-        }
-        shownSection = section;
-        miniMap.highlightSection(section, true);
+    public void onUnselect(MapFeature mapFeature) {
+        miniMap.unselect(mapFeature);
     }
 
     @SuppressWarnings("unused")
-    public void onShowProfile(Profile profile) {
-        GWT.log("Show profile" + profile.getId());
-        if (shownProfile != null) {
-            miniMap.removeProfile(shownProfile);
-        }
-        shownProfile = profile;
-        miniMap.addProfile(profile);
+    public void onHighlight(MapFeature mapFeature) {
+        miniMap.highlight(mapFeature);
+    }
+
+    @SuppressWarnings("unused")
+    public void onUnhighlight(MapFeature mapFeature) {
+        miniMap.unhighlight(mapFeature);
     }
 
     @SuppressWarnings("unused")
     public void onClearMinimap() {
-        if(shownProfile != null) {
-            miniMap.removeProfile(shownProfile);
-            shownProfile = null;
-        }
-
-        if (shownSection != null) {
-            miniMap.highlightSection(shownSection, false);
-            shownSection = null;
-        }
-
-        if (shownDevice != null) {
-            miniMap.removeDevice(shownDevice);
-            shownDevice = null;
-        }
-
-        for (Device selectedDevice : selectedDevices) {
-            miniMap.removeDevice(selectedDevice);
-        }
-        selectedDevices.clear();
+        miniMap.reset(true);
     }
 }

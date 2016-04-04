@@ -1,12 +1,14 @@
 package pl.ismop.web.client.dap.deviceaggregation;
 
-import java.util.List;
-
 import org.fusesource.restygwt.client.Json;
-
 import pl.ismop.web.client.geojson.Geometry;
+import pl.ismop.web.client.geojson.MapFeature;
 
-public class DeviceAggregate {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class DeviceAggregate extends MapFeature {
 	private String id;
 	
 	@Json(name = "parent_id")
@@ -34,8 +36,30 @@ public class DeviceAggregate {
 	
 	private Geometry shape;
 
+	private List<String> vendors;
+
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String getFeatureType() {
+		return "deviceAggregate";
+	}
+
+	@Override
+	public Geometry getFeatureGeometry() {
+		return getShape();
+	}
+
+	@Override
+	public Map<String, String> getAdditionalFeatureProperties() {
+		Map<String, String> properties = new HashMap<>();
+		if (getVendors() != null && getVendors().size() > 0) {
+			properties.put("colour_type", getVendors().get(0));
+		}
+
+		return properties;
 	}
 
 	public void setId(String id) {
@@ -112,5 +136,13 @@ public class DeviceAggregate {
 
 	public void setCustomId(String customId) {
 		this.customId = customId;
+	}
+
+	public List<String> getVendors() {
+		return vendors;
+	}
+
+	public void setVendors(List<String> vendors) {
+		this.vendors = vendors;
 	}
 }

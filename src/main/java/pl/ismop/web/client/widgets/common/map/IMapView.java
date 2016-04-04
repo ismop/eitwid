@@ -1,8 +1,8 @@
 package pl.ismop.web.client.widgets.common.map;
 
-import java.util.List;
-
 import com.google.gwt.user.client.ui.IsWidget;
+
+import java.util.List;
 
 public interface IMapView extends IsWidget {
 	interface IMapPresenter {
@@ -34,6 +34,8 @@ public interface IMapView extends IsWidget {
 	void selectFeature(String featureId, boolean select);
 
 	void showLoadingPanel(boolean show);
+
+	void setMovable(boolean moveable);
 
 	void showPopup(String featureId, String contents);
 

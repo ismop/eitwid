@@ -20,22 +20,28 @@
 			height: 30%;
 		}
 
+		.exportButton {
+			width: 100%;
+			margin: 5px 0 5px 0;
+		}
+
 		.minimap {
 			width: 100%;
-			height: literal("calc(70% - 105px)");
+			height: literal("calc(70% - 150px)");
 		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
 		<g:HTMLPanel tag="h1" addStyleNames="{style.experiments}">
-				<b:DropDown ui:field="dropDown">
-					<b:Anchor ui:field="selectedExperiment" dataToggle="DROPDOWN" />
-					<b:DropDownMenu ui:field="experimentList" />
-				</b:DropDown>
+			<b:DropDown ui:field="dropDown">
+				<b:Anchor ui:field="selectedExperiment" dataToggle="DROPDOWN" />
+				<b:DropDownMenu ui:field="experimentList" />
+			</b:DropDown>
 		</g:HTMLPanel>
 
 		<hr />
 
 		<g:FlowPanel ui:field="waterWavePanel" addStyleNames="{style.waterWave}"/>
 		<g:FlowPanel ui:field="miniMapPanel" addStyleNames="{style.minimap}"/>
+		<b:Button addStyleNames="{style.exportButton}" ui:field="export" text="{messages.export}">Export</b:Button>
 	</g:HTMLPanel>
 </ui:UiBinder>

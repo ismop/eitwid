@@ -15,5 +15,7 @@ public interface IChartView extends IsWidget {
 
 	String getLoadingMessage();
 
+	String getDownloadCSVMessage();
+
 	void showLoadingMessage(boolean show);
 }

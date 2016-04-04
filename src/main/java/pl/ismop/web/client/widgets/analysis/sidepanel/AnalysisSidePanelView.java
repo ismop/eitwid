@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.DropDownMenu;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAnalysisSidePanelPresenter;
@@ -41,16 +43,21 @@ public class AnalysisSidePanelView extends Composite
 	@UiField
 	AnalysisSidePanelMessages messages;
 
+	@UiField
+	Button export;
+
 	public AnalysisSidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
 
 		selectedExperiment.setText(messages.loadingExperiments());
 		selectedExperiment.setEnabled(false);
+		export.setVisible(false);
 	}
 
 	@Override
 	public void setWaterWavePanel(IsWidget widget) {
 		waterWavePanel.add(widget);
+		export.setVisible(true);
 	}
 
 	@Override
@@ -83,6 +90,11 @@ public class AnalysisSidePanelView extends Composite
 			});
 			experimentList.add(item);
 		}
+	}
+
+	@UiHandler("export")
+	void onExport(ClickEvent click) {
+		getPresenter().export();
 	}
 
 	@Override

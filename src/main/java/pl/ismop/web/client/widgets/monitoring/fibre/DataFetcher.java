@@ -1,7 +1,6 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.HashBiMap;
 import com.google.gwt.core.client.GWT;
 import pl.ismop.web.client.dap.DapController;
@@ -14,7 +13,6 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorCallback;
 import pl.ismop.web.client.error.ErrorDetails;
-import pl.ismop.web.client.widgets.common.DateChartPoint;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.delegator.ErrorCallbackDelegator;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
@@ -54,6 +52,7 @@ public class DataFetcher implements IDataFetcher {
     private Set<Device> heatingDevices = new HashSet<>();
     private boolean initialized = false;
     private String yAxisTitle;
+    private Date earliestMeasurementTime;
 
     public DataFetcher(DapController dapController, Levee levee) {
         this.dapController = dapController;
@@ -129,6 +128,7 @@ public class DataFetcher implements IDataFetcher {
                                                     Device device = parameterIdToDevice.get(t.getParameterId());
                                                     timelineIdToDevice.put(t.getId(), device);
                                                 }
+                                                calculateOldestMeasurement(timelines);
 
                                                 callback.ready();
                                             }
@@ -141,6 +141,21 @@ public class DataFetcher implements IDataFetcher {
                 });
             }
         });
+    }
+
+    private void calculateOldestMeasurement(List<Timeline> timelines) {
+        earliestMeasurementTime = new Date();
+        for (Timeline timeline : timelines) {
+            if (timeline.getEarliestMeasurementTimestamp() != null &&
+                    earliestMeasurementTime.after(timeline.getEarliestMeasurementTimestamp())) {
+                earliestMeasurementTime = timeline.getEarliestMeasurementTimestamp();
+            }
+        }
+        GWT.log("Ealier measurement timestamp: " + earliestMeasurementTime);
+    }
+
+    public Date getEarliestMeasurementTime() {
+        return earliestMeasurementTime;
     }
 
     private void setXAxisTitle(Parameter parameter) {
@@ -237,6 +252,11 @@ public class DataFetcher implements IDataFetcher {
         chartSeries.setName(parameter.getParameterName());
         chartSeries.setUnit(parameter.getMeasurementTypeUnit());
         chartSeries.setLabel(parameter.getMeasurementTypeName());
+        
+        if (measurements.size() > 0) {
+        	chartSeries.setTimelineId(measurements.get(0).getTimelineId());
+        }
+        
         Number[][] values = new Number[measurements.size()][2];
         chartSeries.setValues(values);
 

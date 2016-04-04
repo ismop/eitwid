@@ -1,13 +1,5 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
-import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.ButtonGroup;
-import org.gwtbootstrap3.client.ui.Description;
-import org.gwtbootstrap3.client.ui.DescriptionData;
-import org.gwtbootstrap3.client.ui.DescriptionTitle;
-import org.gwtbootstrap3.client.ui.FormControlStatic;
-import org.gwtbootstrap3.client.ui.ListBox;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -18,7 +10,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
-
+import org.gwtbootstrap3.client.ui.*;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.IMonitoringSidePanel.IMonitoringSidePanelPresenter;
 
 public class MonitoringSidePanelView extends Composite implements IMonitoringSidePanel, ReverseViewInterface<IMonitoringSidePanelPresenter> {
@@ -188,5 +180,15 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	@Override
 	public String getNoMeasurementsForDeviceMessage() {
 		return messages.noMeasurementsForDevice();
+	}
+
+	@Override
+	public MonitoringSidePanelMessages getMessages() {
+		return messages;
+	}
+
+	@Override
+	public void showChart(boolean show) {
+		chart.setVisible(show);
 	}
 }

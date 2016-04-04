@@ -12,6 +12,8 @@ public class ChartSeries {
 	private String label;
 	
 	private Number[][] values;
+	
+	private String timelineId;
 
 	public String getDeviceId() {
 		return deviceId;
@@ -59,5 +61,13 @@ public class ChartSeries {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getTimelineId() {
+		return timelineId;
+	}
+
+	public void setTimelineId(String timelineId) {
+		this.timelineId = timelineId;
 	}
 }

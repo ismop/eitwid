@@ -9,4 +9,8 @@ public interface GlobalMessages extends Messages {
 	String exportPdfLabel();
 
 	String exportSvgLabel();
+	
+	String resetZoomLabel();
+	
+	String resetZoomTitleLabel();
 }

@@ -7,13 +7,14 @@ import com.mvp4g.client.presenter.BasePresenter;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
-import pl.ismop.web.client.error.ErrorCallback;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
-import pl.ismop.web.client.widgets.common.DateChartPoint;
+import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 
@@ -21,14 +22,20 @@ import java.util.*;
 
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
-        implements IPanelContent<IChartView, MainEventBus>, IChartView.IChartPresenter {
+        implements IPanelContent<IChartView, MainEventBus> {
     private final DapController dapController;
+    
     private final IsmopProperties properties;
+    
     private Experiment selectedExperiment;
-    private List<Timeline> timelines;
-    ChartMessages messages;
+    
     private ISelectionManager selectionManager;
+    
     private ChartWizardPresenter wizard;
+
+    private pl.ismop.web.client.widgets.common.chart.ChartPresenter chartPresenter;
+
+    private Map<String, Device> idToDevice = new HashMap<>();
 
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
@@ -37,14 +44,9 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     }
 
     @Override
-    public void bind() {
-        messages = getView().getMessages();
-    }
-
-    @Override
     public void setSelectedExperiment(Experiment experiment) {
         selectedExperiment = experiment;
-        getView().setInterval(experiment.getStart(), experiment.getEnd());
+        getChart().setInterval(experiment.getStart(), experiment.getEnd());
     }
 
     @Override
@@ -73,7 +75,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     }
 
     interface ChartPointsCallback {
-        void processChartPoints(Map<Timeline, List<DateChartPoint>> timelineToMeasurements);
+        void processChartPoints(List<ChartSeries> series);
     }
 
     class ChartPointMeasurementsCallback implements DapController.MeasurementsCallback {
@@ -90,33 +92,66 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             callback.processChartPoints(map(measurements));
         }
 
-        private Map<Timeline, List<DateChartPoint>> map(List<Measurement> measurements) {
-            Map<Timeline, List<DateChartPoint>> timelineToMeasurements = new HashMap<>();
-            Map<Timeline, Long> diffs = new HashMap<>();
+        private List<ChartSeries> map(List<Measurement> measurements) {
+            List<ChartSeries> series = new ArrayList<>();
+            for (Map.Entry<Timeline, List<Measurement>> timelineListEntry : group(measurements)) {
+                ChartSeries s = createSeries(timelineListEntry.getKey());
+                s.setValues(getValues(timelineListEntry.getValue(), getDiff(timelineListEntry)));
 
+                series.add(s);
+            }
+
+            return series;
+        }
+
+        private Set<Map.Entry<Timeline, List<Measurement>>> group(List<Measurement> measurements) {
+            Map<Timeline, List<Measurement>> timelineToMeasurements = new HashMap<>();
             for (Measurement measurement : measurements) {
                 Timeline timeline = idToTimeline.get(measurement.getTimelineId());
-                List<DateChartPoint> timelineMeasurements = timelineToMeasurements.get(timeline);
-                long diff = 0;
+                List<Measurement> timelineMeasurements = timelineToMeasurements.get(timeline);
                 if (timelineMeasurements == null) {
                     timelineMeasurements = new ArrayList<>();
                     timelineToMeasurements.put(timeline, timelineMeasurements);
                 }
 
-                if (timeline.getScenarioId() != null) {
-                    if (!diffs.containsKey(timeline)) {
-
-                        diffs.put(timeline, measurement.getTimestamp().getTime() -
-                                selectedExperiment.getStart().getTime());
-                    }
-                    diff = diffs.get(timeline);
-                }
-
-                timelineMeasurements.add(new DateChartPoint(new Date(measurement.getTimestamp().getTime() - diff),
-                        measurement.getValue()));
+                timelineMeasurements.add(measurement);
             }
 
-            return timelineToMeasurements;
+            return timelineToMeasurements.entrySet();
+        }
+
+        private Number[][] getValues(List<Measurement> measurements, long diff) {
+            Number[][] values = new Number[measurements.size()][2];
+            for (int i = 0; i < measurements.size(); i++) {
+                Measurement m = measurements.get(i);
+                values[i][0] = m.getTimestamp().getTime() - diff;
+                values[i][1] = m.getValue();
+            }
+            return values;
+        }
+
+        private long getDiff(Map.Entry<Timeline, List<Measurement>> timelineListEntry) {
+            if (timelineListEntry.getKey().getScenarioId() != null) {
+                Measurement first = timelineListEntry.getValue().get(0);
+                return first.getTimestamp().getTime() - selectedExperiment.getStart().getTime();
+            }
+            return 0;
+        }
+
+        private ChartSeries createSeries(Timeline timeline) {
+            Parameter parameter = timeline.getParameter();
+
+            ChartSeries series = new ChartSeries();
+            series.setDeviceId(parameter.getDeviceId());
+            series.setParameterId(parameter.getId());
+            series.setTimelineId(timeline.getId());
+
+            series.setName(parameter.getDevice().getCustomId() +
+                    " (" + parameter.getMeasurementTypeName() + ") " + timeline.getLabel());
+            series.setLabel(parameter.getMeasurementTypeName());
+            series.setUnit(parameter.getMeasurementTypeUnit());
+
+            return series;
         }
 
         @Override
@@ -126,12 +161,12 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     }
 
     public void setTimelines(List<Timeline> timelines) {
-        getView().showLoading(messages.loadingMeasurements());
+        getChart().setLoadingState(true);
 
-        this.timelines = timelines;
         final Map<String, Timeline> idToRealTimeline = new HashMap<>();
         final Map<String, Timeline> idToScenarioTimeline = new HashMap<>();
         selectionManager.clear();
+        idToDevice = new HashMap<>();
         for (Timeline timeline : timelines) {
             GWT.log("Showing timeline with " + timeline.getId() + "id belonging to " +
                     timeline.getContextId() + " and scenario " + timeline.getScenarioId());
@@ -140,7 +175,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             } else {
                 idToRealTimeline.put(timeline.getId(), timeline);
             }
-            selectionManager.selectDevice(timeline.getParameter().getDevice());
+
+            Device d = timeline.getParameter().getDevice();
+            selectionManager.add(d);
+            idToDevice.put(d.getId(), d);
         }
 
 
@@ -149,43 +187,70 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             dapController.getMeasurements(idToRealTimeline.keySet(), selectedExperiment.getStart(),
                     selectedExperiment.getEnd(), new ChartPointMeasurementsCallback(idToRealTimeline, new ChartPointsCallback() {
                         @Override
-                        public void processChartPoints(final Map<Timeline, List<DateChartPoint>> realTimelineToMeasurements) {
+                        public void processChartPoints(final List<ChartSeries> realTimelineToMeasurements) {
                             loadScenarioTimelines(realTimelineToMeasurements, idToScenarioTimeline);
                         }
                     }));
         } else {
-            loadScenarioTimelines(new HashMap<Timeline, List<DateChartPoint>>(), idToScenarioTimeline);
+            loadScenarioTimelines(new ArrayList<ChartSeries>(), idToScenarioTimeline);
         }
     }
 
-    private void loadScenarioTimelines(final Map<Timeline, List<DateChartPoint>> realTimelineToMeasurements,
-                                       final Map<String, Timeline> idToScenarioTimeline) {
-        if (idToScenarioTimeline.size() > 0) {
-            GWT.log("Loading scenarios measurements");
-            dapController.getAllMeasurements(idToScenarioTimeline.keySet(),
-                    new ChartPointMeasurementsCallback(idToScenarioTimeline, new ChartPointsCallback() {
-                        @Override
-                        public void processChartPoints(Map<Timeline, List<DateChartPoint>> scenarioTimelineToMeasurements) {
-                            realTimelineToMeasurements.putAll(scenarioTimelineToMeasurements);
-                            getView().setSeries(realTimelineToMeasurements);
-                        }
-                    }));
-        } else {
-            getView().setSeries(realTimelineToMeasurements);
+    private pl.ismop.web.client.widgets.common.chart.ChartPresenter getChart() {
+        if(chartPresenter == null) {
+            chartPresenter = eventBus.addHandler(pl.ismop.web.client.widgets.common.chart.ChartPresenter.class);
+            chartPresenter.setDeviceSelectHandler(new pl.ismop.web.client.widgets.common.chart.ChartPresenter.DeviceSelectHandler() {
+                @Override
+                public void select(ChartSeries series) {
+                    selectionManager.select(getDevice(series));
+                }
+
+                @Override
+                public void unselect(ChartSeries series) {
+                    selectionManager.unselect(getDevice(series));
+                }
+
+                private Device getDevice(ChartSeries series) {
+                    return idToDevice.get(series.getDeviceId());
+                }
+            });
+
+            getView().setChart(chartPresenter.getView());
         }
+
+        return chartPresenter;
     }
 
-    @SuppressWarnings("unused")
     public void onDateChanged(Date selectedDate) {
-        getView().selectDate(selectedDate, properties.selectionColor());
+        getChart().selectDate(selectedDate, properties.selectionColor());
     }
 
     public void setWizard(ChartWizardPresenter wizard) {
         this.wizard = wizard;
     }
 
-    @Override
-    public void timelineSelected(Timeline timeline) {
-        selectionManager.showDevice(timeline.getParameter().getDevice());
+	private void loadScenarioTimelines(final List<ChartSeries> realTimelineToMeasurements,
+	                                   final Map<String, Timeline> idToScenarioTimeline) {
+	    if (idToScenarioTimeline.size() > 0) {
+	        GWT.log("Loading scenarios measurements");
+	        dapController.getAllMeasurements(idToScenarioTimeline.keySet(),
+	                new ChartPointMeasurementsCallback(idToScenarioTimeline, new ChartPointsCallback() {
+	                    @Override
+	                    public void processChartPoints(List<ChartSeries> scenarioTimelineToMeasurements) {
+	                        realTimelineToMeasurements.addAll(scenarioTimelineToMeasurements);
+                            setSeries(realTimelineToMeasurements);
+	                    }
+	                }));
+	    } else {
+            setSeries(realTimelineToMeasurements);
+	    }
+	}
+
+    private void setSeries(List<ChartSeries> series) {
+        getChart().setLoadingState(false);
+        chartPresenter.reset();
+        for (ChartSeries s : series) {
+            chartPresenter.addChartSeries(s);
+        }
     }
 }

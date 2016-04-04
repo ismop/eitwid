@@ -84,7 +84,7 @@ public abstract class SliderBase<T> extends Widget implements
 
     protected SliderBase() {
         textBox = new TextBox();
-        // now remove the bootstrap styles
+        // now rm the bootstrap styles
         textBox.removeStyleName(UIObject.getStyleName(textBox.getElement()));
         setElement((Element) textBox.getElement());
     }

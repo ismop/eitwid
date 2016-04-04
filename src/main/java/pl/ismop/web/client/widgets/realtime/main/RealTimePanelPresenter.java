@@ -182,7 +182,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					"" + NumberFormat.getFormat("0.00").format(
 							readings.get(sortedParameters.get(i)).get(0).getValue())
 					+ " " + sortedParameters.get(i).getMeasurementTypeUnit(),
-					ismopConverter.format(readings.get(sortedParameters.get(i)).get(0)
+					ismopConverter.formatForDisplay(readings.get(sortedParameters.get(i)).get(0)
 							.getTimestamp()));
 			
 		}
