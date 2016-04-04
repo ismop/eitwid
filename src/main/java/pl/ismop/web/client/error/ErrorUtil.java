@@ -15,10 +15,7 @@ public class ErrorUtil {
 	}
 	
 	public ErrorDetails processErrors(Method method, Throwable exception) {
-		ErrorDetails details = new ErrorDetails();
-		details.setMessage(exception.getMessage());
-		
-		return details;
+		return new ErrorDetails(exception.getMessage());
 	}
 	
 	public CommunicationException processErrorsForException(Method method, Throwable exception) {

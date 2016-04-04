@@ -100,7 +100,7 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		}
 		
 		view.setSidePanelWidget(realTimeSidePanelPresenter.getView());
-		realTimeSidePanelPresenter.init();
+		realTimeSidePanelPresenter.initializeTimer();
 		
 		if(realTimePanelPresenter == null) {
 			realTimePanelPresenter = eventBus.addHandler(RealTimePanelPresenter.class);
