@@ -11,7 +11,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
@@ -36,6 +38,9 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 			fifthWeatherParameterValue, sixthWeatherParameterName, sixthWeatherParameterValue,
 			firstWeatherParameterDate, secondWeatherParameterDate, thirdWeatherParameterDate,
 			fourthWeatherParameterDate,	fifthWeatherParameterDate, sixthWeatherParameterDate;
+	
+	@UiField
+	FlowPanel chartContainer;
 
 	private IRealTimePanelPresenter presenter;
 	
@@ -89,5 +94,10 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 			weatherParameterValues.get(index).setText(value);
 			weatherParameterDates.get(index).setText(date);
 		}
+	}
+
+	@Override
+	public void setChartView(IsWidget chartView) {
+		chartContainer.add(chartView);
 	}
 }

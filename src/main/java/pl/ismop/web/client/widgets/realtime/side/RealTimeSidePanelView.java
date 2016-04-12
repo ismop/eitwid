@@ -47,6 +47,8 @@ public class RealTimeSidePanelView extends Composite implements IRealTimeSidePan
 
 	@Override
 	public void startTimer(int tickMillis) {
+		stopTimer();
+		
 		timer = new Timer() {
 			@Override
 			public void run() {
@@ -66,5 +68,7 @@ public class RealTimeSidePanelView extends Composite implements IRealTimeSidePan
 		if (timer != null) {
 			timer.cancel();
 		}
+		
+		setProgress(0);
 	}
 }

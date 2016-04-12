@@ -5,7 +5,7 @@
 		xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html">
 	<ui:with type="pl.ismop.web.client.widgets.realtime.main.RealTimePanelMessages"
 		field="messages"/>
-	<g:HTMLPanel>
+	<g:HTMLPanel addStyleNames="{style.real-time-panel}">
 		<b:Container fluid="true">
 			<b:Row>
 				<b:Column size="MD_12">
@@ -85,6 +85,18 @@
 					</b:Panel>
 				</b:Column>
 			</b:Row>
+			<b:Row>
+				<b:Column size="MD_12">
+					<b:Heading size="H5">
+						<b.html:Text text="{messages.chartSectionHeading}"/>
+					</b:Heading>
+				</b:Column>
+			</b:Row>
+			<b:Row>
+				<b:Column size="MD_12">
+					<g:FlowPanel ui:field="chartContainer"/>
+				</b:Column>
+			</b:Row>
 		</b:Container>
 	</g:HTMLPanel>
 	<ui:style>
@@ -102,6 +114,12 @@
 		.weatherDate {
 			text-align: right;
 			font-size:smaller;
+			color: gray;
+		}
+		
+		.real-time-panel {
+			background-color: white;
+			border-right: 1px solid lightgray;
 		}
 	</ui:style>
 </ui:UiBinder>

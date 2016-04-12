@@ -165,7 +165,7 @@ public class DapController {
 	public interface ScenariosCallback extends ErrorCallback {
 		void processScenarios(List<Scenario> scenarios);
 	}
-	
+
 	public interface MalfunctioningParametersCallback extends ErrorCallback {
 		void processMalfunctioningParameters(List<Parameter> malfunctioningParameters);
 	}
@@ -225,7 +225,7 @@ public class DapController {
 		this.monitoringService = monitoringService;
 		this.converter = converter;
 	}
-	
+
 	public void getLevees(final LeveesCallback callback) {	
 		leveeService.getLevees(new MethodCallback<LeveesResponse>() {
 			@Override
@@ -305,8 +305,28 @@ public class DapController {
 			int quantity, MeasurementsCallback callback) {
 		String from = converter.formatForDto(startDate);
 		String until = converter.formatForDto(endDate);
-		measurementService.getMeasurementsWithQuantityAndTime(converter.merge(timelineIds), from, until,
-				quantity, new MeasurementsRestCallback(callback));
+		measurementService.getMeasurementsWithQuantityAndTime(converter.merge(timelineIds), from,
+				until, quantity, new MeasurementsRestCallback(callback));
+	}
+	
+	public ListenableFuture<List<Measurement>> getMeasurementsWithQuantityAndTime(
+			List<String> timelineIds, Date startDate, Date endDate, int quantity) {
+		SettableFuture<List<Measurement>> result = SettableFuture.create();
+		String from = converter.formatForDto(startDate);
+		String until = converter.formatForDto(endDate);
+		measurementService.getMeasurementsWithQuantityAndTime(converter.merge(timelineIds), from,
+				until, quantity, new MethodCallback<MeasurementsResponse>() {
+					@Override
+					public void onFailure(Method method, Throwable exception) {
+						result.setException(errorUtil.processErrorsForException(method, exception));
+					}
+
+					@Override
+					public void onSuccess(Method method, MeasurementsResponse response) {
+						result.set(response.getMeasurements());
+					}});
+		
+		return result;
 	}
 
 	public void getMeasurements(Collection<String> timelineIds, Date startDate, Date endDate,
@@ -1005,6 +1025,24 @@ public class DapController {
 				malfunctioningParametersCallback.processMalfunctioningParameters(response.getParameters());
 			}
 		});
+	}
+
+	public ListenableFuture<List<Device>> getDevicesWithCustomIds(List<String> customIds) {
+		SettableFuture<List<Device>> result = SettableFuture.create();
+		deviceService.getDevicesFotCustomIds(converter.merge(customIds),
+				new MethodCallback<DevicesResponse>() {
+					@Override
+					public void onFailure(Method method, Throwable exception) {
+						result.setException(errorUtil.processErrorsForException(method, exception));
+					}
+		
+					@Override
+					public void onSuccess(Method method, DevicesResponse response) {
+						result.set(response.getDevices());
+					}
+				});
+		
+		return result;
 	}
 
 	private Date monthEarlier() {

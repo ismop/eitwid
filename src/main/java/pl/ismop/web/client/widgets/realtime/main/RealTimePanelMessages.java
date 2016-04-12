@@ -6,4 +6,6 @@ public interface RealTimePanelMessages extends Messages {
 	String changeWeatherTitle();
 	
 	String weatherStation(String weatherDeviceName);
+	
+	String chartSectionHeading();
 }

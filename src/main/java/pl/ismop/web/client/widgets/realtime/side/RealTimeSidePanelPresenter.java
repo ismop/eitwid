@@ -48,4 +48,8 @@ public class RealTimeSidePanelPresenter extends BasePresenter<IRealTimeSidePanel
 				.intValue());
 		countdown--;
 	}
+
+	public void disableTimers() {
+		view.stopTimer();
+	}
 }

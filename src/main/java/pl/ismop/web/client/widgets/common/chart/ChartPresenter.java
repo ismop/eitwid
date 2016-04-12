@@ -1,6 +1,36 @@
 package pl.ismop.web.client.widgets.common.chart;
 
-import com.google.gwt.core.client.GWT;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.moxieapps.gwt.highcharts.client.Axis.Type;
+import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
+import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Extremes;
+import org.moxieapps.gwt.highcharts.client.Legend;
+import org.moxieapps.gwt.highcharts.client.PlotLine;
+import org.moxieapps.gwt.highcharts.client.Point;
+import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEventHandler;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Iterables;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -9,19 +39,13 @@ import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-import org.moxieapps.gwt.highcharts.client.Axis.Type;
-import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
-import org.moxieapps.gwt.highcharts.client.*;
-import org.moxieapps.gwt.highcharts.client.events.*;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+
 import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.IsmopWebEntryPoint;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.widgets.common.chart.IChartView.IChartPresenter;
-
-import java.util.*;
 
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
@@ -33,7 +57,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	
 	private int height;
 	
-	private Map<String, ChartSeries> dataSeriesMap;
+	private BiMap<String, ChartSeries> dataSeriesMap;
 	
 	private Map<String, Series> chartSeriesMap;
 	
@@ -62,23 +86,46 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	public ChartPresenter(IsmopConverter converter) {
 		this.converter = converter;
 
-		dataSeriesMap = new HashMap<>();
+		dataSeriesMap = HashBiMap.create();
 		chartSeriesMap = new HashMap<>();
 		yAxisMap = new HashMap<>();
 	}
 
 	public void addChartSeries(ChartSeries series) {
-		initChart();
+		addChartSeries(series, true);
+	}
+	
+	public void addChartSeriesList(List<ChartSeries> series) {
+		for (ChartSeries chartSeries : series) {
+			addChartSeries(chartSeries, false);
+		}
+		
+		chart.redraw();
+	}
 
-		Series chartSeries = chart.createSeries();
-		chartSeriesMap.put(chartSeries.getId(), chartSeries);
-		dataSeriesMap.put(chartSeries.getId(), series);
+	private void addChartSeries(ChartSeries series, boolean redraw) {
+		initChart();
+		
+		Series chartSeries = null;
+		Optional<ChartSeries> foundChartSeries = Iterables.tryFind(dataSeriesMap.values(),
+				s -> s.getParameterId().equals(series.getParameterId()));
+
+		if (foundChartSeries.isPresent()) {
+			chartSeries = chartSeriesMap.get(dataSeriesMap.inverse().get(foundChartSeries.get()));
+		} else {
+			chartSeries = chart.createSeries();
+			chartSeriesMap.put(chartSeries.getId(), chartSeries);
+			dataSeriesMap.put(chartSeries.getId(), series);
+		}
 		
 		chartSeries
 			.setName(series.getName())
 			.setPoints(series.getValues())
 			.setYAxis(getYAxisIndex(series));
-		chart.addSeries(chartSeries);
+		
+		if (!foundChartSeries.isPresent()) {
+			chart.addSeries(chartSeries, redraw, true);
+		}
 	}
 
 	public void initChart() {
@@ -146,43 +193,13 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		}
 	}
 
-	private native JavaScriptObject getExportCSVChartBtn() /*-{
-		var thisObject = this
-		var exports = $wnd.Highcharts.getOptions().exporting.buttons.contextButton.menuItems.slice(0)
-        exports.push({
-            text: thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::getDownloadCSVMessage()(),
-            onclick: function () {
-                thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::exportCSV()()
-            }
-        })
-		return exports
-    }-*/;
-
-	private void exportCSV() {
-		List<String> parameterIds = new ArrayList<>();
-		for (ChartSeries chartSeries : getSeries()) {
-			parameterIds.add(chartSeries.getParameterId());
-		}
-
-		Extremes xExtremes = chart.getXAxis().getExtremes();
-		Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint") +
-				"/chart_exporter?time_from=" + converter.formatForDto(new Date(xExtremes.getDataMin().longValue())) +
-				"&time_to=" + converter.formatForDto(new Date(xExtremes.getDataMax().longValue())) +
-				"&parameters=" + converter.merge(parameterIds) +
-				"&private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
-	}
-
-	private String getDownloadCSVMessage() {
-		return getView().getDownloadCSVMessage();
-	}
-
 	public void setHeight(int height) {
 		this.height = height;
 	}
 
 	public void removeChartSeriesForDevice(Device device) {
-		for(String chartSeriesKey : new ArrayList<>(dataSeriesMap.keySet())) {
-			if(dataSeriesMap.get(chartSeriesKey).getDeviceId().equals(device.getId())) {
+		for (String chartSeriesKey : new ArrayList<>(dataSeriesMap.keySet())) {
+			if (dataSeriesMap.get(chartSeriesKey).getDeviceId().equals(device.getId())) {
 				dataSeriesMap.remove(chartSeriesKey);
 				chart.removeSeries(chartSeriesMap.remove(chartSeriesKey));
 			}
@@ -192,8 +209,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	}
 
 	public void removeChartSeriesForParameter(Parameter parameter) {
-		for(String chartSeriesKey : new ArrayList<>(dataSeriesMap.keySet())) {
-			if(dataSeriesMap.get(chartSeriesKey).getParameterId().equals(parameter.getId())) {
+		for (String chartSeriesKey : new ArrayList<>(dataSeriesMap.keySet())) {
+			if (dataSeriesMap.get(chartSeriesKey).getParameterId().equals(parameter.getId())) {
 				dataSeriesMap.remove(chartSeriesKey);
 				chart.removeSeries(chartSeriesMap.remove(chartSeriesKey));
 			}
@@ -310,6 +327,35 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		return deviceSelectHandler;
 	}
 
+	public void selectDate(Date selectedDate, String color) {
+		initChart();
+		if (currentTimePlotLine != null) {
+			chart.getXAxis().removePlotLine(currentTimePlotLine);
+		}
+		currentTimePlotLine = chart.getXAxis().createPlotLine().
+				setWidth(2).setColor(color).setValue(selectedDate.getTime());
+		chart.getXAxis().addPlotLines(currentTimePlotLine);
+	}
+
+	private void exportCSV() {
+		List<String> parameterIds = new ArrayList<>();
+		
+		for (ChartSeries chartSeries : getSeries()) {
+			parameterIds.add(chartSeries.getParameterId());
+		}
+	
+		Extremes xExtremes = chart.getXAxis().getExtremes();
+		Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint") +
+				"/chart_exporter?time_from=" + converter.formatForDto(new Date(xExtremes.getDataMin().longValue())) +
+				"&time_to=" + converter.formatForDto(new Date(xExtremes.getDataMax().longValue())) +
+				"&parameters=" + converter.merge(parameterIds) +
+				"&private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
+	}
+
+	private String getDownloadCSVMessage() {
+		return getView().getDownloadCSVMessage();
+	}
+
 	private Number getYAxisIndex(ChartSeries series) {
 		String yAxisLabel = series.getLabel() + ", [" + series.getUnit() + "]";
 		
@@ -330,16 +376,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		}
 	}
 
-	public void selectDate(Date selectedDate, String color) {
-		initChart();
-		if (currentTimePlotLine != null) {
-			chart.getXAxis().removePlotLine(currentTimePlotLine);
-		}
-		currentTimePlotLine = chart.getXAxis().createPlotLine().
-				setWidth(2).setColor(color).setValue(selectedDate.getTime());
-		chart.getXAxis().addPlotLines(currentTimePlotLine);
-	}
-
 	private void clearDataSeries() {
 		if (dataSeriesMap.size() == 0) {
 			yAxisMap.clear();
@@ -356,6 +392,18 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		
 		return result;
 	}
+
+	private native JavaScriptObject getExportCSVChartBtn() /*-{
+		var thisObject = this
+		var exports = $wnd.Highcharts.getOptions().exporting.buttons.contextButton.menuItems.slice(0)
+	    exports.push({
+	        text: thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::getDownloadCSVMessage()(),
+	        onclick: function () {
+	            thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::exportCSV()()
+	        }
+	    })
+		return exports
+	}-*/;
 
 	private native void updateFirstYAxis(JavaScriptObject nativeChart, String yAxisLabel) /*-{
 		nativeChart.yAxis[0].update({

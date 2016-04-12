@@ -52,18 +52,22 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		view.markRealTimeOption(false);
 		view.clearPanels();
 		
-		if(monitoringSidePanelPresenter == null) {
+		if (monitoringSidePanelPresenter == null) {
 			monitoringSidePanelPresenter = eventBus.addHandler(MonitoringSidePanelPresenter.class);
 		}
 		
 		monitoringSidePanelPresenter.reset();
 		view.setSidePanelWidget(monitoringSidePanelPresenter.getView());
 		
-		if(monitoringLeveeNavigator == null) {
+		if (monitoringLeveeNavigator == null) {
 			monitoringLeveeNavigator = eventBus.addHandler(LeveeNavigatorPresenter.class);
 		}
 		
 		view.setMainPanelWidget(monitoringLeveeNavigator.getView());
+		
+		if (realTimeSidePanelPresenter != null) {
+			realTimeSidePanelPresenter.disableTimers();
+		}
 	}
 	
 	public void onAnalysisPanel() {
@@ -73,19 +77,23 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		view.markRealTimeOption(false);
 		view.clearPanels();
 		
-		if(analysisPanelPresenter == null) {
+		if (analysisPanelPresenter == null) {
 			analysisPanelPresenter = eventBus.addHandler(AnalysisSidePanelPresenter.class);
 		}
 		
 		view.setSidePanelWidget(analysisPanelPresenter.getView());
 		analysisPanelPresenter.init();
 		
-		if(comparisonPresenter == null) {
+		if (comparisonPresenter == null) {
 			comparisonPresenter = eventBus.addHandler(ComparisonPresenter.class);
 		}
 
 		view.setMainPanelWidget(comparisonPresenter.getView());
 		comparisonPresenter.init();
+		
+		if (realTimeSidePanelPresenter != null) {
+			realTimeSidePanelPresenter.disableTimers();
+		}
 	}
 	
 	public void onRealTimePanel() {
@@ -95,14 +103,13 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		view.markRealTimeOption(true);
 		view.clearPanels();
 		
-		if(realTimeSidePanelPresenter == null) {
+		if (realTimeSidePanelPresenter == null) {
 			realTimeSidePanelPresenter = eventBus.addHandler(RealTimeSidePanelPresenter.class);
 		}
 		
 		view.setSidePanelWidget(realTimeSidePanelPresenter.getView());
-		realTimeSidePanelPresenter.initializeTimer();
 		
-		if(realTimePanelPresenter == null) {
+		if (realTimePanelPresenter == null) {
 			realTimePanelPresenter = eventBus.addHandler(RealTimePanelPresenter.class);
 		}
 
