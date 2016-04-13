@@ -9,6 +9,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
 
@@ -25,6 +27,9 @@ public class RealTimeSidePanelView extends Composite implements IRealTimeSidePan
 	
 	@UiField
 	ProgressBar progressBar;
+	
+	@UiField
+	FlowPanel mapContainer;
 
 	public RealTimeSidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -70,5 +75,10 @@ public class RealTimeSidePanelView extends Composite implements IRealTimeSidePan
 		}
 		
 		setProgress(0);
+	}
+
+	@Override
+	public void setMapView(IsWidget view) {
+		mapContainer.add(view);
 	}
 }

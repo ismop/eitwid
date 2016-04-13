@@ -233,4 +233,10 @@ public interface MainEventBus extends EventBusWithLookup {
 	
 	@Event(handlers = { VerticalSlicePresenter.class, HorizontalSlicePresenter.class })
 	void gradientExtended(String gradientId);
+
+	@Event(handlers = { RealTimeSidePanelPresenter.class })
+	void addDeviceToRealtimeMap(Device device);
+
+	@Event(handlers = { RealTimeSidePanelPresenter.class })
+	void selectDeviceOnRealtimeMap(Device device, boolean select);
 }

@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
@@ -35,6 +36,7 @@ import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
+import pl.ismop.web.client.widgets.common.chart.ChartPresenter.DeviceSelectHandler;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.realtime.main.IRealTimePanelView.IRealTimePanelPresenter;
 
@@ -76,11 +78,14 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	}
 	
 	public void onRefreshRealTimePanel() {
+		view.showLoadingIndicator(true);
+		
 		ListenableFuture<Void> weatherFuture = updateWeather();
 		ListenableFuture<Void> chartFuture = updateChart();
 		Futures.whenAllComplete(weatherFuture, chartFuture).call(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
+				view.showLoadingIndicator(false);
 				eventBus.realDataContentLoaded();
 				
 				return null;
@@ -264,6 +269,27 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	private void renderChartData() {
 		if (chartPresenter == null) {
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);
+			chartPresenter.setDeviceSelectHandler(new DeviceSelectHandler() {
+				@Override
+				public void unselect(ChartSeries series) {
+					Optional<Device> device = Iterables.tryFind(chartDevices, d -> d.getId()
+							.equals(series.getDeviceId()));
+					
+					if (device.isPresent()) {
+						eventBus.selectDeviceOnRealtimeMap(device.get(), false);
+					}
+				}
+				
+				@Override
+				public void select(ChartSeries series) {
+					Optional<Device> device = Iterables.tryFind(chartDevices, d -> d.getId()
+							.equals(series.getDeviceId()));
+					
+					if (device.isPresent()) {
+						eventBus.selectDeviceOnRealtimeMap(device.get(), true);
+					}
+				}
+			});
 			chartPresenter.setHeight(300);
 			view.setChartView(chartPresenter.getView());
 			chartPresenter.initChart();
@@ -272,6 +298,10 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		}
 		
 		chartPresenter.addChartSeriesList(createChartSeries());
+		
+		for (Device chartDevice : chartDevices) {
+			eventBus.addDeviceToRealtimeMap(chartDevice);
+		}
 	}
 
 	private List<ChartSeries> createChartSeries() {

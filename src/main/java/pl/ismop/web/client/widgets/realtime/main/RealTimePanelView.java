@@ -3,6 +3,7 @@ package pl.ismop.web.client.widgets.realtime.main;
 import java.util.Arrays;
 import java.util.List;
 
+import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
@@ -41,6 +42,9 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	
 	@UiField
 	FlowPanel chartContainer;
+	
+	@UiField
+	Icon loadingIndicator;
 
 	private IRealTimePanelPresenter presenter;
 	
@@ -99,5 +103,10 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	@Override
 	public void setChartView(IsWidget chartView) {
 		chartContainer.add(chartView);
+	}
+
+	@Override
+	public void showLoadingIndicator(boolean show) {
+		loadingIndicator.setVisible(show);
 	}
 }

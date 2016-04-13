@@ -138,7 +138,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 					.setZoomType(ZoomType.X)
 					.setLegend(new Legend()
 							.setMaxHeight(40))
-					.setSelectionEventHandler(this);
+					.setSelectionEventHandler(this)
+					.setPersistent(true);
 
 			chart.getXAxis().setType(Type.DATE_TIME);
 

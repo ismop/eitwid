@@ -2,18 +2,37 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
-	<ui:with type="pl.ismop.web.client.widgets.realtime.side.RealTimeSidePanelMessages" field="messages"/>
-	<g:HTMLPanel>
+	<ui:with type="pl.ismop.web.client.widgets.realtime.side.RealTimeSidePanelMessages"
+		field="messages"/>
+	<g:HTMLPanel addStyleNames="{style.panel}">
 		<g:FocusPanel ui:field="progressFocus">
-			<b:Progress ui:field="progress" type="STRIPED" addStyleNames="{style.progress}" title="{messages.progressTitle}">
+			<b:Progress ui:field="progress" type="STRIPED" addStyleNames="{style.progress}"
+				title="{messages.progressTitle}">
 				<b:ProgressBar ui:field="progressBar" type="WARNING"/>
 			</b:Progress>
 		</g:FocusPanel>
+		<g:FlowPanel ui:field="mapContainer" addStyleNames="{style.map-container}"/>
 	</g:HTMLPanel>
 	<ui:style>
 		.progress {
 			margin: 2px 2px 20px 2px;
 			cursor: pointer;
+		}
+		
+		.map-container {
+			position: absolute;
+			top: 30px;
+			bottom: 0px;
+			left: 0px;
+			right: 0px;
+		}
+		
+		.panel {
+			position: absolute;
+			top: 5px;
+			bottom: 5px;
+			left: 5px;
+			right: 5px;
 		}
 	</ui:style>
 </ui:UiBinder>

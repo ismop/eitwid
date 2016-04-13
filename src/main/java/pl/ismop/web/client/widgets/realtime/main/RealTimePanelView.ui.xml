@@ -10,10 +10,17 @@
 			<b:Row>
 				<b:Column size="MD_12">
 					<b:Heading size="H5">
-						<b:Icon ui:field="changeWeatherSource" type="REFRESH"
-							addStyleNames="{style.changeWeatherSource}"
-							title="{messages.changeWeatherTitle}"/>
-						<b.html:Text ui:field="weatherSectionHeading"/>
+						<g:FlowPanel addStyleNames="{style.header}">
+							<b:Icon ui:field="changeWeatherSource" type="REFRESH"
+								addStyleNames="{style.changeWeatherSource}"
+								title="{messages.changeWeatherTitle}"/>
+							<b.html:Text ui:field="weatherSectionHeading"/>
+						</g:FlowPanel>
+						<g:FlowPanel>
+							<b:Icon ui:field="loadingIndicator" type="SPINNER" spin="true"
+								addStyleNames="{style.loading-indicator}" visible="false"/>
+						</g:FlowPanel>
+						<g:FlowPanel addStyleNames="clearfix"/>
 					</b:Heading>
 				</b:Column>
 			</b:Row>
@@ -120,6 +127,14 @@
 		.real-time-panel {
 			background-color: white;
 			border-right: 1px solid lightgray;
+		}
+		
+		.loading-indicator {
+			float: right;
+		}
+		
+		.header {
+			float: left;
 		}
 	</ui:style>
 </ui:UiBinder>

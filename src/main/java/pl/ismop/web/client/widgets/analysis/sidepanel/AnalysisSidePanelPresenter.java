@@ -215,7 +215,6 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         }
     }
 
-    @SuppressWarnings("unused")
     public void onDateChanged(Date selectedDate) {
         if (waterWave != null) {
             if (currentTimePlotLine != null) {
@@ -227,37 +226,30 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         }
     }
 
-    @SuppressWarnings("unused")
     public void onAdd(MapFeature mapFeature) {
         miniMap.add(mapFeature);
     }
 
-    @SuppressWarnings("unused")
     public void onRm(MapFeature mapFeature) {
         miniMap.rm(mapFeature);
     }
 
-    @SuppressWarnings("unused")
     public void onSelect(MapFeature mapFeature) {
         miniMap.select(mapFeature);
     }
 
-    @SuppressWarnings("unused")
     public void onUnselect(MapFeature mapFeature) {
         miniMap.unselect(mapFeature);
     }
 
-    @SuppressWarnings("unused")
     public void onHighlight(MapFeature mapFeature) {
         miniMap.highlight(mapFeature);
     }
 
-    @SuppressWarnings("unused")
     public void onUnhighlight(MapFeature mapFeature) {
         miniMap.unhighlight(mapFeature);
     }
 
-    @SuppressWarnings("unused")
     public void onClearMinimap() {
         miniMap.reset(true);
     }

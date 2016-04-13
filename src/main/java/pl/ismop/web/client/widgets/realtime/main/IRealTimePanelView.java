@@ -12,4 +12,6 @@ public interface IRealTimePanelView extends IsWidget {
 	void setWeatherParameter(int index, String name, String value, String date);
 
 	void setChartView(IsWidget view);
+
+	void showLoadingIndicator(boolean show);
 }

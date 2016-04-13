@@ -14,4 +14,6 @@ public interface IRealTimeSidePanelView extends IsWidget {
 	void setProgress(int progress);
 
 	void stopTimer();
+
+	void setMapView(IsWidget view);
 }
