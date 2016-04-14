@@ -35,6 +35,7 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
+import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalCrosssectionConfiguration;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter.DeviceSelectHandler;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
@@ -65,6 +66,10 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	private List<Device> chartDevices;
 	
 	private ChartPresenter chartPresenter;
+	
+	private Parameter waterLevelParameter;
+	
+	private List<Measurement> waterLevelMeasurements;
 
 	@Inject
 	public RealTimePanelPresenter(DapController dapController, IsmopConverter ismopConverter) {
@@ -82,15 +87,18 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		
 		ListenableFuture<Void> weatherFuture = updateWeather();
 		ListenableFuture<Void> chartFuture = updateChart();
-		Futures.whenAllComplete(weatherFuture, chartFuture).call(new Callable<Void>() {
-			@Override
-			public Void call() throws Exception {
-				view.showLoadingIndicator(false);
-				eventBus.realDataContentLoaded();
-				
-				return null;
-			}
-		});
+		ListenableFuture<Void> waterLevelFuture = updateWaterLevel();
+		ListenableFuture<Void> verticalSliceFuture = updateVerticalSlice();
+		Futures.whenAllComplete(weatherFuture, chartFuture, waterLevelFuture, verticalSliceFuture)
+				.call(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						view.showLoadingIndicator(false);
+						eventBus.realDataContentLoaded();
+						
+						return null;
+					}
+				});
 	}
 
 	@Override
@@ -335,6 +343,83 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 			series.setValues(values);
 			result.add(series);
 		}
+		
+		return result;
+	}
+
+	private ListenableFuture<Void> updateWaterLevel() {
+		SettableFuture<Void> result = SettableFuture.create();
+		ListenableFuture<List<String>> deviceIdsFuture = Futures.transform(
+				dapController.getDevicesForType("pump"),
+					devices -> Lists.transform(devices, Device::getId)
+				);
+		ListenableFuture<List<Parameter>> parametersFuture = Futures.transformAsync(deviceIdsFuture,
+				deviceIds -> dapController.getParameters(deviceIds));
+		ListenableFuture<List<Context>> contextsFuture = dapController.getContext("measurements");
+		ListenableFuture<List<List<? extends Object>>> contextsAndParameterIds =
+				Futures.allAsList(contextsFuture, parametersFuture);
+		ListenableFuture<List<Timeline>> timelinesFuture =
+				Futures.transformAsync(contextsAndParameterIds,
+				(List<List<? extends Object>> resultList) -> {
+					@SuppressWarnings("unchecked")
+					List<Context> contexts = (List<Context>) resultList.get(0);
+					@SuppressWarnings("unchecked")
+					List<Parameter> parameters = (List<Parameter>) resultList.get(1);
+					waterLevelParameter = Iterables.find(parameters,
+							p -> p.getParameterName()
+								.equals("Monitorowanie wysokości fali - Level1_PV"));
+					
+					if (contexts.size() > 0 && parameters.size() > 0) {
+						return dapController.getTimelinesForParameterIds(
+								contexts.get(0).getId(),
+									Arrays.asList(waterLevelParameter.getId()));
+					} else {
+						SettableFuture<List<Timeline>> resultFuture = SettableFuture.create();
+						resultFuture.set(new ArrayList<>());
+						
+						return resultFuture;
+					}
+				});
+		ListenableFuture<List<Measurement>> measurementsFuture =
+				Futures.transformAsync(timelinesFuture,
+					timelines -> dapController.getLastMeasurementsWith24HourMod(
+						Lists.transform(timelines, timeline -> timeline.getId()), new Date()));
+		Futures.addCallback(measurementsFuture, new FutureCallback<List<Measurement>>() {
+			@Override
+			public void onSuccess(List<Measurement> measurements) {
+				waterLevelMeasurements = measurements;
+				renderWaterLevelData();
+				result.set(null);
+			}
+
+			@Override
+			public void onFailure(Throwable t) {
+				eventBus.showError(new ErrorDetails(t.getMessage()));
+				result.set(null);
+			}
+
+		});
+		
+		
+		return result;
+	}
+	
+	private void renderWaterLevelData() {
+		if (waterLevelParameter != null && waterLevelMeasurements.size() > 0) {
+			view.setWaterLevelValue("" + NumberFormat.getFormat("0.00")
+				.format(waterLevelMeasurements.get(0).getValue()) + " "
+					+ waterLevelParameter.getMeasurementTypeUnit());
+			view.setWaterLevelDate(ismopConverter.formatForDisplay(
+					waterLevelMeasurements.get(0).getTimestamp()));
+		} else {
+			view.setEmptyWaterLevelValues();
+		}
+	}
+
+	private ListenableFuture<Void> updateVerticalSlice() {
+		SettableFuture<Void> result = SettableFuture.create();
+		VerticalCrosssectionConfiguration verticalConfiguration =
+				new VerticalCrosssectionConfiguration();
 		
 		return result;
 	}

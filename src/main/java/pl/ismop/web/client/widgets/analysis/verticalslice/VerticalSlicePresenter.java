@@ -67,9 +67,10 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	
 	public void onUpdateVerticalSliceConfiguration(
 			VerticalCrosssectionConfiguration configuration) {
-		if(this.configuration == configuration) {
+		if (this.configuration == configuration) {
 			refreshView();
 		}
+		
 		selectChosenProfileOnMinimap();
 	}
 	
@@ -107,8 +108,10 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	}
 
 	public void selectChosenProfileOnMinimap() {
-		selectionManager.clear();
-		selectionManager.select(configuration.getPickedProfile());
+		if (selectionManager != null) {
+			selectionManager.clear();
+			selectionManager.select(configuration.getPickedProfile());
+		}
 	}
 
 	@Override

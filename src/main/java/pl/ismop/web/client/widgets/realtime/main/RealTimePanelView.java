@@ -38,7 +38,8 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 			fourthWeatherParameterName, fourthWeatherParameterValue, fifthWeatherParameterName,
 			fifthWeatherParameterValue, sixthWeatherParameterName, sixthWeatherParameterValue,
 			firstWeatherParameterDate, secondWeatherParameterDate, thirdWeatherParameterDate,
-			fourthWeatherParameterDate,	fifthWeatherParameterDate, sixthWeatherParameterDate;
+			fourthWeatherParameterDate,	fifthWeatherParameterDate, sixthWeatherParameterDate,
+			waterLevelParameterValue, waterLevelParameterDate;
 	
 	@UiField
 	FlowPanel chartContainer;
@@ -108,5 +109,20 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	@Override
 	public void showLoadingIndicator(boolean show) {
 		loadingIndicator.setVisible(show);
+	}
+
+	@Override
+	public void setEmptyWaterLevelValues() {
+		waterLevelParameterValue.setText(messages.emptyValue());
+	}
+
+	@Override
+	public void setWaterLevelValue(String value) {
+		waterLevelParameterValue.setText(value);
+	}
+
+	@Override
+	public void setWaterLevelDate(String date) {
+		waterLevelParameterDate.setText(date);
 	}
 }

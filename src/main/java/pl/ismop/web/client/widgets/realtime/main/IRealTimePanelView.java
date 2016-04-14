@@ -14,4 +14,10 @@ public interface IRealTimePanelView extends IsWidget {
 	void setChartView(IsWidget view);
 
 	void showLoadingIndicator(boolean show);
+
+	void setEmptyWaterLevelValues();
+
+	void setWaterLevelValue(String value);
+
+	void setWaterLevelDate(String formatForDisplay);
 }

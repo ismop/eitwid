@@ -104,6 +104,29 @@
 					<g:FlowPanel ui:field="chartContainer"/>
 				</b:Column>
 			</b:Row>
+			<b:Row>
+				<b:Column size="MD_12">
+					<b:Heading size="H5">
+						<b.html:Text text="{messages.verticalSliceSectionHeading}"/>
+					</b:Heading>
+				</b:Column>
+			</b:Row>
+			<b:Row>
+				<b:Column size="MD_10">
+					
+				</b:Column>
+				<b:Column size="MD_2">
+					<b:Panel>
+						<b:PanelBody>
+							<g:HTML text="{messages.wateLevelLabel}"/>
+							<g:HTML ui:field="waterLevelParameterValue"
+									addStyleNames="{style.weatherPanel}"/>
+							<g:HTML ui:field="waterLevelParameterDate"
+									addStyleNames="{style.weatherDate}"/>
+						</b:PanelBody>
+					</b:Panel>
+				</b:Column>
+			</b:Row>
 		</b:Container>
 	</g:HTMLPanel>
 	<ui:style>

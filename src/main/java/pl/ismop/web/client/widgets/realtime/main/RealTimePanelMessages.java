@@ -8,4 +8,10 @@ public interface RealTimePanelMessages extends Messages {
 	String weatherStation(String weatherDeviceName);
 	
 	String chartSectionHeading();
+	
+	String verticalSliceSectionHeading();
+	
+	String wateLevelLabel();
+
+	String emptyValue();
 }
