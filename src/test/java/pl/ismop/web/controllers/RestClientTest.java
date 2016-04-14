@@ -19,6 +19,7 @@ import javax.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,7 @@ public class RestClientTest {
 	private String dapEndpoint;
 
 	@Test
+	@Ignore
 	public void testGet() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		SSLContext sslContext = SSLContext.getInstance("SSL");
 		sslContext.init(null, new TrustManager[] { new X509TrustManager() {
