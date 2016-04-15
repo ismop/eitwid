@@ -385,6 +385,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private void initSlider() {
 		if (slider == null) {
 			slider = eventBus.addHandler(SliderPresenter.class);
+			slider.setSelectedDate(new Date());
 			slider.setEventsListener(new SliderPresenter.Events() {
 				@Override
 				public void onDateChanged(Date selectedDate) {

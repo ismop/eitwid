@@ -69,6 +69,10 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
         return getDate(view.getSelectedPoint());
     }
 
+    public void setSelectedDate(Date date) {
+        view.setSelectedPoint((double)(date.getTime() - startDate.getTime()) / STEP);
+    }
+
     private long calculateNumberOfPoints() {
         long interval = endDate.getTime() - startDate.getTime();
         return interval / STEP;
