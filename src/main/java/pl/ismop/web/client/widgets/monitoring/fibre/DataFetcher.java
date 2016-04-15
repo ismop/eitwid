@@ -194,8 +194,10 @@ public class DataFetcher implements IDataFetcher {
 
             List<Device> devices = new ArrayList<>();
             for(String deviceId : da.getDeviceIds()) {
-                devices.add(idToDevice.get(deviceId));
-
+                Device device = idToDevice.get(deviceId);
+                if (device != null) {
+                    devices.add(idToDevice.get(deviceId));
+                }
             }
             Collections.sort(devices, new Comparator<Device>() {
                 @Override
