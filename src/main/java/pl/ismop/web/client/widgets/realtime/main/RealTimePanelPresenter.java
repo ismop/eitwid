@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +31,17 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
+import pl.ismop.web.client.dap.profile.Profile;
+import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.util.GradientsUtil;
 import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
 import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalCrosssectionConfiguration;
+import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSlicePresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter.DeviceSelectHandler;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
@@ -70,11 +76,29 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	private Parameter waterLevelParameter;
 	
 	private List<Measurement> waterLevelMeasurements;
+	
+	private List<Profile> verticalSliceProfiles;
+	
+	private Profile currentVerticalSliceProfile;
+	
+	private List<Parameter> verticalSliceParameters;
+	
+	private List<Device> verticalSliceDevices;
+
+	private VerticalSlicePresenter verticalSlicePresenter;
+
+	private GradientsUtil gradientsUtil;
+
+	private String currentVerticalSliceParameterName;
+
+	private VerticalCrosssectionConfiguration currentVerticalConfiguration;
 
 	@Inject
-	public RealTimePanelPresenter(DapController dapController, IsmopConverter ismopConverter) {
+	public RealTimePanelPresenter(DapController dapController, IsmopConverter ismopConverter,
+			GradientsUtil gradientsUtil) {
 		this.dapController = dapController;
 		this.ismopConverter = ismopConverter;
+		this.gradientsUtil = gradientsUtil;
 		chartDeviceCustomIds = Arrays.asList("UT6", "UT18", "UT29", "UT5", "UT17", "UT28");
 	}
 	
@@ -113,6 +137,25 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		
 		currentWeatherDeviceId = weatherDeviceId;
 		renderWeatherData();
+	}
+
+	@Override
+	public void onVerticalSliceParameterChange() {
+		//assuming there are only two different parameter names
+		for (Parameter parameter : verticalSliceParameters) {
+			if (!currentVerticalSliceParameterName.equals(parameter.getMeasurementTypeName())) {
+				currentVerticalSliceParameterName = parameter.getMeasurementTypeName();
+				
+				break;
+			}
+		}
+		
+		currentVerticalConfiguration.setPickedParameterMeasurementName(
+				currentVerticalSliceParameterName);
+		verticalSlicePresenter.setConfiguration(currentVerticalConfiguration);
+		verticalSlicePresenter.onDateChanged(new Date());
+		view.setVerticalSliceHeading(
+				currentVerticalConfiguration.getPickedParameterMeasurementName());
 	}
 
 	private ListenableFuture<Void> updateWeather() {
@@ -418,9 +461,109 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 
 	private ListenableFuture<Void> updateVerticalSlice() {
 		SettableFuture<Void> result = SettableFuture.create();
-		VerticalCrosssectionConfiguration verticalConfiguration =
-				new VerticalCrosssectionConfiguration();
+		ListenableFuture<List<Section>> sectionsFuture = dapController.getSections();
+		ListenableFuture<List<String>> sectionIdsFuture = Futures.transform(sectionsFuture,
+				sections -> Lists.transform(sections, Section::getId));
+		ListenableFuture<List<Profile>> profilesFuture = Futures.transformAsync(sectionIdsFuture,
+				sectionIds -> dapController.getProfiles(sectionIds));
+		ListenableFuture<List<String>> profileIdsFuture = Futures.transform(profilesFuture,
+				profiles -> {
+					verticalSliceProfiles = Lists.newArrayList(Iterables.filter(profiles,
+							profile -> profile.getDeviceAggregationIds() != null &&
+								profile.getDeviceAggregationIds().size() > 0));
+					currentVerticalSliceProfile = getCurrentVerticalSliceProfileAndUpdateMap();
+					
+					return Lists.newArrayList(currentVerticalSliceProfile.getId());
+				});
+		ListenableFuture<List<DeviceAggregate>> deviceAggregationsFuture = Futures.transformAsync(
+				profileIdsFuture, profileIds -> dapController.getDeviceAggregations(profileIds));
+		ListenableFuture<List<String>> deviceAggregateIdsFuture = Futures.transform(
+				deviceAggregationsFuture, deviceAggregates -> Lists.transform(
+						deviceAggregates, DeviceAggregate::getId));
+		ListenableFuture<List<Device>> devicesFuture = Futures.transformAsync(
+				deviceAggregateIdsFuture, deviceAggregateIds ->
+					dapController.getDevicesRecursivelyForAggregates(deviceAggregateIds));
+		ListenableFuture<List<String>> deviceIdsFuture = Futures.transform(devicesFuture,
+				devices -> {
+					verticalSliceDevices = devices;
+					
+					return Lists.transform(devices, Device::getId);
+				});
+		ListenableFuture<List<Parameter>> parametersFuture = Futures.transformAsync(deviceIdsFuture,
+				deviceIds -> dapController.getParameters(deviceIds));
+		Futures.addCallback(parametersFuture, new FutureCallback<List<Parameter>>() {
+			@Override
+			public void onSuccess(List<Parameter> parameters) {
+				verticalSliceParameters = parameters;
+				renderVerticalSliceData();
+				result.set(null);
+			}
+
+			@Override
+			public void onFailure(Throwable t) {
+				eventBus.showError(new ErrorDetails(t.getMessage()));
+				result.set(null);
+			}
+		});
 		
 		return result;
+	}
+
+	private Profile getCurrentVerticalSliceProfileAndUpdateMap() {
+		Profile result;
+		
+		if (currentVerticalSliceProfile == null) {
+			result = verticalSliceProfiles.get(0);
+		} else {
+			eventBus.removeProfileFromRealtimeMap(currentVerticalSliceProfile);
+			
+			if (verticalSliceProfiles.contains(currentVerticalSliceProfile)) {
+				result = verticalSliceProfiles.get((verticalSliceProfiles.indexOf(
+						currentVerticalSliceProfile) + 1) % verticalSliceProfiles.size());
+			} else {
+				result = verticalSliceProfiles.get(0);
+			}
+		}
+		
+		return result;
+	}
+
+	private void renderVerticalSliceData() {
+		currentVerticalConfiguration = new VerticalCrosssectionConfiguration();
+		currentVerticalConfiguration.setPickedProfile(currentVerticalSliceProfile);
+		
+		currentVerticalSliceParameterName = getCurrentVerticalSliceParameterName();
+		currentVerticalConfiguration.setPickedParameterMeasurementName(
+				currentVerticalSliceParameterName);
+		view.setVerticalSliceHeading(
+				currentVerticalConfiguration.getPickedParameterMeasurementName());
+		
+		Map<Profile, List<Device>> profileDevicesMap = new HashMap<>();
+		profileDevicesMap.put(currentVerticalSliceProfile, Lists.newArrayList(
+				Iterables.filter(verticalSliceDevices,
+						device -> device.getProfileId()
+							.equals(currentVerticalSliceProfile.getId()))));
+		currentVerticalConfiguration.setProfileDevicesMap(profileDevicesMap);
+		currentVerticalConfiguration.setParameterMap(Maps.uniqueIndex(verticalSliceParameters,
+				Parameter::getId));
+		currentVerticalConfiguration.setDataSelector("0"); //0 means real values
+		
+		if (verticalSlicePresenter == null) {
+			verticalSlicePresenter = eventBus.addHandler(VerticalSlicePresenter.class);
+			view.setVerticalSliceView(verticalSlicePresenter.getView());
+		}
+		
+		gradientsUtil.reset();
+		verticalSlicePresenter.setConfiguration(currentVerticalConfiguration);
+		verticalSlicePresenter.onDateChanged(new Date());
+		eventBus.addProfileFromRealtimeMap(currentVerticalSliceProfile);
+	}
+
+	private String getCurrentVerticalSliceParameterName() {
+		if (currentVerticalSliceParameterName == null) {
+			return verticalSliceParameters.get(0).getMeasurementTypeName();
+		} else {
+			return currentVerticalSliceParameterName;
+		}
 	}
 }

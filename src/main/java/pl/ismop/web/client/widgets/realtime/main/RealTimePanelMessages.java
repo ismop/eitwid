@@ -9,9 +9,11 @@ public interface RealTimePanelMessages extends Messages {
 	
 	String chartSectionHeading();
 	
-	String verticalSliceSectionHeading();
+	String verticalSliceSectionHeading(String parameterName);
 	
 	String wateLevelLabel();
 
 	String emptyValue();
+	
+	String changeVerticalSliceParameterTitle();
 }

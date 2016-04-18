@@ -43,6 +43,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	@Override
 	public void drawCrosssection(Map<Double, List<Double>> legend, String parameterUnit,
 			Map<List<List<Double>>, Map<List<Double>, List<Double>>> locationsWithValues) {
+		parameterUnit = parameterUnit.replaceAll("\u2103", "\u00B0C");
+		
 		@SuppressWarnings("unchecked")
 		JsArray<JsArrayNumber> nativeLegend = (JsArray<JsArrayNumber>) JsArray.createArray();
 		

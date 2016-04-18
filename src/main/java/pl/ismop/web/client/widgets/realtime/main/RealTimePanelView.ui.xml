@@ -12,7 +12,7 @@
 					<b:Heading size="H5">
 						<g:FlowPanel addStyleNames="{style.header}">
 							<b:Icon ui:field="changeWeatherSource" type="REFRESH"
-								addStyleNames="{style.changeWeatherSource}"
+								addStyleNames="{style.changeIcon}"
 								title="{messages.changeWeatherTitle}"/>
 							<b.html:Text ui:field="weatherSectionHeading"/>
 						</g:FlowPanel>
@@ -107,13 +107,19 @@
 			<b:Row>
 				<b:Column size="MD_12">
 					<b:Heading size="H5">
-						<b.html:Text text="{messages.verticalSliceSectionHeading}"/>
+						<g:FlowPanel addStyleNames="{style.header}">
+							<b:Icon ui:field="changeVerticalSliceParameter" type="REFRESH"
+								addStyleNames="{style.changeIcon}"
+								title="{messages.changeVerticalSliceParameterTitle}"/>
+							<b.html:Text ui:field="verticalSliceSectionHeading"/>
+						</g:FlowPanel>
+						<g:FlowPanel addStyleNames="clearfix"/>
 					</b:Heading>
 				</b:Column>
 			</b:Row>
 			<b:Row>
 				<b:Column size="MD_10">
-					
+					<g:FlowPanel ui:field="verticalSliceContainer"/>
 				</b:Column>
 				<b:Column size="MD_2">
 					<b:Panel>
@@ -130,7 +136,7 @@
 		</b:Container>
 	</g:HTMLPanel>
 	<ui:style>
-		.changeWeatherSource {
+		.changeIcon {
 			cursor: pointer;
 			margin-right: 10px;
 		}

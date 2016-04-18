@@ -239,4 +239,10 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = { RealTimeSidePanelPresenter.class })
 	void selectDeviceOnRealtimeMap(Device device, boolean select);
+	
+	@Event(handlers = { RealTimeSidePanelPresenter.class })
+	void removeProfileFromRealtimeMap(Profile profile);
+	
+	@Event(handlers = { RealTimeSidePanelPresenter.class })
+	void addProfileFromRealtimeMap(Profile profile);
 }

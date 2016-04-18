@@ -144,7 +144,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 			for(String parameterId : device.getParameterIds()) {
 				if(configuration.getParameterMap().get(parameterId) != null
 						&& configuration.getParameterMap().get(parameterId).getMeasurementTypeName()
-						.equals(configuration.getPickedParameterName())) {
+						.equals(configuration.getPickedParameterMeasurementName())) {
 					parameterIds.add(parameterId);
 					parameter = configuration.getParameterMap().get(parameterId);
 				}
@@ -191,7 +191,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 							Date queryDate = configuration.getDataSelector().equals("0")
 									? currentDate :	new Date(currentDate.getTime()
 											- configuration.getExperiment().getStart().getTime());
-							dapController.getLastMeasurements(timelineIds, queryDate,
+							dapController.getLastMeasurementsWith24HourMod(timelineIds, queryDate,
 									new MeasurementsCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {

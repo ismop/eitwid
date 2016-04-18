@@ -189,7 +189,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 
 	@Override
 	public void onParameterChanged(String parameterName) {
-		configuration.setPickedParameterName(parameterName);
+		configuration.setPickedParameterMeasurementName(parameterName);
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 		Map<String, Integer> counter = countParameters(configuration.getParameterMap().values());
 		
 		for(String parameterName : configuration.getParameterNames()) {
-			if(parameterName.equals(configuration.getPickedParameterName())) {
+			if(parameterName.equals(configuration.getPickedParameterMeasurementName())) {
 				view.addParameter(parameterName, true, counter.get(parameterName) > 1);
 			} else {
 				view.addParameter(parameterName, false, counter.get(parameterName) > 1);
@@ -251,17 +251,17 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 				configuration.getParameterNames().remove(parameterName);
 				view.removeParameter(parameterName);
 				
-				if(configuration.getPickedParameterName().equals(parameterName)) {
-					configuration.setPickedParameterName(null);
+				if(configuration.getPickedParameterMeasurementName().equals(parameterName)) {
+					configuration.setPickedParameterMeasurementName(null);
 				}
 			}
 		}
 		
 		for(String parameterName : result) {
 			if(!configuration.getParameterNames().contains(parameterName)) {
-				if(configuration.getPickedParameterName() == null) {
+				if(configuration.getPickedParameterMeasurementName() == null) {
 					view.addParameter(parameterName, true, counter.get(parameterName) > 1);
-					configuration.setPickedParameterName(parameterName);
+					configuration.setPickedParameterMeasurementName(parameterName);
 				} else {
 					view.addParameter(parameterName, false, counter.get(parameterName) > 1);
 				}

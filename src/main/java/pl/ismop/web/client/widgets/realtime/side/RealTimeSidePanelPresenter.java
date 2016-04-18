@@ -12,6 +12,7 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.device.Device;
+import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.geojson.MapFeature;
@@ -67,6 +68,14 @@ public class RealTimeSidePanelPresenter extends BasePresenter<IRealTimeSidePanel
 		} else {
 			mapPresenter.unselect(device);
 		}
+	}
+	
+	public void onRemoveProfileFromRealtimeMap(Profile profile) {
+		mapPresenter.rm(profile);
+	}
+	
+	public void onAddProfileFromRealtimeMap(Profile profile) {
+		mapPresenter.add(profile);
 	}
 	
 	public void initializeTimer() {

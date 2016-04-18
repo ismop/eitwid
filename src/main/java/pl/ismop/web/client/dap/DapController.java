@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Singleton;
@@ -445,6 +447,23 @@ public class DapController {
 		});
 	}
 	
+	public ListenableFuture<List<Section>> getSections() {
+		SettableFuture<List<Section>> result = SettableFuture.create();
+		sectionService.getSections(new MethodCallback<SectionsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, SectionsResponse response) {
+				result.set(response.getSections());
+			}
+		});
+		
+		return result;
+	}
+	
 	public void getSections(String leveeId, final SectionsCallback sectionsCallback) {
 		sectionService.getSectionsForLevee(leveeId, new MethodCallback<SectionsResponse>() {
 			@Override
@@ -459,8 +478,10 @@ public class DapController {
 		});
 	}
 	
-	public void getExperiments(List<String> experimentIds, final ThreatAssessmentCallback callback) {
-		threatAssessmentService.getExperiments(converter.merge(experimentIds), new MethodCallback<ThreatAssessmentResponse>() {
+	public void getExperiments(List<String> experimentIds,
+			final ThreatAssessmentCallback callback) {
+		threatAssessmentService.getExperiments(converter.merge(experimentIds),
+				new MethodCallback<ThreatAssessmentResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
@@ -528,9 +549,25 @@ public class DapController {
 			}
 		});
 	}
+	
+	public ListenableFuture<List<Profile>> getProfiles(List<String> sectionIds) {
+		SettableFuture<List<Profile>> result = SettableFuture.create();
+		profileService.getProfilesForSection(converter.merge(sectionIds), new MethodCallback<ProfilesResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, ProfilesResponse response) {
+				result.set(response.getProfiles());
+			}
+		});
+		
+		return result;
+	}
 
 	public void getDevicesRecursively(String profileId, final DevicesCallback callback) {
-		final List<Device> result = new ArrayList<>();
 		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
@@ -539,15 +576,19 @@ public class DapController {
 
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
-				collectDevices(response.getDeviceAggregations(), result, new MutableInteger(0), new DevicesCallback() {
+				SettableFuture<Void> futureCallback = SettableFuture.create();
+				List<Device> devices = new ArrayList<Device>();
+				collectDevices(response.getDeviceAggregations(), devices,
+						new MutableInteger(0), futureCallback);
+				Futures.addCallback(futureCallback, new FutureCallback<Void>() {
 					@Override
-					public void onError(ErrorDetails errorDetails) {
-						callback.onError(errorDetails);
+					public void onSuccess(Void result) {
+						callback.processDevices(devices);
 					}
 
 					@Override
-					public void processDevices(List<Device> devices) {
-						callback.processDevices(devices);
+					public void onFailure(Throwable t) {
+						callback.onError(new ErrorDetails(t.getMessage()));
 					}
 				});
 			}
@@ -808,6 +849,24 @@ public class DapController {
 			}
 		});
 	}
+	
+	public ListenableFuture<List<DeviceAggregate>> getDeviceAggregations(List<String> profileIds) {
+		SettableFuture<List<DeviceAggregate>> result = SettableFuture.create();
+		deviceAggregationService.getDeviceAggregations(converter.merge(profileIds),
+				new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				result.set(response.getDeviceAggregations());
+			}
+		});
+		
+		return result;
+	}
 
 	public void getDeviceAggregationsForSectionId(String sectionIdFilter, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregationsForSectionIds(sectionIdFilter, new MethodCallback<DeviceAggregationsResponse>() {
@@ -832,7 +891,21 @@ public class DapController {
 
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
-				collectDevices(response.getDeviceAggregations(), new ArrayList<Device>(), new MutableInteger(0), callback);
+				SettableFuture<Void> futureCallback = SettableFuture.create();
+				List<Device> devices = new ArrayList<Device>();
+				collectDevices(response.getDeviceAggregations(), devices,
+						new MutableInteger(0), futureCallback);
+				Futures.addCallback(futureCallback, new FutureCallback<Void>() {
+					@Override
+					public void onSuccess(Void result) {
+						callback.processDevices(devices);
+					}
+
+					@Override
+					public void onFailure(Throwable t) {
+						callback.onError(new ErrorDetails(t.getMessage()));
+					}
+				});
 			}
 		});
 	}
@@ -847,9 +920,56 @@ public class DapController {
 
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
-				collectDevices(response.getDeviceAggregations(), new ArrayList<Device>(), new MutableInteger(0), callback);
+				SettableFuture<Void> futureCallback = SettableFuture.create();
+				List<Device> devices = new ArrayList<Device>();
+				collectDevices(response.getDeviceAggregations(), devices,
+						new MutableInteger(0), futureCallback);
+				Futures.addCallback(futureCallback, new FutureCallback<Void>() {
+					@Override
+					public void onSuccess(Void result) {
+						callback.processDevices(devices);
+					}
+
+					@Override
+					public void onFailure(Throwable t) {
+						callback.onError(new ErrorDetails(t.getMessage()));
+					}
+				});
 			}
 		});
+	}
+	
+	public ListenableFuture<List<Device>> getDevicesRecursivelyForAggregates(
+			List<String> deviceAggregationIds) {
+		SettableFuture<List<Device>> result = SettableFuture.create();
+		deviceAggregationService.getDeviceAggregationsForIds(converter.merge(deviceAggregationIds),
+				new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				SettableFuture<Void> futureCallback = SettableFuture.create();
+				List<Device> devices = new ArrayList<Device>();
+				collectDevices(response.getDeviceAggregations(), devices,
+						new MutableInteger(0), futureCallback);
+				Futures.addCallback(futureCallback, new FutureCallback<Void>() {
+					@Override
+					public void onSuccess(Void v) {
+						result.set(devices);
+					}
+
+					@Override
+					public void onFailure(Throwable t) {
+						result.setException(t);
+					}
+				});
+			}
+		});
+		
+		return result;
 	}
 
 	public void getDeviceAggregationForType(String type, final DeviceAggregatesCallback callback) {
@@ -1049,31 +1169,33 @@ public class DapController {
 		return new Date(new Date().getTime() - 2678400000L);
 	}
 
-	private void collectDevices(List<DeviceAggregate> deviceAggregations, final List<Device> result, final MutableInteger requestCounter,
-			final DevicesCallback devicesCallback) {
+	private void collectDevices(List<DeviceAggregate> deviceAggregations ,List<Device> result,
+			MutableInteger requestCounter, SettableFuture<Void> futureCallback) {
 		if(deviceAggregations.size() > 0) {
 			for(DeviceAggregate deviceAggregation : deviceAggregations) {
 				requestCounter.increment();
-				deviceService.getDevices(deviceAggregation.getId(), new MethodCallback<DevicesResponse>() {
-					@Override
-					public void onFailure(Method method, Throwable exception) {
-						requestCounter.decrement();
-						
-						if(requestCounter.get() == 0) {
-							devicesCallback.onError(errorUtil.processErrors(method, exception));
-						}
-					}
-	
-					@Override
-					public void onSuccess(Method method, DevicesResponse response) {
-						result.addAll(response.getDevices());
-						requestCounter.decrement();
-						
-						if(requestCounter.get() == 0) {
-							devicesCallback.processDevices(result);
-						}
-					}
-				});
+				deviceService.getDevices(deviceAggregation.getId(),
+						new MethodCallback<DevicesResponse>() {
+							@Override
+							public void onFailure(Method method, Throwable exception) {
+								requestCounter.decrement();
+								
+								if(requestCounter.get() == 0) {
+									futureCallback.setException(errorUtil.processErrorsForException(
+											method, exception));
+								}
+							}
+			
+							@Override
+							public void onSuccess(Method method, DevicesResponse response) {
+								result.addAll(response.getDevices());
+								requestCounter.decrement();
+								
+								if(requestCounter.get() == 0) {
+									futureCallback.set(null);
+								}
+							}
+						});
 				
 				if(deviceAggregation.getChildernIds() != null && deviceAggregation.getChildernIds().size() > 0) {
 					requestCounter.increment();
@@ -1084,24 +1206,26 @@ public class DapController {
 							requestCounter.decrement();
 							
 							if(requestCounter.get() == 0) {
-								devicesCallback.onError(errorUtil.processErrors(method, exception));
+								futureCallback.setException(errorUtil.processErrorsForException(
+										method, exception));
 							}
 						}
 	
 						@Override
 						public void onSuccess(Method method, DeviceAggregationsResponse response) {
 							requestCounter.decrement();
-							collectDevices(response.getDeviceAggregations(), result, requestCounter, devicesCallback);
+							collectDevices(response.getDeviceAggregations(), result, requestCounter,
+									futureCallback);
 							
 							if(requestCounter.get() == 0) {
-								devicesCallback.processDevices(result);
+								futureCallback.set(null);
 							}
 						}
 					});
 				}
 			}
 		} else {
-			devicesCallback.processDevices(result);
+			futureCallback.set(null);
 		}
 	}
 }

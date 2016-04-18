@@ -30,7 +30,7 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	RealTimePanelMessages messages;
 	
 	@UiField
-	Text weatherSectionHeading;
+	Text weatherSectionHeading, verticalSliceSectionHeading;
 	
 	@UiField
 	HTML firstWeatherParameterName, firstWeatherParameterValue, secondWeatherParameterName,
@@ -42,7 +42,7 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 			waterLevelParameterValue, waterLevelParameterDate;
 	
 	@UiField
-	FlowPanel chartContainer;
+	FlowPanel chartContainer, verticalSliceContainer;
 	
 	@UiField
 	Icon loadingIndicator;
@@ -74,6 +74,11 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	@UiHandler("changeWeatherSource")
 	public void changeWeatherSource(ClickEvent event) {
 		getPresenter().onWeatherSourceChange();
+	}
+	
+	@UiHandler("changeVerticalSliceParameter")
+	public void changeVerticalSliceParameter(ClickEvent event) {
+		getPresenter().onVerticalSliceParameterChange();
 	}
 
 	@Override
@@ -124,5 +129,15 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	@Override
 	public void setWaterLevelDate(String date) {
 		waterLevelParameterDate.setText(date);
+	}
+
+	@Override
+	public void setVerticalSliceView(IsWidget view) {
+		verticalSliceContainer.add(view);
+	}
+
+	@Override
+	public void setVerticalSliceHeading(String parameterName) {
+		verticalSliceSectionHeading.setText(messages.verticalSliceSectionHeading(parameterName));
 	}
 }

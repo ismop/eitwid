@@ -5,6 +5,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 public interface IRealTimePanelView extends IsWidget {
 	interface IRealTimePanelPresenter {
 		void onWeatherSourceChange();
+
+		void onVerticalSliceParameterChange();
 	}
 
 	void setWeatherSectionTitle(String weatherDeviceName);
@@ -20,4 +22,8 @@ public interface IRealTimePanelView extends IsWidget {
 	void setWaterLevelValue(String value);
 
 	void setWaterLevelDate(String formatForDisplay);
+
+	void setVerticalSliceView(IsWidget view);
+
+	void setVerticalSliceHeading(String parameterName);
 }

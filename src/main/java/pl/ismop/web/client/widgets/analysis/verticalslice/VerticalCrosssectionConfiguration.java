@@ -68,11 +68,11 @@ public class VerticalCrosssectionConfiguration {
 		this.parameterNames = parameterNames;
 	}
 
-	public String getPickedParameterName() {
+	public String getPickedParameterMeasurementName() {
 		return pickedParameterName;
 	}
 
-	public void setPickedParameterName(String pickedParameterName) {
+	public void setPickedParameterMeasurementName(String pickedParameterName) {
 		this.pickedParameterName = pickedParameterName;
 	}
 

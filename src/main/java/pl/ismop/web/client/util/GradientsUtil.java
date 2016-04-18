@@ -192,4 +192,8 @@ public class GradientsUtil {
 		return values.get(gradientId) == null ? false :
 			(values.get(gradientId).min < min || values.get(gradientId).max > max);
 	}
+
+	public void reset() {
+		values.clear();
+	}
 }

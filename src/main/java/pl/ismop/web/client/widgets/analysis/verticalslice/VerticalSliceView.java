@@ -54,6 +54,8 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 	public void drawCrosssection(String parameterUnit, boolean leftBank,
 			Map<Double, List<Double>> profileAndDevicePositionsWithValuesAndColors,
 			Map<Double, List<Double>> legend) {
+		parameterUnit = parameterUnit.replaceAll("\u2103", "\u00B0C");
+		
 		@SuppressWarnings("unchecked")
 		JsArray<JsArrayNumber> nativeLegend = (JsArray<JsArrayNumber>) JsArray.createArray();
 		
@@ -492,7 +494,7 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 			tickMaterial.color.setHex(0x555555);
 			
 			var tick = new $wnd.THREE.TextGeometry(text, {
-				font: 'optimer',
+				font: 'ubuntu',
 				size: 12,
 				height: 0.5,
 				curveSegments: 30
@@ -511,7 +513,7 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 				text = this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::format(D)(legend[i + 1][4])
 					+ " " + parameterUnit;
 				tick = new $wnd.THREE.TextGeometry(text, {
-					font: 'optimer',
+					font: 'ubuntu',
 					size: textSize,
 					height: 1
 				});
@@ -552,7 +554,7 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(line);
 		
 		var scaleText = new $wnd.THREE.TextGeometry("10 m", {
-			font: 'optimer',
+			font: 'ubuntu',
 			size: 12,
 			height: 0.5,
 			curveSegments: 30
