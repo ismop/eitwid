@@ -126,6 +126,8 @@ public class RealTimeSidePanelPresenter extends BasePresenter<IRealTimeSidePanel
 				for (Section section : sections) {
 					mapPresenter.add(section);
 				}
+				
+				mapPresenter.redrawMap();
 			}
 		});
 	}

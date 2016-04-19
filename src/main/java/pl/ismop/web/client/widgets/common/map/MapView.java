@@ -124,6 +124,27 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 
 	@Override
+	public void setMovable(boolean moveable) {
+		this.moveable = moveable;
+		updateMoveable();
+	}
+
+	@Override
+	public native void redrawMap() /*-{
+		$wnd.google.maps.event.trigger(this.@pl.ismop.web.client.widgets.common.map.MapView::map,
+				'resize')
+	}-*/;
+
+	public native void updateMoveable() /*-{
+	    if(this.@pl.ismop.web.client.widgets.common.map.MapView::map != null) {
+	        var moveable = this.@pl.ismop.web.client.widgets.common.map.MapView::moveable
+	        this.@pl.ismop.web.client.widgets.common.map.MapView::map.scaleControl = moveable
+	        this.@pl.ismop.web.client.widgets.common.map.MapView::map.draggable = moveable
+	        this.@pl.ismop.web.client.widgets.common.map.MapView::map.scrollwheel = moveable
+	    }
+	}-*/;
+
+	@Override
 	public native void removeButton(String id) /*-{
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map.controls[$wnd.google.maps.ControlPosition.TOP_RIGHT].clear();
 	}-*/;
@@ -354,20 +375,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	private boolean isSelected(String featureId) {
 		return selected.contains(featureId);
 	}
-
-	@Override
-	public void setMovable(boolean moveable) {
-		this.moveable = moveable;
-		updateMoveable();
-	}
-	public native void updateMoveable() /*-{
-        if(this.@pl.ismop.web.client.widgets.common.map.MapView::map != null) {
-            var moveable = this.@pl.ismop.web.client.widgets.common.map.MapView::moveable
-            this.@pl.ismop.web.client.widgets.common.map.MapView::map.scaleControl = moveable
-            this.@pl.ismop.web.client.widgets.common.map.MapView::map.draggable = moveable
-            this.@pl.ismop.web.client.widgets.common.map.MapView::map.scrollwheel = moveable
-        }
-    }-*/;
 
 	private native void initMap() /*-{
         var moveable = this.@pl.ismop.web.client.widgets.common.map.MapView::moveable

@@ -39,7 +39,6 @@ import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
-import pl.ismop.web.client.util.GradientsUtil;
 import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssectionConfiguration;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
@@ -90,8 +89,6 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 
 	private VerticalSlicePresenter verticalSlicePresenter;
 
-	private GradientsUtil gradientsUtil;
-
 	private String currentVerticalSliceParameterName;
 
 	private VerticalCrosssectionConfiguration currentVerticalConfiguration;
@@ -111,11 +108,9 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	private HorizontalSlicePresenter horizontalSlicePresenter;
 	
 	@Inject
-	public RealTimePanelPresenter(DapController dapController, IsmopConverter ismopConverter,
-			GradientsUtil gradientsUtil) {
+	public RealTimePanelPresenter(DapController dapController, IsmopConverter ismopConverter) {
 		this.dapController = dapController;
 		this.ismopConverter = ismopConverter;
-		this.gradientsUtil = gradientsUtil;
 		chartDeviceCustomIds = Arrays.asList("UT6", "UT18", "UT29", "UT5", "UT17", "UT28");
 	}
 	
@@ -194,6 +189,13 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		horizontalSlicePresenter.onDateChanged(new Date());
 		view.setHorizontalSliceHeading(
 				currentHorizontalConfiguration.getPickedParameterMeasurementName());
+	}
+
+	public void cleanUp() {
+		//this fix is needed to redraw chart and prevent an ugly error from happening
+		if (chartPresenter != null) {
+			chartPresenter.reset();
+		}
 	}
 
 	private ListenableFuture<Void> updateWeather() {

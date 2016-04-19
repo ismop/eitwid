@@ -241,14 +241,14 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	}
 
 	public void reset() {
-		for(String chartSeriesKey : new ArrayList<>(dataSeriesMap.keySet())) {
+		for (String chartSeriesKey : new ArrayList<>(dataSeriesMap.keySet())) {
 			dataSeriesMap.remove(chartSeriesKey);
 			chart.removeSeries(chartSeriesMap.remove(chartSeriesKey));
 		}
 		
 		yAxisMap.clear();
 		
-		if(chart != null) {
+		if (chart != null) {
 			chart.removeAllSeries();
 		}
 	}
@@ -359,9 +359,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
 	private Number getYAxisIndex(ChartSeries series) {
 		String yAxisLabel = series.getLabel() + ", [" + series.getUnit() + "]";
+		Number result;
 		
 		if(yAxisMap.containsKey(yAxisLabel)) {
-			return yAxisMap.get(yAxisLabel);
+			result = yAxisMap.get(yAxisLabel);
 		} else {
 			int index = yAxisMap.size();
 			
@@ -373,8 +374,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			
 			yAxisMap.put(yAxisLabel, index);
 			
-			return index;
+			result = index;
 		}
+		
+		return result;
 	}
 
 	private void clearDataSeries() {

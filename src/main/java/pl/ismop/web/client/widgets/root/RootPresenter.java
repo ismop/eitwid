@@ -68,6 +68,10 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		if (realTimeSidePanelPresenter != null) {
 			realTimeSidePanelPresenter.disableTimers();
 		}
+		
+		if (realTimePanelPresenter != null) {
+			realTimePanelPresenter.cleanUp();
+		}
 	}
 	
 	public void onAnalysisPanel() {
@@ -93,6 +97,10 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		
 		if (realTimeSidePanelPresenter != null) {
 			realTimeSidePanelPresenter.disableTimers();
+		}
+		
+		if (realTimePanelPresenter != null) {
+			realTimePanelPresenter.cleanUp();
 		}
 	}
 	
