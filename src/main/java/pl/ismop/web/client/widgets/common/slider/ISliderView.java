@@ -20,6 +20,9 @@ public interface ISliderView extends IsWidget {
     void setEalierDate(Date date);
     void setNumberOfPoints(long numberOfPoints);
     Double getSelectedPoint();
+
+    void setSelectedPoint(Double value);
+
     void setAllowEditDateIntervals(boolean enabled);
     void setEnabled(boolean enabled);
 	void setDateFormat(String displayDateFormat);
