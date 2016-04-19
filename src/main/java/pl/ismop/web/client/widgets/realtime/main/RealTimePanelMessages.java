@@ -16,4 +16,8 @@ public interface RealTimePanelMessages extends Messages {
 	String emptyValue();
 	
 	String changeVerticalSliceParameterTitle();
+	
+	String horizontalSliceSectionHeading(String parameterName);
+	
+	String changeHorizontalSliceParameterTitle();
 }

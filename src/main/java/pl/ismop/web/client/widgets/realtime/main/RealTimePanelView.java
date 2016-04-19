@@ -42,7 +42,7 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 			waterLevelParameterValue, waterLevelParameterDate;
 	
 	@UiField
-	FlowPanel chartContainer, verticalSliceContainer;
+	FlowPanel chartContainer, verticalSliceContainer, horizontalSliceContainer;
 	
 	@UiField
 	Icon loadingIndicator;
@@ -139,5 +139,10 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	@Override
 	public void setVerticalSliceHeading(String parameterName) {
 		verticalSliceSectionHeading.setText(messages.verticalSliceSectionHeading(parameterName));
+	}
+
+	@Override
+	public void setHorizontalSliceView(IsWidget view) {
+		horizontalSliceContainer.add(view);
 	}
 }

@@ -288,10 +288,10 @@
 					</execution>
 				</executions>
 				<configuration>
+					<style>PRETTY</style>
 					<webappDirectory>${project.build.outputDirectory}/static</webappDirectory>
 					<hostedWebapp>${project.build.outputDirectory}/static</hostedWebapp>
 					<noServer>true</noServer>
-					<style>DETAILED</style>
 					<runTarget>http://localhost:8080</runTarget>
 					<extraJvmArgs>-Xmx1024m</extraJvmArgs>
 				</configuration>

@@ -26,4 +26,6 @@ public interface IRealTimePanelView extends IsWidget {
 	void setVerticalSliceView(IsWidget view);
 
 	void setVerticalSliceHeading(String parameterName);
+
+	void setHorizontalSliceView(IsWidget view);
 }

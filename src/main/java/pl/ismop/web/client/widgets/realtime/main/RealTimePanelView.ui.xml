@@ -5,136 +5,166 @@
 		xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html">
 	<ui:with type="pl.ismop.web.client.widgets.realtime.main.RealTimePanelMessages"
 		field="messages"/>
-	<g:HTMLPanel addStyleNames="{style.real-time-panel}">
-		<b:Container fluid="true">
-			<b:Row>
-				<b:Column size="MD_12">
-					<b:Heading size="H5">
-						<g:FlowPanel addStyleNames="{style.header}">
-							<b:Icon ui:field="changeWeatherSource" type="REFRESH"
-								addStyleNames="{style.changeIcon}"
-								title="{messages.changeWeatherTitle}"/>
-							<b.html:Text ui:field="weatherSectionHeading"/>
-						</g:FlowPanel>
-						<g:FlowPanel>
-							<b:Icon ui:field="loadingIndicator" type="SPINNER" spin="true"
-								addStyleNames="{style.loading-indicator}" visible="false"/>
-						</g:FlowPanel>
-						<g:FlowPanel addStyleNames="clearfix"/>
-					</b:Heading>
-				</b:Column>
-			</b:Row>
-			<b:Row>
-				<b:Column size="MD_2">
-					<b:Panel>
-						<b:PanelBody>
-							<g:HTML ui:field="firstWeatherParameterName"/>
-							<g:HTML ui:field="firstWeatherParameterValue"
-									addStyleNames="{style.weatherPanel}"/>
-							<g:HTML ui:field="firstWeatherParameterDate"
-									addStyleNames="{style.weatherDate}"/>
-						</b:PanelBody>
-					</b:Panel>
-				</b:Column>
-				<b:Column size="MD_2">
-					<b:Panel>
-						<b:PanelBody>
-							<g:HTML ui:field="secondWeatherParameterName"/>
-							<g:HTML ui:field="secondWeatherParameterValue"
-									addStyleNames="{style.weatherPanel}"/>
-							<g:HTML ui:field="secondWeatherParameterDate"
-									addStyleNames="{style.weatherDate}"/>
-						</b:PanelBody>
-					</b:Panel>
-				</b:Column>
-				<b:Column size="MD_2">
-					<b:Panel>
-						<b:PanelBody>
-							<g:HTML ui:field="thirdWeatherParameterName"/>
-							<g:HTML ui:field="thirdWeatherParameterValue"
-									addStyleNames="{style.weatherPanel}"/>
-							<g:HTML ui:field="thirdWeatherParameterDate"
-									addStyleNames="{style.weatherDate}"/>
-						</b:PanelBody>
-					</b:Panel>
-				</b:Column>
-				<b:Column size="MD_2">
-					<b:Panel>
-						<b:PanelBody>
-							<g:HTML ui:field="fourthWeatherParameterName"/>
-							<g:HTML ui:field="fourthWeatherParameterValue"
-									addStyleNames="{style.weatherPanel}"/>
-							<g:HTML ui:field="fourthWeatherParameterDate"
-									addStyleNames="{style.weatherDate}"/>
-						</b:PanelBody>
-					</b:Panel>
-				</b:Column>
-				<b:Column size="MD_2">
-					<b:Panel>
-						<b:PanelBody>
-							<g:HTML ui:field="fifthWeatherParameterName"/>
-							<g:HTML ui:field="fifthWeatherParameterValue"
-									addStyleNames="{style.weatherPanel}"/>
-							<g:HTML ui:field="fifthWeatherParameterDate"
-									addStyleNames="{style.weatherDate}"/>
-						</b:PanelBody>
-					</b:Panel>
-				</b:Column>
-				<b:Column size="MD_2">
-					<b:Panel>
-						<b:PanelBody>
-							<g:HTML ui:field="sixthWeatherParameterName"/>
-							<g:HTML ui:field="sixthWeatherParameterValue"
-									addStyleNames="{style.weatherPanel}"/>
-							<g:HTML ui:field="sixthWeatherParameterDate"
-									addStyleNames="{style.weatherDate}"/>
-						</b:PanelBody>
-					</b:Panel>
-				</b:Column>
-			</b:Row>
-			<b:Row>
-				<b:Column size="MD_12">
-					<b:Heading size="H5">
-						<b.html:Text text="{messages.chartSectionHeading}"/>
-					</b:Heading>
-				</b:Column>
-			</b:Row>
-			<b:Row>
-				<b:Column size="MD_12">
-					<g:FlowPanel ui:field="chartContainer"/>
-				</b:Column>
-			</b:Row>
-			<b:Row>
-				<b:Column size="MD_12">
-					<b:Heading size="H5">
-						<g:FlowPanel addStyleNames="{style.header}">
-							<b:Icon ui:field="changeVerticalSliceParameter" type="REFRESH"
-								addStyleNames="{style.changeIcon}"
-								title="{messages.changeVerticalSliceParameterTitle}"/>
-							<b.html:Text ui:field="verticalSliceSectionHeading"/>
-						</g:FlowPanel>
-						<g:FlowPanel addStyleNames="clearfix"/>
-					</b:Heading>
-				</b:Column>
-			</b:Row>
-			<b:Row>
-				<b:Column size="MD_10">
-					<g:FlowPanel ui:field="verticalSliceContainer"/>
-				</b:Column>
-				<b:Column size="MD_2">
-					<b:Panel>
-						<b:PanelBody>
-							<g:HTML text="{messages.wateLevelLabel}"/>
-							<g:HTML ui:field="waterLevelParameterValue"
-									addStyleNames="{style.weatherPanel}"/>
-							<g:HTML ui:field="waterLevelParameterDate"
-									addStyleNames="{style.weatherDate}"/>
-						</b:PanelBody>
-					</b:Panel>
-				</b:Column>
-			</b:Row>
-		</b:Container>
-	</g:HTMLPanel>
+	<g:FlowPanel addStyleNames="{style.scroll-panel}">
+		<g:HTMLPanel addStyleNames="{style.real-time-panel}">
+			<b:Container fluid="true">
+				<b:Row>
+					<b:Column size="MD_6">
+						<b:Row>
+							<b:Column size="MD_12">
+								<b:Heading size="H5">
+									<g:FlowPanel addStyleNames="{style.header}">
+										<b:Icon ui:field="changeWeatherSource" type="REFRESH"
+											addStyleNames="{style.changeIcon}"
+											title="{messages.changeWeatherTitle}"/>
+										<b.html:Text ui:field="weatherSectionHeading"/>
+									</g:FlowPanel>
+									<g:FlowPanel addStyleNames="clearfix"/>
+								</b:Heading>
+							</b:Column>
+						</b:Row>
+						<b:Row>
+							<b:Column size="MD_4">
+								<b:Panel>
+									<b:PanelBody>
+										<g:HTML ui:field="firstWeatherParameterName"/>
+										<g:HTML ui:field="firstWeatherParameterValue"
+												addStyleNames="{style.weatherPanel}"/>
+										<g:HTML ui:field="firstWeatherParameterDate"
+												addStyleNames="{style.weatherDate}"/>
+									</b:PanelBody>
+								</b:Panel>
+							</b:Column>
+							<b:Column size="MD_4">
+								<b:Panel>
+									<b:PanelBody>
+										<g:HTML ui:field="secondWeatherParameterName"/>
+										<g:HTML ui:field="secondWeatherParameterValue"
+												addStyleNames="{style.weatherPanel}"/>
+										<g:HTML ui:field="secondWeatherParameterDate"
+												addStyleNames="{style.weatherDate}"/>
+									</b:PanelBody>
+								</b:Panel>
+							</b:Column>
+							<b:Column size="MD_4">
+								<b:Panel>
+									<b:PanelBody>
+										<g:HTML ui:field="thirdWeatherParameterName"/>
+										<g:HTML ui:field="thirdWeatherParameterValue"
+												addStyleNames="{style.weatherPanel}"/>
+										<g:HTML ui:field="thirdWeatherParameterDate"
+												addStyleNames="{style.weatherDate}"/>
+									</b:PanelBody>
+								</b:Panel>
+							</b:Column>
+						</b:Row>
+						<b:Row>
+							<b:Column size="MD_4">
+								<b:Panel>
+									<b:PanelBody>
+										<g:HTML ui:field="fourthWeatherParameterName"/>
+										<g:HTML ui:field="fourthWeatherParameterValue"
+												addStyleNames="{style.weatherPanel}"/>
+										<g:HTML ui:field="fourthWeatherParameterDate"
+												addStyleNames="{style.weatherDate}"/>
+									</b:PanelBody>
+								</b:Panel>
+							</b:Column>
+							<b:Column size="MD_4">
+								<b:Panel>
+									<b:PanelBody>
+										<g:HTML ui:field="fifthWeatherParameterName"/>
+										<g:HTML ui:field="fifthWeatherParameterValue"
+												addStyleNames="{style.weatherPanel}"/>
+										<g:HTML ui:field="fifthWeatherParameterDate"
+												addStyleNames="{style.weatherDate}"/>
+									</b:PanelBody>
+								</b:Panel>
+							</b:Column>
+							<b:Column size="MD_4">
+								<b:Panel>
+									<b:PanelBody>
+										<g:HTML ui:field="sixthWeatherParameterName"/>
+										<g:HTML ui:field="sixthWeatherParameterValue"
+												addStyleNames="{style.weatherPanel}"/>
+										<g:HTML ui:field="sixthWeatherParameterDate"
+												addStyleNames="{style.weatherDate}"/>
+									</b:PanelBody>
+								</b:Panel>
+							</b:Column>
+						</b:Row>
+					</b:Column>
+					<b:Column size="MD_6">
+						<b:Row>
+							<b:Column size="MD_12">
+								<b:Heading size="H5">
+									<g:FlowPanel addStyleNames="{style.header}">
+										<b.html:Text text="{messages.chartSectionHeading}"/>
+									</g:FlowPanel>
+									<g:FlowPanel>
+										<b:Icon ui:field="loadingIndicator" type="SPINNER" spin="true"
+											addStyleNames="{style.loading-indicator}" visible="false"/>
+									</g:FlowPanel>
+								</b:Heading>
+							</b:Column>
+						</b:Row>
+						<b:Row>
+							<b:Column size="MD_12">
+								<g:FlowPanel ui:field="chartContainer"/>
+							</b:Column>
+						</b:Row>
+					</b:Column>
+				</b:Row>
+				<b:Row>
+					<b:Column size="MD_12">
+						<b:Heading size="H5">
+							<g:FlowPanel addStyleNames="{style.header}">
+								<b:Icon ui:field="changeVerticalSliceParameter" type="REFRESH"
+									addStyleNames="{style.changeIcon}"
+									title="{messages.changeVerticalSliceParameterTitle}"/>
+								<b.html:Text ui:field="verticalSliceSectionHeading"/>
+							</g:FlowPanel>
+							<g:FlowPanel addStyleNames="clearfix"/>
+						</b:Heading>
+					</b:Column>
+				</b:Row>
+				<b:Row>
+					<b:Column size="MD_10">
+						<g:FlowPanel ui:field="verticalSliceContainer"/>
+					</b:Column>
+					<b:Column size="MD_2">
+						<b:Panel addStyleNames="{style.waterLevelPanel}">
+							<b:PanelBody>
+								<g:HTML text="{messages.wateLevelLabel}"/>
+								<g:HTML ui:field="waterLevelParameterValue"
+										addStyleNames="{style.weatherPanel}"/>
+								<g:HTML ui:field="waterLevelParameterDate"
+										addStyleNames="{style.weatherDate}"/>
+							</b:PanelBody>
+						</b:Panel>
+					</b:Column>
+				</b:Row>
+				<b:Row>
+					<b:Column size="MD_12">
+						<b:Heading size="H5">
+							<g:FlowPanel addStyleNames="{style.header}">
+								<b:Icon ui:field="changeHorizontalSliceParameter" type="REFRESH"
+									addStyleNames="{style.changeIcon}"
+									title="{messages.changeHorizontalSliceParameterTitle}"/>
+								<b.html:Text ui:field="horizontalSliceSectionHeading"/>
+							</g:FlowPanel>
+							<g:FlowPanel addStyleNames="clearfix"/>
+						</b:Heading>
+					</b:Column>
+				</b:Row>
+				<b:Row>
+					<b:Column size="MD_12">
+					<g:FlowPanel ui:field="horizontalSliceContainer"/>
+					</b:Column>
+				</b:Row>
+			</b:Container>
+		</g:HTMLPanel>
+	</g:FlowPanel>
 	<ui:style>
 		.changeIcon {
 			cursor: pointer;
@@ -165,5 +195,18 @@
 		.header {
 			float: left;
 		}
+		
+		.waterLevelPanel {
+			margin-top: 50px;
+		}
+		
+		.scroll-panel {
+			overflow-y: auto;
+			position: absolute;
+			top: 0px;
+			bottom: 0px;
+			right: 0px;
+			left: 0px;
+		} 
 	</ui:style>
 </ui:UiBinder>

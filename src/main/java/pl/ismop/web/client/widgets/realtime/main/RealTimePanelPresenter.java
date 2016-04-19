@@ -40,6 +40,8 @@ import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.util.GradientsUtil;
 import pl.ismop.web.client.util.TimelineZoomDataCallbackHelper;
+import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssectionConfiguration;
+import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalCrosssectionConfiguration;
 import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSlicePresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
@@ -93,6 +95,20 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 
 	private VerticalCrosssectionConfiguration currentVerticalConfiguration;
 
+	private HorizontalCrosssectionConfiguration currentHorizontalConfiguration;
+
+	private List<Section> horizontalSliceSections;
+
+	private ArrayList<Profile> horizontalSliceProfiles;
+
+	private List<Device> horizontalSliceDevices;
+
+	private List<Parameter> horizontalSliceParameters;
+
+	private String currentHorizontalSliceParameterName;
+
+	private HorizontalSlicePresenter horizontalSlicePresenter;
+	
 	@Inject
 	public RealTimePanelPresenter(DapController dapController, IsmopConverter ismopConverter,
 			GradientsUtil gradientsUtil) {
@@ -108,12 +124,15 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	
 	public void onRefreshRealTimePanel() {
 		view.showLoadingIndicator(true);
+		gradientsUtil.reset();
 		
 		ListenableFuture<Void> weatherFuture = updateWeather();
 		ListenableFuture<Void> chartFuture = updateChart();
 		ListenableFuture<Void> waterLevelFuture = updateWaterLevel();
 		ListenableFuture<Void> verticalSliceFuture = updateVerticalSlice();
-		Futures.whenAllComplete(weatherFuture, chartFuture, waterLevelFuture, verticalSliceFuture)
+		ListenableFuture<Void> horizontalSliceFuture = updateHorizontalSlice();
+		Futures.whenAllComplete(weatherFuture, chartFuture, waterLevelFuture, verticalSliceFuture,
+				horizontalSliceFuture)
 				.call(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
@@ -341,7 +360,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					}
 				}
 			});
-			chartPresenter.setHeight(300);
+			chartPresenter.setHeight(220);
 			view.setChartView(chartPresenter.getView());
 			chartPresenter.initChart();
 			chartPresenter.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
@@ -530,6 +549,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 
 	private void renderVerticalSliceData() {
 		currentVerticalConfiguration = new VerticalCrosssectionConfiguration();
+		currentVerticalConfiguration.setDataSelector("0"); //0 means real values
 		currentVerticalConfiguration.setPickedProfile(currentVerticalSliceProfile);
 		
 		currentVerticalSliceParameterName = getCurrentVerticalSliceParameterName();
@@ -546,14 +566,12 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		currentVerticalConfiguration.setProfileDevicesMap(profileDevicesMap);
 		currentVerticalConfiguration.setParameterMap(Maps.uniqueIndex(verticalSliceParameters,
 				Parameter::getId));
-		currentVerticalConfiguration.setDataSelector("0"); //0 means real values
 		
 		if (verticalSlicePresenter == null) {
 			verticalSlicePresenter = eventBus.addHandler(VerticalSlicePresenter.class);
 			view.setVerticalSliceView(verticalSlicePresenter.getView());
 		}
 		
-		gradientsUtil.reset();
 		verticalSlicePresenter.setConfiguration(currentVerticalConfiguration);
 		verticalSlicePresenter.onDateChanged(new Date());
 		eventBus.addProfileFromRealtimeMap(currentVerticalSliceProfile);
@@ -564,6 +582,106 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 			return verticalSliceParameters.get(0).getMeasurementTypeName();
 		} else {
 			return currentVerticalSliceParameterName;
+		}
+	}
+
+	private ListenableFuture<Void> updateHorizontalSlice() {
+		SettableFuture<Void> result = SettableFuture.create();
+		ListenableFuture<List<Section>> sectionsFuture = dapController.getSections();
+		ListenableFuture<List<String>> sectionIdsFuture = Futures.transform(sectionsFuture,
+				sections -> {
+					horizontalSliceSections = sections;
+					
+					return Lists.transform(sections, Section::getId);
+				});
+		ListenableFuture<List<Profile>> profilesFuture = Futures.transformAsync(sectionIdsFuture,
+				sectionIds -> dapController.getProfiles(sectionIds));
+		ListenableFuture<List<String>> profileIdsFuture = Futures.transform(profilesFuture,
+				profiles -> {
+					//picking only single profiles per section
+					horizontalSliceProfiles = new ArrayList<>();
+					List<String> sectionIds = new ArrayList<>();
+					
+					for (Profile profile : profiles) {
+						if (!sectionIds.contains(profile.getSectionId())) {
+							horizontalSliceProfiles.add(profile);
+							sectionIds.add(profile.getSectionId());
+						}
+					}
+					
+					return Lists.newArrayList(Iterables.transform(horizontalSliceProfiles,
+							Profile::getId));
+				});
+		ListenableFuture<List<DeviceAggregate>> deviceAggregationsFuture = Futures.transformAsync(
+				profileIdsFuture, profileIds -> dapController.getDeviceAggregations(profileIds));
+		ListenableFuture<List<String>> deviceAggregateIdsFuture = Futures.transform(
+				deviceAggregationsFuture, deviceAggregates -> Lists.transform(
+						deviceAggregates, DeviceAggregate::getId));
+		ListenableFuture<List<Device>> devicesFuture = Futures.transformAsync(
+				deviceAggregateIdsFuture, deviceAggregateIds ->
+					dapController.getDevicesRecursivelyForAggregates(deviceAggregateIds));
+		ListenableFuture<List<String>> deviceIdsFuture = Futures.transform(devicesFuture,
+				devices -> {
+					horizontalSliceDevices = devices;
+					
+					return Lists.transform(devices, Device::getId);
+				});
+		ListenableFuture<List<Parameter>> parametersFuture = Futures.transformAsync(deviceIdsFuture,
+				deviceIds -> dapController.getParameters(deviceIds));
+		Futures.addCallback(parametersFuture, new FutureCallback<List<Parameter>>() {
+			@Override
+			public void onSuccess(List<Parameter> parameters) {
+				horizontalSliceParameters = parameters;
+				renderHorizontalSliceData();
+				result.set(null);
+			}
+
+			@Override
+			public void onFailure(Throwable t) {
+				eventBus.showError(new ErrorDetails(t.getMessage()));
+				result.set(null);
+			}
+
+		});
+		
+		return result;
+	}
+	
+	private void renderHorizontalSliceData() {
+		currentHorizontalConfiguration = new HorizontalCrosssectionConfiguration();
+		currentHorizontalConfiguration.setDataSelector("0"); //0 means real values
+		currentHorizontalConfiguration.setSections(Maps.uniqueIndex(horizontalSliceSections,
+				Section::getId));
+		currentHorizontalSliceParameterName = getCurrentHorizontalSliceParameterName();
+		currentHorizontalConfiguration.setPickedParameterMeasurementName(
+				currentHorizontalSliceParameterName);
+		currentHorizontalConfiguration.setParameterMap(Maps.uniqueIndex(horizontalSliceParameters,
+				Parameter::getId));
+		currentHorizontalConfiguration.setPickedHeights(Maps.toMap(horizontalSliceProfiles,
+				profile -> "fakeHeight"));
+		
+		Map<String, List<Device>> heightDeviceMap = new HashMap<>();
+		heightDeviceMap.put("fakeHeight", horizontalSliceDevices);
+		currentHorizontalConfiguration.setHeightDevicesmap(heightDeviceMap);
+		currentHorizontalConfiguration.setSections(Maps.uniqueIndex(horizontalSliceSections,
+				Section::getId));
+		currentHorizontalConfiguration.setPickedProfiles(Maps.uniqueIndex(horizontalSliceProfiles,
+				Profile::getId));
+		
+		if (horizontalSlicePresenter == null) {
+			horizontalSlicePresenter = eventBus.addHandler(HorizontalSlicePresenter.class);
+			view.setHorizontalSliceView(horizontalSlicePresenter.getView());
+		}
+		
+		horizontalSlicePresenter.setConfiguration(currentHorizontalConfiguration);
+		horizontalSlicePresenter.onDateChanged(new Date());
+	}
+
+	private String getCurrentHorizontalSliceParameterName() {
+		if (currentHorizontalSliceParameterName == null) {
+			return horizontalSliceParameters.get(0).getMeasurementTypeName();
+		} else {
+			return currentHorizontalSliceParameterName;
 		}
 	}
 }

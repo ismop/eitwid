@@ -149,7 +149,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					if(configuration.getParameterMap().get(parameterId) != null
 							&& configuration.getParameterMap().get(parameterId)
 							.getMeasurementTypeName().equals(
-									configuration.getPickedParameterName())) {
+									configuration.getPickedParameterMeasurementName())) {
 						parameterIds.add(parameterId);
 						parameter = configuration.getParameterMap().get(parameterId);
 					}
@@ -199,7 +199,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 								new Date(currentDate.getTime()
 										- configuration.getExperiment().getStart().getTime());
 							
-							dapController.getLastMeasurements(
+							dapController.getLastMeasurementsWith24HourMod(
 									timelineIds, queryDate, new MeasurementsCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {
@@ -287,7 +287,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				for(Parameter parameter : configuration.getParameterMap().values()) {
 					if(device.getParameterIds().contains(parameter.getId())
 							&& parameter.getMeasurementTypeName().equals(
-									configuration.getPickedParameterName())) {
+									configuration.getPickedParameterMeasurementName())) {
 						for(Timeline timeline : timelines) {
 							if(timeline.getContextId().equals(context.getId())
 									&& parameter.getTimelineIds().contains(timeline.getId())) {

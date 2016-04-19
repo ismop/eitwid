@@ -39,6 +39,7 @@ public interface DeviceService extends RestService {
 			@PathParam("deviceType") String deviceType,
 			MethodCallback<DevicesResponse> methodCallback);
 
+	@GET
 	@Path("devices?id={idFilter}&visible=true")
 	void getDevicesForIds(@PathParam("idFilter") String idFilter,
 			MethodCallback<DevicesResponse> methodCallback);
@@ -48,6 +49,7 @@ public interface DeviceService extends RestService {
 	void getDevicesFotCustomIds(@PathParam("customIds") String customIds,
 			MethodCallback<DevicesResponse> methodCallback);
 	
+	@GET
 	@Path("devices?levee_id={leveeId}&visible=true")
 	void getLeveeDevices(@PathParam("leveeId") Integer leveeId,
 			MethodCallback<DevicesResponse> methodCallback);
