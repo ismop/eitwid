@@ -30,7 +30,7 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	RealTimePanelMessages messages;
 	
 	@UiField
-	Text weatherSectionHeading, verticalSliceSectionHeading;
+	Text weatherSectionHeading, verticalSliceSectionHeading, horizontalSliceSectionHeading;
 	
 	@UiField
 	HTML firstWeatherParameterName, firstWeatherParameterValue, secondWeatherParameterName,
@@ -79,6 +79,11 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	@UiHandler("changeVerticalSliceParameter")
 	public void changeVerticalSliceParameter(ClickEvent event) {
 		getPresenter().onVerticalSliceParameterChange();
+	}
+	
+	@UiHandler("changeHorizontalSliceParameter")
+	public void changeHorizontalSliceParameter(ClickEvent event) {
+		getPresenter().onHorizontalSliceParameterChange();
 	}
 
 	@Override
@@ -144,5 +149,11 @@ public class RealTimePanelView extends Composite implements IRealTimePanelView,
 	@Override
 	public void setHorizontalSliceView(IsWidget view) {
 		horizontalSliceContainer.add(view);
+	}
+
+	@Override
+	public void setHorizontalSliceHeading(String parameterMeasurementName) {
+		horizontalSliceSectionHeading.setText(messages.horizontalSliceSectionHeading(
+				parameterMeasurementName));
 	}
 }

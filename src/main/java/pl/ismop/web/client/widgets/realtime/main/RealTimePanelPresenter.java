@@ -18,6 +18,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -124,7 +125,6 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	
 	public void onRefreshRealTimePanel() {
 		view.showLoadingIndicator(true);
-		gradientsUtil.reset();
 		
 		ListenableFuture<Void> weatherFuture = updateWeather();
 		ListenableFuture<Void> chartFuture = updateChart();
@@ -175,6 +175,25 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		verticalSlicePresenter.onDateChanged(new Date());
 		view.setVerticalSliceHeading(
 				currentVerticalConfiguration.getPickedParameterMeasurementName());
+	}
+
+	@Override
+	public void onHorizontalSliceParameterChange() {
+		//assuming there are only two different parameter names
+		for (Parameter parameter : horizontalSliceParameters) {
+			if (!currentHorizontalSliceParameterName.equals(parameter.getMeasurementTypeName())) {
+				currentHorizontalSliceParameterName = parameter.getMeasurementTypeName();
+				
+				break;
+			}
+		}
+		
+		currentHorizontalConfiguration.setPickedParameterMeasurementName(
+				currentHorizontalSliceParameterName);
+		horizontalSlicePresenter.setConfiguration(currentHorizontalConfiguration);
+		horizontalSlicePresenter.onDateChanged(new Date());
+		view.setHorizontalSliceHeading(
+				currentHorizontalConfiguration.getPickedParameterMeasurementName());
 	}
 
 	private ListenableFuture<Void> updateWeather() {
@@ -603,7 +622,8 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					List<String> sectionIds = new ArrayList<>();
 					
 					for (Profile profile : profiles) {
-						if (!sectionIds.contains(profile.getSectionId())) {
+						if (profile.getDeviceAggregationIds().size() > 0
+								&& !sectionIds.contains(profile.getSectionId())) {
 							horizontalSliceProfiles.add(profile);
 							sectionIds.add(profile.getSectionId());
 						}
@@ -655,6 +675,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		currentHorizontalSliceParameterName = getCurrentHorizontalSliceParameterName();
 		currentHorizontalConfiguration.setPickedParameterMeasurementName(
 				currentHorizontalSliceParameterName);
+		view.setHorizontalSliceHeading(currentHorizontalConfiguration.getPickedParameterMeasurementName());
 		currentHorizontalConfiguration.setParameterMap(Maps.uniqueIndex(horizontalSliceParameters,
 				Parameter::getId));
 		currentHorizontalConfiguration.setPickedHeights(Maps.toMap(horizontalSliceProfiles,
@@ -663,10 +684,10 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		Map<String, List<Device>> heightDeviceMap = new HashMap<>();
 		heightDeviceMap.put("fakeHeight", horizontalSliceDevices);
 		currentHorizontalConfiguration.setHeightDevicesmap(heightDeviceMap);
-		currentHorizontalConfiguration.setSections(Maps.uniqueIndex(horizontalSliceSections,
-				Section::getId));
 		currentHorizontalConfiguration.setPickedProfiles(Maps.uniqueIndex(horizontalSliceProfiles,
 				Profile::getId));
+		currentHorizontalConfiguration.setProfileDevicesMap(Multimaps.asMap(Multimaps.index(horizontalSliceDevices,
+				device -> currentHorizontalConfiguration.getPickedProfiles().get(device.getProfileId()))));
 		
 		if (horizontalSlicePresenter == null) {
 			horizontalSlicePresenter = eventBus.addHandler(HorizontalSlicePresenter.class);

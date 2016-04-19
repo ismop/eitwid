@@ -195,7 +195,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 	@Override
 	public void init() {
-		if(scene == null) {
+		if (scene == null) {
 			addRenderer(panel.getElement(), panel.getOffsetWidth(), panel.getOffsetHeight());
 		}
 	}
@@ -233,7 +233,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(line);
 		
 		var scaleText = new $wnd.THREE.TextGeometry("10 m", {
-			font: 'optimer',
+			font: 'ubuntu',
 			size: 12,
 			height: 0.5,
 			curveSegments: 30
@@ -368,7 +368,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			tickMaterial.color.setHex(0x555555);
 			
 			var tick = new $wnd.THREE.TextGeometry(text, {
-				font: 'optimer',
+				font: 'ubuntu',
 				size: 12,
 				height: 0.5,
 				curveSegments: 30
@@ -387,7 +387,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 				text = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::format(D)(legend[i + 1][4])
 					+ " " + parameterUnit;
 				tick = new $wnd.THREE.TextGeometry(text, {
-					font: 'optimer',
+					font: 'ubuntu',
 					size: textSize,
 					height: 1
 				});

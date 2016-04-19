@@ -7,6 +7,8 @@ public interface IRealTimePanelView extends IsWidget {
 		void onWeatherSourceChange();
 
 		void onVerticalSliceParameterChange();
+
+		void onHorizontalSliceParameterChange();
 	}
 
 	void setWeatherSectionTitle(String weatherDeviceName);
@@ -25,7 +27,9 @@ public interface IRealTimePanelView extends IsWidget {
 
 	void setVerticalSliceView(IsWidget view);
 
-	void setVerticalSliceHeading(String parameterName);
+	void setVerticalSliceHeading(String parameterMeasurementName);
 
 	void setHorizontalSliceView(IsWidget view);
+
+	void setHorizontalSliceHeading(String parameterMeasurementName);
 }

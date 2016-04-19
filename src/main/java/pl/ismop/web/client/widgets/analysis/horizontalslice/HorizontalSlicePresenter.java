@@ -391,35 +391,35 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		shiftX = Double.MAX_VALUE;
 		shiftY = Double.MAX_VALUE;
 		
-		for(Section section : muteSections) {
-			if(section.getShape() != null) {
+		for (Section section : muteSections) {
+			if (section.getShape() != null) {
 				List<List<Double>> projected = coordinatesUtil.projectCoordinates(
 						section.getShape().getCoordinates());
 				rotate(projected);
 				coordinates.add(projected);
 				
-				for(List<Double> point : projected) {
-					if(point.get(0) > maxX) {
+				for (List<Double> point : projected) {
+					if (point.get(0) > maxX) {
 						maxX = point.get(0);
 					}
 					
-					if(point.get(0) < shiftX) {
+					if (point.get(0) < shiftX) {
 						shiftX = point.get(0);
 					}
 					
-					if(point.get(1) > maxY) {
+					if (point.get(1) > maxY) {
 						maxY = point.get(1);
 					}
 					
-					if(point.get(1) < shiftY) {
+					if (point.get(1) < shiftY) {
 						shiftY = point.get(1);
 					}
 				}
 			}
 		}
 		
-		for(List<List<Double>> sectionCoordinates : coordinates) {
-			for(List<Double> pointCoordinates : sectionCoordinates) {
+		for (List<List<Double>> sectionCoordinates : coordinates) {
+			for (List<Double> pointCoordinates : sectionCoordinates) {
 				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
 				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
 			}
