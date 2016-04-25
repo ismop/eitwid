@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -46,6 +47,7 @@ import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.widgets.common.chart.IChartView.IChartPresenter;
+import pl.ismop.web.client.widgets.common.timeinterval.TimeIntervalPresenter;
 
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
@@ -339,18 +341,43 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	}
 
 	private void exportCSV() {
+		TimeIntervalPresenter timeInterval = eventBus.addHandler(TimeIntervalPresenter.class);
+		timeInterval.show(getChartFrom(), getChartTo(), (Date from, Date to) -> exportCSV(from, to));
+	}
+
+	private Date getChartFrom() {
+		Extremes xExtremes = chart.getXAxis().getExtremes();
+		Date from = new Date();
+		if(xExtremes.getDataMin() != null) {
+			from = new Date(xExtremes.getDataMin().longValue());
+		}
+
+		return from;
+	}
+
+	private Date getChartTo() {
+		Extremes xExtremes = chart.getXAxis().getExtremes();
+		Date to = new Date();
+		if(xExtremes.getDataMax() != null) {
+			to = new Date(xExtremes.getDataMax().longValue());
+		}
+
+		return to;
+	}
+
+	private void exportCSV(Date from, Date to) {
 		List<String> parameterIds = new ArrayList<>();
-		
+
 		for (ChartSeries chartSeries : getSeries()) {
 			parameterIds.add(chartSeries.getParameterId());
 		}
-	
-		Extremes xExtremes = chart.getXAxis().getExtremes();
+
 		Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint") +
-				"/chart_exporter?time_from=" + converter.formatForDto(new Date(xExtremes.getDataMin().longValue())) +
-				"&time_to=" + converter.formatForDto(new Date(xExtremes.getDataMax().longValue())) +
+				"/chart_exporter?time_from=" + converter.formatForDto(from) +
+				"&time_to=" + converter.formatForDto(to) +
 				"&parameters=" + converter.merge(parameterIds) +
 				"&private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
+
 	}
 
 	private String getDownloadCSVMessage() {
