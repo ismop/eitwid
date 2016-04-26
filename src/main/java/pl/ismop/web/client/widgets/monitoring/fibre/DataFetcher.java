@@ -235,9 +235,8 @@ public class DataFetcher implements IDataFetcher {
 
     @Override
     public void getMeasurements(final Device device, Date startDate, Date endDate, final DateSeriesCallback callback) {
-        GWT.log("From " + startDate + " to " + endDate);
-        dapController.getMeasurements
-                (timelineIdToDevice.inverse().get(device), startDate, endDate, new MeasurementsCallback(callback) {
+        dapController.getMeasurementsWithQuantityAndTime(Arrays.asList(timelineIdToDevice.inverse().get(device)),
+                startDate, endDate, 1000, new MeasurementsCallback(callback) {
             @Override
             public void processMeasurements(List<Measurement> measurements) {
                 callback.series(createChartSeries(device, measurements));
@@ -283,7 +282,7 @@ public class DataFetcher implements IDataFetcher {
         }
 
         if (timelineIds.size() > 0) {
-            dapController.getMeasurements(timelineIds, startDate, endDate, new MeasurementsCallback(callback) {
+            dapController.getMeasurementsWithQuantityAndTime(timelineIds, startDate, endDate, 1000, new MeasurementsCallback(callback) {
                 @Override
                 public void processMeasurements(List<Measurement> measurements) {
                     Map<String, List<Measurement>> timelineToMeasurements = new HashMap<String, List<Measurement>>();
