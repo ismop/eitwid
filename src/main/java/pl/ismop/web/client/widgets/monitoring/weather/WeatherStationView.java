@@ -169,7 +169,8 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 		measurements.setText(row, 2, value + " " + unit);
 		measurements.setText(row, 3, timestamp);
 
-		// when the view is populated with parameters first checkbox is checked 
+		// when the view is populated with parameters first checkbox of a parameter
+		//with temperatura in its name is checked 
 		// - setting value to true fires event in order to trigger chart generation 
 		if (initialCheckbox == null && parameterName.toLowerCase().contains("temperatura")) {
 			initialCheckbox = checkBox;

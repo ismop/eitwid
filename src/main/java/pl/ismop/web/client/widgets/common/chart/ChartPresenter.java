@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -105,31 +104,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		chart.redraw();
 	}
 
-	private void addChartSeries(ChartSeries series, boolean redraw) {
-		initChart();
-		
-		Series chartSeries = null;
-		Optional<ChartSeries> foundChartSeries = Iterables.tryFind(dataSeriesMap.values(),
-				s -> s.getParameterId().equals(series.getParameterId()));
-
-		if (foundChartSeries.isPresent()) {
-			chartSeries = chartSeriesMap.get(dataSeriesMap.inverse().get(foundChartSeries.get()));
-		} else {
-			chartSeries = chart.createSeries();
-			chartSeriesMap.put(chartSeries.getId(), chartSeries);
-			dataSeriesMap.put(chartSeries.getId(), series);
-		}
-		
-		chartSeries
-			.setName(series.getName())
-			.setPoints(series.getValues())
-			.setYAxis(getYAxisIndex(series));
-		
-		if (!foundChartSeries.isPresent()) {
-			chart.addSeries(chartSeries, redraw, true);
-		}
-	}
-
 	public void initChart() {
 		if(chart == null) {
 			chart = new Chart()
@@ -140,8 +114,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 					.setZoomType(ZoomType.X)
 					.setLegend(new Legend()
 							.setMaxHeight(40))
-					.setSelectionEventHandler(this)
-					.setPersistent(true);
+					.setSelectionEventHandler(this);
 
 			chart.getXAxis().setType(Type.DATE_TIME);
 
@@ -422,6 +395,31 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		}
 		
 		return result;
+	}
+
+	private void addChartSeries(ChartSeries series, boolean redraw) {
+		initChart();
+		
+		Series chartSeries = null;
+		Optional<ChartSeries> foundChartSeries = Iterables.tryFind(dataSeriesMap.values(),
+				s -> s.getParameterId().equals(series.getParameterId()));
+	
+		if (foundChartSeries.isPresent()) {
+			chartSeries = chartSeriesMap.get(dataSeriesMap.inverse().get(foundChartSeries.get()));
+		} else {
+			chartSeries = chart.createSeries();
+			chartSeriesMap.put(chartSeries.getId(), chartSeries);
+			dataSeriesMap.put(chartSeries.getId(), series);
+		}
+		
+		chartSeries
+			.setName(series.getName())
+			.setPoints(series.getValues())
+			.setYAxis(getYAxisIndex(series));
+		
+		if (!foundChartSeries.isPresent()) {
+			chart.addSeries(chartSeries, redraw, true);
+		}
 	}
 
 	private native JavaScriptObject getExportCSVChartBtn() /*-{
