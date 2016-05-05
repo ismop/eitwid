@@ -134,7 +134,6 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 	private Widget addReadingsToTable(FlexTable measurements,
 			final String parameterId, String parameterName, String typeName,
 			String value, String unit, String timestamp) {
-		
 		int row = measurements.getRowCount();
 		
 		final CheckBox checkBox = new CheckBox();
@@ -172,7 +171,7 @@ public class WeatherStationView extends Composite implements IWeatherStationView
 
 		// when the view is populated with parameters first checkbox is checked 
 		// - setting value to true fires event in order to trigger chart generation 
-		if (initialCheckbox == null) {
+		if (initialCheckbox == null && parameterName.toLowerCase().contains("temperatura")) {
 			initialCheckbox = checkBox;
 			initialCheckbox.setValue(true, true);
 		}
