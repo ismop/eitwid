@@ -105,7 +105,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	}
 
 	public void initChart() {
-		if(chart == null) {
+		if (chart == null) {
 			chart = new Chart()
 					.setType(Series.Type.SPLINE)
 					.setTitle(
@@ -305,9 +305,11 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
 	public void selectDate(Date selectedDate, String color) {
 		initChart();
+		
 		if (currentTimePlotLine != null) {
 			chart.getXAxis().removePlotLine(currentTimePlotLine);
 		}
+		
 		currentTimePlotLine = chart.getXAxis().createPlotLine().
 				setWidth(2).setColor(color).setValue(selectedDate.getTime());
 		chart.getXAxis().addPlotLines(currentTimePlotLine);
@@ -421,6 +423,21 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			chart.addSeries(chartSeries, redraw, true);
 		}
 	}
+	
+	private void yAxisClicked(String axisLabel) {
+		Integer axisIndex = yAxisMap.get(axisLabel);
+		
+		for (Series series : chart.getSeries()) {
+			if (String.valueOf(axisIndex).equals(series.getOptions().get("yAxis").toString())) {
+				//going only through series attached to the given y axis
+				if (series.isVisible()) {
+					series.hide();
+				} else {
+					series.show();
+				}
+			}
+		}
+	}
 
 	private native JavaScriptObject getExportCSVChartBtn() /*-{
 		var thisObject = this
@@ -435,27 +452,42 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	}-*/;
 
 	private native void updateFirstYAxis(JavaScriptObject nativeChart, String yAxisLabel) /*-{
+		var thisObject = this;
 		nativeChart.yAxis[0].update({
 			title: {
-				text: yAxisLabel
+				text: yAxisLabel,
+				style: {
+					cursor: "pointer"
+				},
+				events: {
+					click: function() {
+						thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::yAxisClicked(Ljava/lang/String;)(yAxisLabel);
+					}
+				}
 			},
 			labels: {
 				format: "{value:.2f}"
-			},
-			showEmpty: false
+			}
 		});
 	}-*/;
 
 	private native void addAxis(JavaScriptObject nativeChart, int index, String yAxisLabel) /*-{
+		var thisObject = this;
 		nativeChart.addAxis({
-			showEmpty: false,
 			title: {
-				text: yAxisLabel
+				text: yAxisLabel,
+				style: {
+					cursor: "pointer"
+				},
+				events: {
+					click: function() {
+						thisObject.@pl.ismop.web.client.widgets.common.chart.ChartPresenter::yAxisClicked(Ljava/lang/String;)(yAxisLabel);
+					}
+				}
 			},
 			labels: {
 				format: "{value:.2f}"
-			},
-			showEmpty: false
+			}
 		});
 	}-*/;
 
