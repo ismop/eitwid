@@ -11,8 +11,10 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
 import com.mvp4g.client.view.ReverseViewInterface;
 import org.gwtbootstrap3.client.ui.Button;
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
 
 import java.util.HashSet;
@@ -23,6 +25,7 @@ import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
 
 public class MapView extends Composite implements IMapView, ReverseViewInterface<IMapPresenter> {
 	private static MapViewUiBinder uiBinder = GWT.create(MapViewUiBinder.class);
+	private final IsmopConverter converter;
 
 	interface MapViewUiBinder extends UiBinder<Widget, MapView> {}
 	
@@ -42,12 +45,14 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 
 	@UiField
 	FlowPanel panel, loadingPanel, mapContainer;
-	
-	public MapView() {
+
+	@Inject
+	public MapView(IsmopConverter converter) {
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		elementId = "map-" + hashCode();
 		mapContainer.getElement().setAttribute("id", elementId);
+		this.converter = converter;
 	}
 	
 	@Override
@@ -280,7 +285,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		if(featureId.startsWith("profile")) {
 			return getProfileFillColor(colourType);
 		} else if(featureId.startsWith("section")) {
-			return getSectionFillColor(colourType);
+			return converter.getSectionFillColor(colourType);
 		} else if(featureId.startsWith("deviceAggregate")) {
 			return "#ebf56f";
 		} else {
@@ -290,20 +295,6 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 
 	private String getProfileFillColor(String colourType) {
 		return "neosentio".equals(colourType) ? "#eceff3" : "#f6e0dd";
-	}
-
-	private String getSectionFillColor(String colourType) {
-		switch (colourType) {
-			case "A":
-				return "#cccccc";
-			case "B":
-				return "#fbffb9";
-			case "C":
-				return "#c0c776";
-			case "D":
-				return "#f3f2f3";
-		}
-		return "#f9aa4b";
 	}
 
 	private String getFeatureStrokeColor(String featureId, String colourType) {
