@@ -32,7 +32,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -426,7 +425,18 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	}
 	
 	private void yAxisClicked(String axisLabel) {
-		GWT.log(axisLabel);
+		Integer axisIndex = yAxisMap.get(axisLabel);
+		
+		for (Series series : chart.getSeries()) {
+			if (String.valueOf(axisIndex).equals(series.getOptions().get("yAxis").toString())) {
+				//going only through series attached to the given y axis
+				if (series.isVisible()) {
+					series.hide();
+				} else {
+					series.show();
+				}
+			}
+		}
 	}
 
 	private native JavaScriptObject getExportCSVChartBtn() /*-{
