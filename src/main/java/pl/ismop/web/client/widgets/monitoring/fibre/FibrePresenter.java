@@ -1,9 +1,24 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.AxisTitle;
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.PlotBand;
+import org.moxieapps.gwt.highcharts.client.PlotLine;
+import org.moxieapps.gwt.highcharts.client.Point;
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.events.PointEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEventHandler;
@@ -64,7 +79,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private FibreMessages messages;
 
 	@Inject
-	public FibrePresenter(DapController dapController, IsmopProperties properties, IsmopConverter converter) {
+	public FibrePresenter(DapController dapController, IsmopProperties properties,
+			IsmopConverter converter) {
 		this.dapController = dapController;
 		this.properties = properties;
 		this.converter = converter;
@@ -114,27 +130,34 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
         nativeChart.zoomOut();
     }-*/;
 
-	private class OverAndOutEvenHandler implements PointMouseOverEventHandler, PointMouseOutEventHandler {
+	private class OverAndOutEvenHandler implements PointMouseOverEventHandler,
+			PointMouseOutEventHandler {
 		private Section selectedSection;
 		private Device selectedDevice;
 
 		@Override
 		public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-			selectedDevice = getDiviceForPoint(pointMouseOverEvent);
+			if (selectedDevice != null) {
+				unselectDevice(selectedDevice);
+			}
+			
+			selectedDevice = getDeviceForPoint(pointMouseOverEvent);
 			Section oldSection = selectedSection;
 
 			if (selectedDevice != null) {
 				selectedSection = fetcher.getDeviceSection(selectedDevice);
 				selectDeviceAndSection(selectedDevice, selectedSection);
 			}
+			
 			unselectSection(oldSection);
 
-			return true;
+			return false;
 		}
 
 		private void selectDeviceAndSection(Device device, Section section) {
 			if (device != null) {
 				map.add(device);
+				
 				if (section != null) {
 					map.highlight(section);
 				} else {
@@ -145,12 +168,13 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 		@Override
 		public boolean onMouseOut(PointMouseOutEvent pointMouseOutEvent) {
-			Device device = getDiviceForPoint(pointMouseOutEvent);
+			Device device = getDeviceForPoint(pointMouseOutEvent);
+			
 			if (device != null) {
 				unselectDeviceAndSection(device);
 			}
 
-			return true;
+			return false;
 		}
 
 		private void unselectSection(Section section) {
@@ -163,6 +187,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			if (device != null && !selectedDevices.keySet().contains(device)) {
 				map.rm(device);
 			}
+			
 			if(selectedDevice == device && selectedSection != null) {
 				map.unhighlight(selectedSection);
 			}
@@ -190,7 +215,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 							setPointMouseOutEventHandler(overAndOutEvenHandler).
 							setMarker(new Marker().
 											setSelectState(new Marker().
-															setFillColor(properties.selectionColor()).
+															setFillColor(
+																	properties.selectionColor()).
 															setRadius(5).
 															setLineWidth(0)
 											)
@@ -199,15 +225,17 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 							setPointSelectEventHandler(new PointSelectEventHandler() {
 								@Override
 								public boolean onSelect(PointSelectEvent pointSelectEvent) {
-									selectDevice(getDiviceForPoint(pointSelectEvent));
-									return true;
+									selectDevice(getDeviceForPoint(pointSelectEvent));
+									
+									return false;
 								}
 							}).
 							setPointUnselectEventHandler(new PointUnselectEventHandler() {
 								@Override
 								public boolean onUnselect(PointUnselectEvent pointUnselectEvent) {
-									unselectDevice(getDiviceForPoint(pointUnselectEvent));
-									return true;
+									unselectDevice(getDeviceForPoint(pointUnselectEvent));
+									
+									return false;
 								}
 							})
 			);
@@ -222,14 +250,17 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 									String msg = "";
 									for (Point point : toolTipData.getPoints()) {
 										String seriesName = getSeriesName(point.getNativePoint());
-										Device selectedDevice = deviceMapping.get(seriesName + "::" + toolTipData.getXAsString());
+										Device selectedDevice = deviceMapping.get(seriesName + "::"
+												+ toolTipData.getXAsString());
 										if (selectedDevice != null) {
-											msg += messages.deviceTooltip(seriesName, selectedDevice.getCableDistanceMarker() + "",
+											msg += messages.deviceTooltip(seriesName,
+													selectedDevice.getCableDistanceMarker() + "",
 													formatter.format(point.getY()));
 										}
 									}
 									if (msg != "") {
-										return messages.devicesTooltip(toolTipData.getXAsString(), msg);
+										return messages.devicesTooltip(toolTipData.getXAsString(),
+												msg);
 									} else {
 										return null;
 									}
@@ -247,7 +278,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 
 
-	private Device getDiviceForPoint(PointEvent point) {
+	private Device getDeviceForPoint(PointEvent point) {
 		return deviceMapping.get(point.getSeriesName() + "::" + point.getXAsString());
 	}
 
@@ -298,7 +329,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void loadDeviceValues(final Device selectedDevice) {
 		deviceChart.showLoading(messages.loadingDeviceValues(selectedDevice.getCustomId()));
-		fetcher.getMeasurements(selectedDevice, slider.getStartDate(), slider.getEndDate(), new DateSeriesCallback() {
+		fetcher.getMeasurements(selectedDevice, slider.getStartDate(), slider.getEndDate(),
+				new DateSeriesCallback() {
 			@Override
 			public void series(ChartSeries series) {
 				deviceChart.hideLoading();
@@ -331,7 +363,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		fetcher.initialize(new InitializeCallback() {
 			@Override
 			public void ready() {
-				fibreChart.getYAxis().setAxisTitle(new AxisTitle().setText(fetcher.getXAxisTitle()));
+				fibreChart.getYAxis().setAxisTitle(new AxisTitle()
+						.setText(fetcher.getXAxisTitle()));
 				customizeYAxis(fibreChart.getNativeChart());
 				fibreChart.removeAllSeries();
 				for (PlotBand soildBand : soildBands) {
@@ -360,7 +393,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 			private void showDevicesGrounds() {
 				List<Device> devices = fetcher.getFibreDevices();
-				Collections.sort(devices, (o1, o2) -> o1.getLeveeDistanceMarker().compareTo(o2.getLeveeDistanceMarker()));
+				Collections.sort(devices, (o1, o2) -> o1.getLeveeDistanceMarker()
+						.compareTo(o2.getLeveeDistanceMarker()));
 
 				Section currentSection = fetcher.getDeviceSection(devices.get(0));
 				Device startDevice = devices.get(0);
@@ -441,7 +475,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 
 	private void updateDevicesSeries(Collection<Device> devices) {
 		deviceChart.showLoading(messages.loadingDevicesValues());
-		fetcher.getMeasurements(devices, slider.getStartDate(), slider.getEndDate(), new DevicesDateSeriesCallback() {
+		fetcher.getMeasurements(devices, slider.getStartDate(), slider.getEndDate(),
+				new DevicesDateSeriesCallback() {
 			@Override
 			public void series(List<ChartSeries> series) {
 				deviceChart.hideLoading();
@@ -477,7 +512,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			public void series(Map<DeviceAggregate, List<IDataFetcher.ChartPoint>> series) {
 				deviceMapping.clear();
 				Map<String, Series> newSeriesCache = new HashMap<>();
-				for (Map.Entry<DeviceAggregate, List<IDataFetcher.ChartPoint>> points : series.entrySet()) {
+				for (Map.Entry<DeviceAggregate, List<IDataFetcher.ChartPoint>> points
+						: series.entrySet()) {
 					DeviceAggregate aggregation = points.getKey();
 					Series s = getSeries(aggregation);
 					newSeriesCache.put(aggregation.getId(), s);
@@ -519,7 +555,8 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		return s;
 	}
 
-	private void upateSeries(Series s, Map.Entry<DeviceAggregate, List<IDataFetcher.ChartPoint>> points) {
+	private void upateSeries(Series s, Map.Entry<DeviceAggregate,
+			List<IDataFetcher.ChartPoint>> points) {
 		DeviceAggregate aggregation = points.getKey();
 		List<IDataFetcher.ChartPoint> newPoints = points.getValue();
 
@@ -529,13 +566,15 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				Point seriesPoint = seriesPoints[i];
 				ChartPoint newPoint = newPoints.get(i);
 				seriesPoint.update(newPoint.getX(), newPoint.getY(), false);
-				deviceMapping.put(aggregation.getCustomId() + "::" + newPoint.getX(), newPoint.getDevice());
+				deviceMapping.put(aggregation.getCustomId() + "::" + newPoint.getX(),
+						newPoint.getDevice());
 			}
 		} else {
 			s.remove();
 			for (ChartPoint point : newPoints) {
 				s.addPoint(point.getX(), point.getY());
-				deviceMapping.put(aggregation.getCustomId() + "::" + point.getX(), point.getDevice());
+				deviceMapping.put(aggregation.getCustomId() + "::" + point.getX(),
+						point.getDevice());
 			}
 			fibreChart.addSeries(s, false, true);
 		}
