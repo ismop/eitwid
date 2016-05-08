@@ -1,13 +1,14 @@
 package pl.ismop.web.client.widgets.old.sidepanel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.gwtbootstrap3.client.ui.Description;
 import org.gwtbootstrap3.client.ui.DescriptionData;
 import org.gwtbootstrap3.client.ui.DescriptionTitle;
 import org.gwtbootstrap3.client.ui.ListBox;
+import org.gwtbootstrap3.extras.select.client.ui.MultipleSelect;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
-import org.gwtbootstrap3.extras.select.client.ui.Select;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
 import com.google.gwt.core.client.GWT;
@@ -39,7 +40,7 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	ListBox levees, sections, profiles;
 	
 	@UiField
-	Select sensors;
+	MultipleSelect sensors;
 
 	@UiField
 	FlowPanel leveeBusyPanel, leveePanel, sectionPanel, sectionBusyPanel, sectionDetails, profilePanel, profileBusyPanel, sensorPanel, sensorBusyPanel,
@@ -64,7 +65,13 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 	
 	@UiHandler("sensors")
 	void sensorPicked(ChangeEvent event) {
-		getPresenter().onDeviceChanged(sensors.getAllSelectedValues());
+		List<String> result = new ArrayList<String>();
+		
+		for (Option option : sensors.getSelectedItems()) {
+			result.add(option.getValue());
+		}
+		
+		getPresenter().onDeviceChanged(result);
 	}
 	
 	@UiHandler("addExperiment")
@@ -260,7 +267,7 @@ public class SidePanelView extends Composite implements ISidePanelView, ReverseV
 
 	@Override
 	public void setSelectedDevices(List<String> deviceIds) {
-		sensors.setValues(deviceIds.toArray(new String[0]));
+		sensors.setValue(deviceIds);
 	}
 
 	@Override

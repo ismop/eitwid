@@ -32,8 +32,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
@@ -141,7 +139,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			chart.setToolTip(new ToolTip().setFormatter(new ToolTipFormatter() {
 				@Override
 				public String format(ToolTipData toolTipData) {
-					String msg = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(new Date(toolTipData.getXAsLong())) + "<br/>";
+					String msg = converter.formatForDisplay(new Date(toolTipData.getXAsLong())) + "<br/>";
 					for (Point point : toolTipData.getPoints()) {
 						JavaScriptObject nativePoint = point.getNativePoint();
 						msg += "<br/><span style=\"color:" + getPointColor(nativePoint) +
@@ -315,7 +313,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
 	private void exportCSV() {
 		TimeIntervalPresenter timeInterval = eventBus.addHandler(TimeIntervalPresenter.class);
-		timeInterval.show(getChartFrom(), getChartTo(), (Date from, Date to) -> exportCSV(from, to));
+		timeInterval.show(getChartFrom(), getChartTo(),
+				(Date from, Date to) -> exportCSV(from, to));
 	}
 
 	private Date getChartFrom() {

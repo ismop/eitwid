@@ -1,5 +1,11 @@
 package pl.ismop.web.client.widgets.common.timeinterval;
 
+import java.util.Date;
+
+import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.extras.datetimepicker.client.ui.DateTimePicker;
+import org.gwtbootstrap3.extras.datetimepicker.client.ui.base.constants.DateTimePickerLanguage;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -8,14 +14,11 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
-import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.extras.datetimepicker.client.ui.DateTimePicker;
-import java.util.Date;
 
 public class TimeIntervalView extends Composite implements ITimeIntervalView,
         ReverseViewInterface<ITimeIntervalView.ITimeIntervalPresenter> {
     private static TimeIntervalUiBinder uiBinder = GWT.create(TimeIntervalUiBinder.class);
+    
     interface TimeIntervalUiBinder extends UiBinder<Widget, TimeIntervalView> {}
 
     private ITimeIntervalPresenter presenter;
@@ -64,4 +67,12 @@ public class TimeIntervalView extends Composite implements ITimeIntervalView,
     public ITimeIntervalPresenter getPresenter() {
         return presenter;
     }
+
+	@Override
+	public void setDateFormatAndLanguage(String dateFormat, String language) {
+		fromDate.setGWTFormat(dateFormat);
+		fromDate.setLanguage(DateTimePickerLanguage.valueOf(language.toUpperCase()));
+		toDate.setGWTFormat(dateFormat);
+		toDate.setLanguage(DateTimePickerLanguage.valueOf(language.toUpperCase()));
+	}
 }

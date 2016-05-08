@@ -64,7 +64,7 @@
 				<b:Icon type="CIRCLE_O_NOTCH" spin="true"/>
 			</g:FlowPanel>
 			<g:FlowPanel ui:field="sensorListPanel" visible="false">
-				<s:Select ui:field="sensors" multiple="true"/>
+				<s:MultipleSelect ui:field="sensors"/>
 			</g:FlowPanel>
 			<g:Label ui:field="noSensorsLabel" text="{messages.noSensors}" visible="false"/>
 			<g:FlowPanel ui:field="plotContainer" visible="false"/>

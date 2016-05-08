@@ -1,7 +1,20 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.gwtbootstrap3.client.ui.Heading;
+import org.gwtbootstrap3.client.ui.Panel;
+import org.gwtbootstrap3.client.ui.Row;
+import org.gwtbootstrap3.client.ui.constants.PanelType;
+import org.gwtbootstrap3.extras.select.client.ui.MultipleSelect;
+import org.gwtbootstrap3.extras.select.client.ui.Option;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -9,15 +22,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
-import org.gwtbootstrap3.client.ui.*;
-import org.gwtbootstrap3.client.ui.constants.ButtonType;
-import org.gwtbootstrap3.client.ui.constants.PanelType;
-import org.gwtbootstrap3.extras.select.client.ui.Option;
-import org.gwtbootstrap3.extras.select.client.ui.Select;
-import pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel.ISensorPanelView.ISensorPanelPresenter;
 
-import java.util.Collection;
-import java.util.List;
+import pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel.ISensorPanelView.ISensorPanelPresenter;
 
 public class SensorPanelView extends Composite implements ISensorPanelView, ReverseViewInterface<ISensorPanelPresenter> {
     private ISensorPanelPresenter presenter;
@@ -46,14 +52,14 @@ public class SensorPanelView extends Composite implements ISensorPanelView, Reve
     Row timelines;
 
     @UiField
-    Select timelinesSelect;
+    MultipleSelect timelinesSelect;
 
     public SensorPanelView() {
         initWidget(uiBinder.createAndBindUi(this));
 
-        timelinesSelect.addChangeHandler(new ChangeHandler() {
+        timelinesSelect.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
-            public void onChange(ChangeEvent changeEvent) {
+            public void onValueChange(ValueChangeEvent<List<String>> changeEvent) {
                 getPresenter().timelineSelectionChanged();
             }
         });
@@ -115,6 +121,6 @@ public class SensorPanelView extends Composite implements ISensorPanelView, Reve
 
     @Override
     public List<String> getSelected() {
-        return timelinesSelect.getAllSelectedValues();
+        return timelinesSelect.getValue();
     }
 }

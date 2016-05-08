@@ -1,25 +1,34 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
-import com.mvp4g.client.view.ReverseViewInterface;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.gwtbootstrap3.client.shared.event.ModalHiddenEvent;
 import org.gwtbootstrap3.client.shared.event.ModalShownEvent;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Row;
+import org.gwtbootstrap3.extras.select.client.ui.MultipleSelect;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
-import org.gwtbootstrap3.extras.select.client.ui.Select;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
+import com.mvp4g.client.view.ReverseViewInterface;
+
 import pl.ismop.web.client.widgets.analysis.chart.wizard.IChartWizardView.IChartWizardPresenter;
 import pl.ismop.web.client.widgets.common.map.IMapView;
-
-import java.util.*;
 
 public class ChartWizardView extends Composite implements IChartWizardView, ReverseViewInterface<IChartWizardPresenter>{
     interface ChartWizardUiBinder extends UiBinder<Widget, ChartWizardView> {
@@ -48,7 +57,7 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
     ChartWizardMessages messages;
 
     @UiField
-    Select devicesSelect;
+    MultipleSelect devicesSelect;
 
     @UiField
     Row devices;
@@ -63,16 +72,16 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
     public ChartWizardView() {
         initWidget(uiBinder.createAndBindUi(this));
         okButton.setEnabled(false);
-        devicesSelect.addChangeHandler(new ChangeHandler() {
+        devicesSelect.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
-            public void onChange(ChangeEvent changeEvent) {
+            public void onValueChange(ValueChangeEvent<List<String>> changeEvent) {
                 List<String> toUnselect = new ArrayList<>(selected);
-                toUnselect.removeAll(devicesSelect.getAllSelectedValues());
+                toUnselect.removeAll(devicesSelect.getValue());
 
-                List<String> toSelect = new ArrayList<>(devicesSelect.getAllSelectedValues());
+                List<String> toSelect = new ArrayList<>(devicesSelect.getValue());
                 toSelect.removeAll(selected);
 
-                selected = new ArrayList<>(devicesSelect.getAllSelectedValues());
+                selected = new ArrayList<>(devicesSelect.getValue());
 
                 for (String s : toSelect) {
                     getPresenter().addParameter(s);
@@ -126,7 +135,7 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
         loading.setVisible(false);
         devices.setVisible(true);
 
-        devicesSelect.clearHeader();
+        devicesSelect.clear();
 
         List<String> sortedNames = new ArrayList<>(names);
         Collections.sort(sortedNames);
@@ -165,7 +174,7 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
     @Override
     public void unselectParameter(String parameterName) {
         selected.remove(parameterName);
-        devicesSelect.setValues(selected.toArray(new String[0]));
+        devicesSelect.setValue(selected);
     }
 
     @Override

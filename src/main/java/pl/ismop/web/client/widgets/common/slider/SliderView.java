@@ -1,19 +1,23 @@
 package pl.ismop.web.client.widgets.common.slider;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
-import com.mvp4g.client.view.ReverseViewInterface;
+import java.util.Date;
+
 import org.gwtbootstrap3.extras.datetimepicker.client.ui.DateTimePicker;
+import org.gwtbootstrap3.extras.datetimepicker.client.ui.base.constants.DateTimePickerLanguage;
 import org.gwtbootstrap3.extras.datetimepicker.client.ui.base.events.ChangeDateEvent;
 import org.gwtbootstrap3.extras.slider.client.ui.Slider;
 import org.gwtbootstrap3.extras.slider.client.ui.base.FormatterCallback;
 import org.gwtbootstrap3.extras.slider.client.ui.base.event.SlideStopEvent;
 
-import java.util.Date;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
+import com.mvp4g.client.view.ReverseViewInterface;
 
 /**
  * Created by marek on 09.09.15.
@@ -39,9 +43,9 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     public SliderView() {
         initWidget(uiBinder.createAndBindUi(this));
 
-        slider.setFormatter(new FormatterCallback() {
+        slider.setFormatter(new FormatterCallback<Double>() {
             @Override
-            public String formatTooltip(double v) {
+            public String formatTooltip(Double v) {
                 return presenter.getLabel(v);
             }
         });
@@ -49,14 +53,22 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
 
     @UiHandler("startDate")
     void onStartDateChanged(ChangeDateEvent event) {
-        presenter.onStartDateChanged(startDate.getValue());
+    	//DateTimePicker component behaves weird when parsing dates hence the fox below
+    	Date date = new Date(getTime(event.getNativeEvent())
+    			+ new Date().getTimezoneOffset() * 60 * 1000);
+        presenter.onStartDateChanged(date);
         presenter.onSliderChanged(slider.getValue());
+    	Scheduler.get().scheduleDeferred(() -> startDate.setValue(date, false));
     }
 
     @UiHandler("endDate")
     void onEndDateChanged(ChangeDateEvent event) {
-        presenter.onEndDateChanged(endDate.getValue());
+    	//DateTimePicker component behaves weird when parsing dates hence the fox below
+    	Date date = new Date(getTime(event.getNativeEvent())
+    			+ new Date().getTimezoneOffset() * 60 * 1000);
+		presenter.onEndDateChanged(date);
         presenter.onSliderChanged(slider.getValue());
+        Scheduler.get().scheduleDeferred(() -> endDate.setValue(date, false));
     }
 
     @UiHandler("slider")
@@ -122,8 +134,14 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     }
 
 	@Override
-	public void setDateFormat(String format) {
-		startDate.setFormat(format);
-		endDate.setFormat(format);
+	public void setDateFormatAndLanguage(String format, String localeValue) {
+		startDate.setLanguage(DateTimePickerLanguage.valueOf(localeValue.toUpperCase()));
+		startDate.setGWTFormat(format);
+		endDate.setLanguage(DateTimePickerLanguage.valueOf(localeValue.toUpperCase()));
+		endDate.setGWTFormat(format);
 	}
+
+	private native int getTime(Event event) /*-{
+		return event.date.getTime();
+	}-*/;
 }

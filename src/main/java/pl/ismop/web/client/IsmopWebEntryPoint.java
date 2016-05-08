@@ -6,6 +6,7 @@ import java.util.List;
 import org.fusesource.restygwt.client.Defaults;
 import org.fusesource.restygwt.client.ServiceRoots;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
+import org.gwtbootstrap3.extras.bootbox.client.options.DialogOptions;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -49,7 +50,9 @@ public class IsmopWebEntryPoint implements EntryPoint {
 				toStringArray(ismopConverter.days()));
 		
 		//Bootbox setup
-		Bootbox.createDefaults().setCloseButton(false).setDefaults();
+		DialogOptions dialogOptions = DialogOptions.newOptions("");
+		dialogOptions.setCloseButton(false);
+		Bootbox.setDefaults(dialogOptions);
 	}
 	
 	private String getCurrentDate() {

@@ -43,7 +43,7 @@
                 </b:Row>
                 <b:Row addStyleNames="{style.row}" visible="false" ui:field="timelines">
                     <b:Column size="MD_12" addStyleNames="{style.column}">
-                        <select:Select ui:field="timelinesSelect" liveSearch="true" multiple="true" visibleSize="5" />
+                        <select:MultipleSelect ui:field="timelinesSelect" liveSearch="true"/>
                     </b:Column>
                 </b:Row>
             </b:PanelBody>

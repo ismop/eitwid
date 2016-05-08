@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -98,5 +99,9 @@ public class IsmopConverter {
 				.append("))");
 
 		return builder.toString();
+	}
+	
+	public String getCurrentLocale() {
+		return LocaleInfo.getCurrentLocale().getLocaleName();
 	}
 }

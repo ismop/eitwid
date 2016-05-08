@@ -6,9 +6,13 @@ import java.util.Date;
 public interface ITimeIntervalView extends IsWidget {
     interface ITimeIntervalPresenter {
         void onOk(Date from, Date to);
+        
         void onCancel();
     }
 
     void show(Date from, Date to);
+    
     void close();
+    
+	void setDateFormatAndLanguage(String dateFormat, String language);
 }

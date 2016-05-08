@@ -61,8 +61,8 @@
                             </b:Row>
                             <b:Row addStyleNames="{style.row}" ui:field="devices" visible="false">
                                 <b:Column size="MD_12">
-                                    <select:Select ui:field="devicesSelect" liveSearch="true" visibleSize="15"
-                                                   multiple="true" selectedTextFormat="count"/>
+                                    <select:MultipleSelect ui:field="devicesSelect"
+                                    	liveSearch="true" selectedTextFormat="COUNT"/>
                                 </b:Column>
                             </b:Row>
                         </g:FlowPanel>

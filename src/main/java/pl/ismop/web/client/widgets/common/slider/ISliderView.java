@@ -25,6 +25,6 @@ public interface ISliderView extends IsWidget {
 
     void setAllowEditDateIntervals(boolean enabled);
     void setEnabled(boolean enabled);
-	void setDateFormat(String displayDateFormat);
+	void setDateFormatAndLanguage(String displayDateFormat, String localeValue);
 }
 

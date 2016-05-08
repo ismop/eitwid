@@ -1,14 +1,15 @@
 package pl.ismop.web.client.widgets.common.slider;
 
+import java.util.Date;
+
+import javax.inject.Inject;
+
+import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.MainEventBus;
-
-import java.util.Date;
-
-import javax.inject.Inject;
 
 /**
  * Created by marek on 09.09.15.
@@ -43,8 +44,10 @@ public class SliderPresenter extends BasePresenter<ISliderView, MainEventBus> im
     }
 
     private void initDates() {
-    	view.setDateFormat(ismopConverter.getDisplayDateFormat());
+    	view.setDateFormatAndLanguage(ismopConverter.getDisplayDateFormat(),
+    			ismopConverter.getCurrentLocale());
         endDate = new Date();
+        GWT.log("Initial date: " + endDate + ", " + endDate.getTime());
         startDate = new Date(endDate.getTime() - 14 * DAY_IN_MS);
 
         setStartDate(startDate);
