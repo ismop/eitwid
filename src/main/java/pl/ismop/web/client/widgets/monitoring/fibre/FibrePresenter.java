@@ -1,21 +1,9 @@
 package pl.ismop.web.client.widgets.monitoring.fibre;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.moxieapps.gwt.highcharts.client.AxisTitle;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.PlotLine;
-import org.moxieapps.gwt.highcharts.client.Point;
-import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
-import org.moxieapps.gwt.highcharts.client.ToolTip;
-import org.moxieapps.gwt.highcharts.client.ToolTipData;
-import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.events.PointEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEventHandler;
@@ -35,6 +23,7 @@ import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -59,10 +48,12 @@ import pl.ismop.web.client.widgets.monitoring.fibre.IFibreView.IFibrePresenter;
 public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> implements IFibrePresenter {
 	private final DapController dapController;
 	private final IsmopProperties properties;
+	private final IsmopConverter converter;
 	private Chart fibreChart;
 	private ChartPresenter deviceChart;
 	private SliderPresenter slider;
 	private MapPresenter map;
+	private List<PlotBand> soildBands = new ArrayList<>();
 
 	private DataFetcher fetcher;
 	Map<String, Device> deviceMapping = new HashMap<>();
@@ -73,9 +64,10 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 	private FibreMessages messages;
 
 	@Inject
-	public FibrePresenter(DapController dapController, IsmopProperties properties) {
+	public FibrePresenter(DapController dapController, IsmopProperties properties, IsmopConverter converter) {
 		this.dapController = dapController;
 		this.properties = properties;
+		this.converter = converter;
 	}
 
 	@SuppressWarnings("unused")
@@ -342,10 +334,16 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				fibreChart.getYAxis().setAxisTitle(new AxisTitle().setText(fetcher.getXAxisTitle()));
 				customizeYAxis(fibreChart.getNativeChart());
 				fibreChart.removeAllSeries();
+				for (PlotBand soildBand : soildBands) {
+					fibreChart.getXAxis().removePlotBand(soildBand);
+				}
+				soildBands.clear();
+
 				fibreChart.hideLoading();
 
 				loadData(slider.getSelectedDate());
 				showHeatingDevices();
+				showDevicesGrounds();
 
 				showSections(fetcher.getSections());
 				showDeviceAggregations();
@@ -360,12 +358,42 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				}
 			}
 
+			private void showDevicesGrounds() {
+				List<Device> devices = fetcher.getFibreDevices();
+				Collections.sort(devices, (o1, o2) -> o1.getLeveeDistanceMarker().compareTo(o2.getLeveeDistanceMarker()));
+
+				Section currentSection = fetcher.getDeviceSection(devices.get(0));
+				Device startDevice = devices.get(0);
+				Device previousDevice = devices.get(0);
+				for (Device device : devices) {
+					Section nextSection = fetcher.getDeviceSection(device);
+					if (!currentSection.getId().equals(nextSection.getId())) {
+						showSectionGround(startDevice, device, currentSection);
+
+						currentSection = nextSection;
+						startDevice = device;
+					}
+					previousDevice = device;
+				}
+
+				showSectionGround(startDevice, previousDevice, currentSection);
+			}
+
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
 				fibreChart.showLoading(messages.errorLoadingDataFromDap());
 			}
 		});
+	}
+
+	private void showSectionGround(Device startDevice, Device endDevice, Section section) {
+		PlotBand band = fibreChart.getXAxis().createPlotBand();
+		band.setFrom(startDevice.getLeveeDistanceMarker());
+		band.setTo(endDevice.getLeveeDistanceMarker());
+		band.setColor(converter.getSectionFillColor(section.getSoilTypeLabel()));
+
+		fibreChart.getXAxis().addPlotBands(band);
 	}
 
 	private void showHeatingDevices() {

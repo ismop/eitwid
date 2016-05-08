@@ -414,6 +414,17 @@ public class DataFetcher implements IDataFetcher {
         return heatingDevices;
     }
 
+    public List<Device> getFibreDevices() {
+        List<Device> fibreDevices = new ArrayList<>();
+        for (Device device : idToDevice.values()) {
+            if ("fiber_optic_node".equals(device.getDeviceType())) {
+                fibreDevices.add(device);
+            }
+        }
+
+        return fibreDevices;
+    }
+
     @Override
     public Collection<DeviceAggregate> getDeviceAggregations() {
         return idToDeviceAggregation.values();

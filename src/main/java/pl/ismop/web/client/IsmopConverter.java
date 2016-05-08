@@ -104,4 +104,18 @@ public class IsmopConverter {
 	public String getCurrentLocale() {
 		return LocaleInfo.getCurrentLocale().getLocaleName();
 	}
+	
+	public String getSectionFillColor(String colourType) {
+		switch (colourType) {
+			case "A":
+				return "#cccccc";
+			case "B":
+				return "#fbffb9";
+			case "C":
+				return "#c0c776";
+			case "D":
+				return "#f3f2f3";
+		}
+		return "#f9aa4b";
+	}
 }
