@@ -19,15 +19,13 @@ import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.events.PointClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.PointEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.PointSelectEvent;
-import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.PointUnselectEvent;
-import org.moxieapps.gwt.highcharts.client.events.PointUnselectEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
@@ -138,7 +136,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		@Override
 		public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
 			if (selectedDevice != null) {
-				unselectDevice(selectedDevice);
+				unselectDeviceAndSection(selectedDevice);
 			}
 			
 			selectedDevice = getDeviceForPoint(pointMouseOverEvent);
@@ -208,11 +206,11 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			fibreChart.getXAxis().
 					setAxisTitle(new AxisTitle().setText(messages.firbreChartXAxisTitle()));
 
-			OverAndOutEvenHandler overAndOutEvenHandler = new OverAndOutEvenHandler();
+			OverAndOutEvenHandler overAndOutEventHandler = new OverAndOutEvenHandler();
 
 			fibreChart.setSeriesPlotOptions(new SeriesPlotOptions().
-							setPointMouseOverEventHandler(overAndOutEvenHandler).
-							setPointMouseOutEventHandler(overAndOutEvenHandler).
+							setPointMouseOverEventHandler(overAndOutEventHandler).
+							setPointMouseOutEventHandler(overAndOutEventHandler).
 							setMarker(new Marker().
 											setSelectState(new Marker().
 															setFillColor(
@@ -221,27 +219,26 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 															setLineWidth(0)
 											)
 							).
-							setAllowPointSelect(true).
-							setPointSelectEventHandler(new PointSelectEventHandler() {
+							setPointClickEventHandler(new PointClickEventHandler() {
 								@Override
-								public boolean onSelect(PointSelectEvent pointSelectEvent) {
-									selectDevice(getDeviceForPoint(pointSelectEvent));
+								public boolean onClick(PointClickEvent pointClickEvent) {
+									//TODO: should the Shift key pressed be handled here somehow?
+									Device device = getDeviceForPoint(pointClickEvent);
+									
+									if (device != null) {
+										if (selectedDevices.keySet().contains(device)) {
+											unselectDevice(device);
+										} else {
+											selectDevice(device);
+										}
+									}
 									
 									return false;
 								}
 							}).
-							setPointUnselectEventHandler(new PointUnselectEventHandler() {
-								@Override
-								public boolean onUnselect(PointUnselectEvent pointUnselectEvent) {
-									unselectDevice(getDeviceForPoint(pointUnselectEvent));
-									
-									return false;
-								}
-							})
+							setAllowPointSelect(true)
 			);
-
 			fibreChart.setOption("/chart/zoomType", "x");
-
 			fibreChart.setToolTip(new ToolTip()
 							.setFormatter(new ToolTipFormatter() {
 								private NumberFormat formatter = NumberFormat.getFormat("00.00");
@@ -275,8 +272,6 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			view.setFibreDevices(fibreChart);
 		}
 	}
-
-
 
 	private Device getDeviceForPoint(PointEvent point) {
 		return deviceMapping.get(point.getSeriesName() + "::" + point.getXAsString());
