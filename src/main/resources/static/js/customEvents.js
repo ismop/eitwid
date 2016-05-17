@@ -312,7 +312,7 @@
         customEvent(_axis, 'render');
 
         //series events & point events
-        customEvent(_series, 'drawPoints');
+//        customEvent(_series, 'drawPoints');
 
         //datalabels events
         customEvent(_series, 'drawDataLabels');

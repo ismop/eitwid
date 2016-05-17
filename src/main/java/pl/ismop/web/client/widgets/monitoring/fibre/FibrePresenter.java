@@ -19,13 +19,15 @@ import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
-import org.moxieapps.gwt.highcharts.client.events.PointClickEvent;
-import org.moxieapps.gwt.highcharts.client.events.PointClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.PointEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.PointSelectEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.PointUnselectEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointUnselectEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
@@ -219,24 +221,24 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 															setLineWidth(0)
 											)
 							).
-							setPointClickEventHandler(new PointClickEventHandler() {
+							setAllowPointSelect(true).
+							setPointSelectEventHandler(new PointSelectEventHandler() {
 								@Override
-								public boolean onClick(PointClickEvent pointClickEvent) {
-									//TODO: should the Shift key pressed be handled here somehow?
-									Device device = getDeviceForPoint(pointClickEvent);
+								public boolean onSelect(PointSelectEvent pointSelectEvent) {
+									selectDevice(getDeviceForPoint(pointSelectEvent));
 									
-									if (device != null) {
-										if (selectedDevices.keySet().contains(device)) {
-											unselectDevice(device);
-										} else {
-											selectDevice(device);
-										}
-									}
-									
-									return false;
+									return true;
 								}
 							}).
-							setAllowPointSelect(true)
+							setPointUnselectEventHandler(new PointUnselectEventHandler() {
+								@Override
+								public boolean onUnselect(PointUnselectEvent pointUnselectEvent) {
+									unselectDevice(getDeviceForPoint(pointUnselectEvent));
+									
+									return true;
+								}
+							})
+							
 			);
 			fibreChart.setOption("/chart/zoomType", "x");
 			fibreChart.setToolTip(new ToolTip()
