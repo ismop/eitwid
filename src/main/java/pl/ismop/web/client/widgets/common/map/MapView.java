@@ -294,7 +294,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 
 	private String getProfileFillColor(String colourType) {
-		return "neosentio".equals(colourType) ? "#eceff3" : "#f6e0dd";
+		return "neosentio".equalsIgnoreCase(colourType) ? "#eceff3" : "#f6e0dd";
 	}
 
 	private String getFeatureStrokeColor(String featureId, String colourType) {
@@ -310,7 +310,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 
 	private String getProfileStrokeColor(String colourType) {
-		return "neosentio".equals(colourType) ? "#3880ff" : "#ff5538";
+		return "neosentio".equalsIgnoreCase(colourType) ? "#3880ff" : "#ff5538";
 	}
 
 	private String getSectionStrokeColor(String colourType) {
@@ -328,7 +328,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 
 	private String getFeatureIcon(String featureId, String colourType) {
-		String postfix = "neosentio".equals(colourType) ? "-neosentio" : "";
+		String postfix = "neosentio".equalsIgnoreCase(colourType) ? "-neosentio" : "";
 		if(isSelected(featureId)) {
 			postfix += "-selected";
 		}
