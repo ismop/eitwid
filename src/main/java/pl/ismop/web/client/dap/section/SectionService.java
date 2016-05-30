@@ -17,7 +17,7 @@ public interface SectionService extends RestService {
 	void getSections(MethodCallback<SectionsResponse> callback);
 	
 	@GET
-	@Path("sections?leveeId={leveeId}")
+	@Path("sections?levee_id={leveeId}")
 	void getSectionsForLevee(@PathParam("leveeId") String leveeId, MethodCallback<SectionsResponse> callback);
 	
 	@GET
