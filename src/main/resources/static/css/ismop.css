@@ -12,3 +12,8 @@
 .gm-style-iw + div {
 	display: none;
 }
+
+.bootbox-body {
+	max-height: 400px;
+	overflow: auto;
+}
