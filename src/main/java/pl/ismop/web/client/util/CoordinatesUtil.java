@@ -16,7 +16,8 @@ public class CoordinatesUtil {
 		JsArray<JsArrayNumber> sourceCoordinates = (JsArray<JsArrayNumber>) JsArray.createArray();
 		
 		for(List<Double> cordinatePair : coordinates) {
-			sourceCoordinates.push(JsArrayUtils.readOnlyJsArray(new double[] {cordinatePair.get(0), cordinatePair.get(1)}));
+			sourceCoordinates.push(JsArrayUtils.readOnlyJsArray(new double[] { cordinatePair.get(0),
+					cordinatePair.get(1)}));
 		}
 		
 		JsArray<JsArrayNumber> projected = convertCoordinates(sourceCoordinates);
@@ -32,7 +33,8 @@ public class CoordinatesUtil {
 		return result;
 	}
 
-	private native JsArray<JsArrayNumber> convertCoordinates(JsArray<JsArrayNumber> sourceCoordinates) /*-{
+	private native JsArray<JsArrayNumber> convertCoordinates(
+			JsArray<JsArrayNumber> sourceCoordinates) /*-{
 		var output = [];
 		
 		sourceCoordinates.forEach(function (elem) {

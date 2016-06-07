@@ -23,18 +23,20 @@ import pl.ismop.web.client.util.CoordinatesUtil;
 import pl.ismop.web.client.widgets.common.profile.ISideProfileView.ISideProfilePresenter;
 
 @Presenter(view = SideProfileView.class, multiple = true)
-public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEventBus> implements ISideProfilePresenter {
+public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEventBus> implements
+		ISideProfilePresenter {
+	
 	private static final double PROFILE_HEIGHT = 4.5;
 	
 	private static final double PROFILE_TOP_WIDTH = 4;
-	
-	private String selectedSensorId;
 	
 	private int width, height;
 	
 	private List<String> hoveredDeviceIds;
 
 	private CoordinatesUtil coordinatesUtil;
+
+	private Profile profile;
 	
 	@Inject
 	public SideProfilePresenter(CoordinatesUtil coordinatesUtil) {
@@ -49,9 +51,11 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 			return;
 		}
 		
+		this.profile = profile;
 		view.setScene(profile.getId(), width, height);
 		
-		List<List<Double>> fullProfile = createFullProfile(coordinatesUtil.projectCoordinates(profile.getShape().getCoordinates()));
+		List<List<Double>> fullProfile = createFullProfile(coordinatesUtil.projectCoordinates(
+				profile.getShape().getCoordinates()));
 		boolean leftBank = true;
 
 		//TODO: come up with a better way of telling where the water is
@@ -62,7 +66,8 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		double xShift = -fullProfile.get(1).get(0) / 2;
 		view.drawProfile(fullProfile, leftBank, xShift);
 		
-		Map<List<String>, List<Double>> devicePositions = collectDevicePositions(getReferencePoint(profile.getShape().getCoordinates()), devices);
+		Map<List<String>, List<Double>> devicePositions = collectDevicePositions(
+				getReferencePoint(profile.getShape().getCoordinates()), devices);
 		view.drawDevices(devicePositions, xShift);
 	}
 
@@ -112,33 +117,48 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		return coordinates.get(0);
 	}
 
-	private Map<List<String>, List<Double>> collectDevicePositions(List<Double> referencePoint, List<Device> devices) {
+	private Map<List<String>, List<Double>> collectDevicePositions(List<Double> referencePoint,
+			List<Device> devices) {
 		Map<List<String>, List<Double>> result = new HashMap<>();
 		List<List<Double>> referenceSource = new ArrayList<>();
 		referenceSource.add(referencePoint);
 		
-		List<Double> projectedReference = coordinatesUtil.projectCoordinates(referenceSource).get(0);
+		List<Double> projectedReference = coordinatesUtil.projectCoordinates(referenceSource).
+				get(0);
 		Map<List<String>, List<List<Double>>> similar = findSimilar(devices);
 		
 		for(List<String> similarDeviceIds : similar.keySet()) {
-			List<List<Double>> projectedValues = coordinatesUtil.projectCoordinates(similar.get(similarDeviceIds));
+			List<List<Double>> projectedValues = coordinatesUtil.projectCoordinates(
+					similar.get(similarDeviceIds));
 			double distance = sqrt(
 				pow(projectedValues.get(0).get(0) - projectedReference.get(0), 2) +
 				pow(projectedValues.get(0).get(1) - projectedReference.get(1), 2)
 			);
 			
-			//for now let's position the devices 10 cm above ground
-			result.put(similarDeviceIds, Arrays.asList(distance, 0.1));
+			double height = findDevice(devices, similarDeviceIds.get(0)).
+					getPlacement().getCoordinates().get(2) - profile.getBaseHeight();
+			result.put(similarDeviceIds, Arrays.asList(distance, height));
 		}
 		
 		return result;
+	}
+
+	private Device findDevice(List<Device> devices, String deviceId) {
+		for (Device device : devices) {
+			if (device.getId().equals(deviceId)) {
+				return device;
+			}
+		}
+		
+		return null;
 	}
 
 	private Map<List<String>, List<List<Double>>> findSimilar(List<Device> devices) {
 		Map<String, List<Device>> similar = new HashMap<>();
 		
 		for(Device device : devices) {
-			String key = String.valueOf(device.getPlacement().getCoordinates().get(0)) + String.valueOf(device.getPlacement().getCoordinates().get(1));
+			String key = String.valueOf(device.getPlacement().getCoordinates().get(0)) +
+					String.valueOf(device.getPlacement().getCoordinates().get(1));
 			
 			if(!similar.containsKey(key)) {
 				similar.put(key, new ArrayList<Device>());
@@ -174,7 +194,8 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		result.add(asList(new Double[] {0.0, 0.0}));
 		result.add(asList(new Double[] {length, 0.0}));
 		result.add(asList(new Double[] {(length - PROFILE_TOP_WIDTH) / 2, PROFILE_HEIGHT}));
-		result.add(asList(new Double[] {(length - PROFILE_TOP_WIDTH) / 2 + PROFILE_TOP_WIDTH, PROFILE_HEIGHT}));
+		result.add(asList(new Double[] {(length - PROFILE_TOP_WIDTH) / 2 + PROFILE_TOP_WIDTH,
+				PROFILE_HEIGHT}));
 		
 		return result;
 	}

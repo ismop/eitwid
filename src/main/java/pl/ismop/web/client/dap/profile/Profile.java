@@ -26,6 +26,9 @@ public class Profile extends MapFeature {
 	private List<String> deviceAggregationIds;
 
 	private List<String> vendors;
+	
+	@Json(name = "base_height")
+	private double baseHeight;
 
 	public String getId() {
 		return id;
@@ -129,5 +132,13 @@ public class Profile extends MapFeature {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	public double getBaseHeight() {
+		return baseHeight;
+	}
+
+	public void setBaseHeight(double baseHeight) {
+		this.baseHeight = baseHeight;
 	}
 }
