@@ -81,6 +81,9 @@ public class IsmopWebEntryPoint implements EntryPoint {
 				shortMonths: shortMonths,
 				weekdays: days
 			},
+			global: {
+				useUTC: false
+			},
 			exporting: {
 				buttons: {
 					contextButton: {
