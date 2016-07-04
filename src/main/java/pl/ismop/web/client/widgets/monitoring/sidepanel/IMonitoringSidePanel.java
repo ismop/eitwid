@@ -11,6 +11,8 @@ public interface IMonitoringSidePanel extends IsWidget {
 		void onExpandChart();
 
 		void onClearChart();
+
+		void handleShowFibreHighClick();
 	}
 
 	void showLeveeName(boolean show);

@@ -1,0 +1,41 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+	<ui:with type="pl.ismop.web.client.widgets.monitoring.waterheight.WaterHeightMessages" field="messages"/>
+	<ui:style>
+		@external .modal-dialog, .modal-content, .modal-body;		
+
+		.modal .modal-dialog {
+			height: 90%;
+		}
+
+		.modal .modal-content {
+			height: 100%;
+		}
+
+		.modal .modal-body {
+			height: literal("calc(100% - 60px)");
+			overflow-y: auto;
+		}
+
+		.row, .column {
+			height: 100%;
+		}
+
+		.chart {
+			height: 100%;
+		}		
+	</ui:style>
+	<g:HTMLPanel>
+		<b:Modal ui:field="modal" title="{messages.title}" fade="true" width="95%" addStyleNames="{style.modal}">
+			<b:ModalBody>
+					<b:Row addStyleNames="{style.row}">
+						<b:Column size="MD_12" addStyleNames="{style.column}">							
+							<g:FlowPanel ui:field="waterHeightChart" addStyleNames="{style.chart}"/>							
+						</b:Column>						
+					</b:Row>
+			</b:ModalBody>
+		</b:Modal>
+	</g:HTMLPanel>
+</ui:UiBinder>

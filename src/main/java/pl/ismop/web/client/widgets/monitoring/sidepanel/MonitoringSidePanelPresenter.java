@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -291,5 +292,10 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 				}
 			}
 		});
+	}
+
+	@Override
+	public void handleShowFibreHighClick() {		
+		eventBus.showWaterHightPanel(selectedLevee);
 	}
 }

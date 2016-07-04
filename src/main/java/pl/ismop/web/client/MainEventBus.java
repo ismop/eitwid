@@ -30,6 +30,7 @@ import pl.ismop.web.client.widgets.monitoring.fibre.FibrePresenter;
 import pl.ismop.web.client.widgets.monitoring.mapnavigator.LeveeNavigatorPresenter;
 import pl.ismop.web.client.widgets.monitoring.readings.ReadingsPresenter;
 import pl.ismop.web.client.widgets.monitoring.sidepanel.MonitoringSidePanelPresenter;
+import pl.ismop.web.client.widgets.monitoring.waterheight.WaterHeightPresenter;
 import pl.ismop.web.client.widgets.monitoring.weather.WeatherStationPresenter;
 import pl.ismop.web.client.widgets.realtime.main.RealTimePanelPresenter;
 import pl.ismop.web.client.widgets.realtime.side.RealTimeSidePanelPresenter;
@@ -59,6 +60,9 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = FibrePresenter.class)
 	void showFibrePanel(Levee levee);
+	
+	@Event(handlers = WaterHeightPresenter.class)
+	void showWaterHightPanel(Levee selectedLevee);
 
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void leveeNavigatorReady();
@@ -244,5 +248,5 @@ public interface MainEventBus extends EventBusWithLookup {
 	void removeProfileFromRealtimeMap(Profile profile);
 	
 	@Event(handlers = { RealTimeSidePanelPresenter.class })
-	void addProfileFromRealtimeMap(Profile profile);
+	void addProfileFromRealtimeMap(Profile profile);	
 }

@@ -52,6 +52,11 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 		getPresenter().handleShowFibreClick();
 	}
 	
+	@UiHandler("showWaterHigh")
+	void showFibreHigh(ClickEvent event) {
+		getPresenter().handleShowFibreHighClick();
+	}
+	
 	@UiHandler("expandChart")
 	void expandChart(ClickEvent event) {
 		getPresenter().onExpandChart();
