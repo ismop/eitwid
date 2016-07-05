@@ -18,10 +18,16 @@ import java.util.Map;
 
 @Presenter(view = MapView.class, multiple = true)
 public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implements IMapPresenter {
+	
 	private GeoJsonFeaturesEncDec geoJsonEncoderDecoder;
+	
 	private Map<String, MapFeature> mapFeatures;
+	
 	private boolean hoverListeners;
+	
 	private boolean clickListeners;
+	
+	private boolean zoomed;
 	
 	@Inject
 	public MapPresenter(GeoJsonFeaturesEncDec geoJsonEncoderDecoder) {
@@ -46,6 +52,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 		if(mapFeatures.containsKey(mapFeature.getFeatureId())) {
 			view.removeFeature(mapFeature.getFeatureId());
 			mapFeatures.remove(mapFeature.getFeatureId());
+			view.hidePopup(mapFeature.getFeatureId());
 		}
 	}
 
@@ -128,7 +135,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	@Override
 	public void onFeatureHoverIn(String type, String featureId) {
 		MapFeature mapFeature = mapFeatures.get(featureId);
-		if(mapFeature != null) {
+		
+		if (mapFeature != null) {
 			switch (type) {
 				case "profile":
 					view.highlight(featureId, true);
@@ -138,16 +146,20 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				case "section":
 					view.highlight(featureId, true);
 					eventBus.showSectionMetadata((Section) mapFeature, true);
+					
 					break;
 				case "device":
 					Device device = (Device) mapFeature;
 					eventBus.showDeviceMetadata(device, true);
 					view.showPopup(featureId, device.getCustomId());
+					
 					break;
 				case "deviceAggregate":
 					DeviceAggregate deviceAggregate = (DeviceAggregate) mapFeature;
 					eventBus.showDeviceAggregateMetadata(deviceAggregate, true);
 					view.showPopup(featureId, deviceAggregate.getCustomId());
+
+					break;
 			}
 		}
 	}
@@ -183,6 +195,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void zoomOnSection(Section section) {
+		zoomed = true;
+		
 		if(!mapFeatures.keySet().contains(section.getFeatureId())) {
 			add(section);
 		}
@@ -198,6 +212,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	@Override
 	public void onZoomOut(String sectionId) {
+		zoomed = false;
 		eventBus.zoomOut(sectionId);
 	}
 
@@ -211,6 +226,10 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void redrawMap() {
 		view.redrawMap();
+	}
+
+	public boolean isZoomed() {
+		return zoomed;
 	}
 
 	private String geoJson(MapFeature mapFeature, Geometry geometry) {

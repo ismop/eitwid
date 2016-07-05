@@ -24,6 +24,7 @@ import java.util.*;
 
 @Presenter(view = LeveeNavigatorView.class, multiple = true)
 public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, MainEventBus> implements ILeveeNavigatorPresenter {
+	
 	private MapPresenter mapPresenter;
 	
 	private Levee displayedLevee;
@@ -300,14 +301,14 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 	}
 	
 	public void onDevicesHovered(List<String> deviceIds, boolean hovered) {
-		if(profileDevices.containsKey(deviceIds.get(0))) {
+		if (profileDevices.containsKey(deviceIds.get(0))) {
 			eventBus.showDeviceMetadata(profileDevices.get(deviceIds.get(0)), hovered);
 		}
 	}
 	
 	public void onDevicesClicked(List<String> deviceIds) {
-		for(String deviceId : deviceIds) {
-			if(selectedDevices.containsKey(deviceId)) {
+		for (String deviceId : deviceIds) {
+			if (selectedDevices.containsKey(deviceId)) {
 				selectedDevices.remove(deviceId);
 				eventBus.deviceSelected(profileDevices.get(deviceId), false);
 				
@@ -315,10 +316,19 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 					profilePresenter.markDevice(deviceId, false);
 				}
 				
-				for(DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
-					if(deviceAggregate.getDeviceIds().containsAll(deviceIds) && selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
+				for (DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
+					if (deviceAggregate.getDeviceIds().containsAll(deviceIds) &&
+							selectedDeviceAggregates.containsKey(deviceAggregate.getId()) &&
+							Collections.disjoint(
+									deviceAggregate.getDeviceIds(),
+									selectedDevices.keySet())) {
 						mapPresenter.unselect(deviceAggregate);
 						selectedDeviceAggregates.remove(deviceAggregate.getId());
+						
+						if (!mapPresenter.isZoomed()) {
+							mapPresenter.rm(deviceAggregate);
+							displayedDeviceAggregations.remove(deviceAggregate);
+						}
 						
 						break;
 					}
@@ -333,11 +343,11 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 				
 				boolean found = false;
 				
-				for(DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
-					if(deviceAggregate.getDeviceIds().containsAll(deviceIds)) {
+				for (DeviceAggregate deviceAggregate : displayedDeviceAggregations) {
+					if (deviceAggregate.getDeviceIds().containsAll(deviceIds)) {
 						found = true;
 						
-						if(!selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
+						if (!selectedDeviceAggregates.containsKey(deviceAggregate.getId())) {
 							mapPresenter.add(deviceAggregate);
 							mapPresenter.select(deviceAggregate);
 							selectedDeviceAggregates.put(deviceAggregate.getId(), deviceAggregate);
@@ -348,19 +358,23 @@ public class LeveeNavigatorPresenter extends BasePresenter<ILeveeNavigatorView, 
 					}
 				}
 				
-				if(!found) {
-					dapController.getDeviceAggregation(profileDevices.get(deviceId).getDeviceAggregationId(), new DeviceAggregatesCallback() {
+				if (!found) {
+					dapController.getDeviceAggregation(profileDevices.get(deviceId).
+							getDeviceAggregationId(), new DeviceAggregatesCallback() {
 						@Override
 						public void onError(ErrorDetails errorDetails) {
 							eventBus.showError(errorDetails);
 						}
 						
 						@Override
-						public void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations) {
-							if(deviceAggreagations.size() > 0) {
+						public void processDeviceAggregations(
+								List<DeviceAggregate> deviceAggreagations) {
+							if (deviceAggreagations.size() > 0) {
 								mapPresenter.add(deviceAggreagations.get(0));
 								mapPresenter.select(deviceAggreagations.get(0));
-								selectedDeviceAggregates.put(deviceAggreagations.get(0).getId(), deviceAggreagations.get(0));
+								selectedDeviceAggregates.put(deviceAggreagations.get(0).getId(),
+										deviceAggreagations.get(0));
+								displayedDeviceAggregations.add(deviceAggreagations.get(0));
 							}
 						}
 					});
