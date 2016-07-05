@@ -74,7 +74,7 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 	public void onDeviceSelected(final List<String> deviceIds, boolean selected) {
 		hoveredDeviceIds.clear();
 		
-		if(selected) {
+		if (selected) {
 			hoveredDeviceIds.addAll(deviceIds);
 		}
 		
@@ -101,7 +101,7 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 
 	@Override
 	public void onMouseClicked() {
-		if(!hoveredDeviceIds.isEmpty()) {
+		if (!hoveredDeviceIds.isEmpty()) {
 			eventBus.devicesClicked(hoveredDeviceIds);
 		}
 	}
@@ -158,7 +158,10 @@ public class SideProfilePresenter extends BasePresenter<ISideProfileView, MainEv
 		
 		for(Device device : devices) {
 			String key = String.valueOf(device.getPlacement().getCoordinates().get(0)) +
-					String.valueOf(device.getPlacement().getCoordinates().get(1));
+					String.valueOf(device.getPlacement().getCoordinates().get(1) +
+							(device.getPlacement().getCoordinates().get(2) != null ?
+									String.valueOf(device.getPlacement().getCoordinates().get(2)) :
+										""));
 			
 			if(!similar.containsKey(key)) {
 				similar.put(key, new ArrayList<Device>());
