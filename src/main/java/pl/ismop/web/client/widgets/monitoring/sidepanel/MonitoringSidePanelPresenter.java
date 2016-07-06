@@ -135,6 +135,11 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		eventBus.clearSelection();
 	}
 
+	@Override
+	public void handleShowWaterHightClick() {		
+		eventBus.showWaterHightPanel(selectedLevee);
+	}
+
 	private void addChartSeries(final Device device) {
 		if(chartPresenter == null) {
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);

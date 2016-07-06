@@ -70,6 +70,7 @@
 			</g:FlowPanel>
 			<b:Button ui:field="showWeather" text="{messages.showWeatherLabel}" block="true"/>
 			<b:Button ui:field="showFibre" text="{messages.showFibreLabel}" block="true"/>
+			<b:Button ui:field="showWaterHight" text="{messages.showWaterHighLabel}" block="true"/>
 		</g:FlowPanel>
 		<g:FlowPanel ui:field="chartPanel" addStyleNames="{style.chartContainer}">
 			<g:FlowPanel ui:field="chart" addStyleNames="{style.chart}"/>

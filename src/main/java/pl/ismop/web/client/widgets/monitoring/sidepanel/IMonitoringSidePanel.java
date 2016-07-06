@@ -11,6 +11,8 @@ public interface IMonitoringSidePanel extends IsWidget {
 		void onExpandChart();
 
 		void onClearChart();
+
+		void handleShowWaterHightClick();
 	}
 
 	void showLeveeName(boolean show);
