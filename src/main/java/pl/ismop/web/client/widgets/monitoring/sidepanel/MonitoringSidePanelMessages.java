@@ -53,5 +53,5 @@ public interface MonitoringSidePanelMessages extends Messages {
 
 	String maxMinAvg(String max, String min, String avg);
 	
-	String showWaterHighLabel();
+	String showWaterHightLabel();
 }

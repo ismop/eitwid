@@ -12,7 +12,7 @@ public interface IMonitoringSidePanel extends IsWidget {
 
 		void onClearChart();
 
-		void handleShowFibreHighClick();
+		void handleShowWaterHightClick();
 	}
 
 	void showLeveeName(boolean show);
