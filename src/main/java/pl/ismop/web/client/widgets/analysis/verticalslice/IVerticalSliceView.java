@@ -22,7 +22,7 @@ public interface IVerticalSliceView extends IsWidget {
 
 	String noMeasurementsMessage();
 
-	String cannotRenderMessages();
+	String cannotRenderMessage();
 
 	boolean canRender();
 }

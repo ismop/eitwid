@@ -274,7 +274,7 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 	}
 
 	@Override
-	public String cannotRenderMessages() {
+	public String cannotRenderMessage() {
 		return messages.cannotRender();
 	}
 
