@@ -7,26 +7,35 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
+import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.timeline.Timeline;
+import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.util.CoordinatesUtil;
 import pl.ismop.web.client.util.GradientsUtil;
 import pl.ismop.web.client.util.GradientsUtil.Color;
@@ -37,13 +46,13 @@ import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 @Presenter(view = VerticalSliceView.class, multiple = true)
 public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, MainEventBus>
 		implements IVerticalSlicePresenter, IPanelContent<IVerticalSliceView, MainEventBus> {
-	
+
 	private static class Point {
-		
+
 		double x, y, value;
-		
+
 		int r, g, b;
-		
+
 		Point(double x, double y) {
 			this.x = x;
 			this.y = y;
@@ -55,20 +64,20 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 					+ ", b=" + b + "]";
 		}
 	}
-	
+
 	private static class Borehole {
-		
+
 		double x;
-		
+
 		boolean virtual;
-		
+
 		List<Point> points;
-		
+
 		Borehole(double x, List<Point> points) {
 			this.x = x;
 			this.points = points;
 		}
-		
+
 		Borehole(double x, List<Point> points, boolean virtual) {
 			this(x, points);
 			this.virtual = virtual;
@@ -79,13 +88,13 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 			return "Borehole [x=" + x + ", virtual=" + virtual + ", points=" + points + "]";
 		}
 	}
-	
+
 	private static final double PROFILE_HEIGHT = 4.5;
-	
+
 	private static final double PROFILE_TOP_WIDTH = 4;
-	
+
 	private DapController dapController;
-	
+
 	private VerticalCrosssectionConfiguration configuration;
 
 	private Date currentDate;
@@ -95,9 +104,9 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	private ISelectionManager selectionManager;
 
 	private GradientsUtil gradientsUtil;
-	
+
 	private double gradientMin, gradientMax;
-	
+
 	private String gradientId;
 
 	@Inject
@@ -107,16 +116,16 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		this.coordinatesUtil = coordinatesUtil;
 		this.gradientsUtil = gradientsUtil;
 	}
-	
+
 	public void onUpdateVerticalSliceConfiguration(
 			VerticalCrosssectionConfiguration configuration) {
 		if (this.configuration == configuration) {
 			refreshView();
 		}
-		
+
 		selectChosenProfileOnMinimap();
 	}
-	
+
 	public void onDateChanged(Date selectedDate) {
 		currentDate = selectedDate;
 		refreshView();
@@ -129,7 +138,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	@Override
 	public void setSelectedExperiment(Experiment experiment) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -159,9 +168,9 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 	@Override
 	public void destroy() {
-		
+
 	}
-	
+
 	public void onGradientExtended(String gradientId) {
 		if (gradientId.equals(this.gradientId)
 				&& gradientsUtil.isExtended(gradientId, gradientMin, gradientMax)) {
@@ -172,18 +181,18 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	private void refreshView() {
 //		if (!view.canRender()) {
 //			eventBus.showSimpleError(view.cannotRenderMessage());
-//			
+//
 //			return;
 //		}
-		
+
 		view.showLoadingState(true);
 		Profile pickedProfile = configuration.getPickedProfile();
-		
+
 		//grouping devices according to their aggregates
 		Map<String, List<Device>> devicesByAggragateId = configuration.getProfileDevicesMap()
 				.get(pickedProfile).stream()
 					.collect(Collectors.groupingBy(Device::getDeviceAggregationId));
-		
+
 		//transforming device aggregate groups into Point lists
 		List<Borehole> boreholes = devicesByAggragateId.values().stream()
 				.filter(devices -> devices.size() > 0)
@@ -192,15 +201,15 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 							.map(device -> {
 								List<List<Double>> coords = coordinatesUtil.projectCoordinates(
 										Arrays.asList(device.getPlacement().getCoordinates()));
-								
+
 								//x becomes new x, z becomes new y in the profile plane
 								return new Point(coords.get(0).get(0),
 										device.getPlacement().getCoordinates().get(2));
 							}).collect(Collectors.toList());
-					
+
 					return new Borehole(points.get(0).x, points);
 				}).collect(Collectors.toList());
-		
+
 		//adding profile end points to point lists
 		List<List<Double>> profileEndPoints = coordinatesUtil.projectCoordinates(
 				pickedProfile.getShape().getCoordinates());
@@ -214,7 +223,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 					);
 		});
 		normalizeCoordinates(boreholes, pickedProfile.getBaseHeight());
-		
+
 		//adding profile's top end points
 		Optional<Double> profileWidth = boreholes.stream()
 				.flatMap(borehole -> borehole.points.stream())
@@ -232,19 +241,19 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 						new Point(topRightPoint, PROFILE_HEIGHT),
 						new Point(topRightPoint, 0.0)),
 				true));
-		
+
 		//sorting boreholes and points
 		boreholes.forEach(borehole -> borehole.points.sort(
 				(point1, point2) -> Double.compare(point1.y, point2.y)));
 		boreholes.sort((borehole1, borehole2) -> Double.compare(borehole1.x, borehole2.x));
-		
+
 		//adding boundary points to non-virtual boreholes
 		Map<Boolean, List<Borehole>> boreholesByVirtual = boreholes.stream().
 				collect(Collectors.partitioningBy(borehole -> borehole.virtual));
 		IntStream.range(0, boreholesByVirtual.get(true).size() - 1).forEach(index -> {
 			Borehole leftBorehole = boreholesByVirtual.get(true).get(index);
 			Borehole rightBorehole = boreholesByVirtual.get(true).get(index + 1);
-			
+
 			for (Borehole nonVirtualBorehole : boreholesByVirtual.get(false)) {
 				if (nonVirtualBorehole.x > leftBorehole.x
 						&& nonVirtualBorehole.x < rightBorehole.x) {
@@ -257,50 +266,54 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 				}
 			}
 		});
-		
-		
+
+		//collecting parameter ids to retrieve measurements
+		List<String> parameterIds = collectParameterIds();
+		Parameter parameter = parameterIds.size() > 0
+				? configuration.getParameterMap().get(parameterIds.get(0))
+						: null;
+		ListenableFuture<Map<Device, Measurement>> measurementsFuture = retrieveMeasurements();
+
+		if (configuration.getDataSelector().equals("0")
+				&& parameter.getMeasurementTypeName().equals("Temperatura")) {
+			//real data is used for the temperature parameter so the external profile nodes can be
+			//assigned temperature values from the weather station
+
+		} else {
+			//all nodes are assigned values according to the retrieved measurements
+			Futures.addCallback(measurementsFuture, new FutureCallback<Map<Device, Measurement>>() {
+				@Override
+				public void onSuccess(Map<Device, Measurement> result) {
+					GWT.log("Device to measurement map: " + result);
+				}
+
+				@Override
+				public void onFailure(Throwable t) {
+					view.showLoadingState(false);
+					eventBus.showError(new ErrorDetails(t.getMessage()));
+				}
+			});
+		}
+
 		GWT.log("Point lists: " + boreholes);
-		
-		
-		
-		
-//		ListenableFuture<List<DeviceAggregate>> aggregatesFuture = 
-//				dapController.getDeviceAggregations(configuration.getPickedProfile().getId());
-//		Futures.transform(aggregatesFuture, aggregates -> {
-//			
-//		});
-		
-		
-		
-		
-		
-//		List<String> parameterIds = collectParameterIds();
-//		Parameter parameter = parameterIds.size() > 0 ?
-//				configuration.getParameterMap().get(parameterIds.get(0)) : null;
-//		String parameterUnit = parameter != null ? parameter.getMeasurementTypeUnit() : "";
-//		String context = configuration.getDataSelector().equals("0") ? "measurements" : "scenarios";
-//		ListenableFuture<List<Context>> contextFuture = dapController.getContext(context);
-//		ListenableFuture<List<Timeline>> timelineFuture = Futures.transformAsync(contextFuture,
-//				contextList -> {
-//					if (contextList.size() > 0) {
-//						return dapController.getTimelinesForParameterIds(
-//								contextList.get(0).getId(), parameterIds);
-//					}
-//					
-//					return Collections.emptyList();
-//				});
-		
-		
-		
-		
-		
+
+
+
+
+
+
+
+
+
+
+
 //		dapController.getContext(context, new ContextsCallback() {
 //			@Override
 //			public void onError(ErrorDetails errorDetails) {
 //				view.showLoadingState(false);
 //				eventBus.showError(errorDetails);
 //			}
-//			
+//
 //			@Override
 //			public void processContexts(List<Context> contexts) {
 //				if(contexts.size() > 0) {
@@ -311,7 +324,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 //							view.showLoadingState(false);
 //							eventBus.showError(errorDetails);
 //						}
-//						
+//
 //						@Override
 //						public void processTimelines(final List<Timeline> timelines) {
 //							if(!configuration.getDataSelector().equals("0")) {
@@ -322,13 +335,13 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 //									}
 //								}
 //							}
-//							
+//
 //							List<String> timelineIds = new ArrayList<>();
-//							
+//
 //							for(Timeline timeline : timelines) {
 //								timelineIds.add(timeline.getId());
 //							}
-//							
+//
 //							Date queryDate = configuration.getDataSelector().equals("0")
 //									? currentDate :	new Date(currentDate.getTime()
 //											- configuration.getExperiment().getStart().getTime());
@@ -339,33 +352,33 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 //									view.showLoadingState(false);
 //									eventBus.showError(errorDetails);
 //								}
-//								
+//
 //								@Override
 //								public void processMeasurements(List<Measurement> measurements) {
 //									view.showLoadingState(false);
 //									view.clear();
-//									
+//
 //									if (measurements.size() > 0) {
 //										gradientId = "analysis:" + parameterUnit;
-//										
+//
 //										if (gradientsUtil.contains(gradientId)) {
 //											gradientMin = gradientsUtil.getMinValue(gradientId);
 //											gradientMax = gradientsUtil.getMaxValue(gradientId);
 //										}
-//										
+//
 //										for (Measurement measurement : measurements) {
 //											gradientsUtil.updateValues(gradientId,
 //													measurement.getValue());
 //										}
-//										
+//
 //										//TODO: come up with a better way of telling where the water is
 //										boolean leftBank = false;
-//										
+//
 //										if (configuration.getPickedProfile().getShape()
 //												.getCoordinates().get(0).get(0) > 19.676851838778) {
 //											leftBank = true;
 //										}
-//										
+//
 //										view.init();
 //										view.drawCrosssection(parameterUnit, leftBank,
 //											calculateProfileAndDevicePositionsWithValuesAndColors(
@@ -373,7 +386,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 //													timelines,
 //													configuration.getPickedProfile(),
 //													parameterUnit), createLegend(gradientId));
-//										
+//
 //										if (gradientsUtil.isExtended(gradientId, gradientMin,
 //												gradientMax)) {
 //											gradientMin = gradientsUtil.getMinValue(gradientId);
@@ -392,12 +405,96 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 //		});
 	}
 
+	private ListenableFuture<Map<Device, Measurement>> retrieveMeasurements() {
+		List<String> parameterIds = collectParameterIds();
+
+		if (parameterIds.size() == 0) {
+			SettableFuture<Map<Device, Measurement>> result = SettableFuture.create();
+			result.set(new HashMap<>());
+
+			return result;
+		}
+
+		Map<String, String> parameterIdDeviceIdMap = new HashMap<>();
+
+		for (Device device : configuration.getProfileDevicesMap().get(
+				configuration.getPickedProfile())) {
+			List<String> commonParameterIds = new ArrayList<>(device.getParameterIds());
+			commonParameterIds.retainAll(parameterIds);
+
+			if (commonParameterIds.size() == 1) {
+				parameterIdDeviceIdMap.put(commonParameterIds.get(0), device.getId());
+			}
+		}
+
+		String context = configuration.getDataSelector().equals("0") ? "measurements" : "scenarios";
+		ListenableFuture<List<Context>> contextFuture = dapController.getContext(context);
+		ListenableFuture<List<Timeline>> timelinesFuture = Futures.transformAsync(contextFuture,
+				contextList -> {
+					if (contextList.size() > 0) {
+						return dapController.getTimelinesForParameterIds(
+								contextList.get(0).getId(), parameterIds);
+					}
+
+					SettableFuture<List<Timeline>> emptyFuture = SettableFuture.create();
+					emptyFuture.set(new ArrayList<>());
+
+					return emptyFuture;
+				});
+		ListenableFuture<Map<String, Timeline>> deviceIdTimelineMapFuture =
+				Futures.transform(timelinesFuture, timelines -> timelines.stream()
+						.filter(timeline -> configuration.getDataSelector().equals("0")
+								|| !configuration.getDataSelector().equals("0")
+								&& timeline.getScenarioId().equals(configuration.getDataSelector()))
+						.collect(Collectors.toMap(
+								timeline -> parameterIdDeviceIdMap.get(timeline.getParameterId()),
+								Function.identity())));
+		ListenableFuture<Map<Device, Measurement>> deviceIdMeasurementMapFuture =
+				Futures.transformAsync(deviceIdTimelineMapFuture, deviceIdTimelineMap -> {
+					GWT.log("Device id to timeline map: " + deviceIdTimelineMap);
+					List<String> timelineIds = deviceIdTimelineMap.values().stream()
+							.map(Timeline::getId)
+							.collect(Collectors.toList());
+					Date queryDate = configuration.getDataSelector().equals("0")
+							? currentDate
+							:	new Date(currentDate.getTime()
+									- configuration.getExperiment().getStart().getTime());
+					ListenableFuture<List<Measurement>> measurementsFuture =
+							dapController.getLastMeasurementsWith24HourMod(timelineIds, queryDate);
+
+					return Futures.transform(measurementsFuture, measurements -> {
+						Map<Device, Measurement> result = new HashMap<>();
+						Map<String, String> timelineIdDeviceIdMap = deviceIdTimelineMap.keySet()
+								.stream().collect(Collectors.toMap(
+										deviceId -> deviceIdTimelineMap.get(deviceId).getId(),
+										Function.identity()));
+						measurements.forEach(measurement -> {
+							if (timelineIdDeviceIdMap.keySet().contains(
+									measurement.getTimelineId())) {
+								String deviceId = timelineIdDeviceIdMap.get(
+										measurement.getTimelineId());
+								Optional<Device> foundDevice = configuration.getProfileDevicesMap().get(
+										configuration.getPickedProfile()).stream()
+										.filter(device -> device.getId().equals(deviceId))
+										.findFirst();
+								result.put(foundDevice.get(), measurement);
+							}
+						});
+
+						return result;
+					});
+				});
+
+
+		return deviceIdMeasurementMapFuture;
+	}
+
 	private void normalizeCoordinates(List<Borehole> boreholes, double baseHeight) {
 		Optional<Double> minX = boreholes.stream()
 				.flatMap(borehole -> borehole.points.stream())
 				.map(point -> point.x)
 				.min(Comparator.naturalOrder());
-		
+
 		if (minX.isPresent()) {
 			boreholes.forEach(borehole -> {
 				borehole.x = borehole.x - minX.get();
@@ -411,7 +508,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 	private Map<Double, List<Double>> createLegend(String gradientId) {
 		Map<Double, List<Double>> result = new LinkedHashMap<>();
-		
+
 		for (Double colorBoundary : gradientsUtil.getGradient().keySet()) {
 			result.put(colorBoundary, asList(new Double[] {
 					new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
@@ -420,13 +517,13 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 					gradientsUtil.getValue(gradientId, colorBoundary)
 			}));
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
-	 * 
-	 * @param parameterUnit 
+	 *
+	 * @param parameterUnit
 	 * @return Map<x coordinate, List<value, color R, color G, color B>>
 	 */
 	private Map<Double, List<Double>> calculateProfileAndDevicePositionsWithValuesAndColors(
@@ -435,7 +532,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		Map<Double, List<Double>> result = new LinkedHashMap<>();
 		List<List<Double>> toBeProjected = new ArrayList<>();
 		toBeProjected.addAll(profile.getShape().getCoordinates());
-		
+
 		List<Device> devices = configuration.getProfileDevicesMap().get(profile);
 		Collections.sort(devices, new Comparator<Device>() {
 			@Override
@@ -444,28 +541,28 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 						o2.getPlacement().getCoordinates().get(0));
 			}
 		});
-		
+
 		for (Device device : devices) {
 			toBeProjected.add(device.getPlacement().getCoordinates());
 		}
-		
+
 		Collections.sort(toBeProjected, new Comparator<List<Double>>() {
 			@Override
 			public int compare(List<Double> o1, List<Double> o2) {
 				return o1.get(0).compareTo(o2.get(0));
 			}
 		});
-		
+
 		List<List<Double>> projected = coordinatesUtil.projectCoordinates(toBeProjected);
 		double minX = projected.get(0).get(0);
-		
+
 		for (List<Double> point : projected) {
 			point.set(0, point.get(0) - minX);
 		}
-		
+
 		for (int i = 0; i < projected.size(); i++) {
 			List<Double> valueAndColors = new ArrayList<>();
-			
+
 			if (i == 0) {
 				//left profile coordinate
 				double value = getDeviceValue(devices.get(0), measurements, timelines);
@@ -487,7 +584,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 				result.put(projected.get(i).get(0), valueAndColors);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -509,13 +606,13 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 				}
 			}
 		}
-		
+
 		return 0.0;
 	}
 
 	private List<String> collectParameterIds() {
 		List<String> result = new ArrayList<>();
-		
+
 		for(Device device : configuration.getProfileDevicesMap().get(
 				configuration.getPickedProfile())) {
 			for(String parameterId : device.getParameterIds()) {
@@ -526,7 +623,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 				}
 			}
 		}
-		
+
 		return result;
 	}
 }
