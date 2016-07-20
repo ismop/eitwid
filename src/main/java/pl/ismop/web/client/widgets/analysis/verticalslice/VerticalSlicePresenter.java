@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
+
+import org.elasticsearch.common.collect.Lists;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -53,9 +56,16 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 		int r, g, b;
 
+		Device device;
+
 		Point(double x, double y) {
 			this.x = x;
 			this.y = y;
+		}
+
+		Point(double x, double y, Device device) {
+			this(x, y);
+			this.device = device;
 		}
 
 		@Override
@@ -204,7 +214,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 								//x becomes new x, z becomes new y in the profile plane
 								return new Point(coords.get(0).get(0),
-										device.getPlacement().getCoordinates().get(2));
+										device.getPlacement().getCoordinates().get(2), device);
 							}).collect(Collectors.toList());
 
 					return new Borehole(points.get(0).x, points);
@@ -272,6 +282,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		Parameter parameter = parameterIds.size() > 0
 				? configuration.getParameterMap().get(parameterIds.get(0))
 						: null;
+		String parameterUnit = parameter == null ? "noen": parameter.getMeasurementTypeUnit();
 		ListenableFuture<Map<Device, Measurement>> measurementsFuture = retrieveMeasurements();
 
 		if (configuration.getDataSelector().equals("0")
@@ -283,8 +294,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 			//all nodes are assigned values according to the retrieved measurements
 			Futures.addCallback(measurementsFuture, new FutureCallback<Map<Device, Measurement>>() {
 				@Override
-				public void onSuccess(Map<Device, Measurement> result) {
-					GWT.log("Device to measurement map: " + result);
+				public void onSuccess(Map<Device, Measurement> deviceMeasurementMap) {
+					setPointValuesAndColors(deviceMeasurementMap, boreholes, parameterUnit);
 				}
 
 				@Override
@@ -294,10 +305,6 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 				}
 			});
 		}
-
-		GWT.log("Point lists: " + boreholes);
-
-
 
 
 
@@ -473,8 +480,9 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 									measurement.getTimelineId())) {
 								String deviceId = timelineIdDeviceIdMap.get(
 										measurement.getTimelineId());
-								Optional<Device> foundDevice = configuration.getProfileDevicesMap().get(
-										configuration.getPickedProfile()).stream()
+								Optional<Device> foundDevice = configuration.getProfileDevicesMap()
+										.get(configuration.getPickedProfile())
+										.stream()
 										.filter(device -> device.getId().equals(deviceId))
 										.findFirst();
 								result.put(foundDevice.get(), measurement);
@@ -625,5 +633,129 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		}
 
 		return result;
+	}
+
+	private void setPointValuesAndColors(Map<Device, Measurement> deviceMeasurementMap,
+			List<Borehole> boreholes, String parameterUnit) {
+		String gradientId = "analysis:" + parameterUnit;
+		setupGradients(deviceMeasurementMap.values(), parameterUnit, gradientId);
+		IntStream.range(0, boreholes.size()).forEach(index -> {
+			Borehole borehole = boreholes.get(index);
+
+			if (borehole.virtual) {
+				if (index == 0) {
+					//first virtual borehole with one point
+					Optional<Borehole> nextNonVirtual = boreholes.subList(1, boreholes.size())
+							.stream()
+							.filter(bh -> !bh.virtual)
+							.findFirst();
+
+					if (nextNonVirtual.isPresent()) {
+						borehole.points.get(0).value = nextNonVirtual.get().points.get(1).value;
+					} else {
+						borehole.points.get(0).value = 0.0;
+					}
+				} else if (index == boreholes.size() - 1) {
+					//last virtual borehole with one point
+					Optional<Borehole> previousNonVirtual = Lists.reverse(
+							boreholes.subList(0, boreholes.size() - 1))
+								.stream()
+								.filter(bh -> !bh.virtual)
+								.findFirst();
+
+					if (previousNonVirtual.isPresent()) {
+						borehole.points.get(0).value = previousNonVirtual.get().points.get(1).value;
+					} else {
+						borehole.points.get(0).value = 0.0;
+					}
+				} else {
+					//intermediary boreholes with two points
+					Optional<Borehole> nextNonVirtual = boreholes.subList(1, boreholes.size())
+							.stream()
+							.filter(bh -> !bh.virtual)
+							.findFirst();
+					Optional<Borehole> previousNonVirtual = Lists.reverse(
+							boreholes.subList(0, boreholes.size() - 1))
+								.stream()
+								.filter(bh -> !bh.virtual)
+								.findFirst();
+
+					if (previousNonVirtual.isPresent() && nextNonVirtual.isPresent()) {
+						Point previousBottomPoint = previousNonVirtual.get().points.get(1);
+						Point nextBottomPoint = nextNonVirtual.get().points.get(1);
+						Point bottomPoint = borehole.points.get(0);
+						bottomPoint.value = (previousBottomPoint.value - nextBottomPoint.value)
+								* ((bottomPoint.x - previousBottomPoint.x)
+										/ nextBottomPoint.x - previousBottomPoint.x);
+
+						Point previousTopPoint = previousNonVirtual.get().points.get(
+								previousNonVirtual.get().points.size() - 2);
+						Point nextTopPoint = nextNonVirtual.get().points.get(
+								nextNonVirtual.get().points.size() - 2);
+						Point topPoint = borehole.points.get(borehole.points.size() - 1);
+						topPoint.value = (previousTopPoint.value - nextTopPoint.value)
+								* ((topPoint.x - previousTopPoint.x)
+										/ nextTopPoint.x - previousTopPoint.x);
+					} else if (!previousNonVirtual.isPresent() && nextNonVirtual.isPresent()) {
+						borehole.points.get(0).value = nextNonVirtual.get().points.get(1).value;
+						borehole.points.get(borehole.points.size() - 1).value =
+								nextNonVirtual.get().points.get(
+										nextNonVirtual.get().points.size() - 2).value;
+					} else if (previousNonVirtual.isPresent() && !nextNonVirtual.isPresent()) {
+						borehole.points.get(0).value = previousNonVirtual.get().points.get(1).value;
+						borehole.points.get(borehole.points.size() - 1).value =
+								previousNonVirtual.get().points.get(
+										previousNonVirtual.get().points.size() - 2).value;
+					} else {
+						borehole.points.get(0).value = 0.0;
+						borehole.points.get(borehole.points.size() - 1).value = 0.0;
+					}
+				}
+			} else {
+				if (borehole.points.size() > 2) {
+					Measurement bottomMeasurement = deviceMeasurementMap.get(
+							borehole.points.get(1).device);
+					double bottomValue = bottomMeasurement == null ? 0.0
+							: bottomMeasurement.getValue();
+					Measurement topMeasurement = deviceMeasurementMap.get(
+							borehole.points.get(borehole.points.size() - 2).device);
+					double topValue = topMeasurement == null ? 0.0
+							: topMeasurement.getValue();
+					borehole.points.get(0).value = bottomValue;
+					borehole.points.get(borehole.points.size() - 1).value = topValue;
+				}
+			}
+
+			setRgbValues(borehole, gradientId);
+		});
+	}
+
+	private void setupGradients(Collection<Measurement> measurements, String parameterUnit,
+			String gradientId) {
+		double oldMinGradient = 0.0, oldMaxGradient = 0.0;
+		boolean oldGradientExists = false;
+
+		if (gradientsUtil.contains(gradientId)) {
+			oldMinGradient = gradientsUtil.getMinValue(gradientId);
+			oldMaxGradient = gradientsUtil.getMaxValue(gradientId);
+			oldGradientExists = true;
+		}
+
+		measurements.forEach(measurement -> gradientsUtil.updateValues(
+				gradientId, measurement.getValue()));
+
+		if (oldGradientExists
+				&& gradientsUtil.isExtended(gradientId, oldMinGradient, oldMaxGradient)) {
+			eventBus.gradientExtended(gradientId);
+		}
+	}
+
+	private void setRgbValues(Borehole borehole, String gradientId) {
+		borehole.points.forEach(point -> {
+			Color color = gradientsUtil.getColor(gradientId, point.value);
+			point.r = color.getR();
+			point.g = color.getG();
+			point.b = color.getB();
+		});
 	}
 }
