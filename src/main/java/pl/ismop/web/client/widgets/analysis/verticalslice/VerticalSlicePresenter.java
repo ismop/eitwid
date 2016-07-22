@@ -23,7 +23,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -190,11 +189,11 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	}
 
 	private void refreshView() {
-//		if (!view.canRender()) {
-//			eventBus.showSimpleError(view.cannotRenderMessage());
-//
-//			return;
-//		}
+		if (!view.canRender()) {
+			eventBus.showSimpleError(view.cannotRenderMessage());
+
+			return;
+		}
 
 		view.showLoadingState(true);
 		Profile pickedProfile = configuration.getPickedProfile();
@@ -293,10 +292,50 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		ListenableFuture<Map<Device, Measurement>> measurementsFuture = retrieveMeasurements();
 
 		if (configuration.getDataSelector().equals("0")
-				&& parameter.getMeasurementTypeName().equals("Temperatura")) {
+				&& parameter.getMeasurementTypeName().equals("Temperatura-disabled")) {
 			//real data is used for the temperature parameter so the external profile nodes can be
 			//assigned temperature values from the weather station
+			ListenableFuture<Optional<Measurement>> temperatureFuture = retrieveTemperatureReading();
+			ListenableFuture<List<Object>> measurementsWithTemperatureFuture =
+					Futures.allAsList(measurementsFuture, temperatureFuture);
+			Futures.addCallback(measurementsWithTemperatureFuture,
+					new FutureCallback<List<Object>>() {
+						@Override
+						public void onSuccess(List<Object> result) {
+							Map<Device, Measurement> deviceMeasurementMap =
+									(Map<Device, Measurement>) result.get(0);
+							Optional<Measurement> temperature =
+									(Optional<Measurement>) result.get(1);
+							String gradientId = "analysis:" + parameterUnit;
 
+							if (temperature.isPresent()) {
+								gradientsUtil.updateValues(gradientId,
+										temperature.get().getValue());
+							}
+
+							setPointValuesAndColors(deviceMeasurementMap, boreholes, parameterUnit,
+									gradientId, temperature);
+							view.showLoadingState(false);
+							view.clear();
+							view.init();
+
+							boolean leftBank = false;
+
+							if (configuration.getPickedProfile().getShape()
+									.getCoordinates().get(0).get(0) > 19.676851838778) {
+								leftBank = true;
+							}
+
+							view.drawCrosssection(parameterUnit, leftBank, boreholes,
+									createLegend(gradientId));
+						}
+
+						@Override
+						public void onFailure(Throwable t) {
+							view.showLoadingState(false);
+							eventBus.showError(new ErrorDetails(t.getMessage()));
+						}
+			});
 		} else {
 			//all nodes are assigned values according to the retrieved measurements
 			Futures.addCallback(measurementsFuture, new FutureCallback<Map<Device, Measurement>>() {
@@ -304,7 +343,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 				public void onSuccess(Map<Device, Measurement> deviceMeasurementMap) {
 					String gradientId = "analysis:" + parameterUnit;
 					setPointValuesAndColors(deviceMeasurementMap, boreholes, parameterUnit,
-							gradientId);
+							gradientId, Optional.empty());
 					view.showLoadingState(false);
 					view.clear();
 					view.init();
@@ -318,7 +357,6 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 					view.drawCrosssection(parameterUnit, leftBank, boreholes,
 							createLegend(gradientId));
-					GWT.log("Final boreholes: " + boreholes);
 				}
 
 				@Override
@@ -328,6 +366,55 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 				}
 			});
 		}
+	}
+
+	private ListenableFuture<Optional<Measurement>> retrieveTemperatureReading() {
+		ListenableFuture<List<Device>> weatherDevicesFuture =
+				dapController.getDevicesForType("weather_station");
+		ListenableFuture<Device> deviceFuture = Futures.transform(weatherDevicesFuture,
+				weatherDevices -> {
+					if (weatherDevices.size() > 0) {
+						return weatherDevices.get(0);
+					} else {
+						return null;
+					}
+		});
+		ListenableFuture<List<Parameter>> temperatureParametersFuture = Futures.transformAsync(
+				deviceFuture, device -> dapController.getParameters(Arrays.asList(device.getId())));
+		ListenableFuture<Parameter> temperatureParameterFuture = Futures.transform(
+				temperatureParametersFuture, parameters -> {
+					Optional<Parameter> temperatureParameter = parameters.stream()
+						.filter(parameter -> parameter.getMeasurementTypeName()
+								.equals("Temperatura"))
+						.findFirst();
+
+					return temperatureParameter.get();
+				});
+		ListenableFuture<List<Context>> contextsFuture = dapController.getContext("measurements");
+		ListenableFuture<List<Object>> contextsAndParameterFuture = Futures.allAsList(
+				contextsFuture, temperatureParameterFuture);
+		ListenableFuture<List<Timeline>> timelinesFuture = Futures.transformAsync(
+				contextsAndParameterFuture, results -> {
+					List<Context> contexts = (List<Context>) results.get(0);
+					Parameter temperatureParameter = (Parameter) results.get(1);
+
+					return dapController.getTimelinesForParameterIds(
+							contexts.get(0).getId(), Arrays.asList(temperatureParameter.getId()));
+				});
+		ListenableFuture<List<Measurement>> measurementsFuture = Futures.transformAsync(
+				timelinesFuture, timelines -> {
+					Date queryDate = configuration.getDataSelector().equals("0")
+							? currentDate
+							:	new Date(currentDate.getTime()
+									- configuration.getExperiment().getStart().getTime());
+
+					return dapController.getLastMeasurementsWith24HourMod(
+							Arrays.asList(timelines.get(0).getId()),
+							queryDate);
+				});
+
+		return Futures.transform(measurementsFuture,
+				measurements -> Optional.ofNullable(measurements.get(0)));
 	}
 
 	private ListenableFuture<Map<Device, Measurement>> retrieveMeasurements() {
@@ -376,7 +463,6 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 								Function.identity())));
 		ListenableFuture<Map<Device, Measurement>> deviceIdMeasurementMapFuture =
 				Futures.transformAsync(deviceIdTimelineMapFuture, deviceIdTimelineMap -> {
-					GWT.log("Device id to timeline map: " + deviceIdTimelineMap);
 					List<String> timelineIds = deviceIdTimelineMap.values().stream()
 							.map(Timeline::getId)
 							.collect(Collectors.toList());
@@ -465,7 +551,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	}
 
 	private void setPointValuesAndColors(Map<Device, Measurement> deviceMeasurementMap,
-			List<Borehole> boreholes, String parameterUnit, String gradientId) {
+			List<Borehole> boreholes, String parameterUnit, String gradientId,
+			Optional<Measurement> externalOverride) {
 		setupGradients(deviceMeasurementMap.values(), parameterUnit, gradientId);
 		IntStream.range(0, boreholes.size()).forEach(index -> {
 			Borehole borehole = boreholes.get(index);
@@ -473,28 +560,36 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 			if (borehole.virtual) {
 				if (index == 0) {
 					//first virtual borehole with one point
-					Optional<Borehole> nextNonVirtual = boreholes.subList(1, boreholes.size())
-							.stream()
-							.filter(bh -> !bh.virtual)
-							.findFirst();
-
-					if (nextNonVirtual.isPresent()) {
-						borehole.points.get(0).value = nextNonVirtual.get().points.get(1).value;
+					if (externalOverride.isPresent()) {
+						borehole.points.get(0).value = externalOverride.get().getValue();
 					} else {
-						borehole.points.get(0).value = 0.0;
-					}
-				} else if (index == boreholes.size() - 1) {
-					//last virtual borehole with one point
-					Optional<Borehole> previousNonVirtual = Lists.reverse(
-							boreholes.subList(0, boreholes.size() - 1))
+						Optional<Borehole> nextNonVirtual = boreholes.subList(1, boreholes.size())
 								.stream()
 								.filter(bh -> !bh.virtual)
 								.findFirst();
 
-					if (previousNonVirtual.isPresent()) {
-						borehole.points.get(0).value = previousNonVirtual.get().points.get(1).value;
+						if (nextNonVirtual.isPresent()) {
+							borehole.points.get(0).value = nextNonVirtual.get().points.get(1).value;
+						} else {
+							borehole.points.get(0).value = 0.0;
+						}
+					}
+				} else if (index == boreholes.size() - 1) {
+					//last virtual borehole with one point
+					if (externalOverride.isPresent()) {
+						borehole.points.get(0).value = externalOverride.get().getValue();
 					} else {
-						borehole.points.get(0).value = 0.0;
+						Optional<Borehole> previousNonVirtual = Lists.reverse(
+								boreholes.subList(0, boreholes.size() - 1))
+								.stream()
+								.filter(bh -> !bh.virtual)
+								.findFirst();
+
+						if (previousNonVirtual.isPresent()) {
+							borehole.points.get(0).value = previousNonVirtual.get().points.get(1).value;
+						} else {
+							borehole.points.get(0).value = 0.0;
+						}
 					}
 				} else {
 					//intermediary boreholes with two points
@@ -508,6 +603,11 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 								.filter(bh -> !bh.virtual)
 								.findFirst();
 
+					if (externalOverride.isPresent()) {
+						borehole.points.get(borehole.points.size() - 1).value =
+								externalOverride.get().getValue();
+					}
+
 					if (previousNonVirtual.isPresent() && nextNonVirtual.isPresent()) {
 						Point previousBottomPoint = previousNonVirtual.get().points.get(1);
 						Point nextBottomPoint = nextNonVirtual.get().points.get(1);
@@ -517,28 +617,39 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 								* ((bottomPoint.x - previousBottomPoint.x)
 										/ (nextBottomPoint.x - previousBottomPoint.x));
 
-						Point previousTopPoint = previousNonVirtual.get().points.get(
-								previousNonVirtual.get().points.size() - 2);
-						Point nextTopPoint = nextNonVirtual.get().points.get(
-								nextNonVirtual.get().points.size() - 2);
-						Point topPoint = borehole.points.get(borehole.points.size() - 1);
-						topPoint.value = previousTopPoint.value
-								- (previousTopPoint.value - nextTopPoint.value)
-								* ((topPoint.x - previousTopPoint.x)
-										/ (nextTopPoint.x - previousTopPoint.x));
+						if (!externalOverride.isPresent()) {
+							Point previousTopPoint = previousNonVirtual.get().points.get(
+									previousNonVirtual.get().points.size() - 2);
+							Point nextTopPoint = nextNonVirtual.get().points.get(
+									nextNonVirtual.get().points.size() - 2);
+							Point topPoint = borehole.points.get(borehole.points.size() - 1);
+							topPoint.value = previousTopPoint.value
+									- (previousTopPoint.value - nextTopPoint.value)
+									* ((topPoint.x - previousTopPoint.x)
+											/ (nextTopPoint.x - previousTopPoint.x));
+						}
 					} else if (!previousNonVirtual.isPresent() && nextNonVirtual.isPresent()) {
 						borehole.points.get(0).value = nextNonVirtual.get().points.get(1).value;
-						borehole.points.get(borehole.points.size() - 1).value =
-								nextNonVirtual.get().points.get(
-										nextNonVirtual.get().points.size() - 2).value;
+
+						if (!externalOverride.isPresent()) {
+							borehole.points.get(borehole.points.size() - 1).value =
+									nextNonVirtual.get().points.get(
+											nextNonVirtual.get().points.size() - 2).value;
+						}
 					} else if (previousNonVirtual.isPresent() && !nextNonVirtual.isPresent()) {
 						borehole.points.get(0).value = previousNonVirtual.get().points.get(1).value;
-						borehole.points.get(borehole.points.size() - 1).value =
-								previousNonVirtual.get().points.get(
-										previousNonVirtual.get().points.size() - 2).value;
+
+						if (!externalOverride.isPresent()) {
+							borehole.points.get(borehole.points.size() - 1).value =
+									previousNonVirtual.get().points.get(
+											previousNonVirtual.get().points.size() - 2).value;
+						}
 					} else {
 						borehole.points.get(0).value = 0.0;
-						borehole.points.get(borehole.points.size() - 1).value = 0.0;
+
+						if (!externalOverride.isPresent()) {
+							borehole.points.get(borehole.points.size() - 1).value = 0.0;
+						}
 					}
 				}
 			} else {
@@ -547,12 +658,18 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 							borehole.points.get(1).device);
 					double bottomValue = bottomMeasurement == null ? 0.0
 							: bottomMeasurement.getValue();
-					Measurement topMeasurement = deviceMeasurementMap.get(
-							borehole.points.get(borehole.points.size() - 2).device);
-					double topValue = topMeasurement == null ? 0.0
-							: topMeasurement.getValue();
 					borehole.points.get(0).value = bottomValue;
-					borehole.points.get(borehole.points.size() - 1).value = topValue;
+
+					if (externalOverride.isPresent()) {
+						borehole.points.get(borehole.points.size() - 1).value =
+								externalOverride.get().getValue();
+					} else {
+						Measurement topMeasurement = deviceMeasurementMap.get(
+								borehole.points.get(borehole.points.size() - 2).device);
+						double topValue = topMeasurement == null ? 0.0
+								: topMeasurement.getValue();
+						borehole.points.get(borehole.points.size() - 1).value = topValue;
+					}
 
 					IntStream.range(1, borehole.points.size() - 1).forEach(nextIndex -> {
 						Measurement measurement = deviceMeasurementMap.get(
