@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -292,7 +293,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		ListenableFuture<Map<Device, Measurement>> measurementsFuture = retrieveMeasurements();
 
 		if (configuration.getDataSelector().equals("0")
-				&& parameter.getMeasurementTypeName().equals("Temperatura-disabled")) {
+				&& parameter.getMeasurementTypeName().equals("Temperatura")) {
 			//real data is used for the temperature parameter so the external profile nodes can be
 			//assigned temperature values from the weather station
 			ListenableFuture<Optional<Measurement>> temperatureFuture = retrieveTemperatureReading();
@@ -357,6 +358,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 					view.drawCrosssection(parameterUnit, leftBank, boreholes,
 							createLegend(gradientId));
+					GWT.log("All boreholes after processing: " + boreholes);
 				}
 
 				@Override
@@ -623,13 +625,14 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 						}
 					}
 				} else {
-					//intermediary boreholes with two points
-					Optional<Borehole> nextNonVirtual = boreholes.subList(1, boreholes.size())
+					//intermediary boreholes with many points
+					Optional<Borehole> nextNonVirtual = boreholes
+							.subList(index + 1, boreholes.size())
 							.stream()
 							.filter(bh -> !bh.virtual)
 							.findFirst();
 					Optional<Borehole> previousNonVirtual = Lists.reverse(
-							boreholes.subList(0, boreholes.size() - 1))
+							boreholes.subList(0, index))
 								.stream()
 								.filter(bh -> !bh.virtual)
 								.findFirst();

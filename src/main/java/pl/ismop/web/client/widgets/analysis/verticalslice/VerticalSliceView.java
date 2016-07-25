@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -85,16 +86,17 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		for (int i = 0; i < boreholes.size() - 1; i++) {
 			Borehole leftBorehole = boreholes.get(i);
 			Borehole rightBorehole = boreholes.get(i + 1);
-			int leftPointIndex = 0, rightPointIndex = 0;
+			int leftPointIndex = 0;
+			int rightPointIndex = 0;
 			boolean allFacesCreated = false;
 
 			//creating faces between every two boreholes
 			while (!allFacesCreated) {
-				JavaScriptObject geometry = createGeometry();
-				List<Point> leftPoints = leftBorehole.points.subList(leftPointIndex,
+				List<Point> leftPoints = Lists.reverse(leftBorehole.points).subList(leftPointIndex,
 						Math.min(leftPointIndex + 2, leftBorehole.points.size()));
-				List<Point> rightPoints = rightBorehole.points.subList(rightPointIndex,
+				List<Point> rightPoints = Lists.reverse(rightBorehole.points).subList(rightPointIndex,
 						Math.min(rightPointIndex + 2, rightBorehole.points.size()));
+				JavaScriptObject geometry = createGeometry();
 
 				if (leftPoints.size() == 1 && rightPoints.size() == 2) {
 					addVertices(geometry,
@@ -218,7 +220,10 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 	}-*/;
 
 	private native JavaScriptObject createMesh(JavaScriptObject geometry) /*-{
-		var material = new $wnd.THREE.MeshBasicMaterial({ vertexColors: $wnd.THREE.VertexColors });
+		var material = new $wnd.THREE.MeshBasicMaterial({
+			vertexColors: $wnd.THREE.VertexColors,
+			side: $wnd.THREE.DoubleSide
+		});
 
 		return new $wnd.THREE.Mesh(geometry, material);
 	}-*/;
