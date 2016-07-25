@@ -1,11 +1,18 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
-import org.moxieapps.gwt.highcharts.client.*;
+
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.IsmopWebEntryPoint;
 import pl.ismop.web.client.MainEventBus;
@@ -17,21 +24,21 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.geojson.MapFeature;
+import pl.ismop.web.client.util.WaterHeight;
 import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAnalysisSidePanelPresenter;
+import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
+import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
-import java.util.*;
-
 @Presenter(view = AnalysisSidePanelView.class, multiple = true)
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
     private final DapController dapController;
-    private final IsmopProperties properties;
-    private PlotLine currentTimePlotLine;
+    private final IsmopProperties properties;    
 
     private MapPresenter miniMap;
-    private Chart waterWave;
+    private ChartPresenter waterWave;
 
     private Experiment selectedExperiment;
     private AnalysisSidePanelMessages messages;
@@ -70,20 +77,10 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private void initWaterWave() {
         if (waterWave == null) {
-            waterWave = new Chart().
-                    setChartTitle(new ChartTitle().setText(messages.waterWaveChartTitle()));
-
-            waterWave.setHeight(view.getWaterWavePanelHeight());
-            waterWave.setOption("/chart/zoomType", "x");
-
-            waterWave.getXAxis().
-                    setType(Axis.Type.DATE_TIME).
-                    setAxisTitle(new AxisTitle().setText(messages.time())).
-                    setDateTimeLabelFormats(new DateTimeLabelFormats().
-                            setMonth("%e. %b").
-                            setYear("%b"));
-
-            view.setWaterWavePanel(waterWave);
+        	waterWave = eventBus.addHandler(ChartPresenter.class);
+        	waterWave.setHeight(view.getWaterWavePanelHeight());  
+        	waterWave.initChart();
+        	view.setWaterWavePanel(waterWave.getView());
         }
     }
 
@@ -102,12 +99,13 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             initWaterWave();
             initMinimap();
             loadExperimentWaveShape();
+            loadWaterHeight();
             loadExperimentLevee();
             eventBus.experimentChanged(selectedExperiment);
         }
     }
 
-    @Override
+	@Override
     public void export() {
         Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint")
                 + "/experiment_exporter/" + selectedExperiment.getId() +
@@ -165,6 +163,20 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             });
         }
     }
+    
+    private void loadWaterHeight() {
+    	new WaterHeight(dapController).loadAverage(selectedExperiment.getStart(), selectedExperiment.getEnd(), new WaterHeight.WaterHeightCallback() {
+			@Override
+			public void onError(ErrorDetails errorDetails) {
+				eventBus.showError(errorDetails);
+			}
+			
+			@Override
+			public void success(Stream<ChartSeries> series) {
+				series.forEach(s -> waterWave.addChartSeries(s));
+			}
+		});
+	}
 
     private void loadExperimentLevee() {
         miniMap.reset(false);
@@ -185,44 +197,41 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     private void showExperimentWaveShape(Map<Parameter, List<Measurement>> series) {
-        waterWave.removeAllSeries();
-        Parameter parameter = null;
+        waterWave.reset();        
         for (Map.Entry<Parameter, List<Measurement>> entry : series.entrySet()) {
-            parameter = entry.getKey();
-            Series s = waterWave.createSeries().
-                    setType(Series.Type.SPLINE).
-                    setName(parameter.getParameterName());
+        	Parameter parameter = entry.getKey();
+            ChartSeries s = new ChartSeries();
+            s.setName(parameter.getParameterName());
+            s.setUnit(parameter.getMeasurementTypeUnit());
+            s.setLabel(parameter.getMeasurementTypeName());
+            s.setParameterId(parameter.getId());            
 
             long diff = 0;
             if(entry.getValue().size() > 0) {
+            	s.setTimelineId(entry.getValue().get(0).getTimelineId());
                 diff = entry.getValue().get(0).getTimestamp().getTime() - selectedExperiment.getStart().getTime();
             }
 
-            for (Measurement measurement : entry.getValue()) {
-                long time = measurement.getTimestamp().getTime() - diff;
-                if (time > selectedExperiment.getEnd().getTime()) {
-                    GWT.log("Warning experiment water wave is longer then experiment");
-                    break;
-                }
-
-                s.addPoint(time, measurement.getValue());
+            int size = entry.getValue().size();
+            Number[][] values = new Number[size][2];
+            for(int i = 0; i < size; i++) {
+            	Measurement measurement = entry.getValue().get(i);
+            	long time = measurement.getTimestamp().getTime() - diff;
+            	if (time > selectedExperiment.getEnd().getTime()) {
+            		GWT.log("Warning experiment water wave is longer then experiment");
+            		break;
+            	}
+            	values[i][0] = time;
+    			values[i][1] = measurement.getValue();
             }
-            waterWave.addSeries(s);
-        }
-
-        if(parameter != null) {
-            waterWave.getYAxis().setAxisTitleText(parameter.getMeasurementTypeName() + " [" + parameter.getMeasurementTypeUnit() + "]");
+            s.setValues(values);
+            waterWave.addChartSeries(s);
         }
     }
 
     public void onDateChanged(Date selectedDate) {
         if (waterWave != null) {
-            if (currentTimePlotLine != null) {
-                waterWave.getXAxis().removePlotLine(currentTimePlotLine);
-            }
-            currentTimePlotLine = waterWave.getXAxis().createPlotLine().
-                    setWidth(2).setColor(properties.selectionColor()).setValue(selectedDate.getTime());
-            waterWave.getXAxis().addPlotLines(currentTimePlotLine);
+        	waterWave.selectDate(selectedDate, properties.selectionColor());
         }
     }
 
