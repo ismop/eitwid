@@ -5,9 +5,11 @@ import java.util.Map;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
+import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSlicePresenter.Borehole;
+
 public interface IVerticalSliceView extends IsWidget {
 	interface IVerticalSlicePresenter {
-		
+
 	}
 
 	void showLoadingState(boolean show);
@@ -16,13 +18,12 @@ public interface IVerticalSliceView extends IsWidget {
 
 	void init();
 
-	void drawCrosssection(String parameterUnit, boolean leftBank,
-			Map<Double, List<Double>> profileAndDevicePositionsWithValues,
+	void drawCrosssection(String parameterUnit, boolean leftBank, List<Borehole> boreholes,
 			Map<Double, List<Double>> legend);
 
 	String noMeasurementsMessage();
 
-	String cannotRenderMessages();
+	String cannotRenderMessage();
 
 	boolean canRender();
 }

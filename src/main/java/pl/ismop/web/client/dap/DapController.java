@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
@@ -833,6 +834,24 @@ public class DapController {
 				callback.processDeviceAggregations(response.getDeviceAggregations());
 			}
 		});
+	}
+	
+	public ListenableFuture<List<DeviceAggregate>> getDeviceAggregations(String profileId) {
+		SettableFuture<List<DeviceAggregate>> result = SettableFuture.create();
+		deviceAggregationService.getDeviceAggregations(profileId,
+				new MethodCallback<DeviceAggregationsResponse>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+
+			@Override
+			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+				result.set(response.getDeviceAggregations());
+			}
+		});
+		
+		return result;
 	}
 	
 	public void getDeviceAggregations(List<String> profileIds, final DeviceAggregatesCallback callback) {
