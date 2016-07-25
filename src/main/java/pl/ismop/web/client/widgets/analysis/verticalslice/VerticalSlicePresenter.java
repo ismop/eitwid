@@ -554,6 +554,37 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 			List<Borehole> boreholes, String parameterUnit, String gradientId,
 			Optional<Measurement> externalOverride) {
 		setupGradients(deviceMeasurementMap.values(), parameterUnit, gradientId);
+
+		//setting values for all non-virtual boreholes first
+		boreholes.stream().filter(borehole -> !borehole.virtual).forEach(borehole -> {
+			if (borehole.points.size() > 2) {
+				Measurement bottomMeasurement = deviceMeasurementMap.get(
+						borehole.points.get(1).device);
+				double bottomValue = bottomMeasurement == null ? 0.0 : bottomMeasurement.getValue();
+				borehole.points.get(0).value = bottomValue;
+
+				if (externalOverride.isPresent()) {
+					borehole.points.get(borehole.points.size() - 1).value =
+							externalOverride.get().getValue();
+				} else {
+					Measurement topMeasurement = deviceMeasurementMap.get(
+							borehole.points.get(borehole.points.size() - 2).device);
+					double topValue = topMeasurement == null ? 0.0 : topMeasurement.getValue();
+					borehole.points.get(borehole.points.size() - 1).value = topValue;
+				}
+
+				IntStream.range(1, borehole.points.size() - 1).forEach(nextIndex -> {
+					Measurement measurement = deviceMeasurementMap.get(
+							borehole.points.get(nextIndex).device);
+					borehole.points.get(nextIndex).value = measurement == null ? 0.0
+							: measurement.getValue();
+				});
+
+				setRgbValues(borehole, gradientId);
+			}
+		});
+
+		//setting values for all virtual boreholes
 		IntStream.range(0, boreholes.size()).forEach(index -> {
 			Borehole borehole = boreholes.get(index);
 
@@ -651,32 +682,6 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 							borehole.points.get(borehole.points.size() - 1).value = 0.0;
 						}
 					}
-				}
-			} else {
-				if (borehole.points.size() > 2) {
-					Measurement bottomMeasurement = deviceMeasurementMap.get(
-							borehole.points.get(1).device);
-					double bottomValue = bottomMeasurement == null ? 0.0
-							: bottomMeasurement.getValue();
-					borehole.points.get(0).value = bottomValue;
-
-					if (externalOverride.isPresent()) {
-						borehole.points.get(borehole.points.size() - 1).value =
-								externalOverride.get().getValue();
-					} else {
-						Measurement topMeasurement = deviceMeasurementMap.get(
-								borehole.points.get(borehole.points.size() - 2).device);
-						double topValue = topMeasurement == null ? 0.0
-								: topMeasurement.getValue();
-						borehole.points.get(borehole.points.size() - 1).value = topValue;
-					}
-
-					IntStream.range(1, borehole.points.size() - 1).forEach(nextIndex -> {
-						Measurement measurement = deviceMeasurementMap.get(
-								borehole.points.get(nextIndex).device);
-						borehole.points.get(nextIndex).value = measurement == null ? 0.0
-								: measurement.getValue();
-					});
 				}
 			}
 
