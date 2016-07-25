@@ -236,23 +236,30 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		});
 		normalizeCoordinates(boreholes, pickedProfile.getBaseHeight());
 
-		//adding profile's top end points
+		//adding boreholes corresponding to profile's top end points, each borehole has a couple of
+		//intermediary points
+		int numberOfIntermediaries = 3;
 		Optional<Double> profileWidth = boreholes.stream()
 				.flatMap(borehole -> borehole.points.stream())
 				.map(point -> point.x)
 				.max(Comparator.naturalOrder());
 		double topLeftPoint = profileWidth.get() / 2 - PROFILE_TOP_WIDTH / 2;
 		double topRightPoint = profileWidth.get() / 2 + PROFILE_TOP_WIDTH / 2;
-		boreholes.add(new Borehole(topLeftPoint,
-				Arrays.asList(
-						new Point(topLeftPoint, PROFILE_HEIGHT, true),
-						new Point(topLeftPoint, 0.0, true)),
-				true));
-		boreholes.add(new Borehole(topRightPoint,
-				Arrays.asList(
-						new Point(topRightPoint, PROFILE_HEIGHT, true),
-						new Point(topRightPoint, 0.0, true)),
-				true));
+		Borehole leftVirtualBorehole = new Borehole(topLeftPoint, new ArrayList<>(), true);
+		leftVirtualBorehole.points.addAll(Arrays.asList(
+				new Point(topLeftPoint, PROFILE_HEIGHT, true),
+				new Point(topLeftPoint, 0.0, true)));
+		Borehole rightVirtualBorehole = new Borehole(topRightPoint, new ArrayList<>(), true);
+		rightVirtualBorehole.points.addAll(Arrays.asList(
+				new Point(topRightPoint, PROFILE_HEIGHT, true),
+				new Point(topRightPoint, 0.0, true)));
+		boreholes.add(leftVirtualBorehole);
+		boreholes.add(rightVirtualBorehole);
+		IntStream.rangeClosed(1, numberOfIntermediaries).forEach(intermediaryIndex -> {
+			double height = (PROFILE_HEIGHT / (numberOfIntermediaries + 1)) * intermediaryIndex;
+			leftVirtualBorehole.points.add(new Point(leftVirtualBorehole.x, height, true));
+			rightVirtualBorehole.points.add(new Point(rightVirtualBorehole.x, height, true));
+		});
 
 		//sorting boreholes and points
 		boreholes.forEach(borehole -> borehole.points.sort(
@@ -625,7 +632,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 						}
 					}
 				} else {
-					//intermediary boreholes with many points
+					//intermediary boreholes with many intermediary points
 					Optional<Borehole> nextNonVirtual = boreholes
 							.subList(index + 1, boreholes.size())
 							.stream()
@@ -646,10 +653,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 						Point previousBottomPoint = previousNonVirtual.get().points.get(1);
 						Point nextBottomPoint = nextNonVirtual.get().points.get(1);
 						Point bottomPoint = borehole.points.get(0);
-						bottomPoint.value = previousBottomPoint.value
-								- (previousBottomPoint.value - nextBottomPoint.value)
-								* ((bottomPoint.x - previousBottomPoint.x)
-										/ (nextBottomPoint.x - previousBottomPoint.x));
+						bottomPoint.value = calculateValue(previousBottomPoint, nextBottomPoint,
+								bottomPoint);
 
 						if (!externalOverride.isPresent()) {
 							Point previousTopPoint = previousNonVirtual.get().points.get(
@@ -657,11 +662,22 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 							Point nextTopPoint = nextNonVirtual.get().points.get(
 									nextNonVirtual.get().points.size() - 2);
 							Point topPoint = borehole.points.get(borehole.points.size() - 1);
-							topPoint.value = previousTopPoint.value
-									- (previousTopPoint.value - nextTopPoint.value)
-									* ((topPoint.x - previousTopPoint.x)
-											/ (nextTopPoint.x - previousTopPoint.x));
+							topPoint.value = calculateValue(previousTopPoint, nextTopPoint,
+									topPoint);
 						}
+
+						//setting values for intermediary points
+						IntStream.range(1, borehole.points.size() - 1).forEach(middlePointIndex -> {
+							Point previousPoint = previousNonVirtual.get().points.get(Math.min(
+									middlePointIndex,
+									previousNonVirtual.get().points.size() - 2));
+							Point nextPoint = nextNonVirtual.get().points.get(Math.min(
+									middlePointIndex,
+									nextNonVirtual.get().points.size() - 2));
+							borehole.points.get(middlePointIndex).value = calculateValue(
+									previousPoint, nextPoint,
+									borehole.points.get(middlePointIndex));
+						});
 					} else if (!previousNonVirtual.isPresent() && nextNonVirtual.isPresent()) {
 						borehole.points.get(0).value = nextNonVirtual.get().points.get(1).value;
 
@@ -670,6 +686,14 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 									nextNonVirtual.get().points.get(
 											nextNonVirtual.get().points.size() - 2).value;
 						}
+
+						//setting values for intermediary points
+						IntStream.range(1, borehole.points.size() - 1).forEach(middlePointIndex -> {
+							Point nextPoint = nextNonVirtual.get().points.get(Math.min(
+									middlePointIndex,
+									nextNonVirtual.get().points.size() - 2));
+							borehole.points.get(middlePointIndex).value = nextPoint.value;
+						});
 					} else if (previousNonVirtual.isPresent() && !nextNonVirtual.isPresent()) {
 						borehole.points.get(0).value = previousNonVirtual.get().points.get(1).value;
 
@@ -678,18 +702,38 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 									previousNonVirtual.get().points.get(
 											previousNonVirtual.get().points.size() - 2).value;
 						}
+
+						//setting values for intermediary points
+						IntStream.range(1, borehole.points.size() - 1).forEach(middlePointIndex -> {
+							Point previousPoint = previousNonVirtual.get().points.get(Math.min(
+									middlePointIndex,
+									previousNonVirtual.get().points.size() - 2));
+							borehole.points.get(middlePointIndex).value = previousPoint.value;
+						});
 					} else {
 						borehole.points.get(0).value = 0.0;
 
 						if (!externalOverride.isPresent()) {
 							borehole.points.get(borehole.points.size() - 1).value = 0.0;
 						}
+
+						//setting values for intermediary points
+						IntStream.range(1, borehole.points.size() - 1).forEach(middlePointIndex -> {
+							borehole.points.get(middlePointIndex).value = 0.0;
+						});
 					}
 				}
 			}
 
 			setRgbValues(borehole, gradientId);
 		});
+	}
+
+	private double calculateValue(Point previousPoint, Point nextPoint, Point currentPoint) {
+		return previousPoint.value
+				- (previousPoint.value - nextPoint.value)
+				* ((currentPoint.x - previousPoint.x)
+						/ (nextPoint.x - previousPoint.x));
 	}
 
 	private void setupGradients(Collection<Measurement> measurements, String parameterUnit,
