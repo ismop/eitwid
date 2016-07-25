@@ -193,7 +193,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		clearDataSeries();
 	}
 
-	public void showLoading(String msg) {
+	public void showLoading(String msg) {		
 		chart.showLoading(msg);
 	}
 

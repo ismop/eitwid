@@ -449,8 +449,8 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					@SuppressWarnings("unchecked")
 					List<Parameter> parameters = (List<Parameter>) resultList.get(1);
 					waterLevelParameter = Iterables.find(parameters,
-							p -> p.getParameterName()
-								.equals("Monitorowanie wysokości fali - Level1_PV"));
+							p -> p.getCustomId()
+								.equals("pumpMonitoring.ASP_Level2_PV"));
 					
 					if (contexts.size() > 0 && parameters.size() > 0) {
 						return dapController.getTimelinesForParameterIds(
