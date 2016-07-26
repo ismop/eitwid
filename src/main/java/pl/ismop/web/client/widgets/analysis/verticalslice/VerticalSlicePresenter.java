@@ -237,8 +237,13 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		normalizeCoordinates(boreholes, pickedProfile.getBaseHeight());
 
 		//adding boreholes corresponding to profile's top end points, each borehole has a couple of
-		//intermediary points
-		int numberOfIntermediaries = 3;
+		//intermediary points equal to the maximam number of points in non-virtual boreholes minus 1
+		Optional<Integer> numberOfIntermediariesOptional = boreholes.stream()
+				.map(borehole -> borehole.points.size())
+				.max(Comparator.naturalOrder());
+		int numberOfIntermediaries = numberOfIntermediariesOptional.isPresent()
+				? numberOfIntermediariesOptional.get() - 1
+				: 0;
 		Optional<Double> profileWidth = boreholes.stream()
 				.flatMap(borehole -> borehole.points.stream())
 				.map(point -> point.x)
@@ -256,7 +261,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 		boreholes.add(leftVirtualBorehole);
 		boreholes.add(rightVirtualBorehole);
 		IntStream.rangeClosed(1, numberOfIntermediaries).forEach(intermediaryIndex -> {
-			double height = (PROFILE_HEIGHT / (numberOfIntermediaries + 1)) * intermediaryIndex;
+			double height = (PROFILE_HEIGHT / (numberOfIntermediaries + 1))
+					* intermediaryIndex;
 			leftVirtualBorehole.points.add(new Point(leftVirtualBorehole.x, height, true));
 			rightVirtualBorehole.points.add(new Point(rightVirtualBorehole.x, height, true));
 		});
