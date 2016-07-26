@@ -1,3 +1,7 @@
+System requirements:
+- Java version 8 (use Oracle JDK)
+- maven version 3.3
+
 To run development environment do the following:
 
 - `mvn gwt:run`,
