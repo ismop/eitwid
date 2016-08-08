@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:b='urn:import:org.gwtbootstrap3.client.ui'>
+     
+    <b:Panel ui:field="panel">
+		<b:PanelHeader>
+			<b:Heading ui:field="heading" size="H3" />
+		</b:PanelHeader>
+		<b:PanelBody>                                
+			<g:HTML ui:field="description"></g:HTML>                
+		</b:PanelBody>
+	</b:Panel>    
+</ui:UiBinder>

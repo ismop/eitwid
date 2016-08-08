@@ -16,8 +16,11 @@ public class Scenario {
 
     @Json(name = "timeline_ids")
     private List<String> timelineIds;
+    
+    @Json(name = "threat_level")
+    private int threatLevel;
 
-    public String getId() {
+	public String getId() {
         return id;
     }
 
@@ -56,4 +59,12 @@ public class Scenario {
     public void setTimelineIds(List<String> timelineIds) {
         this.timelineIds = timelineIds;
     }
+    
+    public int getThreatLevel() {
+		return threatLevel;
+	}
+
+	public void setThreatLevel(int threatLevel) {
+		this.threatLevel = threatLevel;
+	}
 }
