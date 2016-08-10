@@ -1,20 +1,26 @@
 package pl.ismop.web.client.widgets.common.map;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.geojson.*;
+import pl.ismop.web.client.geojson.GeoJsonFeature;
+import pl.ismop.web.client.geojson.GeoJsonFeatures;
+import pl.ismop.web.client.geojson.GeoJsonFeaturesEncDec;
+import pl.ismop.web.client.geojson.Geometry;
+import pl.ismop.web.client.geojson.MapFeature;
 import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Presenter(view = MapView.class, multiple = true)
 public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implements IMapPresenter {
@@ -28,11 +34,14 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	private boolean clickListeners;
 	
 	private boolean zoomed;
+
+	private Map<String, String> featureStrokeColor;
 	
 	@Inject
 	public MapPresenter(GeoJsonFeaturesEncDec geoJsonEncoderDecoder) {
 		this.geoJsonEncoderDecoder = geoJsonEncoderDecoder;
 		mapFeatures = new HashMap<>();
+		featureStrokeColor = new HashMap<>();
 	}
 
 	public void add(MapFeature mapFeature) {
@@ -83,7 +92,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			} else {
 				rm(entry);
 			}
-		}
+		}		
 	}
 
 	/**
@@ -230,6 +239,51 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public boolean isZoomed() {
 		return zoomed;
+	}
+	
+	public void setFeatureStrokeColor(MapFeature feature, String color) {
+		if (feature != null) {
+			featureStrokeColor.put(feature.getFeatureId(), color);
+		}
+	}
+	
+	public void rmFeatureStrokeColor(MapFeature feature) {
+		if (feature != null) {
+			featureStrokeColor.remove(feature.getFeatureId());
+		}
+	}
+	
+	@Override
+	public String getFeatureStrokeColor(String featureId, String colourType) {
+		if (featureStrokeColor.containsKey(featureId)) {
+			return featureStrokeColor.get(featureId);
+		} else if(featureId.startsWith("profile")) {
+			return getProfileStrokeColor(colourType);
+		} else if(featureId.startsWith("section")) {
+			return getSectionStrokeColor(colourType);
+		} else if(featureId.startsWith("deviceAggregate")) {
+			return "#ebf56f";
+		} else {
+			return "#aaaaaa";
+		}
+	}
+
+	private String getProfileStrokeColor(String colourType) {
+		return "neosentio".equalsIgnoreCase(colourType) ? "#3880ff" : "#ff5538";
+	}
+
+	private String getSectionStrokeColor(String colourType) {
+		switch (colourType) {
+			case "A":
+				return "#a6a6a6";
+			case "B":
+				return "#fff734";
+			case "C":
+				return "#878f39";
+			case "D":
+				return "#afbacc";
+		}
+		return "#ec8108";
 	}
 
 	private String geoJson(MapFeature mapFeature, Geometry geometry) {
