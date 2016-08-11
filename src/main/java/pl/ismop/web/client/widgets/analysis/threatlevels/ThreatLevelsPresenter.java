@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -63,5 +64,9 @@ public class ThreatLevelsPresenter extends BasePresenter<IThreatLevelsView, Main
 		}
 		
 		view.showScenarios(scenarios);
+	}
+	
+	public void onThreatLevelsChanged(String msg) {
+		GWT.log("Changing threat levels list" + msg);
 	}
 }

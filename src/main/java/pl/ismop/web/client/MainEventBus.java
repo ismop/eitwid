@@ -1,9 +1,13 @@
 package pl.ismop.web.client;
 
+import java.util.Date;
+import java.util.List;
+
 import com.mvp4g.client.annotation.Event;
 import com.mvp4g.client.annotation.Events;
 import com.mvp4g.client.annotation.InitHistory;
 import com.mvp4g.client.event.EventBusWithLookup;
+
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.experiment.Experiment;
@@ -20,6 +24,7 @@ import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssecti
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelPresenter;
+import pl.ismop.web.client.widgets.analysis.threatlevels.ThreatLevelsPresenter;
 import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalCrosssectionConfiguration;
 import pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.verticalslice.wizard.VerticalSliceWizardPresenter;
@@ -36,19 +41,16 @@ import pl.ismop.web.client.widgets.realtime.main.RealTimePanelPresenter;
 import pl.ismop.web.client.widgets.realtime.side.RealTimeSidePanelPresenter;
 import pl.ismop.web.client.widgets.root.RootPresenter;
 
-import java.util.Date;
-import java.util.List;
-
 @Events(startPresenter = RootPresenter.class, historyOnStart = true)
 public interface MainEventBus extends EventBusWithLookup {
 	@InitHistory
 	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class,
 			deactivate = {VerticalSliceWizardPresenter.class, HorizontalSliceWizardPresenter.class})
 	void monitoringPanel();
-	
+
 	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
 	void analysisPanel();
-	
+
 	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
 	void realTimePanel();
 
@@ -60,7 +62,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = FibrePresenter.class)
 	void showFibrePanel(Levee levee);
-	
+
 	@Event(handlers = WaterHeightPresenter.class)
 	void showWaterHightPanel(Levee selectedLevee);
 
@@ -75,10 +77,10 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showSectionMetadata(Section section, boolean show);
-	
+
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showDeviceMetadata(Device device, boolean show);
-	
+
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show);
 
@@ -125,9 +127,12 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class,
 			HorizontalSlicePresenter.class, VerticalSlicePresenter.class})
 	void dateChanged(Date selectedDate);
-	
+
 	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class})
 	void refresh();
+
+	@Event(handlers = ThreatLevelsPresenter.class)
+	void threatLevelsChanged(String msg);
 
 	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })
 	void experimentChanged(Experiment selectedExperiment);
@@ -216,7 +221,7 @@ public interface MainEventBus extends EventBusWithLookup {
 			activate = VerticalSliceWizardPresenter.class,
 			deactivate = { LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class })
 	void showVerticalCrosssectionWizard(Experiment experiment);
-	
+
 	@Event(handlers = VerticalSliceWizardPresenter.class,
 			activate = VerticalSliceWizardPresenter.class,
 			deactivate = { LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class })
@@ -224,11 +229,11 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = VerticalSlicePresenter.class)
 	void updateVerticalSliceConfiguration(VerticalCrosssectionConfiguration configuration);
-	
+
 	@Event(activate = LeveeNavigatorPresenter.class,
 			deactivate = VerticalSliceWizardPresenter.class)
 	void verticalCrosssectionWizardHidden();
-	
+
 	@Event(handlers = ErrorPresenter.class)
 	void showSimpleError(String errorDetails);
 
@@ -237,7 +242,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = RealTimeSidePanelPresenter.class)
 	void realDataContentLoaded();
-	
+
 	@Event(handlers = { VerticalSlicePresenter.class, HorizontalSlicePresenter.class })
 	void gradientExtended(String gradientId);
 
@@ -246,10 +251,10 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = { RealTimeSidePanelPresenter.class })
 	void selectDeviceOnRealtimeMap(Device device, boolean select);
-	
+
 	@Event(handlers = { RealTimeSidePanelPresenter.class })
 	void removeProfileFromRealtimeMap(Profile profile);
-	
+
 	@Event(handlers = { RealTimeSidePanelPresenter.class })
-	void addProfileFromRealtimeMap(Profile profile);	
+	void addProfileFromRealtimeMap(Profile profile);
 }

@@ -270,7 +270,12 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     public void onDateChanged(Date selectedDate) {
-        if (waterWave != null) {
+    	selectDateOnWaterChart(selectedDate);
+    	loadThreatLevels(selectedDate);
+    }
+
+	private void selectDateOnWaterChart(Date selectedDate) {
+    	if (waterWave != null) {
         	waterWave.selectDate(selectedDate, properties.selectionColor());
         }
     }
@@ -278,6 +283,11 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     public void onRefresh() {
     	loadWaterHeight();
     }
+
+    private void loadThreatLevels(Date selectedDate) {
+		GWT.log("Loading threat levels for selected date: " + selectedDate);
+		eventBus.threatLevelsChanged("New threat levels for " + selectedDate);
+	}
 
     public void onAdd(MapFeature mapFeature) {
         miniMap.add(mapFeature);
