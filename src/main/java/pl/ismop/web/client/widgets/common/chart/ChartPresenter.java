@@ -403,7 +403,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		
 		Series chartSeries = null;
 		Optional<ChartSeries> foundChartSeries = Iterables.tryFind(dataSeriesMap.values(),
-				s -> s.getParameterId().equals(series.getParameterId()));
+				s -> s.getTimelineId().equals(series.getTimelineId()));
 	
 		if (foundChartSeries.isPresent()) {
 			chartSeries = chartSeriesMap.get(dataSeriesMap.inverse().get(foundChartSeries.get()));
