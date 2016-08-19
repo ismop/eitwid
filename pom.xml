@@ -5,7 +5,7 @@
 
 	<groupId>pl.ismop</groupId>
 	<artifactId>web</artifactId>
-	<version>0.6.2-SNAPSHOT</version>
+	<version>0.7.0</version>
 	<packaging>jar</packaging>
 
 	<name>ismop-web</name>
@@ -32,7 +32,7 @@
 		<url>https://gitlab.dev.cyfronet.pl/ismop/eitwid</url>
 		<tag>HEAD</tag>
 	</scm>
-	
+
 	<repositories>
 		<repository>
 			<id>dev.cyfronet.pl</id>
@@ -47,7 +47,7 @@
 			<url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
 		</repository>
 	</repositories>
-	
+
 	<!-- Used by GWT maven snapshot plugin -->
 	<pluginRepositories>
 		<pluginRepository>
@@ -55,7 +55,7 @@
 			<url>http://oss.sonatype.org/content/repositories/snapshots</url>
 		</pluginRepository>
 	</pluginRepositories>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -183,7 +183,7 @@
 			<artifactId>gwtbootstrap3</artifactId>
 			<version>${gwt.bootstrap.version}</version>
 		</dependency>
-		
+
 		<!-- GWT Bootstrap select dependency -->
 		<dependency>
 			<groupId>org.gwtbootstrap3</groupId>
@@ -191,14 +191,14 @@
 			<version>${gwt.bootstrap.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<!-- GWT parallax 3D dependencies -->
 		<dependency>
 			<groupId>thothbot</groupId>
 			<artifactId>parallax</artifactId>
 			<version>1.6.0</version>
 		</dependency>
-		
+
 		<!-- GWT highcharts dependency -->
 		<dependency>
 			<groupId>org.moxieapps</groupId>
@@ -229,7 +229,7 @@
 			<artifactId>smiley-http-proxy-servlet</artifactId>
 			<version>1.4</version>
 		</dependency>
-		
+
 		<!-- Gatling dependecies -->
 		<dependency>
 			<groupId>org.scala-lang</groupId>
