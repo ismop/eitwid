@@ -1,9 +1,15 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
@@ -16,11 +22,6 @@ import pl.ismop.web.client.widgets.analysis.chart.wizard.IChartWizardView.IChart
 import pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel.SensorPanelPresenter;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Presenter(view = ChartWizardView.class, multiple = true)
 public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEventBus>
@@ -154,7 +155,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
     }
 
     private String parameterName(Parameter parameter) {
-        return parameter.getDevice().getCustomId() + " (" + parameter.getMeasurementTypeName() + ")";
+        return parameter.getDevice().getCustomId() + ": " + parameter.getParameterName() + " (" + parameter.getMeasurementTypeName() + ")";
     }
 
     @SuppressWarnings("unused")
