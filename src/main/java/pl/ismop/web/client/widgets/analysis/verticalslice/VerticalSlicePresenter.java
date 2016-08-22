@@ -190,11 +190,11 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 	}
 
 	private void refreshView() {
-		if (!view.canRender()) {
-			eventBus.showSimpleError(view.cannotRenderMessage());
-
-			return;
-		}
+//		if (!view.canRender()) {
+//			eventBus.showSimpleError(view.cannotRenderMessage());
+//
+//			return;
+//		}
 
 		view.showLoadingState(true);
 		Profile pickedProfile = configuration.getPickedProfile();
