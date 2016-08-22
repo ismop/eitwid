@@ -146,8 +146,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             series.setParameterId(parameter.getId());
             series.setTimelineId(timeline.getId());
 
-            series.setName(parameter.getDevice().getCustomId() +
-                    " (" + parameter.getMeasurementTypeName() + ") " + timeline.getLabel());
+			series.setName(parameter.getDevice().getCustomId() + ": " + parameter.getParameterName() + " ("
+					+ parameter.getMeasurementTypeName() + ")");
             series.setLabel(parameter.getMeasurementTypeName());
             series.setUnit(parameter.getMeasurementTypeUnit());
 

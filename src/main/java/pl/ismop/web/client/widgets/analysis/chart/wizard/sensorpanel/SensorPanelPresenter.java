@@ -42,8 +42,8 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
 
     public void setParameter(Parameter parameter) {
         this.parameter = parameter;
-        getView().setHeaderTitle(parameter.getDevice().getCustomId() + " (" + parameter.getMeasurementTypeName() + ")");
-
+        getView().setHeaderTitle(parameter.getDevice().getCustomId() + ": " + parameter.getParameterName() + " ("
+					+ parameter.getMeasurementTypeName() + ")");        
         loadTimelines();
     }
 
