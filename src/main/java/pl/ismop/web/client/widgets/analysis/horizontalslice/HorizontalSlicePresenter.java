@@ -20,7 +20,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -50,23 +49,23 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		implements IHorizontalSlicePresenter,
 		IPanelContent<IHorizontalSliceView, MainEventBus> {
 	private HorizontalCrosssectionConfiguration configuration;
-	
+
 	private ISelectionManager selectionManager;
 
 	private DapController dapController;
 
 	private CoordinatesUtil coordinatesUtil;
-	
+
 	private double shiftX, shiftY, scale, panX;
 
 	private Date currentDate;
 
 	private GradientsUtil gradientsUtil;
-	
+
 	private double gradientMin, gradientMax;
-	
+
 	private String gradientId;
-	
+
 	@Inject
 	public HorizontalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil,
 			GradientsUtil gradientsUtil) {
@@ -74,7 +73,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		this.coordinatesUtil = coordinatesUtil;
 		this.gradientsUtil = gradientsUtil;
 	}
-	
+
 	public void onUpdateHorizontalSliceConfiguration(
 			HorizontalCrosssectionConfiguration configuration) {
 		if(this.configuration == configuration) {
@@ -83,7 +82,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 		addProfilesToMinimap();
 	}
-	
+
 	public void onDateChanged(Date selectedDate) {
 		this.currentDate = selectedDate;
 		refreshView();
@@ -114,35 +113,34 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		this.selectionManager = selectionManager;
 		addProfilesToMinimap();
 	}
-	
+
 	public void onGradientExtended(String gradientId) {
 		if (gradientId.equals(this.gradientId)
 				&& gradientsUtil.isExtended(gradientId, gradientMin, gradientMax)) {
-			GWT.log("Gradient " + gradientId + " extended");
 			refreshView();
 		}
 	}
 
 	private void addProfilesToMinimap() {
 		selectionManager.clear();
-		
+
 		for (Profile profile : configuration.getPickedProfiles().values()) {
 			selectionManager.add(profile);
 		}
 	}
 
 	private void refreshView() {
-		if (!view.canRender()) {
-			eventBus.showSimpleError(view.cannotRenderMessages());
-			
-			return;
-		}
-		
+//		if (!view.canRender()) {
+//			eventBus.showSimpleError(view.cannotRenderMessages());
+//
+//			return;
+//		}
+
 		view.showLoadingState(true);
-		
+
 		final List<String> parameterIds = new ArrayList<>();
 		Parameter parameter = null;
-		
+
 		for(String height : configuration.getPickedHeights().values()) {
 			for(Device device : configuration.getHeightDevicesmap().get(height)) {
 				for(String parameterId : device.getParameterIds()) {
@@ -156,7 +154,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				}
 			}
 		}
-		
+
 		final String parameterUnit = parameter != null ? parameter.getMeasurementTypeUnit() : "";
 		String context = configuration.getDataSelector().equals("0") ? "measurements" : "scenarios";
 		dapController.getContext(context, new ContextsCallback() {
@@ -165,7 +163,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				view.showLoadingState(false);
 				eventBus.showError(errorDetails);
 			}
-			
+
 			@Override
 			public void processContexts(final List<Context> contexts) {
 				if(contexts.size() > 0) {
@@ -176,7 +174,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 							view.showLoadingState(false);
 							eventBus.showError(errorDetails);
 						}
-						
+
 						@Override
 						public void processTimelines(final List<Timeline> timelines) {
 							if(!configuration.getDataSelector().equals("0")) {
@@ -187,18 +185,18 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 									}
 								}
 							}
-							
+
 							List<String> timelineIds = new ArrayList<>();
-							
+
 							for(Timeline timeline : timelines) {
 								timelineIds.add(timeline.getId());
 							}
-							
+
 							Date queryDate = configuration.getDataSelector().equals("0")
 									? currentDate :
 								new Date(currentDate.getTime()
 										- configuration.getExperiment().getStart().getTime());
-							
+
 							dapController.getLastMeasurementsWith24HourMod(
 									timelineIds, queryDate, new MeasurementsCallback() {
 								@Override
@@ -211,34 +209,38 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 								public void processMeasurements(List<Measurement> measurements) {
 									view.showLoadingState(false);
 									view.clear();
-									
+
 									List<Section> muteSections = new ArrayList<>();
-									
+
 									SECTION:
 									for(Section section : configuration.getSections().values()) {
-										for(Profile profile
-												: configuration.getPickedProfiles().values()) {
-											if(profile.getSectionId().equals(section.getId())) {
+										for(Profile profile : configuration.getPickedProfiles()
+												.values()) {
+											if(profile.getSectionId().equals(section.getId())
+													//sections with more than 4 corners are
+													//considered mute
+													&& section.getShape().getCoordinates()
+													.size() < 6) {
 												continue SECTION;
 											}
 										}
-										
+
 										muteSections.add(section);
 									}
-									
+
 									if(measurements.size() > 0) {
 										gradientId = "analysis:" + parameterUnit;
-										
+
 										if (gradientsUtil.contains(gradientId)) {
 											gradientMin = gradientsUtil.getMinValue(gradientId);
 											gradientMax = gradientsUtil.getMaxValue(gradientId);
 										}
-										
+
 										for(Measurement measurement : measurements) {
 											gradientsUtil.updateValues(gradientId,
 													measurement.getValue());
 										}
-										
+
 										view.init();
 										drawMuteSections(configuration.getSections().values(),
 												muteSections);
@@ -247,7 +249,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 												createDeviceLocationsWithValuesAndColors(
 														measurements, timelines, contexts.get(0),
 														gradientId));
-										
+
 										if (gradientsUtil.isExtended(gradientId, gradientMin,
 												gradientMax)) {
 											gradientMin = gradientsUtil.getMinValue(gradientId);
@@ -265,23 +267,23 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			}
 		});
 	}
-	
+
 	@Override
 	public void destroy() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private Map<List<List<Double>>, Map<List<Double>, List<Double>>>
 			createDeviceLocationsWithValuesAndColors(List<Measurement> measurements,
 					List<Timeline> timelines, Context context, String gradientId) {
 		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = new HashMap<>();
-		
+
 		for(Profile profile : configuration.getPickedProfiles().values()) {
 			Map<List<Double>, Double> temp = new LinkedHashMap<>();
 			List<List<Double>> keys = new ArrayList<>();
 			Double value = 0.0;
-			
+
 			for(Device device : configuration.getProfileDevicesMap().get(profile)) {
 				PARAMETER:
 				for(Parameter parameter : configuration.getParameterMap().values()) {
@@ -294,7 +296,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 								for(Measurement measurement : measurements) {
 									if(measurement.getTimelineId().equals(timeline.getId())) {
 										value = measurement.getValue();
-										
+
 										break PARAMETER;
 									}
 								}
@@ -302,21 +304,21 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 						}
 					}
 				}
-				
+
 				if(device.getPlacement() != null
 						&& device.getPlacement().getCoordinates() != null) {
 					List<List<Double>> coordinates = new ArrayList<>();
 					coordinates.add(device.getPlacement().getCoordinates());
-					
+
 					List<List<Double>> projectedCoordinates = coordinatesUtil.projectCoordinates(
 							coordinates);
 					rotate(projectedCoordinates);
-					
+
 					for(List<Double> pointCoordinates : projectedCoordinates) {
 						pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
 						pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
 					}
-					
+
 					List<List<List<Double>>> toBeScaledAndShiftedCoordinates = new ArrayList<>();
 					toBeScaledAndShiftedCoordinates.add(projectedCoordinates);
 					scaleAndShift(toBeScaledAndShiftedCoordinates, scale, panX);
@@ -324,16 +326,16 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					keys.add(toBeScaledAndShiftedCoordinates.get(0).get(0));
 				}
 			}
-			
+
 			sort(keys, new Comparator<List<Double>>() {
 				@Override
 				public int compare(List<Double> o1, List<Double> o2) {
 					return -o1.get(1).compareTo(o2.get(1));
 				}
 			});
-			
+
 			Map<List<Double>, List<Double>> locationsWithReadings = new LinkedHashMap<>();
-			
+
 			for(List<Double> key : keys) {
 				Double finalValue = temp.get(key);
 				Color color = gradientsUtil.getColor(gradientId, finalValue);
@@ -344,19 +346,19 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				valueWithColor.add(new Integer(color.getB()).doubleValue());
 				locationsWithReadings.put(key, valueWithColor);
 			}
-			
+
 			Section section = configuration.getSections().get(profile.getSectionId());
 			//removing last element which is just there to close the loop
 			List<List<Double>> corners = section.getShape().getCoordinates()
 					.subList(0, section.getShape().getCoordinates().size() - 1);
 			List<List<Double>> projectedCorners = coordinatesUtil.projectCoordinates(corners);
 			rotate(projectedCorners);
-			
+
 			for(List<Double> pointCoordinates : projectedCorners) {
 				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
 				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
 			}
-			
+
 			List<List<List<Double>>> scaledAndShiftedCoordinates = new ArrayList<>();
 			scaledAndShiftedCoordinates.add(projectedCorners);
 			scaleAndShift(scaledAndShiftedCoordinates, scale, panX);
@@ -367,20 +369,20 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					return -o1.get(1).compareTo(o2.get(1));
 				}
 			});
-			
+
 			if(scaled.size() > 3) {
 				if(scaled.get(0).get(0) > scaled.get(1).get(0)) {
 					scaled.add(0, scaled.remove(1));
 				}
-				
+
 				if(scaled.get(2).get(0) < scaled.get(3).get(0)) {
 					scaled.add(2, scaled.remove(3));
 				}
 			}
-			
+
 			result.put(scaled , locationsWithReadings);
 		}
-		
+
 		return result;
 	}
 
@@ -390,41 +392,41 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				maxY = Double.MIN_VALUE;
 		shiftX = Double.MAX_VALUE;
 		shiftY = Double.MAX_VALUE;
-		
+
 		for (Section section : muteSections) {
 			if (section.getShape() != null) {
 				List<List<Double>> projected = coordinatesUtil.projectCoordinates(
 						section.getShape().getCoordinates());
 				rotate(projected);
 				coordinates.add(projected);
-				
+
 				for (List<Double> point : projected) {
 					if (point.get(0) > maxX) {
 						maxX = point.get(0);
 					}
-					
+
 					if (point.get(0) < shiftX) {
 						shiftX = point.get(0);
 					}
-					
+
 					if (point.get(1) > maxY) {
 						maxY = point.get(1);
 					}
-					
+
 					if (point.get(1) < shiftY) {
 						shiftY = point.get(1);
 					}
 				}
 			}
 		}
-		
+
 		for (List<List<Double>> sectionCoordinates : coordinates) {
 			for (List<Double> pointCoordinates : sectionCoordinates) {
 				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
 				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
 			}
 		}
-		
+
 		panX = 200;
 		scale = computeScale(coordinates, panX, view.getHeight(), view.getWidth());
 		scaleAndShift(coordinates, scale, panX);
@@ -438,30 +440,30 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				maxY = Double.MIN_VALUE,
 				minX = Double.MAX_VALUE,
 				maxX = Double.MIN_VALUE;
-		
+
 		for(List<List<Double>> sectionCoordinates : coordinates) {
 			for(List<Double> point : sectionCoordinates) {
 				if(point.get(0) > maxX) {
 					maxX = point.get(0);
 				}
-				
+
 				if(point.get(0) < minX) {
 					minX = point.get(0);
 				}
-				
+
 				if(point.get(1) > maxY) {
 					maxY = point.get(1);
 				}
-				
+
 				if(point.get(1) < minY) {
 					minY = point.get(1);
 				}
 			}
 		}
-		
+
 		double sectionsHeight = abs(minY) + abs(maxY);
 		double sectionsWidth = abs(minX) + abs(maxX);
-		
+
 		return min(height / sectionsHeight, (width - panX) / sectionsWidth);
 	}
 
@@ -482,10 +484,10 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			point.set(1, newY);
 		}
 	}
-	
+
 	private Map<Double, List<Double>> createLegend(String gradientId) {
 		Map<Double, List<Double>> result = new LinkedHashMap<>();
-		
+
 		for (Double colorBoundary : gradientsUtil.getGradient().keySet()) {
 			result.put(colorBoundary, asList(new Double[] {
 					new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
@@ -494,7 +496,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					gradientsUtil.getValue(gradientId, colorBoundary)
 			}));
 		}
-		
+
 		return result;
 	}
 }
