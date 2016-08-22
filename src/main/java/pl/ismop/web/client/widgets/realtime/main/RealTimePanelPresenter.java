@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -52,39 +53,39 @@ import pl.ismop.web.client.widgets.realtime.main.IRealTimePanelView.IRealTimePan
 @Presenter(view = RealTimePanelView.class, multiple = true)
 public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, MainEventBus>
 		implements IRealTimePanelPresenter {
-	
+
 	private DapController dapController;
-	
+
 	private Map<String, Device> weatherDevices;
-	
+
 	private List<Parameter> weatherParameters;
-	
+
 	private List<Measurement> weatherMeasurements;
 
 	private String currentWeatherDeviceId;
 
 	private IsmopConverter ismopConverter;
-	
+
 	private List<String> chartDeviceCustomIds;
-	
+
 	private List<Parameter> chartParameters;
-	
+
 	private List<Measurement> chartMeasurements;
-	
+
 	private List<Device> chartDevices;
-	
+
 	private ChartPresenter chartPresenter;
-	
+
 	private Parameter waterLevelParameter;
-	
+
 	private List<Measurement> waterLevelMeasurements;
-	
+
 	private List<Profile> verticalSliceProfiles;
-	
+
 	private Profile currentVerticalSliceProfile;
-	
+
 	private List<Parameter> verticalSliceParameters;
-	
+
 	private List<Device> verticalSliceDevices;
 
 	private VerticalSlicePresenter verticalSlicePresenter;
@@ -106,21 +107,21 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	private String currentHorizontalSliceParameterName;
 
 	private HorizontalSlicePresenter horizontalSlicePresenter;
-	
+
 	@Inject
 	public RealTimePanelPresenter(DapController dapController, IsmopConverter ismopConverter) {
 		this.dapController = dapController;
 		this.ismopConverter = ismopConverter;
 		chartDeviceCustomIds = Arrays.asList("UT6", "UT18", "UT29", "UT5", "UT17", "UT28");
 	}
-	
+
 	public void init() {
 		onRefreshRealTimePanel();
 	}
-	
+
 	public void onRefreshRealTimePanel() {
 		view.showLoadingIndicator(true);
-		
+
 		ListenableFuture<Void> weatherFuture = updateWeather();
 		ListenableFuture<Void> chartFuture = updateChart();
 		ListenableFuture<Void> waterLevelFuture = updateWaterLevel();
@@ -133,7 +134,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					public Void call() throws Exception {
 						view.showLoadingIndicator(false);
 						eventBus.realDataContentLoaded();
-						
+
 						return null;
 					}
 				});
@@ -143,12 +144,12 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	public void onWeatherSourceChange() {
 		Iterator<String> weatherDeviceIdIterator = weatherDevices.keySet().iterator();
 		String weatherDeviceId = weatherDeviceIdIterator.next();
-		
+
 		while (weatherDeviceIdIterator.hasNext()
 				&& weatherDeviceId.equals(currentWeatherDeviceId)) {
 			weatherDeviceId = weatherDeviceIdIterator.next();
 		}
-		
+
 		currentWeatherDeviceId = weatherDeviceId;
 		renderWeatherData();
 	}
@@ -159,11 +160,11 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		for (Parameter parameter : verticalSliceParameters) {
 			if (!currentVerticalSliceParameterName.equals(parameter.getMeasurementTypeName())) {
 				currentVerticalSliceParameterName = parameter.getMeasurementTypeName();
-				
+
 				break;
 			}
 		}
-		
+
 		currentVerticalConfiguration.setPickedParameterMeasurementName(
 				currentVerticalSliceParameterName);
 		verticalSlicePresenter.setConfiguration(currentVerticalConfiguration);
@@ -178,11 +179,11 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		for (Parameter parameter : horizontalSliceParameters) {
 			if (!currentHorizontalSliceParameterName.equals(parameter.getMeasurementTypeName())) {
 				currentHorizontalSliceParameterName = parameter.getMeasurementTypeName();
-				
+
 				break;
 			}
 		}
-		
+
 		currentHorizontalConfiguration.setPickedParameterMeasurementName(
 				currentHorizontalSliceParameterName);
 		horizontalSlicePresenter.setConfiguration(currentHorizontalConfiguration);
@@ -203,7 +204,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		ListenableFuture<List<String>> deviceIdsFuture = Futures.transform(
 				dapController.getDevicesForType("weather_station"), devices -> {
 					weatherDevices = Maps.uniqueIndex(devices, Device::getId);
-					
+
 					return Lists.transform(devices, Device::getId);
 				});
 		ListenableFuture<List<Parameter>> parametersFuture = Futures.transformAsync(deviceIdsFuture,
@@ -219,7 +220,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					@SuppressWarnings("unchecked")
 					List<Parameter> parameters = (List<Parameter>) resultList.get(1);
 					weatherParameters = parameters;
-					
+
 					if (contexts.size() > 0 && parameters.size() > 0) {
 						return dapController.getTimelinesForParameterIds(
 								contexts.get(0).getId(), Lists.transform(parameters,
@@ -227,7 +228,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					} else {
 						SettableFuture<List<Timeline>> resultFuture = SettableFuture.create();
 						resultFuture.set(new ArrayList<>());
-						
+
 						return resultFuture;
 					}
 				});
@@ -249,7 +250,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 				result.set(null);
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -261,11 +262,11 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 							.compareTo(weatherDevices.get(d2).getCustomId()));
 			currentWeatherDeviceId = sortedWeatherDeviceIds.get(0);
 		}
-		
+
 		view.setWeatherSectionTitle(weatherDevices.get(currentWeatherDeviceId).getCustomId());
-		
+
 		ListMultimap<Parameter, Measurement> readings = ArrayListMultimap.create();
-		
+
 		for (Parameter parameter : weatherParameters) {
 			for (Measurement measurement : weatherMeasurements) {
 				if (parameter.getTimelineIds().contains(measurement.getTimelineId())) {
@@ -273,18 +274,18 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 				}
 			}
 		}
-		
+
 		List<Parameter> sortedParameters = new ArrayList<>(readings.keys());
-		
+
 		for (Iterator<Parameter> i = sortedParameters.iterator(); i.hasNext();) {
 			if (!i.next().getDeviceId().equals(currentWeatherDeviceId)) {
 				i.remove();
 			}
 		}
-		
+
 		Collections.sort(sortedParameters, (p1, p2) -> p1.getMeasurementTypeName()
 				.compareTo(p2.getMeasurementTypeName()));
-		
+
 		for (int i = 0; i < sortedParameters.size(); i++) {
 			view.setWeatherParameter(i, sortedParameters.get(i).getMeasurementTypeName(),
 					"" + NumberFormat.getFormat("0.00").format(
@@ -292,18 +293,18 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					+ " " + sortedParameters.get(i).getMeasurementTypeUnit(),
 					ismopConverter.formatForDisplay(readings.get(sortedParameters.get(i)).get(0)
 							.getTimestamp()));
-			
+
 		}
 	}
 
 	private ListenableFuture<Void> updateChart() {
 		SettableFuture<Void> result = SettableFuture.create();
-		
+
 		ListenableFuture<List<String>> deviceIdsFuture = Futures.transform(
 				dapController.getDevicesWithCustomIds(chartDeviceCustomIds),
 					devices -> {
 						chartDevices = devices;
-						
+
 						return Lists.transform(devices, Device::getId);
 					});
 		ListenableFuture<List<Parameter>> parametersFuture = Futures.transformAsync(deviceIdsFuture,
@@ -319,7 +320,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					@SuppressWarnings("unchecked")
 					List<Parameter> parameters = (List<Parameter>) resultList.get(1);
 					chartParameters = parameters;
-					
+
 					if (contexts.size() > 0 && parameters.size() > 0) {
 						return dapController.getTimelinesForParameterIds(
 								contexts.get(0).getId(), Lists.transform(parameters,
@@ -327,11 +328,11 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					} else {
 						SettableFuture<List<Timeline>> resultFuture = SettableFuture.create();
 						resultFuture.set(new ArrayList<>());
-						
+
 						return resultFuture;
 					}
 				});
-		
+
 		Date currentDate = new Date();
 		Date earlierBy24Hours = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
 		ListenableFuture<List<Measurement>> measurementsFuture =
@@ -353,7 +354,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 				result.set(null);
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -365,17 +366,17 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 				public void unselect(ChartSeries series) {
 					Optional<Device> device = Iterables.tryFind(chartDevices, d -> d.getId()
 							.equals(series.getDeviceId()));
-					
+
 					if (device.isPresent()) {
 						eventBus.selectDeviceOnRealtimeMap(device.get(), false);
 					}
 				}
-				
+
 				@Override
 				public void select(ChartSeries series) {
 					Optional<Device> device = Iterables.tryFind(chartDevices, d -> d.getId()
 							.equals(series.getDeviceId()));
-					
+
 					if (device.isPresent()) {
 						eventBus.selectDeviceOnRealtimeMap(device.get(), true);
 					}
@@ -387,9 +388,9 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 			chartPresenter.setZoomDataCallback(new TimelineZoomDataCallbackHelper(dapController,
 					eventBus, chartPresenter));
 		}
-		
+
 		chartPresenter.addChartSeriesList(createChartSeries());
-		
+
 		for (Device chartDevice : chartDevices) {
 			eventBus.addDeviceToRealtimeMap(chartDevice);
 		}
@@ -397,7 +398,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 
 	private List<ChartSeries> createChartSeries() {
 		List<ChartSeries> result = new ArrayList<>();
-		
+
 		for (Parameter parameter : chartParameters) {
 			ChartSeries series = new ChartSeries();
 			Device device = Iterables.find(chartDevices, d -> d.getParameterIds()
@@ -408,25 +409,25 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 			series.setLabel(parameter.getMeasurementTypeName());
 			series.setUnit(parameter.getMeasurementTypeUnit());
 			series.setTimelineId(parameter.getTimelineIds().get(0));
-			
+
 			List<Measurement> parameterMeasurements = Lists.newArrayList(
 					Iterables.filter(chartMeasurements,
 						measurement -> measurement.getTimelineId().equals(
 								parameter.getTimelineIds().get(0))));
-			
+
 			Number[][] values = new Number[parameterMeasurements.size()][2];
 			int index = 0;
-			
+
 			for(Measurement measurement : parameterMeasurements) {
 				values[index][0] = measurement.getTimestamp().getTime();
 				values[index][1] = measurement.getValue();
 				index++;
 			}
-			
+
 			series.setValues(values);
 			result.add(series);
 		}
-		
+
 		return result;
 	}
 
@@ -451,7 +452,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					waterLevelParameter = Iterables.find(parameters,
 							p -> p.getCustomId()
 								.equals("pumpMonitoring.ASP_Level2_PV"));
-					
+
 					if (contexts.size() > 0 && parameters.size() > 0) {
 						return dapController.getTimelinesForParameterIds(
 								contexts.get(0).getId(),
@@ -459,7 +460,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					} else {
 						SettableFuture<List<Timeline>> resultFuture = SettableFuture.create();
 						resultFuture.set(new ArrayList<>());
-						
+
 						return resultFuture;
 					}
 				});
@@ -482,11 +483,11 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 			}
 
 		});
-		
-		
+
+
 		return result;
 	}
-	
+
 	private void renderWaterLevelData() {
 		if (waterLevelParameter != null && waterLevelMeasurements.size() > 0) {
 			view.setWaterLevelValue("" + NumberFormat.getFormat("0.00")
@@ -512,7 +513,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 							profile -> profile.getDeviceAggregationIds() != null &&
 								profile.getDeviceAggregationIds().size() > 0));
 					currentVerticalSliceProfile = getCurrentVerticalSliceProfileAndUpdateMap();
-					
+
 					return Lists.newArrayList(currentVerticalSliceProfile.getId());
 				});
 		ListenableFuture<List<DeviceAggregate>> deviceAggregationsFuture = Futures.transformAsync(
@@ -526,7 +527,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		ListenableFuture<List<String>> deviceIdsFuture = Futures.transform(devicesFuture,
 				devices -> {
 					verticalSliceDevices = devices;
-					
+
 					return Lists.transform(devices, Device::getId);
 				});
 		ListenableFuture<List<Parameter>> parametersFuture = Futures.transformAsync(deviceIdsFuture,
@@ -545,18 +546,18 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 				result.set(null);
 			}
 		});
-		
+
 		return result;
 	}
 
 	private Profile getCurrentVerticalSliceProfileAndUpdateMap() {
 		Profile result;
-		
+
 		if (currentVerticalSliceProfile == null) {
 			result = verticalSliceProfiles.get(0);
 		} else {
 			eventBus.removeProfileFromRealtimeMap(currentVerticalSliceProfile);
-			
+
 			if (verticalSliceProfiles.contains(currentVerticalSliceProfile)) {
 				result = verticalSliceProfiles.get((verticalSliceProfiles.indexOf(
 						currentVerticalSliceProfile) + 1) % verticalSliceProfiles.size());
@@ -564,7 +565,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 				result = verticalSliceProfiles.get(0);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -572,13 +573,13 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		currentVerticalConfiguration = new VerticalCrosssectionConfiguration();
 		currentVerticalConfiguration.setDataSelector("0"); //0 means real values
 		currentVerticalConfiguration.setPickedProfile(currentVerticalSliceProfile);
-		
+
 		currentVerticalSliceParameterName = getCurrentVerticalSliceParameterName();
 		currentVerticalConfiguration.setPickedParameterMeasurementName(
 				currentVerticalSliceParameterName);
 		view.setVerticalSliceHeading(
 				currentVerticalConfiguration.getPickedParameterMeasurementName());
-		
+
 		Map<Profile, List<Device>> profileDevicesMap = new HashMap<>();
 		profileDevicesMap.put(currentVerticalSliceProfile, Lists.newArrayList(
 				Iterables.filter(verticalSliceDevices,
@@ -587,12 +588,12 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		currentVerticalConfiguration.setProfileDevicesMap(profileDevicesMap);
 		currentVerticalConfiguration.setParameterMap(Maps.uniqueIndex(verticalSliceParameters,
 				Parameter::getId));
-		
+
 		if (verticalSlicePresenter == null) {
 			verticalSlicePresenter = eventBus.addHandler(VerticalSlicePresenter.class);
 			view.setVerticalSliceView(verticalSlicePresenter.getView());
 		}
-		
+
 		verticalSlicePresenter.setConfiguration(currentVerticalConfiguration);
 		verticalSlicePresenter.onDateChanged(new Date());
 		eventBus.addProfileFromRealtimeMap(currentVerticalSliceProfile);
@@ -612,8 +613,14 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		ListenableFuture<List<String>> sectionIdsFuture = Futures.transform(sectionsFuture,
 				sections -> {
 					horizontalSliceSections = sections;
-					
-					return Lists.transform(sections, Section::getId);
+
+					//sections with more than 5 corners should not be processed for profile
+					//retrieval as it breaks gradient processing
+					List<Section> filteredSections = sections.stream()
+							.filter(section -> section.getShape().getCoordinates().size() < 6)
+							.collect(Collectors.toList());
+
+					return Lists.transform(filteredSections, Section::getId);
 				});
 		ListenableFuture<List<Profile>> profilesFuture = Futures.transformAsync(sectionIdsFuture,
 				sectionIds -> dapController.getProfiles(sectionIds));
@@ -622,7 +629,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 					//picking only single profiles per section
 					horizontalSliceProfiles = new ArrayList<>();
 					List<String> sectionIds = new ArrayList<>();
-					
+
 					for (Profile profile : profiles) {
 						if (profile.getDeviceAggregationIds().size() > 0
 								&& !sectionIds.contains(profile.getSectionId())) {
@@ -630,7 +637,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 							sectionIds.add(profile.getSectionId());
 						}
 					}
-					
+
 					return Lists.newArrayList(Iterables.transform(horizontalSliceProfiles,
 							Profile::getId));
 				});
@@ -645,7 +652,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		ListenableFuture<List<String>> deviceIdsFuture = Futures.transform(devicesFuture,
 				devices -> {
 					horizontalSliceDevices = devices;
-					
+
 					return Lists.transform(devices, Device::getId);
 				});
 		ListenableFuture<List<Parameter>> parametersFuture = Futures.transformAsync(deviceIdsFuture,
@@ -665,10 +672,10 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 			}
 
 		});
-		
+
 		return result;
 	}
-	
+
 	private void renderHorizontalSliceData() {
 		currentHorizontalConfiguration = new HorizontalCrosssectionConfiguration();
 		currentHorizontalConfiguration.setDataSelector("0"); //0 means real values
@@ -677,25 +684,28 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		currentHorizontalSliceParameterName = getCurrentHorizontalSliceParameterName();
 		currentHorizontalConfiguration.setPickedParameterMeasurementName(
 				currentHorizontalSliceParameterName);
-		view.setHorizontalSliceHeading(currentHorizontalConfiguration.getPickedParameterMeasurementName());
+		view.setHorizontalSliceHeading(currentHorizontalConfiguration
+				.getPickedParameterMeasurementName());
 		currentHorizontalConfiguration.setParameterMap(Maps.uniqueIndex(horizontalSliceParameters,
 				Parameter::getId));
 		currentHorizontalConfiguration.setPickedHeights(Maps.toMap(horizontalSliceProfiles,
 				profile -> "fakeHeight"));
-		
+
 		Map<String, List<Device>> heightDeviceMap = new HashMap<>();
 		heightDeviceMap.put("fakeHeight", horizontalSliceDevices);
 		currentHorizontalConfiguration.setHeightDevicesmap(heightDeviceMap);
 		currentHorizontalConfiguration.setPickedProfiles(Maps.uniqueIndex(horizontalSliceProfiles,
 				Profile::getId));
-		currentHorizontalConfiguration.setProfileDevicesMap(Multimaps.asMap(Multimaps.index(horizontalSliceDevices,
-				device -> currentHorizontalConfiguration.getPickedProfiles().get(device.getProfileId()))));
-		
+		currentHorizontalConfiguration.setProfileDevicesMap(Multimaps.asMap(Multimaps.index(
+				horizontalSliceDevices,
+				device -> currentHorizontalConfiguration.getPickedProfiles().get(
+						device.getProfileId()))));
+
 		if (horizontalSlicePresenter == null) {
 			horizontalSlicePresenter = eventBus.addHandler(HorizontalSlicePresenter.class);
 			view.setHorizontalSliceView(horizontalSlicePresenter.getView());
 		}
-		
+
 		horizontalSlicePresenter.setConfiguration(currentHorizontalConfiguration);
 		horizontalSlicePresenter.onDateChanged(new Date());
 	}
