@@ -10,6 +10,8 @@ public interface IAnalysisSidePanelView extends IsWidget {
 
 	void setExperiments(List<Experiment> experiments);
 
+	void setRefresher(IsWidget widget);
+	
 	void setWaterWavePanel(IsWidget widget);
 
 	void setMinimap(IsWidget widget);

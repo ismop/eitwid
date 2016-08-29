@@ -33,6 +33,9 @@ public class AnalysisSidePanelView extends Composite
 
 	@UiField
 	FlowPanel miniMapPanel;
+	
+	@UiField
+	FlowPanel refresherPanel;
 
 	@UiField
 	Anchor selectedExperiment;
@@ -121,5 +124,11 @@ public class AnalysisSidePanelView extends Composite
 	@Override
 	public AnalysisSidePanelMessages getMessages() {
 		return messages;
+	}
+
+	@Override
+	public void setRefresher(IsWidget widget) {
+		refresherPanel.clear();
+		refresherPanel.add(widget);
 	}
 }

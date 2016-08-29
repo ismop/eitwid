@@ -29,6 +29,8 @@ import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAn
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
+import pl.ismop.web.client.widgets.common.refresher.RefresherPresenter;
+import pl.ismop.web.client.widgets.common.refresher.RefresherPresenter.Event;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
@@ -42,6 +44,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private Experiment selectedExperiment;
     private AnalysisSidePanelMessages messages;
+	private RefresherPresenter refresher;
 
     @Inject
     public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
@@ -58,10 +61,9 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         dapController.getExperiments(new DapController.ExperimentsCallback() {
             @Override
             public void processExperiments(List<Experiment> loadedExperiments) {
-                getView().setExperiments(loadedExperiments);
-                Date currentDate = new Date();
+                getView().setExperiments(loadedExperiments);                
                 for (Experiment loadedExperiment : loadedExperiments) {
-                    if (currentDate.after(loadedExperiment.getStart()) && currentDate.before(loadedExperiment.getEnd())) {
+                    if (isActiveExperiment(loadedExperiment)) {
                         selectExperiment(loadedExperiment);
                         break;
                     }
@@ -75,6 +77,12 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         });
     }
 
+    private boolean isActiveExperiment(Experiment experiment) {
+    	Date currentDate = new Date();
+    	
+    	return currentDate.after(experiment.getStart()) && currentDate.before(experiment.getEnd());
+    }
+    
     private void initWaterWave() {
         if (waterWave == null) {
         	waterWave = eventBus.addHandler(ChartPresenter.class);
@@ -96,6 +104,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         if (this.selectedExperiment != selectedExperiment) {
             this.selectedExperiment = selectedExperiment;
             getView().selectExperiment(selectedExperiment);
+            initRefresher();
             initWaterWave();
             initMinimap();
             loadExperimentWaveShape();
@@ -104,6 +113,21 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             eventBus.experimentChanged(selectedExperiment);
         }
     }
+
+	private void initRefresher() {
+		if (refresher == null) {
+			refresher = eventBus.addHandler(RefresherPresenter.class);			
+			view.setRefresher(refresher.getView());
+			refresher.setEvent(new Event() {
+				@Override
+				public void refresh() {
+					eventBus.refresh();
+					refresher.initializeTimer();
+				}				
+			});			
+			refresher.initializeTimer();
+		}		
+	}
 
 	@Override
     public void export() {
@@ -233,6 +257,10 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         if (waterWave != null) {
         	waterWave.selectDate(selectedDate, properties.selectionColor());
         }
+    }
+    
+    public void onRefresh() {
+    	GWT.log("Refresh water wave chart");
     }
 
     public void onAdd(MapFeature mapFeature) {

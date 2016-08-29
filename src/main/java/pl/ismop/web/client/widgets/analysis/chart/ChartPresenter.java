@@ -224,6 +224,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     public void onDateChanged(Date selectedDate) {
         getChart().selectDate(selectedDate, properties.selectionColor());
     }
+    
+    public void onRefresh() {
+    	GWT.log("Refresh chart all chosen series");
+    }
 
     public void setWizard(ChartWizardPresenter wizard) {
         this.wizard = wizard;
