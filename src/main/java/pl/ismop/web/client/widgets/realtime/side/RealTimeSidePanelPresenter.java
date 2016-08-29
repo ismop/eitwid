@@ -17,43 +17,53 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.geojson.MapFeature;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
+import pl.ismop.web.client.widgets.common.refresher.RefresherPresenter;
+import pl.ismop.web.client.widgets.common.refresher.RefresherPresenter.Event;
 import pl.ismop.web.client.widgets.realtime.side.IRealTimeSidePanelView.IRealTimeSidePanelPresenter;
 
 @Presenter(view = RealTimeSidePanelView.class, multiple = true)
 public class RealTimeSidePanelPresenter extends BasePresenter<IRealTimeSidePanelView, MainEventBus>
 		implements IRealTimeSidePanelPresenter {
-	private static final int REFRESH_INTERVAL_SECONDS = 60;
-	
-	private static final int TIME_TICK_MILLIS = 1000;
-	
-	private int countdown;
-	
 	private MapPresenter mapPresenter;
 
 	private DapController dapController;
-	
+
 	private List<MapFeature> featureBuffer;
-	
+
+	private RefresherPresenter refresher;
+
 	@Inject
 	public RealTimeSidePanelPresenter(DapController dapController) {
 		this.dapController = dapController;
 		featureBuffer = new ArrayList<>();
 	}
-	
+
 	public void init() {
 		if (mapPresenter == null) {
 			addMap();
-			
+
 			if (featureBuffer.size() > 0) {
 				for (MapFeature feature : featureBuffer) {
 					mapPresenter.add(feature);
 				}
-				
+
 				featureBuffer.clear();
 			}
 		}
+
+		if (refresher == null) {
+			refresher = eventBus.addHandler(RefresherPresenter.class);
+			view.setProegressView(refresher.getView());
+			refresher.setEvent(new Event() {
+				@Override
+				public void refresh() {
+					eventBus.refreshRealTimePanel();
+				}
+
+			});
+		}
 	}
-	
+
 	public void onAddDeviceToRealtimeMap(Device device) {
 		if (mapPresenter != null) {
 			mapPresenter.add(device);
@@ -61,7 +71,7 @@ public class RealTimeSidePanelPresenter extends BasePresenter<IRealTimeSidePanel
 			featureBuffer.add(device);
 		}
 	}
-	
+
 	public void onSelectDeviceOnRealtimeMap(Device device, boolean select) {
 		if (select) {
 			mapPresenter.select(device);
@@ -69,47 +79,25 @@ public class RealTimeSidePanelPresenter extends BasePresenter<IRealTimeSidePanel
 			mapPresenter.unselect(device);
 		}
 	}
-	
+
 	public void onRemoveProfileFromRealtimeMap(Profile profile) {
 		mapPresenter.rm(profile);
 	}
-	
+
 	public void onAddProfileFromRealtimeMap(Profile profile) {
 		mapPresenter.add(profile);
 	}
-	
+
 	public void initializeTimer() {
-		countdown = REFRESH_INTERVAL_SECONDS;
-		view.startTimer(TIME_TICK_MILLIS);
+		refresher.initializeTimer();
 	}
-	
+
 	public void onRealDataContentLoaded() {
 		initializeTimer();
 	}
 
-	@Override
-	public void onRefreshRequested() {
-		eventBus.refreshRealTimePanel();
-		countdown = 0;
-		view.setProgress(Double.valueOf(((double) countdown / REFRESH_INTERVAL_SECONDS) * 100)
-				.intValue());
-		view.stopTimer();
-	}
-
-	@Override
-	public void onTimeTick() {
-		if (countdown <= 0) {
-			eventBus.refreshRealTimePanel();
-			view.stopTimer();
-		}
-		
-		view.setProgress(Double.valueOf(((double) countdown / REFRESH_INTERVAL_SECONDS) * 100)
-				.intValue());
-		countdown--;
-	}
-
 	public void disableTimers() {
-		view.stopTimer();
+		refresher.disableTimers();
 	}
 
 	private void addMap() {
@@ -120,13 +108,13 @@ public class RealTimeSidePanelPresenter extends BasePresenter<IRealTimeSidePanel
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
 			}
-			
+
 			@Override
 			public void processSections(List<Section> sections) {
 				for (Section section : sections) {
 					mapPresenter.add(section);
 				}
-				
+
 				mapPresenter.redrawMap();
 			}
 		});

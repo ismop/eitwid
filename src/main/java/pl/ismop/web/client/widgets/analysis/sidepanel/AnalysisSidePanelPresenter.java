@@ -29,19 +29,22 @@ import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAn
 import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
+import pl.ismop.web.client.widgets.common.refresher.RefresherPresenter;
+import pl.ismop.web.client.widgets.common.refresher.RefresherPresenter.Event;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
 @Presenter(view = AnalysisSidePanelView.class, multiple = true)
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
     private final DapController dapController;
-    private final IsmopProperties properties;    
+    private final IsmopProperties properties;
 
     private MapPresenter miniMap;
     private ChartPresenter waterWave;
 
     private Experiment selectedExperiment;
     private AnalysisSidePanelMessages messages;
+	private RefresherPresenter refresher;
 
     @Inject
     public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
@@ -59,9 +62,8 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             @Override
             public void processExperiments(List<Experiment> loadedExperiments) {
                 getView().setExperiments(loadedExperiments);
-                Date currentDate = new Date();
                 for (Experiment loadedExperiment : loadedExperiments) {
-                    if (currentDate.after(loadedExperiment.getStart()) && currentDate.before(loadedExperiment.getEnd())) {
+                    if (isActiveExperiment(loadedExperiment)) {
                         selectExperiment(loadedExperiment);
                         break;
                     }
@@ -75,10 +77,16 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         });
     }
 
+    private boolean isActiveExperiment(Experiment experiment) {
+    	Date currentDate = new Date();
+
+    	return currentDate.after(experiment.getStart()) && currentDate.before(experiment.getEnd());
+    }
+
     private void initWaterWave() {
         if (waterWave == null) {
         	waterWave = eventBus.addHandler(ChartPresenter.class);
-        	waterWave.setHeight(view.getWaterWavePanelHeight());  
+        	waterWave.setHeight(view.getWaterWavePanelHeight());
         	waterWave.initChart();
         	view.setWaterWavePanel(waterWave.getView());
         }
@@ -96,6 +104,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         if (this.selectedExperiment != selectedExperiment) {
             this.selectedExperiment = selectedExperiment;
             getView().selectExperiment(selectedExperiment);
+            initRefresher();
             initWaterWave();
             initMinimap();
             loadExperimentWaveShape();
@@ -104,6 +113,29 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             eventBus.experimentChanged(selectedExperiment);
         }
     }
+
+	private void initRefresher() {
+		if(isActiveExperiment(selectedExperiment)) {
+			if (refresher == null) {
+				refresher = eventBus.addHandler(RefresherPresenter.class);
+				view.setRefresher(refresher.getView());
+				refresher.setEvent(new Event() {
+					@Override
+					public void refresh() {
+						eventBus.refresh();
+						refresher.initializeTimer();
+					}
+				});
+				refresher.initializeTimer();
+			}
+		} else {
+			view.clearRefresher();
+			if(refresher != null) {
+				eventBus.removeHandler(refresher);
+				refresher = null;
+			}
+		}
+	}
 
 	@Override
     public void export() {
@@ -163,17 +195,25 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             });
         }
     }
-    
+
     private void loadWaterHeight() {
+    	waterWave.showLoading(messages.loadingWaterWave());
     	new WaterHeight(dapController).loadAverage(selectedExperiment.getStart(), selectedExperiment.getEnd(), new WaterHeight.WaterHeightCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
+				waterWave.hideLoading();
 			}
-			
+
 			@Override
 			public void success(Stream<ChartSeries> series) {
-				series.forEach(s -> waterWave.addChartSeries(s));
+				series.forEach(s -> {
+					Parameter seriesParameter = new Parameter();
+					seriesParameter.setId(s.getParameterId());
+					waterWave.removeChartSeriesForParameter(seriesParameter);
+					waterWave.addChartSeries(s);
+				});
+				waterWave.hideLoading();
 			}
 		});
 	}
@@ -197,14 +237,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     private void showExperimentWaveShape(Map<Parameter, List<Measurement>> series) {
-        waterWave.reset();        
+        waterWave.reset();
         for (Map.Entry<Parameter, List<Measurement>> entry : series.entrySet()) {
         	Parameter parameter = entry.getKey();
             ChartSeries s = new ChartSeries();
             s.setName(parameter.getParameterName());
             s.setUnit(parameter.getMeasurementTypeUnit());
             s.setLabel(parameter.getMeasurementTypeName());
-            s.setParameterId(parameter.getId());            
+            s.setParameterId(parameter.getId());
 
             long diff = 0;
             if(entry.getValue().size() > 0) {
@@ -233,6 +273,10 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         if (waterWave != null) {
         	waterWave.selectDate(selectedDate, properties.selectionColor());
         }
+    }
+
+    public void onRefresh() {
+    	loadWaterHeight();
     }
 
     public void onAdd(MapFeature mapFeature) {

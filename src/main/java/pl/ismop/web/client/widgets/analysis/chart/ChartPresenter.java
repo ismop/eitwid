@@ -37,6 +37,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     private Map<String, Device> idToDevice = new HashMap<>();
 
+    private List<Timeline> timelines;
+    
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
@@ -162,7 +164,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     public void setTimelines(List<Timeline> timelines) {
         getChart().setLoadingState(true);
-
+        this.timelines = timelines;
+        
         final Map<String, Timeline> idToRealTimeline = new HashMap<>();
         final Map<String, Timeline> idToScenarioTimeline = new HashMap<>();
         selectionManager.clear();
@@ -223,6 +226,11 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     public void onDateChanged(Date selectedDate) {
         getChart().selectDate(selectedDate, properties.selectionColor());
+    }
+    
+    public void onRefresh() {
+    	GWT.log("Refresh chart all chosen series");
+    	setTimelines(timelines);
     }
 
     public void setWizard(ChartWizardPresenter wizard) {

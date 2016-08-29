@@ -125,6 +125,9 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class,
 			HorizontalSlicePresenter.class, VerticalSlicePresenter.class})
 	void dateChanged(Date selectedDate);
+	
+	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class})
+	void refresh();
 
 	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })
 	void experimentChanged(Experiment selectedExperiment);

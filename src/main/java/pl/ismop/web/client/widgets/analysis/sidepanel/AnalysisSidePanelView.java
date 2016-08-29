@@ -1,8 +1,16 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
+import java.util.List;
+
+import org.gwtbootstrap3.client.ui.Anchor;
+import org.gwtbootstrap3.client.ui.AnchorListItem;
+import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.DropDownMenu;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -12,14 +20,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
-import org.gwtbootstrap3.client.ui.Anchor;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
-import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.DropDownMenu;
+
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.widgets.analysis.sidepanel.IAnalysisSidePanelView.IAnalysisSidePanelPresenter;
-
-import java.util.List;
 
 public class AnalysisSidePanelView extends Composite
 		implements IAnalysisSidePanelView, ReverseViewInterface<IAnalysisSidePanelPresenter> {
@@ -28,11 +31,19 @@ public class AnalysisSidePanelView extends Composite
 
 	interface AnalysisSidePanelUiBinder extends UiBinder<Widget, AnalysisSidePanelView> {}
 
+	public interface Css extends CssResource {
+		String minimapWithRefresher();
+		String minimapWithoutRefresher();
+	}
+
 	@UiField
 	FlowPanel waterWavePanel;
 
 	@UiField
 	FlowPanel miniMapPanel;
+
+	@UiField
+	FlowPanel refresherPanel;
 
 	@UiField
 	Anchor selectedExperiment;
@@ -45,6 +56,9 @@ public class AnalysisSidePanelView extends Composite
 
 	@UiField
 	Button export;
+
+	@UiField
+	Css style;
 
 	public AnalysisSidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -121,5 +135,18 @@ public class AnalysisSidePanelView extends Composite
 	@Override
 	public AnalysisSidePanelMessages getMessages() {
 		return messages;
+	}
+
+	@Override
+	public void setRefresher(IsWidget widget) {
+		refresherPanel.clear();
+		miniMapPanel.setStyleName(style.minimapWithRefresher());
+		refresherPanel.add(widget);
+	}
+
+	@Override
+	public void clearRefresher() {
+		refresherPanel.clear();
+		miniMapPanel.setStyleName(style.minimapWithoutRefresher());
 	}
 }
