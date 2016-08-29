@@ -132,6 +132,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 			view.clearRefresher();
 			if(refresher != null) {
 				eventBus.removeHandler(refresher);
+				refresher = null;
 			}
 		}
 	}
