@@ -37,7 +37,7 @@ import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 @Presenter(view = AnalysisSidePanelView.class, multiple = true)
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
     private final DapController dapController;
-    private final IsmopProperties properties;    
+    private final IsmopProperties properties;
 
     private MapPresenter miniMap;
     private ChartPresenter waterWave;
@@ -61,7 +61,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         dapController.getExperiments(new DapController.ExperimentsCallback() {
             @Override
             public void processExperiments(List<Experiment> loadedExperiments) {
-                getView().setExperiments(loadedExperiments);                
+                getView().setExperiments(loadedExperiments);
                 for (Experiment loadedExperiment : loadedExperiments) {
                     if (isActiveExperiment(loadedExperiment)) {
                         selectExperiment(loadedExperiment);
@@ -79,14 +79,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private boolean isActiveExperiment(Experiment experiment) {
     	Date currentDate = new Date();
-    	
+
     	return currentDate.after(experiment.getStart()) && currentDate.before(experiment.getEnd());
     }
-    
+
     private void initWaterWave() {
         if (waterWave == null) {
         	waterWave = eventBus.addHandler(ChartPresenter.class);
-        	waterWave.setHeight(view.getWaterWavePanelHeight());  
+        	waterWave.setHeight(view.getWaterWavePanelHeight());
         	waterWave.initChart();
         	view.setWaterWavePanel(waterWave.getView());
         }
@@ -115,18 +115,25 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
 	private void initRefresher() {
-		if (refresher == null) {
-			refresher = eventBus.addHandler(RefresherPresenter.class);			
-			view.setRefresher(refresher.getView());
-			refresher.setEvent(new Event() {
-				@Override
-				public void refresh() {
-					eventBus.refresh();
-					refresher.initializeTimer();
-				}				
-			});			
-			refresher.initializeTimer();
-		}		
+		if(isActiveExperiment(selectedExperiment)) {
+			if (refresher == null) {
+				refresher = eventBus.addHandler(RefresherPresenter.class);
+				view.setRefresher(refresher.getView());
+				refresher.setEvent(new Event() {
+					@Override
+					public void refresh() {
+						eventBus.refresh();
+						refresher.initializeTimer();
+					}
+				});
+				refresher.initializeTimer();
+			}
+		} else {
+			view.clearRefresher();
+			if(refresher != null) {
+				eventBus.removeHandler(refresher);
+			}
+		}
 	}
 
 	@Override
@@ -187,7 +194,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
             });
         }
     }
-    
+
     private void loadWaterHeight() {
     	waterWave.showLoading(messages.loadingWaterWave());
     	new WaterHeight(dapController).loadAverage(selectedExperiment.getStart(), selectedExperiment.getEnd(), new WaterHeight.WaterHeightCallback() {
@@ -196,7 +203,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 				eventBus.showError(errorDetails);
 				waterWave.hideLoading();
 			}
-			
+
 			@Override
 			public void success(Stream<ChartSeries> series) {
 				series.forEach(s -> {
@@ -229,14 +236,14 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
     private void showExperimentWaveShape(Map<Parameter, List<Measurement>> series) {
-        waterWave.reset();        
+        waterWave.reset();
         for (Map.Entry<Parameter, List<Measurement>> entry : series.entrySet()) {
         	Parameter parameter = entry.getKey();
             ChartSeries s = new ChartSeries();
             s.setName(parameter.getParameterName());
             s.setUnit(parameter.getMeasurementTypeUnit());
             s.setLabel(parameter.getMeasurementTypeName());
-            s.setParameterId(parameter.getId());            
+            s.setParameterId(parameter.getId());
 
             long diff = 0;
             if(entry.getValue().size() > 0) {
@@ -266,7 +273,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         	waterWave.selectDate(selectedDate, properties.selectionColor());
         }
     }
-    
+
     public void onRefresh() {
     	loadWaterHeight();
     }

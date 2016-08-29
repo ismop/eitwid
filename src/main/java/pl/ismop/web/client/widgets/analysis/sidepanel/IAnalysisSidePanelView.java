@@ -1,9 +1,10 @@
 package pl.ismop.web.client.widgets.analysis.sidepanel;
 
-import com.google.gwt.user.client.ui.IsWidget;
-import pl.ismop.web.client.dap.experiment.Experiment;
-
 import java.util.List;
+
+import com.google.gwt.user.client.ui.IsWidget;
+
+import pl.ismop.web.client.dap.experiment.Experiment;
 
 public interface IAnalysisSidePanelView extends IsWidget {
 	int getWaterWavePanelHeight();
@@ -20,6 +21,8 @@ public interface IAnalysisSidePanelView extends IsWidget {
 
 	AnalysisSidePanelMessages getMessages();
 
+	void clearRefresher();
+	
 	interface IAnalysisSidePanelPresenter {
 		void selectExperiment(Experiment selectedExperiment);
 		void export();

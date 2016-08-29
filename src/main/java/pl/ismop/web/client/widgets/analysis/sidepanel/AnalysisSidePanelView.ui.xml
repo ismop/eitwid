@@ -3,7 +3,7 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelMessages" field="messages"/>
-	<ui:style>
+	<ui:style type="pl.ismop.web.client.widgets.analysis.sidepanel.AnalysisSidePanelView.Css">
 		.panel {
 			width: 100%;
 			height: 100%;
@@ -29,9 +29,14 @@
 			margin: 5px 0 5px 0;
 		}
 
-		.minimap {
+		.minimapWithRefresher {
 			width: 100%;
 			height: literal("calc(70% - 190px)");
+		}
+		
+		.minimapWithoutRefresher {
+			width: 100%;
+			height: literal("calc(70% - 150px)");
 		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.panel}">
@@ -46,7 +51,7 @@
 
 		<g:FlowPanel ui:field="refresherPanel" addStyleNames="{style.refresher}"/>
 		<g:FlowPanel ui:field="waterWavePanel" addStyleNames="{style.waterWave}"/>
-		<g:FlowPanel ui:field="miniMapPanel" addStyleNames="{style.minimap}"/>
+		<g:FlowPanel ui:field="miniMapPanel" addStyleNames="{style.minimapWithRefresher}"/>
 		<b:Button addStyleNames="{style.exportButton}" ui:field="export" text="{messages.export}">Export</b:Button>
 	</g:HTMLPanel>
 </ui:UiBinder>
