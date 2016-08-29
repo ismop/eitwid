@@ -189,15 +189,23 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
     
     private void loadWaterHeight() {
+    	waterWave.showLoading(messages.loadingWaterWave());
     	new WaterHeight(dapController).loadAverage(selectedExperiment.getStart(), selectedExperiment.getEnd(), new WaterHeight.WaterHeightCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
+				waterWave.hideLoading();
 			}
 			
 			@Override
 			public void success(Stream<ChartSeries> series) {
-				series.forEach(s -> waterWave.addChartSeries(s));
+				series.forEach(s -> {
+					Parameter seriesParameter = new Parameter();
+					seriesParameter.setId(s.getParameterId());
+					waterWave.removeChartSeriesForParameter(seriesParameter);
+					waterWave.addChartSeries(s);
+				});
+				waterWave.hideLoading();
 			}
 		});
 	}
@@ -260,7 +268,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
     
     public void onRefresh() {
-    	GWT.log("Refresh water wave chart");
+    	loadWaterHeight();
     }
 
     public void onAdd(MapFeature mapFeature) {
