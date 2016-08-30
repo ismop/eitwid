@@ -1,9 +1,21 @@
 package pl.ismop.web.client.widgets.analysis.chart;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
@@ -18,19 +30,17 @@ import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 
-import java.util.*;
-
 @Presenter(view = ChartView.class, multiple = true)
 public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         implements IPanelContent<IChartView, MainEventBus> {
     private final DapController dapController;
-    
+
     private final IsmopProperties properties;
-    
+
     private Experiment selectedExperiment;
-    
+
     private ISelectionManager selectionManager;
-    
+
     private ChartWizardPresenter wizard;
 
     private pl.ismop.web.client.widgets.common.chart.ChartPresenter chartPresenter;
@@ -38,7 +48,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     private Map<String, Device> idToDevice = new HashMap<>();
 
     private List<Timeline> timelines;
-    
+
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
@@ -165,7 +175,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     public void setTimelines(List<Timeline> timelines) {
         getChart().setLoadingState(true);
         this.timelines = timelines;
-        
+
         final Map<String, Timeline> idToRealTimeline = new HashMap<>();
         final Map<String, Timeline> idToScenarioTimeline = new HashMap<>();
         selectionManager.clear();
@@ -202,6 +212,13 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     private pl.ismop.web.client.widgets.common.chart.ChartPresenter getChart() {
         if(chartPresenter == null) {
             chartPresenter = eventBus.addHandler(pl.ismop.web.client.widgets.common.chart.ChartPresenter.class);
+            chartPresenter.setXAxisLabelsFormatter(new AxisLabelsFormatter() {
+				@Override
+				public String format(AxisLabelsData axisLabelsData) {
+					return getXLabelDefaultFormat(axisLabelsData.getNativeData()) +
+							" [" + getExperimentHours(axisLabelsData.getValueAsDouble()) +" h]";
+				}
+			});
             chartPresenter.setDeviceSelectHandler(new pl.ismop.web.client.widgets.common.chart.ChartPresenter.DeviceSelectHandler() {
                 @Override
                 public void select(ChartSeries series) {
@@ -224,10 +241,19 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         return chartPresenter;
     }
 
+    private String getExperimentHours(double time) {
+    	int interval = (int)(time - selectedExperiment.getStart().getTime()) / (1000 * 60 * 60);
+    	return "" + interval;
+    }
+
+    private native String getXLabelDefaultFormat(JavaScriptObject nativeData) /*-{
+		return $wnd.Highcharts.dateFormat(nativeData.dateTimeLabelFormat, nativeData.value);
+	}-*/;
+
     public void onDateChanged(Date selectedDate) {
         getChart().selectDate(selectedDate, properties.selectionColor());
     }
-    
+
     public void onRefresh() {
     	GWT.log("Refresh chart all chosen series");
     	setTimelines(timelines);
