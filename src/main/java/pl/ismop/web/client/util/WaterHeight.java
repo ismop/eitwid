@@ -27,14 +27,14 @@ public class WaterHeight {
 	public interface WaterHeightCallback extends ErrorCallback {
 		void success(Stream<ChartSeries> series);
 	}
-	
+
 	private abstract class MeasurementLoader implements ErrorCallback {
 		private ErrorCallback errorCallback;
-		
+
 		public MeasurementLoader(ErrorCallback errorCallback) {
 			this.errorCallback = errorCallback;
 		}
-		
+
 		@Override
 		public void onError(ErrorDetails errorDetails) {
 			errorCallback.onError(errorDetails);
@@ -42,13 +42,13 @@ public class WaterHeight {
 
 		public abstract void run(List<Device> devices, List<Parameter> parameters, List<Timeline> timelines);
 	}
-	
+
 	private DapController dapController;
 
 	public WaterHeight(DapController dapController) {
 		this.dapController = dapController;
 	}
-	
+
 
 	public void load(final WaterHeightCallback callback) {
 		loadDeviceStructure("PV", new MeasurementLoader(callback) {
@@ -63,7 +63,21 @@ public class WaterHeight {
 			}
 		});
 	}
-	
+
+	public void loadAverage(final WaterHeightCallback callback) {
+		loadDeviceStructure("2_PV", new MeasurementLoader(callback) {
+			@Override
+			public void run(List<Device> devices, List<Parameter> parameters, List<Timeline> timelines) {
+				dapController.getMeasurementsForTimelineIdsWithQuantity(Lists.transform(timelines, Timeline::getId), 1000, new MeasurementsCallback(callback) {
+					@Override
+					public void processMeasurements(List<Measurement> measurements) {
+						callback.success(ChartSeriesUtil.toChartSeries(devices, parameters, timelines, measurements));
+					}
+				});
+			}
+		});
+	}
+
 	public void loadAverage(final Date from, final Date to, final WaterHeightCallback callback) {
 		loadDeviceStructure("2_PV", new MeasurementLoader(callback) {
 			@Override
@@ -77,7 +91,7 @@ public class WaterHeight {
 			}
 		});
 	}
-	
+
 	private void loadDeviceStructure(String parameterFilter, MeasurementLoader loader) {
 		GWT.log("Loading measurements context");
 		dapController.getContext("measurements", new ContextsCallback(loader) {

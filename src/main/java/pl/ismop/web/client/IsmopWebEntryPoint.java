@@ -19,9 +19,9 @@ import com.mvp4g.client.Mvp4gModule;
 
 public class IsmopWebEntryPoint implements EntryPoint {
 	private IsmopConverter ismopConverter;
-	
+
 	public static Dictionary properties;
-	
+
 	public IsmopWebEntryPoint() {
 		ismopConverter = new IsmopConverter();
 	}
@@ -32,10 +32,10 @@ public class IsmopWebEntryPoint implements EntryPoint {
 		ServiceRoots.add("dap", properties.get("dapEndpoint"));
 		ServiceRoots.add("hypgen", properties.get("hypgenEndpoint"));
 		Defaults.ignoreJsonNulls();
-		
+
 		GlobalMessages globalMessages = GWT.create(GlobalMessages.class);
 		globalInitialization(globalMessages);
-		
+
 		Mvp4gModule module = (Mvp4gModule)GWT.create(Mvp4gModule.class);
 		module.createAndStartModule();
 		RootLayoutPanel.get().add((Widget) module.getStartView());
@@ -48,24 +48,24 @@ public class IsmopWebEntryPoint implements EntryPoint {
 				toStringArray(ismopConverter.shortMonths()),
 				toStringArray(ismopConverter.months()),
 				toStringArray(ismopConverter.days()));
-		
+
 		//Bootbox setup
 		DialogOptions dialogOptions = DialogOptions.newOptions("");
 		dialogOptions.setCloseButton(false);
 		Bootbox.setDefaults(dialogOptions);
 	}
-	
+
 	private String getCurrentDate() {
 		return ismopConverter.formatForFileSafeName(new Date());
 	}
 
 	private JavaScriptObject toStringArray(List<String> values) {
 		JsArrayString result = (JsArrayString) JsArrayString.createArray();
-		
+
 		for (String value : values) {
 			result.push(value);
 		}
-		
+
 		return result;
 	}
 
@@ -73,6 +73,8 @@ public class IsmopWebEntryPoint implements EntryPoint {
 			JavaScriptObject shortMonths, JavaScriptObject months, JavaScriptObject days) /*-{
 		var object = this;
 		$wnd.Highcharts.setOptions({
+			colors: ['#90ed7d', '#f7a35c', '#8085e9', '#f15c80',
+   						'#e4d354', '#2b908f', '#f45b5b', '#91e8e1', '#7cb5ec', '#434348'],
 			lang: {
 				resetZoom: messages.@pl.ismop.web.client.GlobalMessages::resetZoomLabel()(),
 				resetZoomTitle:
@@ -120,8 +122,8 @@ public class IsmopWebEntryPoint implements EntryPoint {
 			}
 		});
 	}-*/;
-	
+
 	private native JavaScriptObject toStringArray(String values) /*-{
 		return values.split(",");
-	}-*/;; 
+	}-*/;;
 }

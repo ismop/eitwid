@@ -11,6 +11,7 @@ import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Extremes;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
@@ -27,6 +28,7 @@ import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
+import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.common.base.Optional;
@@ -432,6 +434,16 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			.setName(series.getName())
 			.setPoints(series.getValues())
 			.setYAxis(getYAxisIndex(series));
+
+		if (series.getOverrideColor() != null) {
+			chartSeries.setPlotOptions(new LinePlotOptions().setColor(
+					new Color(series.getOverrideColor())));
+		}
+
+		if (series.getOverrideLineWidth() > 0) {
+			chartSeries.setPlotOptions(new LinePlotOptions().setLineWidth(
+					series.getOverrideLineWidth()));
+		}
 
 		if (!foundChartSeries.isPresent()) {
 			chart.addSeries(chartSeries, redraw, true);
