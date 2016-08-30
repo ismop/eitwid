@@ -1,10 +1,24 @@
 package pl.ismop.web.client.widgets.monitoring.readings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.*;
+import pl.ismop.web.client.dap.DapController.ContextsCallback;
+import pl.ismop.web.client.dap.DapController.DevicesCallback;
+import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
+import pl.ismop.web.client.dap.DapController.ParametersCallback;
+import pl.ismop.web.client.dap.DapController.SectionsCallback;
+import pl.ismop.web.client.dap.DapController.TimelinesCallback;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.levee.Levee;
@@ -19,30 +33,27 @@ import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.monitoring.readings.IReadingsView.IReadingsPresenter;
 
-import javax.inject.Inject;
-import java.util.*;
-
 @Presenter(view = ReadingsView.class)
 public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus>
 		implements IReadingsPresenter {
 	private static final String PICK_VALUE = "pick";
 
 	private DapController dapController;
-	
+
 	private MapPresenter mapPresenter;
-	
+
 	private ChartPresenter chartPresenter ;
-	
+
 	private Levee levee;
-	
+
 	private List<ChartSeries> series;
-	
+
 	private Map<String, Device> displayedDevices;
-	
+
 	private Map<String, Parameter> additionalParameters;
-	
+
 	private List<String> chosenAdditionalReadings;
-	
+
 	private Map<String, Device> additionalDevices;
 
 	@Inject
@@ -54,14 +65,14 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 		chosenAdditionalReadings = new ArrayList<>();
 		additionalDevices = new HashMap<>();
 	}
-	
+
 	public void onShowExpandedReadings(Levee levee, List<ChartSeries> series) {
 		this.levee = levee;
 		this.series.clear();
 		this.series.addAll(series);
 		view.showModal(true);
 	}
-	
+
 	public void onDeviceSeriesHover(String deviceId, boolean hover) {
 		if(displayedDevices.containsKey(deviceId)) {
 			if (hover) {
@@ -78,14 +89,14 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			mapPresenter = eventBus.addHandler(MapPresenter.class);
 			view.setMap(mapPresenter.getView());
 		}
-		
+
 		mapPresenter.reset(false);
 		dapController.getSections(levee.getId(), new SectionsCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
 			}
-			
+
 			@Override
 			public void processSections(List<Section> sections) {
 				for(Section section : sections) {
@@ -93,7 +104,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 				}
 			}
 		});
-		
+
 		if(chartPresenter == null) {
 			chartPresenter = eventBus.addHandler(ChartPresenter.class);
 			chartPresenter.setHeight(view.getChartContainerHeight());
@@ -112,16 +123,16 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 					eventBus, chartPresenter));
 			view.setChart(chartPresenter.getView());
 		}
-		
+
 		chartPresenter.reset();
-		
-		List<String> deviceIds = new ArrayList<String>();
-		
+
+		List<String> deviceIds = new ArrayList<>();
+
 		for(ChartSeries chartSeries : series) {
 			chartPresenter.addChartSeries(chartSeries);
 			deviceIds.add(chartSeries.getDeviceId());
 		}
-		
+
 		drawDevices(deviceIds);
 		completeAdditionalReadings();
 	}
@@ -133,7 +144,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			if(chosenAdditionalReadings.size() == 0) {
 				view.showNoAdditionalReadingsLabel(false);
 			}
-			
+
 			Parameter parameter = additionalParameters.get(parameterId);
 			view.addAdditionalReadingsLabel(parameterId,
 					additionalDevices.get(parameter.getDeviceId()).getCustomId()
@@ -149,11 +160,11 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 		if(chosenAdditionalReadings.contains(parameterId)) {
 			view.removeAdditionalReadingsLabel(parameterId);
 			chosenAdditionalReadings.remove(parameterId);
-			
+
 			if(chosenAdditionalReadings.size() == 0) {
 				view.showNoAdditionalReadingsLabel(true);
 			}
-			
+
 			removeAdditionalReadings(parameterId);
 		}
 	}
@@ -166,7 +177,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 				eventBus.showError(errorDetails);
 				chartPresenter.setLoadingState(false);
 			}
-			
+
 			@Override
 			public void processContexts(List<Context> contexts) {
 				if(contexts.size() > 0) {
@@ -177,7 +188,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 							eventBus.showError(errorDetails);
 							chartPresenter.setLoadingState(false);
 						}
-						
+
 						@Override
 						public void processTimelines(List<Timeline> timelines) {
 							if(timelines.size() > 0) {
@@ -189,12 +200,12 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 										eventBus.showError(errorDetails);
 										chartPresenter.setLoadingState(false);
 									}
-									
+
 									@Override
 									public void processMeasurements(
 											List<Measurement> measurements) {
 										chartPresenter.setLoadingState(false);
-										
+
 										if(measurements.size() > 0) {
 											ChartSeries chartSeries = new ChartSeries();
 											String  additionalDeviceId = additionalParameters.get(
@@ -210,17 +221,23 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 											chartSeries.setUnit(additionalParameters
 													.get(parameterId).getMeasurementTypeUnit());
 											chartSeries.setTimelineId(timeline.getId());
-											
+
+											if (additionalDevices.get(additionalDeviceId)
+													.getCustomId().contains("Wysokość wody")) {
+												chartSeries.setOverrideColor("#278cdc");
+												chartSeries.setOverrideLineWidth(4);
+											}
+
 											Number[][] values = new Number[measurements.size()][2];
 											int index = 0;
-											
+
 											for(Measurement measurement : measurements) {
 												values[index][0] = measurement.getTimestamp()
 														.getTime();
 												values[index][1] = measurement.getValue();
 												index++;
 											}
-											
+
 											chartSeries.setValues(values);
 											chartPresenter.addChartSeries(chartSeries);
 										}
@@ -250,26 +267,26 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
 			}
-			
+
 			@Override
 			public void processDevices(List<Device> devices) {
 				List<String> deviceIds = new ArrayList<>();
-				
+
 				for(Device device : devices) {
 					deviceIds.add(device.getId());
 					additionalDevices.put(device.getId(), device);
 				}
-				
+
 				dapController.getParameters(deviceIds, new ParametersCallback() {
 					@Override
 					public void onError(ErrorDetails errorDetails) {
 						eventBus.showError(errorDetails);
 					}
-					
+
 					@Override
 					public void processParameters(List<Parameter> parameters) {
 						additionalParameters.clear();
-						
+
 						for(Parameter parameter : parameters) {
 							view.addAdditionalReadingsOption(parameter.getId(),
 									additionalDevices.get(parameter.getDeviceId()).getCustomId()
@@ -288,11 +305,11 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
 			}
-			
+
 			@Override
 			public void processDevices(List<Device> devices) {
 				displayedDevices.clear();
-				
+
 				for(Device device : devices) {
 					mapPresenter.add(device);
 					displayedDevices.put(device.getId(), device);

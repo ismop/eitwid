@@ -2,18 +2,22 @@ package pl.ismop.web.client.widgets.common.chart;
 
 public class ChartSeries {
 	private String name;
-	
+
 	private String deviceId;
-	
+
 	private String parameterId;
-	
+
 	private String unit;
-	
+
 	private String label;
-	
+
 	private Number[][] values;
-	
+
 	private String timelineId;
+
+	private String overrideColor;
+
+	private int overrideLineWidth;
 
 	public String getDeviceId() {
 		return deviceId;
@@ -69,5 +73,21 @@ public class ChartSeries {
 
 	public void setTimelineId(String timelineId) {
 		this.timelineId = timelineId;
+	}
+
+	public String getOverrideColor() {
+		return overrideColor;
+	}
+
+	public void setOverrideColor(String overrideColor) {
+		this.overrideColor = overrideColor;
+	}
+
+	public int getOverrideLineWidth() {
+		return overrideLineWidth;
+	}
+
+	public void setOverrideLineWidth(int overrideLineWidth) {
+		this.overrideLineWidth = overrideLineWidth;
 	}
 }
