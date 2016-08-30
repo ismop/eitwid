@@ -6,7 +6,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IChartView extends IsWidget {
 	interface IChartPresenter {
-		
 	}
 
 	void addChart(Chart chart);

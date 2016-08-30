@@ -130,11 +130,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	}
 
 	private void refreshView() {
-//		if (!view.canRender()) {
-//			eventBus.showSimpleError(view.cannotRenderMessages());
-//
-//			return;
-//		}
+		if (!view.canRender()) {
+			eventBus.showSimpleError(view.cannotRenderMessages());
+
+			return;
+		}
 
 		view.showLoadingState(true);
 

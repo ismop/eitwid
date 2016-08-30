@@ -236,7 +236,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			chart.removeSeries(chartSeriesMap.remove(chartSeriesKey));
 		}
 
-		yAxisMap.clear();
+		removeYAxes();
 
 		if (chart != null) {
 			chart.removeAllSeries();
@@ -384,14 +384,12 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		} else {
 			int index = yAxisMap.size();
 
-			if(index == 0) {
-				updateFirstYAxis(chart.getNativeChart(), yAxisLabel);
-			} else {
-				addAxis(chart.getNativeChart(), index, yAxisLabel);
+			if (index == 0) {
+				resetYAxes(chart.getNativeChart());
 			}
 
+			addAxis(chart.getNativeChart(), index, yAxisLabel);
 			yAxisMap.put(yAxisLabel, index);
-
 			result = index;
 		}
 
@@ -400,7 +398,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
 	private void clearDataSeries() {
 		if (dataSeriesMap.size() == 0) {
-			yAxisMap.clear();
+			removeYAxes();
 			chart.removeAllSeries();
 		}
 	}
@@ -455,6 +453,14 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		}
 	}
 
+	private void removeYAxes() {
+		for (String yAxisLabel : yAxisMap.keySet()) {
+			removeYAxis(chart.getNativeChart(), yAxisLabel);
+		}
+
+		yAxisMap.clear();
+	}
+
 	private native JavaScriptObject getExportCSVChartBtn() /*-{
 		var thisObject = this
 		var exports = $wnd.Highcharts.getOptions().exporting.buttons.contextButton.menuItems.slice(0)
@@ -470,6 +476,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	private native void updateFirstYAxis(JavaScriptObject nativeChart, String yAxisLabel) /*-{
 		var thisObject = this;
 		nativeChart.yAxis[0].update({
+			id: yAxisLabel,
 			title: {
 				text: yAxisLabel,
 				style: {
@@ -490,6 +497,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	private native void addAxis(JavaScriptObject nativeChart, int index, String yAxisLabel) /*-{
 		var thisObject = this;
 		nativeChart.addAxis({
+			id: yAxisLabel,
 			title: {
 				text: yAxisLabel,
 				style: {
@@ -513,5 +521,19 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
 	private native boolean hasXAxis(JavaScriptObject selectionEvent) /*-{
 		return selectionEvent.xAxis != null;
+	}-*/;
+
+	private native void removeYAxis(JavaScriptObject nativeChart, String yAxisId) /*-{
+		var yAxis = nativeChart.get(yAxisId);
+
+		if (yAxis != null) {
+			yAxis.remove();
+		}
+	}-*/;
+
+	private native void resetYAxes(JavaScriptObject nativeChart) /*-{
+		if (nativeChart.yAxis.length > 0) {
+			nativeChart.yAxis[0].remove();
+		}
 	}-*/;
 }
