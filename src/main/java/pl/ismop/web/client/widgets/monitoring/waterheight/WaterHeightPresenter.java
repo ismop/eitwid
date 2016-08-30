@@ -55,17 +55,17 @@ public class WaterHeightPresenter extends BasePresenter<IWaterHeightView, MainEv
 
 	private void loadWaterHeight() {
 		waterHeightChart.setLoadingState(true);
-		new WaterHeight(dapController).load(new WaterHeight.WaterHeightCallback() {
+		new WaterHeight(dapController).loadAverage(new WaterHeight.WaterHeightCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				waterHeightChart.setLoadingState(false);
-				eventBus.showError(errorDetails);				
+				eventBus.showError(errorDetails);
 			}
-			
+
 			@Override
 			public void success(Stream<ChartSeries> series) {
 				series.forEach(chartSeries -> waterHeightChart.addChartSeries(chartSeries));
-				waterHeightChart.setLoadingState(false);				
+				waterHeightChart.setLoadingState(false);
 			}
 		});
 	}
