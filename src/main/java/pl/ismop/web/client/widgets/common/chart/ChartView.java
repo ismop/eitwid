@@ -11,19 +11,21 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ChartView extends Composite implements IChartView {
+
 	private static ChartViewUiBinder uiBinder = GWT.create(ChartViewUiBinder.class);
 
 	interface ChartViewUiBinder extends UiBinder<Widget, ChartView> {}
 
 	@UiField
 	ChartMessages messages;
-	
+
 	@UiField
 	HTMLPanel panel;
-	
+
 	@UiField
 	FlowPanel loadingPanel;
-	
+
+
 	public ChartView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
