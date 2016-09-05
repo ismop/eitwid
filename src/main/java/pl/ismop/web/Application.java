@@ -1,8 +1,5 @@
 package pl.ismop.web;
 
-import org.apache.catalina.Context;
-import org.apache.catalina.session.FileStore;
-import org.apache.catalina.session.PersistentManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
-import org.springframework.boot.context.embedded.tomcat.TomcatContextCustomizer;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -33,11 +27,17 @@ public class Application extends WebMvcConfigurerAdapter {
 
 	private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-	@Value("${dap.token}") private String dapToken;
-	@Value("${dap.endpoint}") private String dapEndpoint;
-	@Value("${public.maps.server.url}") private String mapsServerUrl;
-	@Value("${session.store.path}") private String sessionStorePath;
-	@Value("${hypgen.endpoint}") private String hypgenEndpoint;
+	@Value("${dap.token}")
+	private String dapToken;
+
+	@Value("${dap.endpoint}")
+	private String dapEndpoint;
+
+	@Value("${public.maps.server.url}")
+	private String mapsServerUrl;
+
+	@Value("${hypgen.endpoint}")
+	private String hypgenEndpoint;
 
 	public static void main(String[] args) {
 		new SpringApplicationBuilder(Application.class).run(args);
@@ -73,23 +73,5 @@ public class Application extends WebMvcConfigurerAdapter {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
-	public EmbeddedServletContainerFactory servletContainer() {
-		TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
-		factory.addContextCustomizers(new TomcatContextCustomizer() {
-			@Override
-			public void customize(Context context) {
-				FileStore store = new FileStore();
-				store.setDirectory(sessionStorePath);
-
-				PersistentManager manager = new PersistentManager();
-				manager.setStore(store);
-				context.setManager(manager);
-			}
-		});
-
-	    return factory;
 	}
 }
