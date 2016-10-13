@@ -1,7 +1,6 @@
 package pl.ismop.web.client.widgets.analysis.threatlevels;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +27,6 @@ public class ThreatLevelsPresenter extends BasePresenter<IThreatLevelsView, Main
 	@Override
 	public void setSelectedExperiment(Experiment experiment) {
 		this.experiment = experiment;
-	}
-
-	@Override
-	public void bind() {
-		view.setProfiles(Arrays.asList("Profile 1", "Profile 2", "Profile 3", "Profile 4"));
-		view.showResults();
 	}
 
 	@Override
@@ -69,5 +62,6 @@ public class ThreatLevelsPresenter extends BasePresenter<IThreatLevelsView, Main
 			threatLevels.stream().forEach(tl -> namesToThreatLevels.put("Profile " + tl.getProfileId(), tl));
 			view.setProfiles(new ArrayList<>(namesToThreatLevels.keySet()));
 		}
+		view.showResults();
 	}
 }

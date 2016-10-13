@@ -24,19 +24,19 @@ import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
 
 @Presenter(view = MapView.class, multiple = true)
 public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implements IMapPresenter {
-	
+
 	private GeoJsonFeaturesEncDec geoJsonEncoderDecoder;
-	
+
 	private Map<String, MapFeature> mapFeatures;
-	
+
 	private boolean hoverListeners;
-	
+
 	private boolean clickListeners;
-	
+
 	private boolean zoomed;
 
 	private Map<String, String> featureStrokeColor;
-	
+
 	@Inject
 	public MapPresenter(GeoJsonFeaturesEncDec geoJsonEncoderDecoder) {
 		this.geoJsonEncoderDecoder = geoJsonEncoderDecoder;
@@ -92,7 +92,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 			} else {
 				rm(entry);
 			}
-		}		
+		}
 	}
 
 	/**
@@ -101,14 +101,14 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	public void addHoverListeners() {
 		hoverListeners = true;
 	}
-	
+
 	/**
 	 * Has to be invoked before the map widget is added to DOM.
 	 */
 	public void addClickListeners() {
 		clickListeners = true;
 	}
-	
+
 	public void addAction(String id, String label) {
 		view.addButton(id, label);
 	}
@@ -144,7 +144,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	@Override
 	public void onFeatureHoverIn(String type, String featureId) {
 		MapFeature mapFeature = mapFeatures.get(featureId);
-		
+
 		if (mapFeature != null) {
 			switch (type) {
 				case "profile":
@@ -155,13 +155,13 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				case "section":
 					view.highlight(featureId, true);
 					eventBus.showSectionMetadata((Section) mapFeature, true);
-					
+
 					break;
 				case "device":
 					Device device = (Device) mapFeature;
 					eventBus.showDeviceMetadata(device, true);
 					view.showPopup(featureId, device.getCustomId());
-					
+
 					break;
 				case "deviceAggregate":
 					DeviceAggregate deviceAggregate = (DeviceAggregate) mapFeature;
@@ -205,11 +205,11 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void zoomOnSection(Section section) {
 		zoomed = true;
-		
+
 		if(!mapFeatures.keySet().contains(section.getFeatureId())) {
 			add(section);
 		}
-		
+
 		if(mapFeatures.keySet().contains(section.getFeatureId())) {
 			view.adjustBounds(section.getShape().getCoordinates());
 		}
@@ -240,19 +240,23 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	public boolean isZoomed() {
 		return zoomed;
 	}
-	
+
 	public void setFeatureStrokeColor(MapFeature feature, String color) {
 		if (feature != null) {
 			featureStrokeColor.put(feature.getFeatureId(), color);
 		}
 	}
-	
+
 	public void rmFeatureStrokeColor(MapFeature feature) {
 		if (feature != null) {
 			featureStrokeColor.remove(feature.getFeatureId());
 		}
 	}
-	
+
+	public void clearStrokeColors() {
+		featureStrokeColor.clear();
+	}
+
 	@Override
 	public String getFeatureStrokeColor(String featureId, String colourType) {
 		if (featureStrokeColor.containsKey(featureId)) {
@@ -300,7 +304,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 				allPoints.addAll(((Profile) mapFeature).getShape().getCoordinates());
 			}
 		}
-		
+
 		return allPoints;
 	}
 }
