@@ -2,12 +2,12 @@ package pl.ismop.web.client.widgets.analysis.threatlevels;
 
 import java.util.List;
 
-import pl.ismop.web.client.dap.scenario.Scenario;
+import pl.ismop.web.client.dap.threatlevel.Scenario;
 
 public interface IThreatLevelsView {
 	interface IThreadLevelsPresenter {
 		void changeProfile(String value);
-	}		
+	}
 
 	void clearScenarios();
 
@@ -17,5 +17,5 @@ public interface IThreatLevelsView {
 
 	void setProfiles(List<String> names);
 
-	void showScenarios(List<Scenario> scenarios);
+	void showScenarios(List<Scenario> list);
 }

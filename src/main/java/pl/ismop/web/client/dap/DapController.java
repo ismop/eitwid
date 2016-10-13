@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
@@ -61,6 +60,9 @@ import pl.ismop.web.client.dap.sensor.SensorService;
 import pl.ismop.web.client.dap.sensor.SensorsResponse;
 import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentResponse;
 import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentService;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevel;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevelResponse;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevelService;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.dap.timeline.TimelineService;
 import pl.ismop.web.client.dap.timeline.TimelinesResponse;
@@ -72,91 +74,93 @@ import pl.ismop.web.client.hypgen.Experiment;
 @Singleton
 public class DapController {
 	private final IsmopConverter converter;
-	
+
 	private final ScenarioService scenarioService;
-	
+
 	private ExperimentService leveeExperimentService;
-	
+
 	private ErrorUtil errorUtil;
-	
+
 	private LeveeService leveeService;
-	
+
 	private SensorService sensorService;
-	
+
 	private MeasurementService measurementService;
-	
+
 	private SectionService sectionService;
-	
+
 	private ThreatAssessmentService threatAssessmentService;
-	
+
 	private ResultService resultService;
-	
+
 	private ProfileService profileService;
-	
+
 	private DeviceService deviceService;
-	
+
 	private DeviceAggregationService deviceAggregationService;
-	
+
 	private ParameterService parameterService;
-	
+
 	private ContextService contextService;
-	
+
 	private TimelineService timelineService;
-	
+
 	private MonitoringService monitoringService;
+
+	private ThreatLevelService threatLevelService;
 
 	public interface LeveesCallback extends ErrorCallback {
 		void processLevees(List<Levee> levees);
 	}
-	
+
 	public interface LeveeCallback extends ErrorCallback {
 		void processLevee(Levee levee);
 	}
-	
+
 	public interface SensorCallback extends ErrorCallback {
 		void processSensor(Sensor sensor);
 	}
-	
+
 	public interface MeasurementsCallback extends ErrorCallback {
 		void processMeasurements(List<Measurement> measurements);
 	}
-	
+
 	public interface SectionsCallback extends ErrorCallback {
 		void processSections(List<Section> sections);
 	}
-	
+
 	public interface ThreatAssessmentCallback extends ErrorCallback {
 		void processExperiments(List<Experiment> experiments);
 	}
-	
+
 	public interface ResultsCallback extends ErrorCallback {
 		void processResults(List<Result> results);
 	}
-	
+
 	public interface SensorsCallback extends ErrorCallback {
 		void processSensors(List<Sensor> sensors);
 	}
-	
+
 	public interface ProfilesCallback extends ErrorCallback {
 		void processProfiles(List<Profile> profiles);
 	}
-	
+
 	public interface DevicesCallback extends ErrorCallback {
 		void processDevices(List<Device> devices);
 	}
-	
+
 	public interface ParametersCallback extends ErrorCallback {
 		void processParameters(List<Parameter> parameters);
 	}
-	
+
 	public interface ContextsCallback extends ErrorCallback {
 		void processContexts(List<Context> contexts);
 	}
-	
+
 	public interface TimelinesCallback extends ErrorCallback {
 		void processTimelines(List<Timeline> timelines);
 	}
-	
+
 	public interface DeviceAggregatesCallback extends ErrorCallback {
 		void processDeviceAggregations(List<DeviceAggregate> deviceAggreagations);
 	}
@@ -199,6 +203,7 @@ public class DapController {
 			MeasurementService measurementService,
 			SectionService sectionService,
 			ThreatAssessmentService experimentService,
+			ThreatLevelService threatLevelService,
 			ResultService resultService,
 			ProfileService profileService,
 			DeviceService deviceService,
@@ -216,6 +221,7 @@ public class DapController {
 		this.measurementService = measurementService;
 		this.sectionService = sectionService;
 		this.threatAssessmentService = experimentService;
+		this.threatLevelService = threatLevelService;
 		this.resultService = resultService;
 		this.profileService = profileService;
 		this.deviceService = deviceService;
@@ -229,7 +235,7 @@ public class DapController {
 		this.converter = converter;
 	}
 
-	public void getLevees(final LeveesCallback callback) {	
+	public void getLevees(final LeveesCallback callback) {
 		leveeService.getLevees(new MethodCallback<LeveesResponse>() {
 			@Override
 			public void onSuccess(Method method, LeveesResponse response) {
@@ -246,7 +252,7 @@ public class DapController {
 	public void changeLeveeMode(String leveeId, String mode, final LeveeCallback callback) {
 		ModeChange modeChange = new ModeChange();
 		modeChange.setMode(mode);
-		
+
 		ModeChangeRequest request = new ModeChangeRequest();
 		request.setModeChange(modeChange);
 		leveeService.changeMode(leveeId, request, new MethodCallback<LeveeResponse>() {
@@ -289,7 +295,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public void getMeasurementsWithQuantity(String timelineId, int quantity,
 			MeasurementsCallback callback) {
 		measurementService.getMeasurementsWithQuantity(timelineId, quantity,
@@ -303,7 +309,7 @@ public class DapController {
 		measurementService.getMeasurements(timelineId, from, until,
 				new MeasurementsRestCallback(callback));
 	}
-	
+
 	public void getMeasurementsWithQuantityAndTime(List<String> timelineIds, Date startDate, Date endDate,
 			int quantity, MeasurementsCallback callback) {
 		String from = converter.formatForDto(startDate);
@@ -311,7 +317,7 @@ public class DapController {
 		measurementService.getMeasurementsWithQuantityAndTime(converter.merge(timelineIds), from,
 				until, quantity, new MeasurementsRestCallback(callback));
 	}
-	
+
 	public ListenableFuture<List<Measurement>> getMeasurementsWithQuantityAndTime(
 			List<String> timelineIds, Date startDate, Date endDate, int quantity) {
 		SettableFuture<List<Measurement>> result = SettableFuture.create();
@@ -328,7 +334,7 @@ public class DapController {
 					public void onSuccess(Method method, MeasurementsResponse response) {
 						result.set(response.getMeasurements());
 					}});
-		
+
 		return result;
 	}
 
@@ -357,7 +363,7 @@ public class DapController {
 		measurementService.getLastMeasurements(converter.merge(timelineIds), from, until,
 				new MeasurementsRestCallback(callback));
 	}
-	
+
 	public ListenableFuture<List<Measurement>> getLastMeasurementsWith24HourMod(
 			List<String> timelineIds, Date untilDate) {
 		SettableFuture<List<Measurement>> result = SettableFuture.create();
@@ -375,16 +381,16 @@ public class DapController {
 						result.set(response.getMeasurements());
 					}
 				});
-		
+
 		return result;
 	}
-	
+
 	public void getLastMeasurements(Collection<String> timelineIds, Date untilDate, final MeasurementsCallback callback) {
 		String until = converter.formatForDto(untilDate);
 		measurementService.getLastMeasurementsOnlyUntil(converter.merge(timelineIds), until,
 				new MeasurementsRestCallback(callback));
 	}
-	
+
 	public ListenableFuture<List<Measurement>> getLastMeasurements(List<String> timelineIds,
 			Date untilDate) {
 		SettableFuture<List<Measurement>> result = SettableFuture.create();
@@ -401,7 +407,7 @@ public class DapController {
 						result.set(response.getMeasurements());
 					}
 				});
-		
+
 		return result;
 	}
 
@@ -447,7 +453,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<Section>> getSections() {
 		SettableFuture<List<Section>> result = SettableFuture.create();
 		sectionService.getSections(new MethodCallback<SectionsResponse>() {
@@ -461,10 +467,10 @@ public class DapController {
 				result.set(response.getSections());
 			}
 		});
-		
+
 		return result;
 	}
-	
+
 	public void getSections(String leveeId, final SectionsCallback sectionsCallback) {
 		sectionService.getSectionsForLevee(leveeId, new MethodCallback<SectionsResponse>() {
 			@Override
@@ -478,7 +484,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public void getExperiments(List<String> experimentIds,
 			final ThreatAssessmentCallback callback) {
 		threatAssessmentService.getExperiments(converter.merge(experimentIds),
@@ -494,7 +500,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public void getResults(String experimentId, final ResultsCallback callback) {
 		resultService.getResults(experimentId, new MethodCallback<ResultsResponse>() {
 			@Override
@@ -508,7 +514,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public void getSensors(String sectionId, final SensorsCallback callback) {
 		sensorService.getSensorsForSection(sectionId, new MethodCallback<SensorsResponse>() {
 			@Override
@@ -536,7 +542,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public void getProfiles(List<String> sectionIds, final ProfilesCallback callback) {
 		profileService.getProfilesForSection(converter.merge(sectionIds), new MethodCallback<ProfilesResponse>() {
 			@Override
@@ -550,7 +556,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<Profile>> getProfiles(List<String> sectionIds) {
 		SettableFuture<List<Profile>> result = SettableFuture.create();
 		profileService.getProfilesForSection(converter.merge(sectionIds), new MethodCallback<ProfilesResponse>() {
@@ -564,7 +570,7 @@ public class DapController {
 				result.set(response.getProfiles());
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -578,7 +584,7 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
 				SettableFuture<Void> futureCallback = SettableFuture.create();
-				List<Device> devices = new ArrayList<Device>();
+				List<Device> devices = new ArrayList<>();
 				collectDevices(response.getDeviceAggregations(), devices,
 						new MutableInteger(0), futureCallback);
 				Futures.addCallback(futureCallback, new FutureCallback<Void>() {
@@ -623,7 +629,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<Parameter>> getParameters(List<String> deviceIds) {
 		SettableFuture<List<Parameter>> result = SettableFuture.create();
 		parameterService.getParameters(converter.merge(deviceIds, ","), new MethodCallback<ParametersResponse>() {
@@ -637,7 +643,7 @@ public class DapController {
 				result.set(response.getParameters());
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -682,7 +688,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<Context>> getContext(String contextType) {
 		SettableFuture<List<Context>> result = SettableFuture.create();
 		contextService.getContexts(contextType, new MethodCallback<ContextsResponse>() {
@@ -696,7 +702,7 @@ public class DapController {
 				result.set(response.getContexts());
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -742,7 +748,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<Timeline>> getTimelinesForParameterIds(String contextId,
 			List<String> parameterIds) {
 		SettableFuture<List<Timeline>> result = SettableFuture.create();
@@ -758,7 +764,7 @@ public class DapController {
 				result.set(response.getTimelines());
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -835,7 +841,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<DeviceAggregate>> getDeviceAggregations(String profileId) {
 		SettableFuture<List<DeviceAggregate>> result = SettableFuture.create();
 		deviceAggregationService.getDeviceAggregations(profileId,
@@ -850,10 +856,10 @@ public class DapController {
 				result.set(response.getDeviceAggregations());
 			}
 		});
-		
+
 		return result;
 	}
-	
+
 	public void getDeviceAggregations(List<String> profileIds, final DeviceAggregatesCallback callback) {
 		deviceAggregationService.getDeviceAggregations(converter.merge(profileIds),
 				new MethodCallback<DeviceAggregationsResponse>() {
@@ -868,7 +874,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<DeviceAggregate>> getDeviceAggregations(List<String> profileIds) {
 		SettableFuture<List<DeviceAggregate>> result = SettableFuture.create();
 		deviceAggregationService.getDeviceAggregations(converter.merge(profileIds),
@@ -883,7 +889,7 @@ public class DapController {
 				result.set(response.getDeviceAggregations());
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -911,7 +917,7 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
 				SettableFuture<Void> futureCallback = SettableFuture.create();
-				List<Device> devices = new ArrayList<Device>();
+				List<Device> devices = new ArrayList<>();
 				collectDevices(response.getDeviceAggregations(), devices,
 						new MutableInteger(0), futureCallback);
 				Futures.addCallback(futureCallback, new FutureCallback<Void>() {
@@ -940,7 +946,7 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
 				SettableFuture<Void> futureCallback = SettableFuture.create();
-				List<Device> devices = new ArrayList<Device>();
+				List<Device> devices = new ArrayList<>();
 				collectDevices(response.getDeviceAggregations(), devices,
 						new MutableInteger(0), futureCallback);
 				Futures.addCallback(futureCallback, new FutureCallback<Void>() {
@@ -957,7 +963,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<Device>> getDevicesRecursivelyForAggregates(
 			List<String> deviceAggregationIds) {
 		SettableFuture<List<Device>> result = SettableFuture.create();
@@ -971,7 +977,7 @@ public class DapController {
 			@Override
 			public void onSuccess(Method method, DeviceAggregationsResponse response) {
 				SettableFuture<Void> futureCallback = SettableFuture.create();
-				List<Device> devices = new ArrayList<Device>();
+				List<Device> devices = new ArrayList<>();
 				collectDevices(response.getDeviceAggregations(), devices,
 						new MutableInteger(0), futureCallback);
 				Futures.addCallback(futureCallback, new FutureCallback<Void>() {
@@ -987,7 +993,7 @@ public class DapController {
 				});
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -1032,7 +1038,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<Device>> getDevicesForType(String deviceType) {
 		SettableFuture<List<Device>> result = SettableFuture.create();
 		deviceService.getDevicesForType(deviceType, new MethodCallback<DevicesResponse>() {
@@ -1046,7 +1052,7 @@ public class DapController {
 				result.set(response.getDevices());
 			}
 		});
-		
+
 		return result;
 	}
 
@@ -1123,7 +1129,7 @@ public class DapController {
 			}
 		});
 	}
-	
+
 	public void getExperiments(final ExperimentsCallback callback) {
 		leveeExperimentService.getExperiments(new MethodCallback<ExperimentsResponse>() {
 			@Override
@@ -1174,13 +1180,31 @@ public class DapController {
 					public void onFailure(Method method, Throwable exception) {
 						result.setException(errorUtil.processErrorsForException(method, exception));
 					}
-		
+
 					@Override
 					public void onSuccess(Method method, DevicesResponse response) {
 						result.set(response.getDevices());
 					}
 				});
-		
+
+		return result;
+	}
+
+	public ListenableFuture<List<ThreatLevel>> getThreatLevels(int limit, Date from, Date to) {
+		SettableFuture<List<ThreatLevel>> result = SettableFuture.create();
+		threatLevelService.getThreatLevels(limit, from, to, new MethodCallback<ThreatLevelResponse>() {
+
+			@Override
+			public void onSuccess(Method method, ThreatLevelResponse response) {
+				result.set(response.getThreatLevels());
+			}
+
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+		});
+
 		return result;
 	}
 
@@ -1198,24 +1222,24 @@ public class DapController {
 							@Override
 							public void onFailure(Method method, Throwable exception) {
 								requestCounter.decrement();
-								
+
 								if(requestCounter.get() == 0) {
 									futureCallback.setException(errorUtil.processErrorsForException(
 											method, exception));
 								}
 							}
-			
+
 							@Override
 							public void onSuccess(Method method, DevicesResponse response) {
 								result.addAll(response.getDevices());
 								requestCounter.decrement();
-								
+
 								if(requestCounter.get() == 0) {
 									futureCallback.set(null);
 								}
 							}
 						});
-				
+
 				if(deviceAggregation.getChildernIds() != null && deviceAggregation.getChildernIds().size() > 0) {
 					requestCounter.increment();
 					deviceAggregationService.getDeviceAggregationsForIds(converter.merge(deviceAggregation.getChildernIds()),
@@ -1223,19 +1247,19 @@ public class DapController {
 						@Override
 						public void onFailure(Method method, Throwable exception) {
 							requestCounter.decrement();
-							
+
 							if(requestCounter.get() == 0) {
 								futureCallback.setException(errorUtil.processErrorsForException(
 										method, exception));
 							}
 						}
-	
+
 						@Override
 						public void onSuccess(Method method, DeviceAggregationsResponse response) {
 							requestCounter.decrement();
 							collectDevices(response.getDeviceAggregations(), result, requestCounter,
 									futureCallback);
-							
+
 							if(requestCounter.get() == 0) {
 								futureCallback.set(null);
 							}

@@ -14,6 +14,7 @@ import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.levee.Levee;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevel;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.geojson.MapFeature;
 import pl.ismop.web.client.widgets.analysis.chart.ChartPresenter;
@@ -131,8 +132,8 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = {AnalysisSidePanelPresenter.class, ChartPresenter.class})
 	void refresh();
 
-	@Event(handlers = ThreatLevelsPresenter.class)
-	void threatLevelsChanged(String msg);
+	@Event(handlers = {ThreatLevelsPresenter.class, ComparisonPresenter.class})
+	void threatLevelsChanged(List<ThreatLevel> threatLevels);
 
 	@Event(handlers = { DummyPresenter.class, ComparisonPresenter.class })
 	void experimentChanged(Experiment selectedExperiment);

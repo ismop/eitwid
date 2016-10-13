@@ -11,6 +11,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.experiment.Experiment;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevel;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.widgets.analysis.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
@@ -27,6 +28,7 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     private SliderPresenter sliderPresenter;
     private Experiment selectedExperiment;
     private Set<PanelPresenter> panels = new HashSet<>();
+	private List<ThreatLevel> threatLevels;
 
     public void init() {
         if (sliderPresenter == null) {
@@ -69,11 +71,12 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     public void addVerticalCS() {
     	eventBus.showVerticalCrosssectionWizard(selectedExperiment);
     }
-    
+
     @Override
     public void addThreadAssesment() {
     	GWT.log("Show thread assesment");
     	ThreatLevelsPresenter content = eventBus.addHandler(ThreatLevelsPresenter.class);
+    	content.onThreatLevelsChanged(threatLevels);
     	eventBus.addPanel("Threat levels", content);
     }
 
@@ -143,5 +146,9 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
         boolean enabled = selectedExperiment != null;
         getView().setActionsEnabled(enabled);
         sliderPresenter.setEnabled(enabled);
+    }
+
+    public void onThreatLevelsChanged(List<ThreatLevel> threatLevels) {
+    	this.threatLevels = threatLevels;
     }
 }

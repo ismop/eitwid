@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
@@ -21,6 +24,7 @@ import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevel;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.geojson.MapFeature;
@@ -286,7 +290,20 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private void loadThreatLevels(Date selectedDate) {
 		GWT.log("Loading threat levels for selected date: " + selectedDate);
-		eventBus.threatLevelsChanged("New threat levels for " + selectedDate);
+		ListenableFuture<List<ThreatLevel>> threatLevels = dapController.getThreatLevels(1, selectedExperiment.getStart(), selectedDate);
+		Futures.addCallback(threatLevels, new FutureCallback<List<ThreatLevel>>() {
+
+			@Override
+			public void onFailure(Throwable error) {
+				eventBus.showError(new ErrorDetails(error.getMessage()));
+			}
+
+			@Override
+			public void onSuccess(List<ThreatLevel> threatLevels) {
+				eventBus.threatLevelsChanged(threatLevels);
+			}
+
+		});
 	}
 
     public void onAdd(MapFeature mapFeature) {

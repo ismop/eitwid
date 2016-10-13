@@ -11,7 +11,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
-import pl.ismop.web.client.dap.scenario.Scenario;
+import pl.ismop.web.client.dap.threatlevel.Scenario;
+
 
 public class ScenarioView extends Composite {
     interface SensorPanelViewUiBinder extends UiBinder<Widget, ScenarioView> {
@@ -21,21 +22,21 @@ public class ScenarioView extends Composite {
 
     @UiField
     Panel panel;
-    
+
     @UiField
     Heading heading;
-    
+
     @UiField
     HTML description;
 
     public ScenarioView(int rankingIndex, Scenario scenario) {
         initWidget(uiBinder.createAndBindUi(this));
-        
+
         heading.setText(rankingIndex + ". " + scenario.getName());
         description.setText(scenario.getDescription());
         panel.setType(getType(scenario));
     }
-	
+
 	private PanelType getType(Scenario scenario) {
 		PanelType type;
 		switch(scenario.getThreatLevel()) {

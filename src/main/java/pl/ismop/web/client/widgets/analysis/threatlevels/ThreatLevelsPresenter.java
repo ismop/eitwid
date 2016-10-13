@@ -3,15 +3,17 @@ package pl.ismop.web.client.widgets.analysis.threatlevels;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.experiment.Experiment;
-import pl.ismop.web.client.dap.scenario.Scenario;
+import pl.ismop.web.client.dap.threatlevel.ThreatAssessment;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevel;
 import pl.ismop.web.client.widgets.analysis.threatlevels.IThreatLevelsView.IThreadLevelsPresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
@@ -20,13 +22,13 @@ import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 public class ThreatLevelsPresenter extends BasePresenter<IThreatLevelsView, MainEventBus>
 		implements IPanelContent<IThreatLevelsView, MainEventBus>, IThreadLevelsPresenter {
 
-	private Experiment experiment;		
-	
-	
+	private Experiment experiment;
+	private Map<String, ThreatLevel> namesToThreatLevels = new HashMap<>();
+
 	@Override
 	public void setSelectedExperiment(Experiment experiment) {
-		this.experiment = experiment;				
-	}	
+		this.experiment = experiment;
+	}
 
 	@Override
 	public void bind() {
@@ -53,20 +55,19 @@ public class ThreatLevelsPresenter extends BasePresenter<IThreatLevelsView, Main
 	@Override
 	public void changeProfile(String profileName) {
 		view.clearScenarios();
-		List<Scenario> scenarios = new ArrayList<>();
-		for(int i = 0; i < 10; i++) {
-			Scenario s = new Scenario();
-			s.setName(profileName + " - scenario " + (i + 1));
-			s.setDescription(profileName + " - scenario description " + (i + 1));
-			s.setThreatLevel(i % 3);
-			
-			scenarios.add(s);
+		ThreatLevel tl = namesToThreatLevels.get(profileName);
+		if (tl != null && tl.getThreatAssessments() != null && tl.getThreatAssessments().size() > 0) {
+			ThreatAssessment ta = tl.getThreatAssessments().get(0);
+			view.showScenarios(ta.getScenarios());
 		}
-		
-		view.showScenarios(scenarios);
 	}
-	
-	public void onThreatLevelsChanged(String msg) {
-		GWT.log("Changing threat levels list" + msg);
+
+	public void onThreatLevelsChanged(List<ThreatLevel> threatLevels) {
+		view.clearScenarios();
+		namesToThreatLevels.clear();
+		if (threatLevels != null) {
+			threatLevels.stream().forEach(tl -> namesToThreatLevels.put("Profile " + tl.getProfileId(), tl));
+			view.setProfiles(new ArrayList<>(namesToThreatLevels.keySet()));
+		}
 	}
 }
