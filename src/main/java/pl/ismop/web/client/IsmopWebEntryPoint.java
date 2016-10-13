@@ -3,8 +3,6 @@ package pl.ismop.web.client;
 import java.util.Date;
 import java.util.List;
 
-import org.fusesource.restygwt.client.Defaults;
-import org.fusesource.restygwt.client.ServiceRoots;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 import org.gwtbootstrap3.extras.bootbox.client.options.DialogOptions;
 
@@ -12,10 +10,15 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.Dictionary;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.mvp4g.client.Mvp4gModule;
+
+import javaslang.concurrent.Future;
+import javaslang.concurrent.Promise;
 
 public class IsmopWebEntryPoint implements EntryPoint {
 	private IsmopConverter ismopConverter;
@@ -28,17 +31,69 @@ public class IsmopWebEntryPoint implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
-		properties = Dictionary.getDictionary("properties");
-		ServiceRoots.add("dap", properties.get("dapEndpoint"));
-		ServiceRoots.add("hypgen", properties.get("hypgenEndpoint"));
-		Defaults.ignoreJsonNulls();
+//		properties = Dictionary.getDictionary("properties");
+//		ServiceRoots.add("dap", properties.get("dapEndpoint"));
+//		ServiceRoots.add("hypgen", properties.get("hypgenEndpoint"));
+//		Defaults.ignoreJsonNulls();
+//
+//		GlobalMessages globalMessages = GWT.create(GlobalMessages.class);
+//		globalInitialization(globalMessages);
+//
+//		Mvp4gModule module = (Mvp4gModule)GWT.create(Mvp4gModule.class);
+//		module.createAndStartModule();
+//		RootLayoutPanel.get().add((Widget) module.getStartView());
+		testFuture();
+	}
 
-		GlobalMessages globalMessages = GWT.create(GlobalMessages.class);
-		globalInitialization(globalMessages);
+	private void testFuture() {
+		Future.sequence(javaslang.collection.List.of(
+				get("http://localhost:8080"),
+				get("http://localhost:8080")))
+		.onComplete(results -> {
+			if (results.isSuccess()) {
+				results.get().zipWithIndex((result, index) -> {
+					GWT.log("Result " + index + ": " + result);
 
-		Mvp4gModule module = (Mvp4gModule)GWT.create(Mvp4gModule.class);
-		module.createAndStartModule();
-		RootLayoutPanel.get().add((Widget) module.getStartView());
+					return null;
+				});
+			}
+		});
+
+
+//		get("http://localhost:8080")
+//		.flatMap(value -> {
+//			GWT.log("Got 1: " + value);
+//
+//			return get("http://localhost:8080");
+//		})
+//		.onComplete(value -> GWT.log("Got 2: " + value))
+//		.onFailure(exception -> GWT.log("Error: " + exception.getMessage()));
+	}
+
+	private Future<String> get(String url) {
+		RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, url);
+		Promise<String> promise = Promise.make();
+		rb.setCallback(new RequestCallback() {
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+//				promise.success(response.getText());
+				promise.failure(new IllegalArgumentException("Yo!"));
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+				promise.failure(exception);
+			}
+		});
+		try {
+			rb.send();
+		} catch (RequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return promise.future();
 	}
 
 	//this is the place to do global initialization once
