@@ -1190,9 +1190,9 @@ public class DapController {
 		return result;
 	}
 
-	public ListenableFuture<List<ThreatLevel>> getThreatLevels(int limit, Date from, Date to) {
+	public ListenableFuture<List<ThreatLevel>> getThreatLevels(int limit, Date from, Date to, String status) {
 		SettableFuture<List<ThreatLevel>> result = SettableFuture.create();
-		threatLevelService.getThreatLevels(limit, from, to, new MethodCallback<ThreatLevelResponse>() {
+		threatLevelService.getThreatLevels(limit, from, to, status, new MethodCallback<ThreatLevelResponse>() {
 
 			@Override
 			public void onSuccess(Method method, ThreatLevelResponse response) {

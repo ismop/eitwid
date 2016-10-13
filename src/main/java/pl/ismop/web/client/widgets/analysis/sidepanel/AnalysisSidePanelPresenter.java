@@ -292,7 +292,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     private void loadThreatLevels(Date selectedDate) {
 		GWT.log("Loading threat levels for selected date: " + selectedDate);
-		ListenableFuture<List<ThreatLevel>> threatLevels = dapController.getThreatLevels(1, selectedExperiment.getStart(), selectedDate);
+		ListenableFuture<List<ThreatLevel>> threatLevels = dapController.getThreatLevels(1, selectedExperiment.getStart(), selectedDate, "finished");
 		Futures.addCallback(threatLevels, new FutureCallback<List<ThreatLevel>>() {
 
 			@Override
