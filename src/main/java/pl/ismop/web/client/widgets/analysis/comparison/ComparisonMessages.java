@@ -8,4 +8,6 @@ public interface ComparisonMessages extends Messages {
 	String addHorizontalSliceLabel();
 	
 	String addVerticalSliceLabel();
+	
+	String addThreatLevelsLabel();
 }

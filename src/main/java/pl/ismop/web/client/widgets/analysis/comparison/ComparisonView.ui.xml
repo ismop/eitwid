@@ -43,6 +43,7 @@
 			<b:Button ui:field="addChart" text="{messages.addChartLabel}" icon="PLUS" addStyleNames="{style.action-button}"/>
 			<b:Button ui:field="addHorizontalCS" text="{messages.addHorizontalSliceLabel}" icon="PLUS" addStyleNames="{style.action-button}"/>
 			<b:Button ui:field="addVerticalCS" text="{messages.addVerticalSliceLabel}" icon="PLUS" addStyleNames="{style.action-button}"/>
+			<b:Button ui:field="addThreadAssesment" text="{messages.addThreatLevelsLabel}" icon="PLUS" addStyleNames="{style.action-button}"/>
 		</g:FlowPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>
