@@ -36,6 +36,7 @@ import pl.ismop.web.client.widgets.monitoring.readings.IReadingsView.IReadingsPr
 @Presenter(view = ReadingsView.class)
 public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus>
 		implements IReadingsPresenter {
+
 	private static final String PICK_VALUE = "pick";
 
 	private DapController dapController;

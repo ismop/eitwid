@@ -18,12 +18,8 @@ import javax.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import javaslang.Tuple2;
 import pl.ismop.web.client.MainEventBus;
-import pl.ismop.web.client.dap.DapController.DevicesCallback;
-import pl.ismop.web.client.dap.DapController.ParametersCallback;
-import pl.ismop.web.client.dap.DapController.ProfilesCallback;
-import pl.ismop.web.client.dap.DapController.ScenariosCallback;
-import pl.ismop.web.client.dap.DapController.SectionsCallback;
 import pl.ismop.web.client.dap.FunctionalDapController;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
@@ -90,67 +86,37 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 			view.addProfile(profile.getId());
 			configuration.getPickedProfiles().put(profile.getId(), profile);
 			view.showLoadingState(true, profile.getId());
-			dapController.getDevicesRecursively(profile.getId(), new DevicesCallback() {
-				@Override
-				public void onError(ErrorDetails errorDetails) {
-					view.showLoadingState(false, profile.getId());
-					eventBus.showError(errorDetails);
+			dapController.getAllDevicesForProfile(profile.getId())
+			.onSuccess(devices -> {
+				if(configuration.getProfileDevicesMap().get(profile) == null) {
+					configuration.getProfileDevicesMap().put(profile,
+							new ArrayList<Device>());
 				}
 
-				@Override
-				public void processDevices(final List<Device> devices) {
-					List<String> deviceIds = new ArrayList<>();
+				configuration.getProfileDevicesMap().get(profile).addAll(devices.toJavaList());
+				dapController.getParameters(devices.map(Device::getId))
+				.onSuccess(parameters -> {
+					dapController.getExperimentScenarios(experiment.getId())
+					.onSuccess(scenarios -> {
+						view.showLoadingState(false, profile.getId());
 
-					for(Device device : devices) {
-						deviceIds.add(device.getId());
-
-						if(configuration.getProfileDevicesMap().get(profile) == null) {
-							configuration.getProfileDevicesMap().put(profile,
-									new ArrayList<Device>());
+						for(Parameter parameter : parameters) {
+							configuration.getParameterMap().put(parameter.getId(), parameter);
 						}
 
-						configuration.getProfileDevicesMap().get(profile).add(device);
-					}
-
-					dapController.getParameters(deviceIds, new ParametersCallback() {
-						@Override
-						public void onError(ErrorDetails errorDetails) {
-							view.showLoadingState(false, profile.getId());
-							eventBus.showError(errorDetails);
+						for(Scenario scenario : scenarios) {
+							configuration.getScenarioMap().put(scenario.getId(), scenario);
 						}
 
-						@Override
-						public void processParameters(final List<Parameter> parameters) {
-							dapController.getExperimentScenarios(experiment.getId(),
-									new ScenariosCallback() {
-								@Override
-								public void onError(ErrorDetails errorDetails) {
-									view.showLoadingState(false, profile.getId());
-									eventBus.showError(errorDetails);
-								}
-
-								@Override
-								public void processScenarios(List<Scenario> scenarios) {
-									view.showLoadingState(false, profile.getId());
-
-									for(Parameter parameter : parameters) {
-										configuration.getParameterMap().put(parameter.getId(),
-												parameter);
-									}
-
-									for(Scenario scenario : scenarios) {
-										configuration.getScenarioMap().put(scenario.getId(),
-												scenario);
-									}
-
-									computeHeights(devices, profile.getId());
-									updateParametersAndScenarios(parameters, scenarios);
-								}
-							});
-						}
-					});
-				}
-			});
+						computeHeights(devices.toJavaList(), profile.getId());
+						updateParametersAndScenarios(
+								parameters.toJavaList(), scenarios.toJavaList());
+					})
+					.onFailure(e -> handleCommunicationErrors(e, profile));
+				})
+				.onFailure(e -> handleCommunicationErrors(e, profile));
+			})
+			.onFailure(e -> handleCommunicationErrors(e, profile));
 		}
 	}
 
@@ -167,41 +133,19 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		mapPresenter.setLoadingState(true);
 		//TODO: fetch only sections for a levee which should be passed
 		//by the event bus in the future
-		dapController.getSections(new SectionsCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
+		dapController.getSections()
+		.onSuccess(sections -> {
+			configuration.getSections().putAll(sections.toJavaMap(
+					section -> new Tuple2<>(section.getId(), section)));
+			sections.forEach(mapPresenter::add);
+			dapController.getProfiles(sections.map(Section::getId))
+			.onSuccess(profiles -> {
 				mapPresenter.setLoadingState(false);
-				eventBus.showError(errorDetails);
-			}
-
-			@Override
-			public void processSections(List<Section> sections) {
-				List<String> sectionIds = new ArrayList<>();
-
-				for(Section section : sections) {
-					mapPresenter.add(section);
-					sectionIds.add(section.getId());
-					configuration.getSections().put(section.getId(), section);
-				}
-
-				dapController.getProfiles(sectionIds, new ProfilesCallback() {
-					@Override
-					public void onError(ErrorDetails errorDetails) {
-						mapPresenter.setLoadingState(false);
-						eventBus.showError(errorDetails);
-					}
-
-					@Override
-					public void processProfiles(List<Profile> profiles) {
-						mapPresenter.setLoadingState(false);
-
-						for(Profile profile : profiles) {
-							mapPresenter.add(profile);
-						}
-					}
-				});
-			}
-		});
+				profiles.forEach(mapPresenter::add);
+			})
+			.onFailure(this::handleCommunicationErrors);
+		})
+		.onFailure(this::handleCommunicationErrors);
 	}
 
 	@Override
@@ -426,5 +370,15 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		}
 
 		return result;
+	}
+
+	private void handleCommunicationErrors(Throwable e, Profile profile) {
+		view.showLoadingState(false, profile.getId());
+		eventBus.showError(new ErrorDetails(e.getMessage()));
+	}
+
+	private void handleCommunicationErrors(Throwable e) {
+		mapPresenter.setLoadingState(false);
+		eventBus.showError(new ErrorDetails(e.getMessage()));
 	}
 }

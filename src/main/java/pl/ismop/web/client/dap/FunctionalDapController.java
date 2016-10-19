@@ -1,7 +1,5 @@
 package pl.ismop.web.client.dap;
 
-import java.util.function.BiFunction;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -13,13 +11,24 @@ import javaslang.collection.List;
 import javaslang.collection.Seq;
 import javaslang.concurrent.Future;
 import javaslang.concurrent.Promise;
-import javaslang.control.Try;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.device.DeviceService;
+import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateService;
+import pl.ismop.web.client.dap.parameter.Parameter;
+import pl.ismop.web.client.dap.parameter.ParameterService;
+import pl.ismop.web.client.dap.parameter.ParametersResponse;
+import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.profile.ProfileService;
+import pl.ismop.web.client.dap.profile.ProfilesResponse;
+import pl.ismop.web.client.dap.scenario.Scenario;
+import pl.ismop.web.client.dap.scenario.ScenarioService;
+import pl.ismop.web.client.dap.scenario.ScenariosResponse;
+import pl.ismop.web.client.dap.section.Section;
+import pl.ismop.web.client.dap.section.SectionService;
+import pl.ismop.web.client.dap.section.SectionsResponse;
 
 @Singleton
 public class FunctionalDapController {
@@ -52,60 +61,110 @@ public class FunctionalDapController {
 
 	private DeviceAggregateService deviceAggregateService;
 
+	private ParameterService parameterService;
+
+	private ScenarioService scenarioService;
+
+	private SectionService sectionService;
+
 	@Inject
 	public FunctionalDapController(ProfileService profileService, DeviceService deviceService,
-			DeviceAggregateService deviceAggregateService) {
+			DeviceAggregateService deviceAggregateService, ParameterService parameterService,
+			ScenarioService scenarioService, SectionService sectionService) {
 		this.profileService = profileService;
 		this.deviceService = deviceService;
 		this.deviceAggregateService = deviceAggregateService;
+		this.parameterService = parameterService;
+		this.scenarioService = scenarioService;
+		this.sectionService = sectionService;
 	}
 
-	public Future<Try<Seq<Device>>> getAllDevicesForProfile(String profileId) {
-		Promise<Try<Seq<Device>>> result = Promise.make();
-		collectDeviceAggregateIds(getDeviceAggregatesForProfile(profileId));
+	public Future<Seq<Device>> getAllDevicesForProfile(String profileId) {
+		return collectDeviceAggregates(getDeviceAggregatesForProfile(profileId))
+				.flatMap(aggregates -> getDevicesForAggregates(
+						aggregates.map(DeviceAggregate::getId)));
+	}
+
+	public Future<Seq<Parameter>> getParameters(Seq<String> deviceIds) {
+		Promise<Seq<Parameter>> result = Promise.make();
+		parameterService.getParameters(deviceIds.mkString(","),
+				new CallbackHandler<Seq<Parameter>, ParametersResponse>(
+						result,
+						response -> List.ofAll(response.getParameters())));
 
 		return result.future();
 	}
 
-	public Future<Try<Seq<DeviceAggregate>>> getDeviceAggregatesForProfile(String profileId) {
-		Promise<Try<Seq<DeviceAggregate>>> result = Promise.make();
+	public Future<Seq<Scenario>> getExperimentScenarios(String experimentId) {
+		Promise<Seq<Scenario>> result = Promise.make();
+		scenarioService.getExperimentScenarios(experimentId,
+				new CallbackHandler<Seq<Scenario>, ScenariosResponse>(
+						result,
+						response -> List.ofAll(response.getScenarios())));
+
+		return result.future();
+	}
+
+	public Future<Seq<Section>> getSections() {
+		Promise<Seq<Section>> result = Promise.make();
+		sectionService.getSections(new CallbackHandler<Seq<Section>, SectionsResponse>(
+				result,
+				response -> List.ofAll(response.getSections())));
+
+		return result.future();
+	}
+
+	public Future<Seq<Profile>> getProfiles(Seq<String> sectionIds) {
+		Promise<Seq<Profile>> result = Promise.make();
+		profileService.getProfilesForSection(sectionIds.mkString(","),
+				new CallbackHandler<Seq<Profile>, ProfilesResponse>(
+						result,
+						response -> List.ofAll(response.getProfiles())));
+
+		return result.future();
+	}
+
+	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfile(String profileId) {
+		Promise<Seq<DeviceAggregate>> result = Promise.make();
 		deviceAggregateService.getDeviceAggregates(profileId,
-				new CallbackHandler<Try<Seq<DeviceAggregate>>, DeviceAggregateResponse>(
+				new CallbackHandler<Seq<DeviceAggregate>, DeviceAggregateResponse>(
 						result,
-						response -> Try.success(List.ofAll(response.getDeviceAggregations()))));
+						response -> List.ofAll(response.getDeviceAggregations())));
 
 		return result.future();
 	}
 
-	public Future<Try<Seq<DeviceAggregate>>> getDeviceAggregates(Seq<String> ids) {
-		Promise<Try<Seq<DeviceAggregate>>> result = Promise.make();
+	private Future<Seq<DeviceAggregate>> getDeviceAggregates(Seq<String> ids) {
+		Promise<Seq<DeviceAggregate>> result = Promise.make();
 		deviceAggregateService.getDeviceAggregatesForIds(ids.mkString(","),
-				new CallbackHandler<Try<Seq<DeviceAggregate>>, DeviceAggregateResponse>(
+				new CallbackHandler<Seq<DeviceAggregate>, DeviceAggregateResponse>(
 						result,
-						response -> Try.success(List.ofAll(response.getDeviceAggregations()))));
+						response -> List.ofAll(response.getDeviceAggregations())));
 
 		return result.future();
 	}
 
-	private Future<Try<Seq<DeviceAggregate>>> collectDeviceAggregateIds(
-			Future<Try<Seq<DeviceAggregate>>> inputDeviceAggregatesTry) {
-		return inputDeviceAggregatesTry.flatMap(deviceAggregatesTry -> {
-			if (deviceAggregatesTry.isSuccess()) {
-				Seq<Future<Try<Seq<DeviceAggregate>>>> futures = deviceAggregatesTry.get()
-					.filter(deviceAggregate -> !deviceAggregate.getChildrenIds().isEmpty())
-					.map(aggregateWithChildren -> getDeviceAggregates(
-							List.ofAll(aggregateWithChildren.getChildrenIds())));
-				Future<Try<Seq<DeviceAggregate>>> zero = Future.successful(
-						Try.success(deviceAggregatesTry.get()));
-				BiFunction<
-						Future<Seq<DeviceAggregate>>,
-						Future<Seq<DeviceAggregate>>,
-						Future<Seq<DeviceAggregate>>> f =
-					(result, future) -> result.flatMap(seq -> future.map(seq::append));
+	private Future<Seq<Device>> getDevicesForAggregates(Seq<String> aggregateIds) {
+		Promise<Seq<Device>> result = Promise.make();
+		deviceService.getDevices(aggregateIds.mkString(","),
+				new CallbackHandler<Seq<Device>, DevicesResponse>(
+						result,
+						response -> List.ofAll(response.getDevices())));
 
+		return result.future();
+	}
 
+	private Future<Seq<DeviceAggregate>> collectDeviceAggregates(
+			Future<Seq<DeviceAggregate>> aggregatesFuture) {
+		return aggregatesFuture.flatMap(aggregates -> {
+			Seq<String> allChildrenIds = aggregates.flatMap(
+					aggregate -> aggregate.getChildrenIds());
+
+			if (allChildrenIds.isEmpty()) {
+				return Future.successful(aggregatesFuture.get());
 			} else {
-				return Future.failed(deviceAggregatesTry.getCause());
+				return collectDeviceAggregates(getDeviceAggregates(allChildrenIds))
+						.map(result -> result.appendAll(aggregatesFuture.get()));
 			}
 		});
 	}
