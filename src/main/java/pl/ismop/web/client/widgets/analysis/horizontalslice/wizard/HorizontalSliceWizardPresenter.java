@@ -19,12 +19,12 @@ import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
-import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.DapController.DevicesCallback;
 import pl.ismop.web.client.dap.DapController.ParametersCallback;
 import pl.ismop.web.client.dap.DapController.ProfilesCallback;
 import pl.ismop.web.client.dap.DapController.ScenariosCallback;
 import pl.ismop.web.client.dap.DapController.SectionsCallback;
+import pl.ismop.web.client.dap.FunctionalDapController;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.parameter.Parameter;
@@ -38,12 +38,14 @@ import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.IHorizontalSl
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 
 @Presenter(view = HorizontalSliceWizardView.class)
-public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSliceWizardView, MainEventBus> implements IHorizontalSliceWizardPresenter {
+public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSliceWizardView,
+		MainEventBus> implements IHorizontalSliceWizardPresenter {
+
 	private static final double HEIGHT_THRESHOLD = 0.2;
 
 	private MapPresenter mapPresenter;
 
-	private DapController dapController;
+	private FunctionalDapController dapController;
 
 	private boolean configMode;
 
@@ -52,7 +54,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	private Experiment experiment;
 
 	@Inject
-	public HorizontalSliceWizardPresenter(DapController dapController) {
+	public HorizontalSliceWizardPresenter(FunctionalDapController dapController) {
 		this.dapController = dapController;
 	}
 
@@ -68,7 +70,8 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		view.showModal(true);
 	}
 
-	public void onShowHorizontalCrosssectionWizardWithConfig(HorizontalCrosssectionConfiguration configuration) {
+	public void onShowHorizontalCrosssectionWizardWithConfig(
+			HorizontalCrosssectionConfiguration configuration) {
 		onShowHorizontalCrosssectionWizard(experiment);
 		this.configuration = configuration;
 		initializeConfigMode();
@@ -118,7 +121,8 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 						@Override
 						public void processParameters(final List<Parameter> parameters) {
-							dapController.getExperimentScenarios(experiment.getId(), new ScenariosCallback() {
+							dapController.getExperimentScenarios(experiment.getId(),
+									new ScenariosCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {
 									view.showLoadingState(false, profile.getId());
@@ -130,11 +134,13 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 									view.showLoadingState(false, profile.getId());
 
 									for(Parameter parameter : parameters) {
-										configuration.getParameterMap().put(parameter.getId(), parameter);
+										configuration.getParameterMap().put(parameter.getId(),
+												parameter);
 									}
 
 									for(Scenario scenario : scenarios) {
-										configuration.getScenarioMap().put(scenario.getId(), scenario);
+										configuration.getScenarioMap().put(scenario.getId(),
+												scenario);
 									}
 
 									computeHeights(devices, profile.getId());
@@ -159,7 +165,8 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 		mapPresenter.reset(false);
 		mapPresenter.setLoadingState(true);
-		//TODO: fetch only sections for a levee which should be passed by the event bus in the future
+		//TODO: fetch only sections for a levee which should be passed
+		//by the event bus in the future
 		dapController.getSections(new SectionsCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
@@ -301,18 +308,21 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 			for(Iterator<Device> i = devices.iterator(); i.hasNext();) {
 				Device device = i.next();
 
-				if(device.getPlacement() == null || device.getPlacement().getCoordinates().size() < 2) {
+				if(device.getPlacement() == null
+						|| device.getPlacement().getCoordinates().size() < 2) {
 					i.remove();
 				}
 			}
 			sort(devices, new Comparator<Device>() {
 				@Override
 				public int compare(Device o1, Device o2) {
-					return o1.getPlacement().getCoordinates().get(2).compareTo(o2.getPlacement().getCoordinates().get(2));
+					return o1.getPlacement().getCoordinates().get(2).compareTo(
+							o2.getPlacement().getCoordinates().get(2));
 				}
 			});
 
-			double threshold = HEIGHT_THRESHOLD + devices.get(0).getPlacement().getCoordinates().get(2);
+			double threshold = HEIGHT_THRESHOLD + devices.get(0).getPlacement().
+					getCoordinates().get(2);
 
 			for(Device device : devices) {
 				while(device.getPlacement().getCoordinates().get(2) > threshold) {
@@ -345,7 +355,8 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		}
 	}
 
-	private void updateParametersAndScenarios(List<Parameter> parameters, List<Scenario> scenarios) {
+	private void updateParametersAndScenarios(List<Parameter> parameters,
+			List<Scenario> scenarios) {
 		configuration.setDataSelector("0");
 
 		Set<String> result = new HashSet<>();
@@ -398,7 +409,8 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		scenariosMap.put("0", view.getRealDataLabel());
 
 		for(Scenario scenario : scenarios) {
-			scenariosMap.put(scenario.getId(), view.getScenarioNamePrefix() + " " + scenario.getName());
+			scenariosMap.put(scenario.getId(), view.getScenarioNamePrefix() + " "
+					+ scenario.getName());
 		}
 
 		view.addScenarios(scenariosMap);
@@ -409,7 +421,8 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 		for(Parameter parameter : parameters) {
 			result.put(parameter.getMeasurementTypeName(), result.get(
-					parameter.getMeasurementTypeName()) == null ? 1 : result.get(parameter.getMeasurementTypeName()) + 1);
+					parameter.getMeasurementTypeName()) == null ? 1
+							: result.get(parameter.getMeasurementTypeName()) + 1);
 		}
 
 		return result;

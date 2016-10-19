@@ -127,15 +127,8 @@
 		<!-- javaslang dependency for client code -->
 		<dependency>
 			<groupId>io.javaslang</groupId>
-			<artifactId>javaslang</artifactId>
+			<artifactId>javaslang-gwt</artifactId>
 			<version>${javaslang.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.javaslang</groupId>
-			<artifactId>javaslang</artifactId>
-			<version>${javaslang.version}</version>
-			<classifier>sources</classifier>
 			<scope>provided</scope>
 		</dependency>
 

@@ -11,25 +11,30 @@ import org.fusesource.restygwt.client.RestService;
 import pl.ismop.web.client.dap.DapDispatcher;
 
 @Options(dispatcher = DapDispatcher.class, serviceRootKey = "dap")
-public interface DeviceAggregationService extends RestService {
+public interface DeviceAggregateService extends RestService {
 	@GET
 	@Path("device_aggregations?profile_id={profileIdFilter}")
-	void getDeviceAggregations(@PathParam("profileIdFilter") String profileIdFilter, MethodCallback<DeviceAggregationsResponse> callback);
+	void getDeviceAggregates(@PathParam("profileIdFilter") String profileIdFilter,
+			MethodCallback<DeviceAggregateResponse> callback);
 
 	@GET
 	@Path("device_aggregations?id={idFilter}")
-	void getDeviceAggregationsForIds(@PathParam("idFilter") String idFilter, MethodCallback<DeviceAggregationsResponse> methodCallback);
+	void getDeviceAggregatesForIds(@PathParam("idFilter") String idFilter,
+			MethodCallback<DeviceAggregateResponse> methodCallback);
 
 	@GET
 	@Path("device_aggregations?device_aggregation_type={type}")
-	void getDeviceAggregationsForType(@PathParam("type") String type, MethodCallback<DeviceAggregationsResponse> methodCallback);
+	void getDeviceAggregatesForType(@PathParam("type") String type,
+			MethodCallback<DeviceAggregateResponse> methodCallback);
 
 	@GET
 	@Path("device_aggregations?device_aggregation_type={type}&levee_id={levee_id}")
-	void getDeviceAggregationsForType(@PathParam("type") String type, @PathParam("levee_id") String leveeId,
-									  MethodCallback<DeviceAggregationsResponse> methodCallback);
-	
+	void getDeviceAggregatesForType(@PathParam("type") String type,
+			@PathParam("levee_id") String leveeId,
+			MethodCallback<DeviceAggregateResponse> methodCallback);
+
 	@GET
 	@Path("device_aggregations?section_id={sectionIdFilter}")
-	void getDeviceAggregationsForSectionIds(@PathParam("sectionIdFilter") String sectionIdFilter, MethodCallback<DeviceAggregationsResponse> methodCallback);
+	void getDeviceAggregatesForSectionIds(@PathParam("sectionIdFilter") String sectionIdFilter,
+			MethodCallback<DeviceAggregateResponse> methodCallback);
 }

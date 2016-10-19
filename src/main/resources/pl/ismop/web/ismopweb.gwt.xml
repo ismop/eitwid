@@ -19,8 +19,6 @@
 
 	<entry-point class='pl.ismop.web.client.IsmopWebEntryPoint'/>
 
-	<super-source path="emul"/>
-
 	<source path="client"/>
 
 	<stylesheet src="/css/ismop.css"/>
