@@ -158,13 +158,14 @@ public class FunctionalDapController {
 			Future<Seq<DeviceAggregate>> aggregatesFuture) {
 		return aggregatesFuture.flatMap(aggregates -> {
 			Seq<String> allChildrenIds = aggregates.flatMap(
-					aggregate -> aggregate.getChildrenIds());
+					aggregate -> aggregate.getChildrenIds() == null
+					? List.empty() : aggregate.getChildrenIds());
 
 			if (allChildrenIds.isEmpty()) {
-				return Future.successful(aggregatesFuture.get());
+				return Future.successful(aggregates);
 			} else {
 				return collectDeviceAggregates(getDeviceAggregates(allChildrenIds))
-						.map(result -> result.appendAll(aggregatesFuture.get()));
+						.map(childrenAggregates -> childrenAggregates.appendAll(aggregates));
 			}
 		});
 	}

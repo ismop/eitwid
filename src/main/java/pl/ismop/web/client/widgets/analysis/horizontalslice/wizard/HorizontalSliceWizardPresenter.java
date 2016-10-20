@@ -27,7 +27,7 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.scenario.Scenario;
 import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.error.ErrorUtil;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalCrosssectionConfiguration;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.IHorizontalSliceWizardView.IHorizontalSliceWizardPresenter;
@@ -49,9 +49,13 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 	private Experiment experiment;
 
+	private ErrorUtil errorUtil;
+
 	@Inject
-	public HorizontalSliceWizardPresenter(FunctionalDapController dapController) {
+	public HorizontalSliceWizardPresenter(FunctionalDapController dapController,
+			ErrorUtil errorUtil) {
 		this.dapController = dapController;
+		this.errorUtil = errorUtil;
 	}
 
 	public void onShowHorizontalCrosssectionWizard(Experiment experiment) {
@@ -374,11 +378,11 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 	private void handleCommunicationErrors(Throwable e, Profile profile) {
 		view.showLoadingState(false, profile.getId());
-		eventBus.showError(new ErrorDetails(e.getMessage()));
+		eventBus.showError(errorUtil.processErrors(null, e));
 	}
 
 	private void handleCommunicationErrors(Throwable e) {
 		mapPresenter.setLoadingState(false);
-		eventBus.showError(new ErrorDetails(e.getMessage()));
+		eventBus.showError(errorUtil.processErrors(null, e));
 	}
 }
