@@ -158,12 +158,24 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             series.setParameterId(parameter.getId());
             series.setTimelineId(timeline.getId());
 
-			series.setName(parameter.getDevice().getCustomId() + ": " + parameter.getParameterName() + " ("
-					+ parameter.getMeasurementTypeName() + ")");
+			series.setName(getChartName(timeline));
             series.setLabel(parameter.getMeasurementTypeName());
             series.setUnit(parameter.getMeasurementTypeUnit());
 
             return series;
+        }
+
+        private String getChartName(Timeline timeline) {
+        	Parameter parameter = timeline.getParameter();
+        	String name = parameter.getDevice().getCustomId() + ": " + parameter.getParameterName() + " ("
+        			+ parameter.getMeasurementTypeName() + ")";
+
+        	if (timeline.getScenario() != null) {
+        		name = name + " - " + view.getMessages().scenario() + " " +  timeline.getScenario().getName();
+        	}
+
+
+        	return name;
         }
 
         @Override
