@@ -165,10 +165,6 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 			configuration.getHeightDevicesmap().remove(pickedHeight);
 			view.removeProfile(profileId);
 
-			if(configuration.getPickedProfiles().size() == 0) {
-				view.showNoProfileLabel();
-			}
-
 			//updating parameter list
 			List<Parameter> parameters = new ArrayList<>();
 

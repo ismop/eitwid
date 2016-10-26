@@ -1,15 +1,16 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 		xmlns:g="urn:import:com.google.gwt.user.client.ui"
-		xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+		xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
+		xmlns:t="urn:import:org.gwtbootstrap3.extras.toggleswitch.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardMessages" field="messages"/>
 	<g:HTMLPanel>
 		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%" addStyleNames="{style.modal}">
 			<b:ModalBody>
 				<b:Row addStyleNames="{style.row}">
 					<b:Column size="MD_6" addStyleNames="{style.column}">
-						<b:Heading size="H3" text="{messages.pickInfoLabel}"/>
-						<b:Label ui:field="noProfilesPicked" text="{messages.noProfilesLabel}"/>
+						<t:ToggleSwitch onText="{messages.neoSentio}" offText="{messages.budokop}"
+							onColor="INFO" offColor="DANGER"/>
 						<g:FlowPanel ui:field="profiles"/>
 						<g:FlowPanel addStyleNames="{style.parameterPanel}">
 							<b:Heading size="H3" text="{messages.pickParameterLabel}"/>
@@ -29,24 +30,24 @@
 	</g:HTMLPanel>
 	<ui:style>
 		@external .modal-dialog, .modal-content, .modal-body;
-		
+
 		.modal .modal-dialog {
 			height: 90%;
 		}
-		
+
 		.modal .modal-content {
 			height: 100%;
 		}
-		
+
 		.modal .modal-body {
 			height: literal("calc(100% - 60px)");
 			overflow-y: auto;
 		}
-		
+
 		.row, .column, .map {
 			height: 100%;
 		}
-		
+
 		.parameterPanel {
 			position: absolute;
 			height: 50%;
@@ -55,7 +56,7 @@
 			bottom: 0px;
 			padding: 5px;
 		}
-		
+
 		.buttonsPanel {
 			position: absolute;
 			left: 5px;

@@ -7,11 +7,12 @@
 		<meta id="csrfHeaderName" name="_csrf_header" th:content="${_csrf} ? ${_csrf.headerName}"/>
 		<meta id="csrfParameterName" name="_csrf_parameter_name" th:content="${_csrf} ? ${_csrf.parameterName}"/>
 		<title th:text="#{workspace.page.title}"></title>
-		
+
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
-		
+
 		<link th:href='@{/css/bootstrap-datetimepicker.min.css}' rel='stylesheet' type='text/css'/>
-		
+		<link th:href='@{/css/bootstrap-switch.min.css}' rel='stylesheet' type='text/css'/>
+
 		<script type="text/javascript" th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapApiKey} + '&amp;sensor=false&amp;libraries=drawing'}"></script>
 		<script type="text/javascript" th:utext="'var geojsonUrl = \'' + @{/maps/geojson} + '\';'"></script>
 		<script type="text/javascript" th:utext="'var sensorUrl = \'' + @{/maps/sensors} + '\';'"></script>
@@ -34,6 +35,7 @@
 		<script type="text/javascript" th:src="@{/js/highcharts-exporting.js}"></script>
 		<script type="text/javascript" th:src="@{/js/customEvents.js}"></script>
 		<script type="text/javascript" th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+		<script type="text/javascript" th:src="@{/js/bootstrap-switch.min.js}"></script>
 		<script type="text/javascript" th:src="@{/ismopweb/ismopweb.nocache.js}"></script>
 	</head>
 	<body>

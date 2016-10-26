@@ -16,6 +16,7 @@
 	<inherits name="com.google.common.collect.Collect"/>
 	<inherits name="com.google.common.util.concurrent.Concurrent"/>
 	<inherits name="Javaslang"/>
+	<inherits name="org.gwtbootstrap3.extras.toggleswitch.ToggleSwitchNoResources"/>
 
 	<entry-point class='pl.ismop.web.client.IsmopWebEntryPoint'/>
 

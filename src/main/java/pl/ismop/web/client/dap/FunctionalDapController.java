@@ -1,10 +1,14 @@
 package pl.ismop.web.client.dap;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
+import org.fusesource.restygwt.client.REST;
 
 import javaslang.Function1;
 import javaslang.collection.List;
@@ -12,65 +16,75 @@ import javaslang.collection.Seq;
 import javaslang.concurrent.Future;
 import javaslang.concurrent.Promise;
 import pl.ismop.web.client.dap.device.Device;
-import pl.ismop.web.client.dap.device.DeviceService;
+import pl.ismop.web.client.dap.device.DeviceDirectService;
 import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateDirectService;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateResponse;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateService;
 import pl.ismop.web.client.dap.parameter.Parameter;
-import pl.ismop.web.client.dap.parameter.ParameterService;
+import pl.ismop.web.client.dap.parameter.ParameterDirectService;
 import pl.ismop.web.client.dap.parameter.ParametersResponse;
 import pl.ismop.web.client.dap.profile.Profile;
-import pl.ismop.web.client.dap.profile.ProfileService;
+import pl.ismop.web.client.dap.profile.ProfileDirectService;
 import pl.ismop.web.client.dap.profile.ProfilesResponse;
 import pl.ismop.web.client.dap.scenario.Scenario;
-import pl.ismop.web.client.dap.scenario.ScenarioService;
+import pl.ismop.web.client.dap.scenario.ScenarioDirectService;
 import pl.ismop.web.client.dap.scenario.ScenariosResponse;
 import pl.ismop.web.client.dap.section.Section;
-import pl.ismop.web.client.dap.section.SectionService;
+import pl.ismop.web.client.dap.section.SectionDirectService;
 import pl.ismop.web.client.dap.section.SectionsResponse;
 
 @Singleton
 public class FunctionalDapController {
 
-	private static class CallbackHandler<R, T> implements MethodCallback<T> {
+	private static class ServiceCall<S extends DirectRestService, R> {
 
-		private Promise<R> promise;
+		private Consumer<S> serviceCall;
 
-		private Function1<T, R> mapping;
+		private S service;
 
-		public CallbackHandler(Promise<R> promise, Function1<T, R> mapping) {
-			this.promise = promise;
-			this.mapping = mapping;
+		public ServiceCall(S service, Consumer<S> serviceCall) {
+			this.service = service;
+			this.serviceCall = serviceCall;
 		}
 
-		@Override
-		public void onFailure(Method method, Throwable exception) {
-			promise.failure(exception);
-		}
+		public <E> Future<Seq<E>> andThen(Function1<R, Seq<E>> transformResult) {
+			Promise<Seq<E>> promise = Promise.make();
+			S s = REST.withCallback(new MethodCallback<R>() {
 
-		@Override
-		public void onSuccess(Method method, T response) {
-			promise.success(mapping.apply(response));
+				@Override
+				public void onFailure(Method method, Throwable exception) {
+					promise.failure(exception);
+				}
+
+				@Override
+				public void onSuccess(Method method, R response) {
+					promise.success(transformResult.apply(response));
+				}
+			}).call(service);
+			serviceCall.accept(s);
+
+			return promise.future();
 		}
 	}
 
-	private DeviceService deviceService;
+	private DeviceDirectService deviceService;
 
-	private ProfileService profileService;
+	private ProfileDirectService profileService;
 
-	private DeviceAggregateService deviceAggregateService;
+	private DeviceAggregateDirectService deviceAggregateService;
 
-	private ParameterService parameterService;
+	private ParameterDirectService parameterService;
 
-	private ScenarioService scenarioService;
+	private ScenarioDirectService scenarioService;
 
-	private SectionService sectionService;
+	private SectionDirectService sectionService;
 
 	@Inject
-	public FunctionalDapController(ProfileService profileService, DeviceService deviceService,
-			DeviceAggregateService deviceAggregateService, ParameterService parameterService,
-			ScenarioService scenarioService, SectionService sectionService) {
+	public FunctionalDapController(ProfileDirectService profileService,
+			DeviceDirectService deviceService, DeviceAggregateDirectService deviceAggregateService,
+			ParameterDirectService parameterService, ScenarioDirectService scenarioService,
+			SectionDirectService sectionService) {
 		this.profileService = profileService;
 		this.deviceService = deviceService;
 		this.deviceAggregateService = deviceAggregateService;
@@ -86,72 +100,48 @@ public class FunctionalDapController {
 	}
 
 	public Future<Seq<Parameter>> getParameters(Seq<String> deviceIds) {
-		Promise<Seq<Parameter>> result = Promise.make();
-		parameterService.getParameters(deviceIds.mkString(","),
-				new CallbackHandler<Seq<Parameter>, ParametersResponse>(
-						result,
-						response -> List.ofAll(response.getParameters())));
-
-		return result.future();
+		return new ServiceCall<ParameterDirectService, ParametersResponse>(
+					parameterService, service -> service.getParameters(deviceIds.mkString(",")))
+				.andThen(response -> List.ofAll(response.getParameters()));
 	}
 
 	public Future<Seq<Scenario>> getExperimentScenarios(String experimentId) {
-		Promise<Seq<Scenario>> result = Promise.make();
-		scenarioService.getExperimentScenarios(experimentId,
-				new CallbackHandler<Seq<Scenario>, ScenariosResponse>(
-						result,
-						response -> List.ofAll(response.getScenarios())));
-
-		return result.future();
+		return new ServiceCall<ScenarioDirectService, ScenariosResponse>(
+					scenarioService, service -> service.getExperimentScenarios(experimentId))
+				.andThen(response -> List.ofAll(response.getScenarios()));
 	}
 
 	public Future<Seq<Section>> getSections() {
-		Promise<Seq<Section>> result = Promise.make();
-		sectionService.getSections(new CallbackHandler<Seq<Section>, SectionsResponse>(
-				result,
-				response -> List.ofAll(response.getSections())));
-
-		return result.future();
+		return new ServiceCall<SectionDirectService, SectionsResponse>(
+					sectionService, service -> service.getSections())
+				.andThen(response -> List.ofAll(response.getSections()));
 	}
 
 	public Future<Seq<Profile>> getProfiles(Seq<String> sectionIds) {
-		Promise<Seq<Profile>> result = Promise.make();
-		profileService.getProfilesForSection(sectionIds.mkString(","),
-				new CallbackHandler<Seq<Profile>, ProfilesResponse>(
-						result,
-						response -> List.ofAll(response.getProfiles())));
-
-		return result.future();
+		return new ServiceCall<ProfileDirectService, ProfilesResponse>(
+					profileService,
+					service -> service.getProfilesForSection(sectionIds.mkString(",")))
+				.andThen(response -> List.ofAll(response.getProfiles()));
 	}
 
-	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfile(String profileId) {
-		Promise<Seq<DeviceAggregate>> result = Promise.make();
-		deviceAggregateService.getDeviceAggregates(profileId,
-				new CallbackHandler<Seq<DeviceAggregate>, DeviceAggregateResponse>(
-						result,
-						response -> List.ofAll(response.getDeviceAggregations())));
 
-		return result.future();
+
+	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfile(String profileId) {
+		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
+					deviceAggregateService, service -> service.getDeviceAggregates(profileId))
+				.andThen(response -> List.ofAll(response.getDeviceAggregations()));
 	}
 
 	private Future<Seq<DeviceAggregate>> getDeviceAggregates(Seq<String> ids) {
-		Promise<Seq<DeviceAggregate>> result = Promise.make();
-		deviceAggregateService.getDeviceAggregatesForIds(ids.mkString(","),
-				new CallbackHandler<Seq<DeviceAggregate>, DeviceAggregateResponse>(
-						result,
-						response -> List.ofAll(response.getDeviceAggregations())));
-
-		return result.future();
+		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
+				deviceAggregateService, service -> service.getDeviceAggregates(ids.mkString(",")))
+			.andThen(response -> List.ofAll(response.getDeviceAggregations()));
 	}
 
 	private Future<Seq<Device>> getDevicesForAggregates(Seq<String> aggregateIds) {
-		Promise<Seq<Device>> result = Promise.make();
-		deviceService.getDevices(aggregateIds.mkString(","),
-				new CallbackHandler<Seq<Device>, DevicesResponse>(
-						result,
-						response -> List.ofAll(response.getDevices())));
-
-		return result.future();
+		return new ServiceCall<DeviceDirectService, DevicesResponse>(
+					deviceService, service -> service.getDevices(aggregateIds.mkString(",")))
+				.andThen(response -> List.ofAll(response.getDevices()));
 	}
 
 	private Future<Seq<DeviceAggregate>> collectDeviceAggregates(
