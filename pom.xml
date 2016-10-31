@@ -5,7 +5,7 @@
 
 	<groupId>pl.ismop</groupId>
 	<artifactId>web</artifactId>
-	<version>0.8.3-SNAPSHOT</version>
+	<version>0.9.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>ismop-web</name>
@@ -156,8 +156,13 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-gwt</artifactId>
-			<version>20.0-rc1</version>
+			<version>20.0</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>elemental2-experimental</artifactId>
+			<version>16-06-30</version>
 		</dependency>
 
 		<!-- GWT Bootstrap dependencies -->
@@ -236,6 +241,7 @@
 					<noServer>true</noServer>
 					<runTarget>http://localhost:8080</runTarget>
 					<extraJvmArgs>-Xmx1024m</extraJvmArgs>
+					<generateJsInteropExports>true</generateJsInteropExports>
 				</configuration>
 			</plugin>
 		</plugins>

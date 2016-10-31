@@ -1,8 +1,13 @@
 package pl.ismop.web.client.widgets.analysis.dummy;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.device.Device;
@@ -10,13 +15,9 @@ import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.error.ErrorDetails;
-import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.analysis.dummy.IDummyView.IDumyPresenter;
+import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
 @Presenter(view = DummyView.class, multiple = true)
 public class DummyPresenter extends BasePresenter<IDummyView, MainEventBus>

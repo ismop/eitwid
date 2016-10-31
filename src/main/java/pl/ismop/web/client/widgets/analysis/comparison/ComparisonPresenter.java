@@ -1,24 +1,26 @@
 package pl.ismop.web.client.widgets.analysis.comparison;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.google.gwt.core.shared.GWT;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.experiment.Experiment;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevel;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.widgets.analysis.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.IComparisonView.IComparisonPresenter;
-import pl.ismop.web.client.widgets.analysis.dummy.DummyPresenter;
+import pl.ismop.web.client.widgets.analysis.threatlevels.ThreatLevelsPresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.IWindowManager;
 import pl.ismop.web.client.widgets.common.panel.PanelPresenter;
 import pl.ismop.web.client.widgets.common.slider.SliderPresenter;
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Presenter(view = ComparisonView.class, multiple = true)
 public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEventBus>
@@ -26,6 +28,7 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     private SliderPresenter sliderPresenter;
     private Experiment selectedExperiment;
     private Set<PanelPresenter> panels = new HashSet<>();
+	private List<ThreatLevel> threatLevels;
 
     public void init() {
         if (sliderPresenter == null) {
@@ -67,6 +70,14 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
     @Override
     public void addVerticalCS() {
     	eventBus.showVerticalCrosssectionWizard(selectedExperiment);
+    }
+
+    @Override
+    public void addThreadAssesment() {
+    	GWT.log("Show thread assesment");
+    	ThreatLevelsPresenter content = eventBus.addHandler(ThreatLevelsPresenter.class);
+    	content.onThreatLevelsChanged(threatLevels);
+    	eventBus.addPanel("Threat levels", content);
     }
 
     @Override
@@ -135,5 +146,9 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
         boolean enabled = selectedExperiment != null;
         getView().setActionsEnabled(enabled);
         sliderPresenter.setEnabled(enabled);
+    }
+
+    public void onThreatLevelsChanged(List<ThreatLevel> threatLevels) {
+    	this.threatLevels = threatLevels;
     }
 }

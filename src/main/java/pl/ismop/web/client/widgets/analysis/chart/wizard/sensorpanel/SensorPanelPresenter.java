@@ -1,9 +1,15 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
+
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.DapController;
 import pl.ismop.web.client.dap.context.Context;
@@ -15,11 +21,6 @@ import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel.ISensorPanelView.ISensorPanelPresenter;
 import pl.ismop.web.client.widgets.delegator.ContextsCallback;
 import pl.ismop.web.client.widgets.delegator.ScenariosCallback;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Presenter(view = SensorPanelView.class, multiple = true)
 public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEventBus>
@@ -43,7 +44,7 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
     public void setParameter(Parameter parameter) {
         this.parameter = parameter;
         getView().setHeaderTitle(parameter.getDevice().getCustomId() + ": " + parameter.getParameterName() + " ("
-					+ parameter.getMeasurementTypeName() + ")");        
+					+ parameter.getMeasurementTypeName() + ")");
         loadTimelines();
     }
 
@@ -84,6 +85,7 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
                                     String name = null;
                                     if (timeline.getScenarioId() != null) {
                                         Scenario scenario = idToScenario.get(timeline.getScenarioId());
+                                        timeline.setScenario(scenario);
                                         if (scenario != null) {
                                             name = idToScenario.get(timeline.getScenarioId()).getName();
                                         }

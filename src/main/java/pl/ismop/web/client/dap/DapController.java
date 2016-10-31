@@ -24,8 +24,8 @@ import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.device.DeviceService;
 import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateService;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateResponse;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateService;
 import pl.ismop.web.client.dap.experiment.ExperimentService;
 import pl.ismop.web.client.dap.experiment.ExperimentsResponse;
 import pl.ismop.web.client.dap.levee.Levee;
@@ -60,6 +60,9 @@ import pl.ismop.web.client.dap.sensor.SensorService;
 import pl.ismop.web.client.dap.sensor.SensorsResponse;
 import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentResponse;
 import pl.ismop.web.client.dap.threatassessment.ThreatAssessmentService;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevel;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevelResponse;
+import pl.ismop.web.client.dap.threatlevel.ThreatLevelService;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.dap.timeline.TimelineService;
 import pl.ismop.web.client.dap.timeline.TimelinesResponse;
@@ -104,6 +107,8 @@ public class DapController {
 	private TimelineService timelineService;
 
 	private MonitoringService monitoringService;
+
+	private ThreatLevelService threatLevelService;
 
 	public interface LeveesCallback extends ErrorCallback {
 		void processLevees(List<Levee> levees);
@@ -199,6 +204,7 @@ public class DapController {
 			MeasurementService measurementService,
 			SectionService sectionService,
 			ThreatAssessmentService experimentService,
+			ThreatLevelService threatLevelService,
 			ResultService resultService,
 			ProfileService profileService,
 			DeviceService deviceService,
@@ -216,6 +222,7 @@ public class DapController {
 		this.measurementService = measurementService;
 		this.sectionService = sectionService;
 		this.threatAssessmentService = experimentService;
+		this.threatLevelService = threatLevelService;
 		this.resultService = resultService;
 		this.profileService = profileService;
 		this.deviceService = deviceService;
@@ -1180,6 +1187,24 @@ public class DapController {
 						result.set(response.getDevices());
 					}
 				});
+
+		return result;
+	}
+
+	public ListenableFuture<List<ThreatLevel>> getThreatLevels(int limit, Date from, Date to, String status) {
+		SettableFuture<List<ThreatLevel>> result = SettableFuture.create();
+		threatLevelService.getThreatLevels(limit, from, to, status, new MethodCallback<ThreatLevelResponse>() {
+
+			@Override
+			public void onSuccess(Method method, ThreatLevelResponse response) {
+				result.set(response.getThreatLevels());
+			}
+
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				result.setException(errorUtil.processErrorsForException(method, exception));
+			}
+		});
 
 		return result;
 	}

@@ -12,39 +12,41 @@ public class RefresherPresenter extends BasePresenter<IRefresherView, MainEventB
 	public static interface Event {
 		void refresh();
 	}
-	
+
 	private static final int REFRESH_INTERVAL_SECONDS = 60;
 
 	private static final int TIME_TICK_MILLIS = 1000;
 
 	private int countdown;
-	
-	private Event event;	
-	
+
+	private Event event;
+
+	private boolean pause;
+
 	@Override
 	public void onRefreshRequested() {
-		view.setProgress(Double.valueOf(((double) countdown / REFRESH_INTERVAL_SECONDS) * 100).intValue());
+		view.setProgress(Double.valueOf(((double) countdown / REFRESH_INTERVAL_SECONDS) * 100)
+				.intValue());
 		view.stopTimer();
 		refresh();
 	}
 
 	@Override
 	public void onTimeTick() {
-		if (countdown <= 0) {			
+		if (pause) {
+			return;
+		}
+
+		if (countdown <= 0) {
 			view.stopTimer();
 			refresh();
 		}
 
-		view.setProgress(Double.valueOf(((double) countdown / REFRESH_INTERVAL_SECONDS) * 100).intValue());
+		view.setProgress(Double.valueOf(((double) countdown / REFRESH_INTERVAL_SECONDS) * 100)
+				.intValue());
 		countdown--;
 	}
 
-	private void refresh() {
-		if (event != null) {
-			event.refresh();
-		}
-	}
-	
 	public void initializeTimer() {
 		countdown = REFRESH_INTERVAL_SECONDS;
 		view.startTimer(TIME_TICK_MILLIS);
@@ -53,8 +55,18 @@ public class RefresherPresenter extends BasePresenter<IRefresherView, MainEventB
 	public void disableTimers() {
 		view.stopTimer();
 	}
-	
+
 	public void setEvent(Event event) {
 		this.event = event;
+	}
+
+	public void pause(boolean pause) {
+		this.pause = pause;
+	}
+
+	private void refresh() {
+		if (event != null) {
+			event.refresh();
+		}
 	}
 }

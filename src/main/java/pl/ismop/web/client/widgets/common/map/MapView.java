@@ -1,5 +1,13 @@
 package pl.ismop.web.client.widgets.common.map;
 
+import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.gwtbootstrap3.client.ui.Button;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -13,15 +21,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.mvp4g.client.view.ReverseViewInterface;
-import org.gwtbootstrap3.client.ui.Button;
+
 import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.widgets.common.map.IMapView.IMapPresenter;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.gwtbootstrap3.client.ui.constants.ButtonSize.SMALL;
 
 public class MapView extends Composite implements IMapView, ReverseViewInterface<IMapPresenter> {
 	private static MapViewUiBinder uiBinder = GWT.create(MapViewUiBinder.class);
@@ -298,33 +300,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 
 	private String getFeatureStrokeColor(String featureId, String colourType) {
-		if(featureId.startsWith("profile")) {
-			return getProfileStrokeColor(colourType);
-		} else if(featureId.startsWith("section")) {
-			return getSectionStrokeColor(colourType);
-		} else if(featureId.startsWith("deviceAggregate")) {
-			return "#ebf56f";
-		} else {
-			return "#aaaaaa";
-		}
-	}
-
-	private String getProfileStrokeColor(String colourType) {
-		return "neosentio".equalsIgnoreCase(colourType) ? "#3880ff" : "#ff5538";
-	}
-
-	private String getSectionStrokeColor(String colourType) {
-		switch (colourType) {
-			case "A":
-				return "#a6a6a6";
-			case "B":
-				return "#fff734";
-			case "C":
-				return "#878f39";
-			case "D":
-				return "#afbacc";
-		}
-		return "#ec8108";
+		return getPresenter().getFeatureStrokeColor(featureId, colourType);		
 	}
 
 	private String getFeatureIcon(String featureId, String colourType) {

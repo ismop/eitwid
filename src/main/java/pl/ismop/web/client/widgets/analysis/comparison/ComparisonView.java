@@ -37,6 +37,9 @@ public class ComparisonView extends Composite implements IComparisonView, Revers
 
 	@UiField
 	Button addVerticalCS;
+	
+	@UiField
+	Button addThreadAssesment;
 
 	@UiHandler("addChart")
 	void addChart(ClickEvent click) {
@@ -53,6 +56,11 @@ public class ComparisonView extends Composite implements IComparisonView, Revers
 		getPresenter().addVerticalCS();
 	}
 
+	@UiHandler("addThreadAssesment")
+	void addThreadAssesment(ClickEvent click) {
+		getPresenter().addThreadAssesment();
+	}
+	
 	@Override
 	public void setSlider(IsWidget slider) {
 		sliderPanel.add(slider);
@@ -116,5 +124,6 @@ public class ComparisonView extends Composite implements IComparisonView, Revers
 		addChart.setEnabled(enabled);
 		addHorizontalCS.setEnabled(enabled);
 		addVerticalCS.setEnabled(enabled);
+		addThreadAssesment.setEnabled(enabled);
 	}
 }

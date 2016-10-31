@@ -10,6 +10,8 @@ public interface IComparisonView extends IsWidget {
 		void addHorizontalCS();
 		
 		void addVerticalCS();
+
+		void addThreadAssesment();
 	}
 	
 	void setActionsEnabled(boolean enabled);

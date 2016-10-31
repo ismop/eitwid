@@ -1,0 +1,36 @@
+image: maven:3-jdk-8
+
+testing:
+  stage: test
+  script: mvn test -B -Dmaven.repo.local=/cache/.m2/repository -Ddap.token=${DAP_TOKEN} -Dhypgen.user=ismop -Dhypgen.pass=${HYPGEN_PASS}
+
+dev_deploy:
+  stage: deploy
+  environment: development
+  only:
+  - master
+  script:
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  - mvn clean package -B -DskipTests -Dmaven.repo.local=/cache/.m2/repository -Pproduction  -Ddap.token=${DAP_TOKEN} -Dhypgen.user=ismop -Dhypgen.pass=${HYPGEN_PASS}
+  - ssh servers@ui.moc.ismop.edu.pl "mkdir -p apps/ismop-web-dev"
+  - scp target/*.jar servers@ui.moc.ismop.edu.pl:apps/ismop-web-dev
+  - ssh servers@ui.moc.ismop.edu.pl "cd apps/ismop-web-dev; ./deploy-dev.sh"
+
+prod_deploy:
+  stage: deploy
+  environment: production
+  only:
+  - production
+  script:
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  - mvn clean package -B -DskipTests -Dmaven.repo.local=/cache/.m2/repository -Pproduction -Ddap.token=${DAP_TOKEN} -Dhypgen.user=ismop -Dhypgen.pass=${HYPGEN_PASS}
+  - ssh servers@ui.moc.ismop.edu.pl "mkdir -p apps/ismop-web"
+  - scp target/*.jar servers@ui.moc.ismop.edu.pl:apps/ismop-web
+  - ssh servers@ui.moc.ismop.edu.pl "cd apps/ismop-web; ./deploy.sh"
+  

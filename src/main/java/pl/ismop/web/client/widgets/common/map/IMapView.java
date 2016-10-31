@@ -17,6 +17,8 @@ public interface IMapView extends IsWidget {
 		void onFeatureClick(String type, String id);
 
 		void onZoomOut(String sectionId);
+
+		String getFeatureStrokeColor(String featureId, String colourType);
 	}
 
 	void adjustBounds(List<List<Double>> points);

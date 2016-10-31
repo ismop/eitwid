@@ -1,16 +1,20 @@
 package pl.ismop.web.client.dap.timeline;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.fusesource.restygwt.client.Json;
-import pl.ismop.web.client.dap.parameter.Parameter;
 import java.util.Date;
+
+import org.fusesource.restygwt.client.Json;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import pl.ismop.web.client.dap.parameter.Parameter;
+import pl.ismop.web.client.dap.scenario.Scenario;
 
 public class Timeline {
 	private String id;
-	
+
 	@Json(name = "parameter_id")
 	private String parameterId;
-	
+
 	@Json(name = "context_id")
 	private String contextId;
 
@@ -28,6 +32,9 @@ public class Timeline {
 
 	@JsonIgnore
 	private String label;
+
+	@JsonIgnore
+	private Scenario scenario;
 
 	public String getId() {
 		return id;
@@ -91,5 +98,13 @@ public class Timeline {
 
 	public void setEarliestMeasurementTimestamp(Date earliestMeasurementTimestamp) {
 		this.earliestMeasurementTimestamp = earliestMeasurementTimestamp;
+	}
+
+	public Scenario getScenario() {
+		return scenario;
+	}
+
+	public void setScenario(Scenario scenario) {
+		this.scenario = scenario;
 	}
 }
