@@ -36,7 +36,6 @@ import pl.ismop.web.client.widgets.common.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.common.chart.ChartSeries;
 import pl.ismop.web.client.widgets.common.map.MapPresenter;
 import pl.ismop.web.client.widgets.common.refresher.RefresherPresenter;
-import pl.ismop.web.client.widgets.common.refresher.RefresherPresenter.Event;
 import pl.ismop.web.client.widgets.delegator.MeasurementsCallback;
 import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
@@ -121,22 +120,20 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     }
 
 	private void initRefresher() {
-		if(isActiveExperiment(selectedExperiment)) {
+		if (isActiveExperiment(selectedExperiment)) {
 			if (refresher == null) {
 				refresher = eventBus.addHandler(RefresherPresenter.class);
 				view.setRefresher(refresher.getView());
-				refresher.setEvent(new Event() {
-					@Override
-					public void refresh() {
-						eventBus.refresh();
-						refresher.initializeTimer();
-					}
+				refresher.setEvent(() -> {
+					eventBus.refresh();
+					refresher.initializeTimer();
 				});
 				refresher.initializeTimer();
 			}
 		} else {
 			view.clearRefresher();
-			if(refresher != null) {
+
+			if (refresher != null) {
 				eventBus.removeHandler(refresher);
 				refresher = null;
 			}
@@ -389,5 +386,11 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
     public void onClearMinimap() {
         miniMap.reset(true);
+    }
+
+    public void onAppVisibilityChange(boolean hidden) {
+    	if (refresher != null) {
+    		refresher.pause(hidden);
+    	}
     }
 }

@@ -88,6 +88,10 @@ public class RealTimeSidePanelPresenter extends BasePresenter<IRealTimeSidePanel
 		mapPresenter.add(profile);
 	}
 
+	public void onAppVisibilityChange(boolean hidden) {
+		refresher.pause(hidden);
+	}
+
 	public void initializeTimer() {
 		refresher.initializeTimer();
 	}

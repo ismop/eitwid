@@ -6,6 +6,7 @@ import java.util.List;
 import com.mvp4g.client.annotation.Event;
 import com.mvp4g.client.annotation.Events;
 import com.mvp4g.client.annotation.InitHistory;
+import com.mvp4g.client.annotation.Start;
 import com.mvp4g.client.event.EventBusWithLookup;
 
 import pl.ismop.web.client.dap.device.Device;
@@ -17,6 +18,7 @@ import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.threatlevel.ThreatLevel;
 import pl.ismop.web.client.error.ErrorDetails;
 import pl.ismop.web.client.geojson.MapFeature;
+import pl.ismop.web.client.handlers.BrowserTabVisibilityHandler;
 import pl.ismop.web.client.widgets.analysis.chart.ChartPresenter;
 import pl.ismop.web.client.widgets.analysis.chart.wizard.ChartWizardPresenter;
 import pl.ismop.web.client.widgets.analysis.comparison.ComparisonPresenter;
@@ -44,9 +46,15 @@ import pl.ismop.web.client.widgets.root.RootPresenter;
 
 @Events(startPresenter = RootPresenter.class, historyOnStart = true)
 public interface MainEventBus extends EventBusWithLookup {
+
+	@Start
+	@Event(handlers = BrowserTabVisibilityHandler.class)
+	void start();
+
 	@InitHistory
 	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class,
-			deactivate = {VerticalSliceWizardPresenter.class, HorizontalSliceWizardPresenter.class})
+			deactivate = { VerticalSliceWizardPresenter.class,
+					HorizontalSliceWizardPresenter.class })
 	void monitoringPanel();
 
 	@Event(handlers = RootPresenter.class, historyConverter = MenuHistoryConverter.class)
@@ -258,4 +266,7 @@ public interface MainEventBus extends EventBusWithLookup {
 
 	@Event(handlers = { RealTimeSidePanelPresenter.class })
 	void addProfileFromRealtimeMap(Profile profile);
+
+	@Event(handlers = { RealTimeSidePanelPresenter.class, AnalysisSidePanelPresenter.class })
+	void appVisibilityChange(boolean hidden);
 }
