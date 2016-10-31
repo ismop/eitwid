@@ -4,8 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class MapFeature {
+
     public abstract String getId();
+
     public abstract String getFeatureType();
+
     public abstract Geometry getFeatureGeometry();
 
     public String getFeatureId() {

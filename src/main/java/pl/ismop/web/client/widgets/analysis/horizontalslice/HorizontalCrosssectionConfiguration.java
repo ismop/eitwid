@@ -15,29 +15,31 @@ import pl.ismop.web.client.dap.section.Section;
 
 public class HorizontalCrosssectionConfiguration {
 	private Set<String> parameterNames;
-	
+
 	private String pickedParameterName;
-	
+
 	private Map<String, Profile> pickedProfiles;
-	
+
 	private Map<Profile, List<Device>> profileDevicesMap;
-	
+
 	private Map<String, Parameter> parameterMap;
-	
+
 	private Map<Profile, String> pickedHeights;
-	
+
 	private Map<String, List<Device>> heightDevicesmap;
-	
+
 	private Map<Profile, List<String>> profileHeights;
-	
+
 	private Map<String, Section> sections;
-	
+
 	private Experiment experiment;
-	
+
 	private Map<String, Scenario> scenarioMap;
-	
+
 	private String dataSelector;
-	
+
+	private boolean budokopProfiles;
+
 	public HorizontalCrosssectionConfiguration() {
 		parameterNames = new HashSet<>();
 		pickedProfiles = new HashMap<>();
@@ -48,6 +50,7 @@ public class HorizontalCrosssectionConfiguration {
 		profileHeights = new HashMap<>();
 		sections = new HashMap<>();
 		scenarioMap = new HashMap<>();
+		setBudokopProfiles(true);
 	}
 
 	public Set<String> getParameterNames() {
@@ -144,5 +147,13 @@ public class HorizontalCrosssectionConfiguration {
 
 	public void setDataSelector(String dataSelector) {
 		this.dataSelector = dataSelector;
+	}
+
+	public boolean isBudokopProfiles() {
+		return budokopProfiles;
+	}
+
+	public void setBudokopProfiles(boolean budokopProfiles) {
+		this.budokopProfiles = budokopProfiles;
 	}
 }

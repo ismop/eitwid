@@ -18,6 +18,7 @@ import org.gwtbootstrap3.client.ui.Label;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Radio;
+import org.gwtbootstrap3.extras.toggleswitch.client.ui.ToggleSwitch;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -67,6 +68,9 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@UiField
 	Button add;
 
+	@UiField
+	ToggleSwitch budokopToggle;
+
 	public HorizontalSliceWizardView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		profileHeightsContainers = new HashMap<>();
@@ -87,6 +91,11 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@UiHandler("add")
 	void addPanel(ClickEvent event) {
 		getPresenter().onAcceptConfig();
+	}
+
+	@UiHandler("budokopToggle")
+	void budokopToggleSwitched(ValueChangeEvent<Boolean> event) {
+		getPresenter().onProfileTypeChange(!event.getValue());
 	}
 
 	@Override
@@ -290,5 +299,10 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@Override
 	public String singleProfilePerSection() {
 		return messages.singleProfilePerSection();
+	}
+
+	@Override
+	public void setBudokopProfilesToggle(boolean budokopProfiles) {
+		budokopToggle.setValue(!budokopProfiles);
 	}
 }

@@ -1,22 +1,27 @@
 package pl.ismop.web.client.dap.section;
 
-import org.fusesource.restygwt.client.Json;
-import pl.ismop.web.client.dap.levee.PolygonShape;
-import pl.ismop.web.client.geojson.Geometry;
-import pl.ismop.web.client.geojson.MapFeature;
-import pl.ismop.web.client.geojson.PolygonGeometry;
-
-import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlElement;
+
+import org.fusesource.restygwt.client.Json;
+
+import pl.ismop.web.client.dap.levee.PolygonShape;
+import pl.ismop.web.client.geojson.Geometry;
+import pl.ismop.web.client.geojson.MapFeature;
+import pl.ismop.web.client.geojson.PolygonGeometry;
+
 public class Section extends MapFeature {
+
 	private String id;
+
 	private String name;
+
 	private PolygonShape shape;
-	
+
 	@Json(name = "levee_id")
 	@XmlElement(name = "levee_id")
 	private String leveeId;
@@ -65,15 +70,16 @@ public class Section extends MapFeature {
 	@XmlElement(name = "filtration_coefficient_avg")
 	private String filtrationCoefficientAvg;
 
-	
+
 	public String getLeveeId() {
 		return leveeId;
 	}
-	
+
 	public void setLeveeId(String leveeId) {
 		this.leveeId = leveeId;
 	}
-	
+
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -86,7 +92,7 @@ public class Section extends MapFeature {
 	@Override
 	public Geometry getFeatureGeometry() {
 		if (isValidShape()) {
-			List<List<List<Double>>> polygonCoordinates = new ArrayList<List<List<Double>>>();
+			List<List<List<Double>>> polygonCoordinates = new ArrayList<>();
 			polygonCoordinates.add(getShape().getCoordinates());
 			PolygonGeometry polygonGeometry = new PolygonGeometry();
 			polygonGeometry.setCoordinates(polygonCoordinates);
@@ -99,6 +105,7 @@ public class Section extends MapFeature {
 	private boolean isValidShape() {
 		if (getShape() != null) {
 			List<List<Double>> coordinates = getShape().getCoordinates();
+
 			return String.valueOf(coordinates.get(0).get(0)).
 					equals(String.valueOf(coordinates.get(coordinates.size() - 1).get(0)));
 		} else {
@@ -114,6 +121,7 @@ public class Section extends MapFeature {
 		return properties;
 	}
 
+	@Override
 	public boolean isAdjustBounds() {
 		return true;
 	}
@@ -121,15 +129,15 @@ public class Section extends MapFeature {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public PolygonShape getShape() {
 		return shape;
 	}

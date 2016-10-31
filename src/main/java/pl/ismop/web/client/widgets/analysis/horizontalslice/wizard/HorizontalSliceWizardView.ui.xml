@@ -10,7 +10,8 @@
 			<b:ModalBody>
 				<b:Row addStyleNames="{style.row}">
 					<b:Column size="MD_6" addStyleNames="{style.column}">
-						<t:ToggleSwitch onText="{messages.neoSentio}" offText="{messages.budokop}"
+						<t:ToggleSwitch ui:field="budokopToggle" onText="{messages.neoSentio}"
+								offText="{messages.budokop}"
 								onColor="INFO" offColor="DANGER"
 								labelText="{messages.profileType}"/>
 						<g:FlowPanel ui:field="profiles"/>

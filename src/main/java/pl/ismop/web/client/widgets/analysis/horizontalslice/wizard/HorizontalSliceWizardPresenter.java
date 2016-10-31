@@ -60,12 +60,15 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 	public void onShowHorizontalCrosssectionWizard(Experiment experiment) {
 		this.experiment = experiment;
+
+
 		view.clearProfiles();
 		view.clearParameters();
 		configMode = false;
 		view.showButtonConfigLabel(false);
 
 		configuration = new HorizontalCrosssectionConfiguration();
+		view.setBudokopProfilesToggle(configuration.isBudokopProfiles());
 		configuration.setExperiment(experiment);
 		view.showModal(true);
 	}
@@ -78,15 +81,15 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	}
 
 	public void onProfileClicked(final Profile profile) {
-		for(Profile pickedProfile : configuration.getPickedProfiles().values()) {
-			if(pickedProfile.getSectionId().equals(profile.getSectionId())) {
+		for (Profile pickedProfile : configuration.getPickedProfiles().values()) {
+			if (pickedProfile.getSectionId().equals(profile.getSectionId())) {
 				eventBus.showSimpleError(view.singleProfilePerSection());
 
 				return;
 			}
 		}
 
-		if(!configuration.getPickedProfiles().containsKey(profile.getId())) {
+		if (!configuration.getPickedProfiles().containsKey(profile.getId())) {
 			view.addProfile(profile.getId());
 			configuration.getPickedProfiles().put(profile.getId(), profile);
 			view.showLoadingState(true, profile.getId());
@@ -126,30 +129,13 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 
 	@Override
 	public void onModalShown() {
-		if(mapPresenter == null) {
+		if (mapPresenter == null) {
 			mapPresenter = eventBus.addHandler(MapPresenter.class);
 			mapPresenter.addClickListeners();
-			mapPresenter.setMoveable(true);
 			view.setMap(mapPresenter.getView());
 		}
 
-		mapPresenter.reset(false);
-		mapPresenter.setLoadingState(true);
-		//TODO: fetch only sections for a levee which should be passed
-		//by the event bus in the future
-		dapController.getSections()
-		.onSuccess(sections -> {
-			configuration.getSections().putAll(sections.toJavaMap(
-					section -> new Tuple2<>(section.getId(), section)));
-			sections.forEach(mapPresenter::add);
-			dapController.getProfiles(sections.map(Section::getId))
-			.onSuccess(profiles -> {
-				mapPresenter.setLoadingState(false);
-				profiles.forEach(mapPresenter::add);
-			})
-			.onFailure(this::handleCommunicationErrors);
-		})
-		.onFailure(this::handleCommunicationErrors);
+		refreshSections();
 	}
 
 	@Override
@@ -214,6 +200,12 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	@Override
 	public void onDataSelectorChanged(String dataSelector) {
 		configuration.setDataSelector(dataSelector);
+	}
+
+	@Override
+	public void onProfileTypeChange(boolean budokopType) {
+		this.configuration.setBudokopProfiles(budokopType);
+		refreshSections();
 	}
 
 	private void initializeConfigMode() {
@@ -380,5 +372,31 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 	private void handleCommunicationErrors(Throwable e) {
 		mapPresenter.setLoadingState(false);
 		eventBus.showError(errorUtil.processErrors(null, e));
+	}
+
+	private void refreshSections() {
+		mapPresenter.reset(false);
+		mapPresenter.setLoadingState(true);
+		dapController.getSections()
+		.onSuccess(sections -> {
+			configuration.getSections().putAll(sections.toJavaMap(
+					section -> new Tuple2<>(section.getId(), section)));
+			dapController.getProfiles(sections.map(Section::getId))
+			.onSuccess(profiles -> {
+				mapPresenter.setLoadingState(false);
+				profiles.filter(profile -> profile.getVendors()
+							.contains(configuration.isBudokopProfiles() ? "budokop" : "neosentio"))
+						.map(Profile::getSectionId)
+						.distinct()
+						.forEach(sectionId -> {
+							Section section = configuration.getSections().get(sectionId);
+							mapPresenter.setFeatureStrokeColor(section,
+									configuration.isBudokopProfiles() ? "#ff5538" : "#3880ff");
+							mapPresenter.add(section);
+						});
+			})
+			.onFailure(this::handleCommunicationErrors);
+		})
+		.onFailure(this::handleCommunicationErrors);
 	}
 }

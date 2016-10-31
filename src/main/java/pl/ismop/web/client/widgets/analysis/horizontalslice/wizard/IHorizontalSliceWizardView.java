@@ -19,6 +19,8 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 		void onParameterChanged(String parameterName);
 
 		void onDataSelectorChanged(String dataSelector);
+
+		void onProfileTypeChange(boolean budokopType);
 	}
 
 	void showModal(boolean show);
@@ -58,4 +60,6 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 	String noProfilePickedError();
 
 	String singleProfilePerSection();
+
+	void setBudokopProfilesToggle(boolean budokopProfiles);
 }

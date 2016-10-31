@@ -45,11 +45,13 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	}
 
 	public void add(MapFeature mapFeature) {
-		if(!mapFeatures.keySet().contains(mapFeature.getFeatureId())) {
+		if (!mapFeatures.keySet().contains(mapFeature.getFeatureId())) {
 			Geometry geometry = mapFeature.getFeatureGeometry();
+
 			if (geometry != null) {
 				mapFeatures.put(mapFeature.getFeatureId(), mapFeature);
 				view.addGeoJson(geoJson(mapFeature, geometry));
+
 				if (mapFeature.isAdjustBounds()) {
 					view.adjustBounds(collectAllPoints());
 				}
@@ -86,6 +88,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	public void reset(boolean leaveSections) {
 		List<MapFeature> features = new ArrayList<>(mapFeatures.values());
+
 		for (MapFeature entry : features) {
 			if (entry.getFeatureType().equals("section") && leaveSections) {
 				unhighlight(entry);
@@ -120,7 +123,8 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 	@Override
 	public void onFeatureHoverOut(String type, String featureId) {
 		MapFeature mapFeature = mapFeatures.get(featureId);
-		if(mapFeature != null) {
+
+		if (mapFeature != null) {
 			switch (type) {
 				case "profile":
 					view.highlight(featureId, false);
@@ -292,13 +296,14 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 	private String geoJson(MapFeature mapFeature, Geometry geometry) {
 		GeoJsonFeature feature = new GeoJsonFeature(mapFeature, geometry);
+
 		return geoJsonEncoderDecoder.encode(new GeoJsonFeatures(feature)).toString();
 	}
 
 	private List<List<Double>> collectAllPoints() {
 		List<List<Double>> allPoints = new ArrayList<>();
 		for (MapFeature mapFeature : mapFeatures.values()) {
-			if(mapFeature.getFeatureType().equals("section")) {
+			if (mapFeature.getFeatureType().equals("section")) {
 				allPoints.addAll(((Section) mapFeature).getShape().getCoordinates());
 			} else if (mapFeature.getFeatureType().equals("profile")) {
 				allPoints.addAll(((Profile) mapFeature).getShape().getCoordinates());
