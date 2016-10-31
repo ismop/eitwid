@@ -15,15 +15,16 @@
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
 	<inherits name="com.google.common.collect.Collect"/>
 	<inherits name="com.google.common.util.concurrent.Concurrent"/>
-	
+	<inherits name="elemental2"/>
+
 	<entry-point class='pl.ismop.web.client.IsmopWebEntryPoint'/>
 	<source path="client"/>
-	
+
 	<stylesheet src="/css/ismop.css"/>
-	
+
 	<!-- Logging configuration -->
 	<set-property name="gwt.logging.logLevel" value="FINE"/>
-	
+
 	<!-- locale setup -->
 	<extend-property name="locale" values="en,pl"/>
 	<set-property-fallback name="locale" value="pl"/>
