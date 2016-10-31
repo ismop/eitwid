@@ -124,8 +124,6 @@ public class FunctionalDapController {
 				.andThen(response -> List.ofAll(response.getProfiles()));
 	}
 
-
-
 	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfile(String profileId) {
 		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
 					deviceAggregateService, service -> service.getDeviceAggregates(profileId))

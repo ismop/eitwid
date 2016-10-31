@@ -31,4 +31,6 @@ public interface HorizontalSliceWizardMessages extends Messages {
 	String budokop();
 
 	String neoSentio();
+
+	String profileType();
 }

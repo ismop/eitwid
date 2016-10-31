@@ -5,19 +5,22 @@
 		xmlns:t="urn:import:org.gwtbootstrap3.extras.toggleswitch.client.ui">
 	<ui:with type="pl.ismop.web.client.widgets.analysis.horizontalslice.wizard.HorizontalSliceWizardMessages" field="messages"/>
 	<g:HTMLPanel>
-		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%" addStyleNames="{style.modal}">
+		<b:Modal ui:field="modal" title="{messages.modalTitle}" fade="true" width="50%"
+				addStyleNames="{style.modal}">
 			<b:ModalBody>
 				<b:Row addStyleNames="{style.row}">
 					<b:Column size="MD_6" addStyleNames="{style.column}">
 						<t:ToggleSwitch onText="{messages.neoSentio}" offText="{messages.budokop}"
-							onColor="INFO" offColor="DANGER"/>
+								onColor="INFO" offColor="DANGER"
+								labelText="{messages.profileType}"/>
 						<g:FlowPanel ui:field="profiles"/>
 						<g:FlowPanel addStyleNames="{style.parameterPanel}">
 							<b:Heading size="H3" text="{messages.pickParameterLabel}"/>
 							<b:Label ui:field="noParameters" text="{messages.noParametersLabel}"/>
 							<g:FlowPanel ui:field="parameters"/>
 							<g:FlowPanel addStyleNames="{style.buttonsPanel}">
-								<b:Button ui:field="add" text="{messages.addPanelLabel}" type="PRIMARY"></b:Button>
+								<b:Button ui:field="add" text="{messages.addPanelLabel}"
+										type="PRIMARY"></b:Button>
 							</g:FlowPanel>
 						</g:FlowPanel>
 					</b:Column>
