@@ -142,14 +142,14 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
     public void removeParameter(String parameterName) {
         SensorPanelPresenter panel = panels.get(parameterName);
         if (panel != null) {
-            removePanel(panel);
+            removePanel(parameterName);
             miniMap.rm(panel.getParameter().getDevice());
         }
     }
 
-    private void removePanel(SensorPanelPresenter panel) {
+    private void removePanel(String parameterName) {
+        SensorPanelPresenter panel = panels.remove(parameterName);
         eventBus.removeHandler(panel);
-        panels.remove(panel);
 
         getView().removePanel(panel.getView());
     }
