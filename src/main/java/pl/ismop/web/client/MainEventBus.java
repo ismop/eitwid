@@ -48,7 +48,7 @@ import pl.ismop.web.client.widgets.root.RootPresenter;
 public interface MainEventBus extends EventBusWithLookup {
 
 	@Start
-	@Event(handlers = BrowserTabVisibilityHandler.class)
+	@Event(bind = BrowserTabVisibilityHandler.class)
 	void start();
 
 	@InitHistory

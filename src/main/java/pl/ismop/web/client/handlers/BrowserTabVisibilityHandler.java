@@ -19,8 +19,6 @@ public class BrowserTabVisibilityHandler extends BaseEventHandler<MainEventBus> 
 		Global.document.addEventListener("visibilitychange", this::handleVisibilityChange, false);
 	}
 
-	public void onStart() {}
-
 	private void handleVisibilityChange(Event event) {
 		log.info("Detected app visibility change - hidden: " + Global.document.hidden);
 		getEventBus().appVisibilityChange(Global.document.hidden);
