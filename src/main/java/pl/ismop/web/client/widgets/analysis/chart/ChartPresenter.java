@@ -94,7 +94,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         private final Map<String, Timeline> idToTimeline;
         private final ChartPointsCallback callback;
 
-        public ChartPointMeasurementsCallback(Map<String, Timeline> idToTimeline, ChartPointsCallback callback) {
+        public ChartPointMeasurementsCallback(Map<String, Timeline> idToTimeline,
+        		ChartPointsCallback callback) {
             this.idToTimeline = idToTimeline;
             this.callback = callback;
         }
@@ -167,11 +168,13 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
         private String getChartName(Timeline timeline) {
         	Parameter parameter = timeline.getParameter();
-        	String name = parameter.getDevice().getCustomId() + ": " + parameter.getParameterName() + " ("
+        	String name = parameter.getDevice().getCustomId() + ": "
+        			+ parameter.getParameterName() + " ("
         			+ parameter.getMeasurementTypeName() + ")";
 
         	if (timeline.getScenario() != null) {
-        		name = name + " - " + view.getMessages().scenario() + " " +  timeline.getScenario().getName();
+        		name = name + " - " + view.getMessages().scenario() + " "
+        				+  timeline.getScenario().getName();
         	}
 
 
@@ -210,9 +213,11 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         if (idToRealTimeline.size() > 0) {
             GWT.log("Loading real measurements");
             dapController.getMeasurements(idToRealTimeline.keySet(), selectedExperiment.getStart(),
-                    selectedExperiment.getEnd(), new ChartPointMeasurementsCallback(idToRealTimeline, new ChartPointsCallback() {
+                    selectedExperiment.getEnd(), new ChartPointMeasurementsCallback(
+                    		idToRealTimeline, new ChartPointsCallback() {
                         @Override
-                        public void processChartPoints(final List<ChartSeries> realTimelineToMeasurements) {
+                        public void processChartPoints(
+                        		final List<ChartSeries> realTimelineToMeasurements) {
                             loadScenarioTimelines(realTimelineToMeasurements, idToScenarioTimeline);
                         }
                     }));

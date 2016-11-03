@@ -1,17 +1,17 @@
 package pl.ismop.web.client.widgets.common.timeinterval;
 
+import java.util.Date;
+
+import javax.inject.Inject;
+
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
 import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.MainEventBus;
-import java.util.Date;
-
-import javax.inject.Inject;
 
 @Presenter(view = TimeIntervalView.class, multiple = true)
-public class TimeIntervalPresenter
-        extends BasePresenter<ITimeIntervalView, MainEventBus>
+public class TimeIntervalPresenter extends BasePresenter<ITimeIntervalView, MainEventBus>
         implements ITimeIntervalView.ITimeIntervalPresenter {
 
     public interface Callback {
@@ -19,7 +19,7 @@ public class TimeIntervalPresenter
     }
 
     private Callback callback;
-    
+
 	private IsmopConverter ismopConverter;
 
 	@Inject
@@ -31,7 +31,7 @@ public class TimeIntervalPresenter
         this.callback = callback;
         getView().show(from, to);
     }
-    
+
     @Override
     public void bind() {
     	super.bind();
