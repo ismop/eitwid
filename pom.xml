@@ -5,7 +5,7 @@
 
 	<groupId>pl.ismop</groupId>
 	<artifactId>web</artifactId>
-	<version>0.9.3-SNAPSHOT</version>
+	<version>0.9.2</version>
 	<packaging>jar</packaging>
 
 	<name>ismop-web</name>
@@ -242,7 +242,7 @@
 					<hostedWebapp>${project.build.outputDirectory}/static</hostedWebapp>
 					<noServer>true</noServer>
 					<runTarget>http://localhost:8080</runTarget>
-					<extraJvmArgs>-Xmx1024m</extraJvmArgs>
+					<extraJvmArgs>-Xmx2048m</extraJvmArgs>
 					<generateJsInteropExports>true</generateJsInteropExports>
 				</configuration>
 			</plugin>
