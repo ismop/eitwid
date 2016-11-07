@@ -197,9 +197,29 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}-*/;
 
 	@Override
-	public native void addGeoJson(String geoJsonValue) /*-{
+	public native void addGeoJson(String geoJsonValue, String featureId) /*-{
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addGeoJson(JSON.parse(geoJsonValue));
+		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
+		var thisObject = this;
+		if(feature) {
+		    this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
+		        zIndex: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getZIndex(*)(featureId)
+		    });
+		}
+
 	}-*/;
+
+	private int getZIndex(String featureId) {
+	    if (featureId.startsWith("profile")) {
+	        return 10001;
+	    } else if (featureId.startsWith("deviceAggregate")) {
+	        return 10002;
+	    } else if (featureId.startsWith("device")) {
+	        return 10003;
+	    } else {
+	        return 10000;
+	    }
+	}
 
 	@Override
 	public native void selectFeature(String featureId, boolean select) /*-{
