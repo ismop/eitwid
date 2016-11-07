@@ -254,7 +254,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 														chartPresenter.addChartSeries(series);
 														view.showChartButtons(true);
 													} else {
-														eventBus.showSimpleError(view.getNoMeasurementsForDeviceMessage());
+														eventBus.showSimpleError(view.getNoMeasurementsForDeviceMessage(parameter.getCustomId()));
 													}
 												}
 											}

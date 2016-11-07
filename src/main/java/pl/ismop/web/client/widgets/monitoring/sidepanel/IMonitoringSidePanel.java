@@ -53,7 +53,7 @@ public interface IMonitoringSidePanel extends IsWidget {
 
 	String getAggregateContentsLabel();
 
-	String getNoMeasurementsForDeviceMessage();
+	String getNoMeasurementsForDeviceMessage(String customId);
 
 	MonitoringSidePanelMessages getMessages();
 
