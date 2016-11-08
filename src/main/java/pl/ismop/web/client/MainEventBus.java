@@ -93,11 +93,10 @@ public interface MainEventBus extends EventBusWithLookup {
 	@Event(handlers = MonitoringSidePanelPresenter.class)
 	void showDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show);
 
-	@Event(handlers = {LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class,
-			VerticalSliceWizardPresenter.class})
+	@Event(handlers = {LeveeNavigatorPresenter.class, VerticalSliceWizardPresenter.class})
 	void profileClicked(Profile profile);
 
-	@Event(handlers = LeveeNavigatorPresenter.class)
+	@Event(handlers = { LeveeNavigatorPresenter.class, HorizontalSliceWizardPresenter.class })
 	void sectionClicked(Section section);
 
 	@Event(handlers = LeveeNavigatorPresenter.class)

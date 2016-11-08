@@ -33,7 +33,6 @@ import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
-import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorDetails;
@@ -80,7 +79,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			refreshView();
 		}
 
-		addProfilesToMinimap();
+		addSectionsToMinimap();
 	}
 
 	public void onDateChanged(Date selectedDate) {
@@ -111,7 +110,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	@Override
 	public void setSelectionManager(ISelectionManager selectionManager) {
 		this.selectionManager = selectionManager;
-		addProfilesToMinimap();
+		addSectionsToMinimap();
 	}
 
 	public void onGradientExtended(String gradientId) {
@@ -121,11 +120,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		}
 	}
 
-	private void addProfilesToMinimap() {
+	private void addSectionsToMinimap() {
 		selectionManager.clear();
 
-		for (Profile profile : configuration.getPickedProfiles().values()) {
-			selectionManager.add(profile);
+		for (Section section : configuration.getPickedSections().values()) {
+			selectionManager.add(section);
 		}
 	}
 
@@ -214,15 +213,13 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 									SECTION:
 									for(Section section : configuration.getSections().values()) {
-										for(Profile profile : configuration.getPickedProfiles()
-												.values()) {
-											if(profile.getSectionId().equals(section.getId())
-													//sections with more than 4 corners are
-													//considered mute
-													&& section.getShape().getCoordinates()
-													.size() < 6) {
-												continue SECTION;
-											}
+										if(configuration.getPickedSections()
+												.containsKey(section.getId())
+												//sections with more than 4 corners are
+												//considered mute
+												&& section.getShape().getCoordinates()
+												.size() < 6) {
+											continue SECTION;
 										}
 
 										muteSections.add(section);
@@ -279,12 +276,12 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					List<Timeline> timelines, Context context, String gradientId) {
 		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = new HashMap<>();
 
-		for(Profile profile : configuration.getPickedProfiles().values()) {
+		for(Section section : configuration.getPickedSections().values()) {
 			Map<List<Double>, Double> temp = new LinkedHashMap<>();
 			List<List<Double>> keys = new ArrayList<>();
 			Double value = 0.0;
 
-			for(Device device : configuration.getProfileDevicesMap().get(profile)) {
+			for(Device device : configuration.getSectionDevicesMap().get(section)) {
 				PARAMETER:
 				for(Parameter parameter : configuration.getParameterMap().values()) {
 					if(device.getParameterIds().contains(parameter.getId())
@@ -347,7 +344,6 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				locationsWithReadings.put(key, valueWithColor);
 			}
 
-			Section section = configuration.getSections().get(profile.getSectionId());
 			//removing last element which is just there to close the loop
 			List<List<Double>> corners = section.getShape().getCoordinates()
 					.subList(0, section.getShape().getCoordinates().size() - 1);

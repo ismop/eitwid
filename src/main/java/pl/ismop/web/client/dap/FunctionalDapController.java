@@ -99,6 +99,12 @@ public class FunctionalDapController {
 						aggregates.map(DeviceAggregate::getId)));
 	}
 
+	public Future<Seq<Device>> getAllDevicesForProfiles(Seq<String> profileIds) {
+		return collectDeviceAggregates(getDeviceAggregatesForProfiles(profileIds))
+				.flatMap(aggregates -> getDevicesForAggregates(
+						aggregates.map(DeviceAggregate::getId)));
+	}
+
 	public Future<Seq<Parameter>> getParameters(Seq<String> deviceIds) {
 		return new ServiceCall<ParameterDirectService, ParametersResponse>(
 					parameterService, service -> service.getParameters(deviceIds.mkString(",")))
@@ -128,6 +134,13 @@ public class FunctionalDapController {
 		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
 					deviceAggregateService, service -> service.getDeviceAggregates(profileId))
 				.andThen(response -> List.ofAll(response.getDeviceAggregations()));
+	}
+
+	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfiles(Seq<String> profileIds) {
+		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
+				deviceAggregateService, service -> service.getDeviceAggregates(
+						profileIds.mkString(",")))
+			.andThen(response -> List.ofAll(response.getDeviceAggregations()));
 	}
 
 	private Future<Seq<DeviceAggregate>> getDeviceAggregates(Seq<String> ids) {

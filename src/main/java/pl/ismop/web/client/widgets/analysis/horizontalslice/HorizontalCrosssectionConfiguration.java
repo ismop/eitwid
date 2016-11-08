@@ -9,7 +9,6 @@ import java.util.Set;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.parameter.Parameter;
-import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.scenario.Scenario;
 import pl.ismop.web.client.dap.section.Section;
 
@@ -18,17 +17,15 @@ public class HorizontalCrosssectionConfiguration {
 
 	private String pickedParameterName;
 
-	private Map<String, Profile> pickedProfiles;
-
-	private Map<Profile, List<Device>> profileDevicesMap;
+	private Map<Section, List<Device>> sectionDevicesMap;
 
 	private Map<String, Parameter> parameterMap;
 
-	private Map<Profile, String> pickedHeights;
+	private Map<Section, String> pickedHeights;
 
 	private Map<String, List<Device>> heightDevicesmap;
 
-	private Map<Profile, List<String>> profileHeights;
+	private Map<Section, List<String>> profileHeights;
 
 	private Map<String, Section> sections;
 
@@ -40,10 +37,12 @@ public class HorizontalCrosssectionConfiguration {
 
 	private boolean budokopProfiles;
 
+	private Map<String, Section> pickedSections;
+
 	public HorizontalCrosssectionConfiguration() {
 		parameterNames = new HashSet<>();
-		pickedProfiles = new HashMap<>();
-		profileDevicesMap = new HashMap<>();
+		setPickedSections(new HashMap<>());
+		setSectionDevicesMap(new HashMap<>());
 		parameterMap = new HashMap<>();
 		pickedHeights = new HashMap<>();
 		heightDevicesmap = new HashMap<>();
@@ -69,22 +68,6 @@ public class HorizontalCrosssectionConfiguration {
 		this.pickedParameterName = pickedParameterName;
 	}
 
-	public Map<String, Profile> getPickedProfiles() {
-		return pickedProfiles;
-	}
-
-	public void setPickedProfiles(Map<String, Profile> pickedProfiles) {
-		this.pickedProfiles = pickedProfiles;
-	}
-
-	public Map<Profile, List<Device>> getProfileDevicesMap() {
-		return profileDevicesMap;
-	}
-
-	public void setProfileDevicesMap(Map<Profile, List<Device>> profileDevicesMap) {
-		this.profileDevicesMap = profileDevicesMap;
-	}
-
 	public Map<String, Parameter> getParameterMap() {
 		return parameterMap;
 	}
@@ -93,11 +76,11 @@ public class HorizontalCrosssectionConfiguration {
 		this.parameterMap = parameterMap;
 	}
 
-	public Map<Profile, String> getPickedHeights() {
+	public Map<Section, String> getPickedHeights() {
 		return pickedHeights;
 	}
 
-	public void setPickedHeights(Map<Profile, String> pickedHeights) {
+	public void setPickedHeights(Map<Section, String> pickedHeights) {
 		this.pickedHeights = pickedHeights;
 	}
 
@@ -109,11 +92,11 @@ public class HorizontalCrosssectionConfiguration {
 		this.heightDevicesmap = heightDevicesmap;
 	}
 
-	public Map<Profile, List<String>> getProfileHeights() {
+	public Map<Section, List<String>> getSectionHeights() {
 		return profileHeights;
 	}
 
-	public void setProfileHeights(Map<Profile, List<String>> profileHeights) {
+	public void setProfileHeights(Map<Section, List<String>> profileHeights) {
 		this.profileHeights = profileHeights;
 	}
 
@@ -155,5 +138,21 @@ public class HorizontalCrosssectionConfiguration {
 
 	public void setBudokopProfiles(boolean budokopProfiles) {
 		this.budokopProfiles = budokopProfiles;
+	}
+
+	public Map<String, Section> getPickedSections() {
+		return pickedSections;
+	}
+
+	public void setPickedSections(Map<String, Section> pickedSections) {
+		this.pickedSections = pickedSections;
+	}
+
+	public Map<Section, List<Device>> getSectionDevicesMap() {
+		return sectionDevicesMap;
+	}
+
+	public void setSectionDevicesMap(Map<Section, List<Device>> sectionDevicesMap) {
+		this.sectionDevicesMap = sectionDevicesMap;
 	}
 }

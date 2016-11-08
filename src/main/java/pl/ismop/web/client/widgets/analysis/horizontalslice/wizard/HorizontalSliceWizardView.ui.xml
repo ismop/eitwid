@@ -14,7 +14,7 @@
 								offText="{messages.budokop}"
 								onColor="INFO" offColor="DANGER"
 								labelText="{messages.profileType}"/>
-						<g:FlowPanel ui:field="profiles"/>
+						<g:FlowPanel ui:field="sections" addStyleNames="{style.sectionPanel}"/>
 						<g:FlowPanel addStyleNames="{style.parameterPanel}">
 							<b:Heading size="H3" text="{messages.pickParameterLabel}"/>
 							<b:Label ui:field="noParameters" text="{messages.noParametersLabel}"/>
@@ -59,6 +59,16 @@
 			right: 0px;
 			bottom: 0px;
 			padding: 5px;
+		}
+
+		.sectionPanel {
+			position: absolute;
+			height: 40%;
+			left: 0px;
+			right: 0px;
+			top: 35px;
+			padding: 5px;
+			overflow-y: auto;
 		}
 
 		.buttonsPanel {

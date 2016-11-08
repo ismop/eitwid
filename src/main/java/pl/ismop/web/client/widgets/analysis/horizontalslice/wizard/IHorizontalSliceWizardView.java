@@ -10,7 +10,7 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 
 		void onModalHide();
 
-		void onRemoveProfile(String profileId);
+		void onRemoveSection(String profileId);
 
 		void onAcceptConfig();
 
@@ -27,15 +27,15 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 
 	void setMap(IsWidget view);
 
-	void addProfile(String profileId);
+	void addSection(String sectionId);
 
-	void clearProfiles();
+	void clearSections();
 
-	void showLoadingState(boolean show, String profileId);
+	void showLoadingState(boolean show, String sectionId);
 
-	void removeProfile(String profileId);
+	void removeSection(String sectionId);
 
-	void addProfileHeight(Double height, String profileId, boolean check);
+	void addSectionHeight(Double height, String profileId, boolean check);
 
 	void addParameter(String parameterName, boolean check, boolean enabled);
 
@@ -57,7 +57,7 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 
 	void selectScenario(String dataSelector);
 
-	String noProfilePickedError();
+	String noSectionPickedError();
 
 	String singleProfilePerSection();
 

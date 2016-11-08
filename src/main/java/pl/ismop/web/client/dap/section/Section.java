@@ -70,7 +70,6 @@ public class Section extends MapFeature {
 	@XmlElement(name = "filtration_coefficient_avg")
 	private String filtrationCoefficientAvg;
 
-
 	public String getLeveeId() {
 		return leveeId;
 	}

@@ -98,8 +98,6 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 
 	private List<Section> horizontalSliceSections;
 
-	private ArrayList<Profile> horizontalSliceProfiles;
-
 	private List<Device> horizontalSliceDevices;
 
 	private List<Parameter> horizontalSliceParameters;
@@ -625,22 +623,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		ListenableFuture<List<Profile>> profilesFuture = Futures.transformAsync(sectionIdsFuture,
 				sectionIds -> dapController.getProfiles(sectionIds));
 		ListenableFuture<List<String>> profileIdsFuture = Futures.transform(profilesFuture,
-				profiles -> {
-					//picking only single profiles per section
-					horizontalSliceProfiles = new ArrayList<>();
-					List<String> sectionIds = new ArrayList<>();
-
-					for (Profile profile : profiles) {
-						if (profile.getDeviceAggregationIds().size() > 0
-								&& !sectionIds.contains(profile.getSectionId())) {
-							horizontalSliceProfiles.add(profile);
-							sectionIds.add(profile.getSectionId());
-						}
-					}
-
-					return Lists.newArrayList(Iterables.transform(horizontalSliceProfiles,
-							Profile::getId));
-				});
+				profiles -> Lists.newArrayList(Iterables.transform(profiles, Profile::getId)));
 		ListenableFuture<List<DeviceAggregate>> deviceAggregationsFuture = Futures.transformAsync(
 				profileIdsFuture, profileIds -> dapController.getDeviceAggregations(profileIds));
 		ListenableFuture<List<String>> deviceAggregateIdsFuture = Futures.transform(
@@ -688,17 +671,17 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 				.getPickedParameterMeasurementName());
 		currentHorizontalConfiguration.setParameterMap(Maps.uniqueIndex(horizontalSliceParameters,
 				Parameter::getId));
-		currentHorizontalConfiguration.setPickedHeights(Maps.toMap(horizontalSliceProfiles,
+		currentHorizontalConfiguration.setPickedHeights(Maps.toMap(horizontalSliceSections,
 				profile -> "fakeHeight"));
 
 		Map<String, List<Device>> heightDeviceMap = new HashMap<>();
 		heightDeviceMap.put("fakeHeight", horizontalSliceDevices);
 		currentHorizontalConfiguration.setHeightDevicesmap(heightDeviceMap);
-		currentHorizontalConfiguration.setPickedProfiles(Maps.uniqueIndex(horizontalSliceProfiles,
-				Profile::getId));
-		currentHorizontalConfiguration.setProfileDevicesMap(Multimaps.asMap(Multimaps.index(
+		currentHorizontalConfiguration.setPickedSections(Maps.uniqueIndex(horizontalSliceSections,
+				Section::getId));
+		currentHorizontalConfiguration.setSectionDevicesMap(Multimaps.asMap(Multimaps.index(
 				horizontalSliceDevices,
-				device -> currentHorizontalConfiguration.getPickedProfiles().get(
+				device -> currentHorizontalConfiguration.getPickedSections().get(
 						device.getProfileId()))));
 
 		if (horizontalSlicePresenter == null) {
