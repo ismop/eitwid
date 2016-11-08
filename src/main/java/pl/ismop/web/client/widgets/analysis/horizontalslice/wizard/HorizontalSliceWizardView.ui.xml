@@ -10,7 +10,9 @@
 					<b:Column size="MD_6" addStyleNames="{style.column}">
 						<b:Heading size="H3" text="{messages.pickInfoLabel}"/>
 						<b:Label ui:field="noProfilesPicked" text="{messages.noProfilesLabel}"/>
-						<g:FlowPanel ui:field="profiles"/>
+						<g:ScrollPanel addStyleNames="{style.scroll-panel}">
+							<g:FlowPanel ui:field="profiles"/>
+						</g:ScrollPanel>
 						<g:FlowPanel addStyleNames="{style.parameterPanel}">
 							<b:Heading size="H3" text="{messages.pickParameterLabel}"/>
 							<b:Label ui:field="noParameters" text="{messages.noParametersLabel}"/>
@@ -48,12 +50,7 @@
 		}
 		
 		.parameterPanel {
-			position: absolute;
-			height: 50%;
-			left: 0px;
-			right: 0px;
-			bottom: 0px;
-			padding: 5px;
+			
 		}
 		
 		.buttonsPanel {
@@ -62,5 +59,10 @@
 			right: 5px;
 			bottom: 0px;
 		}
+		
+		.scroll-panel {
+            height: literal("calc(100% - 220px)");
+            width: 100%;
+        }
 	</ui:style>
 </ui:UiBinder>
