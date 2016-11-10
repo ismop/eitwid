@@ -1,5 +1,6 @@
 package pl.ismop.web.client.dap;
 
+import java.util.Date;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -15,12 +16,19 @@ import javaslang.collection.List;
 import javaslang.collection.Seq;
 import javaslang.concurrent.Future;
 import javaslang.concurrent.Promise;
+import pl.ismop.web.client.IsmopConverter;
+import pl.ismop.web.client.dap.context.Context;
+import pl.ismop.web.client.dap.context.ContextDirectService;
+import pl.ismop.web.client.dap.context.ContextsResponse;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.device.DeviceDirectService;
 import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateDirectService;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateResponse;
+import pl.ismop.web.client.dap.measurement.Measurement;
+import pl.ismop.web.client.dap.measurement.MeasurementDirectService;
+import pl.ismop.web.client.dap.measurement.MeasurementsResponse;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.parameter.ParameterDirectService;
 import pl.ismop.web.client.dap.parameter.ParametersResponse;
@@ -33,6 +41,9 @@ import pl.ismop.web.client.dap.scenario.ScenariosResponse;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.section.SectionDirectService;
 import pl.ismop.web.client.dap.section.SectionsResponse;
+import pl.ismop.web.client.dap.timeline.Timeline;
+import pl.ismop.web.client.dap.timeline.TimelineDirectService;
+import pl.ismop.web.client.dap.timeline.TimelinesResponse;
 
 @Singleton
 public class FunctionalDapController {
@@ -80,17 +91,31 @@ public class FunctionalDapController {
 
 	private SectionDirectService sectionService;
 
+	private ContextDirectService contextService;
+
+	private TimelineDirectService timelineService;
+
+	private MeasurementDirectService measurementService;
+
+	private IsmopConverter ismopConverter;
+
 	@Inject
-	public FunctionalDapController(ProfileDirectService profileService,
+	public FunctionalDapController(IsmopConverter ismopConverter,
+			ProfileDirectService profileService,
 			DeviceDirectService deviceService, DeviceAggregateDirectService deviceAggregateService,
 			ParameterDirectService parameterService, ScenarioDirectService scenarioService,
-			SectionDirectService sectionService) {
+			SectionDirectService sectionService, ContextDirectService contextService,
+			TimelineDirectService timelineService, MeasurementDirectService measurementService) {
+		this.ismopConverter = ismopConverter;
 		this.profileService = profileService;
 		this.deviceService = deviceService;
 		this.deviceAggregateService = deviceAggregateService;
 		this.parameterService = parameterService;
 		this.scenarioService = scenarioService;
 		this.sectionService = sectionService;
+		this.contextService = contextService;
+		this.timelineService = timelineService;
+		this.measurementService = measurementService;
 	}
 
 	public Future<Seq<Device>> getAllDevicesForProfile(String profileId) {
@@ -107,33 +132,59 @@ public class FunctionalDapController {
 
 	public Future<Seq<Parameter>> getParameters(Seq<String> deviceIds) {
 		return new ServiceCall<ParameterDirectService, ParametersResponse>(
-					parameterService, service -> service.getParameters(deviceIds.mkString(",")))
-				.andThen(response -> List.ofAll(response.getParameters()));
+				parameterService, service -> service.getParameters(deviceIds.mkString(",")))
+			.andThen(response -> List.ofAll(response.getParameters()));
 	}
 
 	public Future<Seq<Scenario>> getExperimentScenarios(String experimentId) {
 		return new ServiceCall<ScenarioDirectService, ScenariosResponse>(
-					scenarioService, service -> service.getExperimentScenarios(experimentId))
-				.andThen(response -> List.ofAll(response.getScenarios()));
+				scenarioService, service -> service.getExperimentScenarios(experimentId))
+			.andThen(response -> List.ofAll(response.getScenarios()));
 	}
 
 	public Future<Seq<Section>> getSections() {
 		return new ServiceCall<SectionDirectService, SectionsResponse>(
-					sectionService, service -> service.getSections())
-				.andThen(response -> List.ofAll(response.getSections()));
+				sectionService, service -> service.getSections())
+			.andThen(response -> List.ofAll(response.getSections()));
 	}
 
 	public Future<Seq<Profile>> getProfiles(Seq<String> sectionIds) {
 		return new ServiceCall<ProfileDirectService, ProfilesResponse>(
-					profileService,
-					service -> service.getProfilesForSection(sectionIds.mkString(",")))
-				.andThen(response -> List.ofAll(response.getProfiles()));
+				profileService,
+				service -> service.getProfilesForSection(sectionIds.mkString(",")))
+			.andThen(response -> List.ofAll(response.getProfiles()));
+	}
+
+	public Future<Seq<Context>> getContexts(String contextType) {
+		return new ServiceCall<ContextDirectService, ContextsResponse>(
+				contextService,
+				service -> service.getContexts(contextType))
+			.andThen(response -> List.ofAll(response.getContexts()));
+	}
+
+	public Future<Seq<Timeline>> getTimelinesForParameterIds(String contextId,
+			Seq<String> parameterIds) {
+		return new ServiceCall<TimelineDirectService, TimelinesResponse>(
+				timelineService,
+				service -> service.getTimelines(contextId, parameterIds.mkString(",")))
+			.andThen(response -> List.ofAll(response.getTimelines()));
+	}
+
+	public Future<Seq<Measurement>> getLastMeasurementsWith24HourMod(Seq<String> timelineIds,
+			Date untilDate) {
+		String until = ismopConverter.formatForDto(untilDate);
+		String from = ismopConverter.formatForDto(new Date(untilDate.getTime() - 86_400_000L));
+
+		return new ServiceCall<MeasurementDirectService, MeasurementsResponse>(
+				measurementService,
+				service -> service.getMeasurements(timelineIds.mkString(","), from, until))
+			.andThen(response -> List.ofAll(response.getMeasurements()));
 	}
 
 	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfile(String profileId) {
 		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
-					deviceAggregateService, service -> service.getDeviceAggregates(profileId))
-				.andThen(response -> List.ofAll(response.getDeviceAggregations()));
+				deviceAggregateService, service -> service.getDeviceAggregates(profileId))
+			.andThen(response -> List.ofAll(response.getDeviceAggregations()));
 	}
 
 	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfiles(Seq<String> profileIds) {
@@ -151,8 +202,8 @@ public class FunctionalDapController {
 
 	private Future<Seq<Device>> getDevicesForAggregates(Seq<String> aggregateIds) {
 		return new ServiceCall<DeviceDirectService, DevicesResponse>(
-					deviceService, service -> service.getDevices(aggregateIds.mkString(",")))
-				.andThen(response -> List.ofAll(response.getDevices()));
+				deviceService, service -> service.getDevices(aggregateIds.mkString(",")))
+			.andThen(response -> List.ofAll(response.getDevices()));
 	}
 
 	private Future<Seq<DeviceAggregate>> collectDeviceAggregates(

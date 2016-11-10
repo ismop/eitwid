@@ -13,29 +13,31 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import javaslang.Tuple;
+import javaslang.collection.Seq;
+import javaslang.concurrent.Future;
 import pl.ismop.web.client.MainEventBus;
-import pl.ismop.web.client.dap.DapController;
-import pl.ismop.web.client.dap.DapController.ContextsCallback;
-import pl.ismop.web.client.dap.DapController.MeasurementsCallback;
-import pl.ismop.web.client.dap.DapController.TimelinesCallback;
-import pl.ismop.web.client.dap.context.Context;
+import pl.ismop.web.client.dap.FunctionalDapController;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.timeline.Timeline;
-import pl.ismop.web.client.error.ErrorDetails;
+import pl.ismop.web.client.error.ErrorUtil;
 import pl.ismop.web.client.util.CoordinatesUtil;
 import pl.ismop.web.client.util.GradientsUtil;
 import pl.ismop.web.client.util.GradientsUtil.Color;
@@ -47,11 +49,12 @@ import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
 public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView, MainEventBus>
 		implements IHorizontalSlicePresenter,
 		IPanelContent<IHorizontalSliceView, MainEventBus> {
+
+	private static final Logger log = LoggerFactory.getLogger(HorizontalSlicePresenter.class);
+
 	private HorizontalCrosssectionConfiguration configuration;
 
 	private ISelectionManager selectionManager;
-
-	private DapController dapController;
 
 	private CoordinatesUtil coordinatesUtil;
 
@@ -65,17 +68,23 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 	private String gradientId;
 
+	private FunctionalDapController dapController;
+
+	private ErrorUtil errorUtil;
+
 	@Inject
-	public HorizontalSlicePresenter(DapController dapController, CoordinatesUtil coordinatesUtil,
-			GradientsUtil gradientsUtil) {
+	public HorizontalSlicePresenter(FunctionalDapController dapController,
+			CoordinatesUtil coordinatesUtil,
+			GradientsUtil gradientsUtil, ErrorUtil errorUtil) {
 		this.dapController = dapController;
 		this.coordinatesUtil = coordinatesUtil;
 		this.gradientsUtil = gradientsUtil;
+		this.errorUtil = errorUtil;
 	}
 
 	public void onUpdateHorizontalSliceConfiguration(
 			HorizontalCrosssectionConfiguration configuration) {
-		if(this.configuration == configuration) {
+		if (this.configuration == configuration) {
 			refreshView();
 		}
 
@@ -137,13 +146,13 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 		view.showLoadingState(true);
 
-		final List<String> parameterIds = new ArrayList<>();
+		List<String> parameterIds = new ArrayList<>();
 		Parameter parameter = null;
 
-		for(String height : configuration.getPickedHeights().values()) {
-			for(Device device : configuration.getHeightDevicesmap().get(height)) {
-				for(String parameterId : device.getParameterIds()) {
-					if(configuration.getParameterMap().get(parameterId) != null
+		for (String height : configuration.getPickedHeights().values()) {
+			for (Device device : configuration.getHeightDevicesmap().get(height)) {
+				for (String parameterId : device.getParameterIds()) {
+					if (configuration.getParameterMap().get(parameterId) != null
 							&& configuration.getParameterMap().get(parameterId)
 							.getMeasurementTypeName().equals(
 									configuration.getPickedParameterMeasurementName())) {
@@ -156,153 +165,123 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 		final String parameterUnit = parameter != null ? parameter.getMeasurementTypeUnit() : "";
 		String context = configuration.getDataSelector().equals("0") ? "measurements" : "scenarios";
-		dapController.getContext(context, new ContextsCallback() {
-			@Override
-			public void onError(ErrorDetails errorDetails) {
-				view.showLoadingState(false);
-				eventBus.showError(errorDetails);
-			}
-
-			@Override
-			public void processContexts(final List<Context> contexts) {
-				if(contexts.size() > 0) {
-					dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds,
-							new TimelinesCallback() {
-						@Override
-						public void onError(ErrorDetails errorDetails) {
-							view.showLoadingState(false);
-							eventBus.showError(errorDetails);
-						}
-
-						@Override
-						public void processTimelines(final List<Timeline> timelines) {
-							if(!configuration.getDataSelector().equals("0")) {
-								for(Iterator<Timeline> i = timelines.iterator(); i.hasNext();) {
-									if(!i.next().getScenarioId()
-											.equals(configuration.getDataSelector())) {
-										i.remove();
-									}
-								}
-							}
-
-							List<String> timelineIds = new ArrayList<>();
-
-							for(Timeline timeline : timelines) {
-								timelineIds.add(timeline.getId());
-							}
-
-							Date queryDate = configuration.getDataSelector().equals("0")
-									? currentDate :
-								new Date(currentDate.getTime()
-										- configuration.getExperiment().getStart().getTime());
-
-							dapController.getLastMeasurementsWith24HourMod(
-									timelineIds, queryDate, new MeasurementsCallback() {
-								@Override
-								public void onError(ErrorDetails errorDetails) {
-									view.showLoadingState(false);
-									eventBus.showError(errorDetails);
-								}
-
-								@Override
-								public void processMeasurements(List<Measurement> measurements) {
-									view.showLoadingState(false);
-									view.clear();
-
-									List<Section> muteSections = new ArrayList<>();
-
-									SECTION:
-									for(Section section : configuration.getSections().values()) {
-										if(configuration.getPickedSections()
-												.containsKey(section.getId())
-												//sections with more than 4 corners are
-												//considered mute
-												&& section.getShape().getCoordinates()
-												.size() < 6) {
-											continue SECTION;
-										}
-
-										muteSections.add(section);
-									}
-
-									if(measurements.size() > 0) {
-										gradientId = "analysis:" + parameterUnit;
-
-										if (gradientsUtil.contains(gradientId)) {
-											gradientMin = gradientsUtil.getMinValue(gradientId);
-											gradientMax = gradientsUtil.getMaxValue(gradientId);
-										}
-
-										for(Measurement measurement : measurements) {
-											gradientsUtil.updateValues(gradientId,
-													measurement.getValue());
-										}
-
-										view.init();
-										drawMuteSections(configuration.getSections().values(),
-												muteSections);
-										view.drawCrosssection(createLegend(gradientId),
-												parameterUnit,
-												createDeviceLocationsWithValuesAndColors(
-														measurements, timelines, contexts.get(0),
-														gradientId));
-
-										if (gradientsUtil.isExtended(gradientId, gradientMin,
-												gradientMax)) {
-											gradientMin = gradientsUtil.getMinValue(gradientId);
-											gradientMax = gradientsUtil.getMaxValue(gradientId);
-											eventBus.gradientExtended(gradientId);
-										}
-									} else {
-										eventBus.showSimpleError(view.noMeasurementsMessage());
-									}
-								}
-							});
-						}
-					});
+		dapController.getContexts(
+				context)
+			.flatMap(contexts -> {
+				if (contexts.size() > 0) {
+					return dapController.getTimelinesForParameterIds(contexts.get(0).getId(),
+						javaslang.collection.List.ofAll(parameterIds));
+				} else {
+					return Future.failed(new IllegalArgumentException("No context is present"));
 				}
-			}
-		});
+			})
+			.map(timelines -> {
+				if (!configuration.getDataSelector().equals("0")) {
+					return timelines.filter(timeline -> timeline.getScenarioId().equals(
+							configuration.getDataSelector()));
+				} else {
+					return timelines;
+				}
+			})
+			.flatMap(timelines -> {
+				Date queryDate = configuration.getDataSelector().equals("0")
+						? currentDate :
+						new Date(currentDate.getTime()
+								- configuration.getExperiment().getStart().getTime());
+				return dapController.getLastMeasurementsWith24HourMod(
+							timelines.map(Timeline::getId), queryDate)
+						.map(measurements -> {
+							javaslang.collection.Map<String, Timeline> timelineMap = timelines
+									.toMap(timeline -> Tuple.of(timeline.getId(), timeline));
+								javaslang.collection.Map<Timeline, ? extends Seq<Measurement>> result =
+										measurements.groupBy(measurement ->
+										timelineMap.get(measurement.getTimelineId()).get());
+
+							return result;
+						});
+			})
+			.onFailure(e -> {
+				view.showLoadingState(false);
+				eventBus.showError(errorUtil.processErrors(null, e));
+			})
+			.onSuccess(measurements -> {
+				view.showLoadingState(false);
+				view.clear();
+
+				if (measurements.size() > 0) {
+					Seq<Section> muteSections = javaslang.collection.List.ofAll(
+							configuration.getSections().values())
+							.filter(section -> !configuration.getPickedSections()
+									.containsKey(section.getId())
+									|| section.getShape().getCoordinates().size() >= 6);
+					gradientId = "analysis:" + parameterUnit;
+
+					if (gradientsUtil.contains(gradientId)) {
+						gradientMin = gradientsUtil.getMinValue(gradientId);
+						gradientMax = gradientsUtil.getMaxValue(gradientId);
+					}
+
+					for (Measurement measurement : measurements.values()
+							.flatMap(Function.identity())) {
+						gradientsUtil.updateValues(gradientId,
+								measurement.getValue());
+					}
+
+					view.init();
+					drawMuteSections(configuration.getSections().values(),
+							muteSections.toJavaList());
+					view.drawCrosssection(createLegend(gradientId),
+							parameterUnit,
+							createDeviceLocationsWithValuesAndColors(
+									measurements, gradientId));
+
+					if (gradientsUtil.isExtended(gradientId, gradientMin,
+							gradientMax)) {
+						gradientMin = gradientsUtil.getMinValue(gradientId);
+						gradientMax = gradientsUtil.getMaxValue(gradientId);
+						eventBus.gradientExtended(gradientId);
+					}
+				} else {
+					eventBus.showSimpleError(view.noMeasurementsMessage());
+				}
+			});
 	}
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
-
+		//not used
 	}
 
 	private Map<List<List<Double>>, Map<List<Double>, List<Double>>>
-			createDeviceLocationsWithValuesAndColors(List<Measurement> measurements,
-					List<Timeline> timelines, Context context, String gradientId) {
+			createDeviceLocationsWithValuesAndColors(
+					javaslang.collection.Map<Timeline, ? extends Seq<Measurement>> timelineMeasurementMap,
+					String gradientId) {
 		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = new HashMap<>();
 
-		for(Section section : configuration.getPickedSections().values()) {
+		for (Section section : configuration.getPickedSections().values()) {
 			Map<List<Double>, Double> temp = new LinkedHashMap<>();
 			List<List<Double>> keys = new ArrayList<>();
 			Double value = 0.0;
 
-			for(Device device : configuration.getSectionDevicesMap().get(section)) {
+			for (Device device : configuration.getSectionDevicesMap().get(section)) {
 				PARAMETER:
-				for(Parameter parameter : configuration.getParameterMap().values()) {
-					if(device.getParameterIds().contains(parameter.getId())
+				for (Parameter parameter : configuration.getParameterMap().values()) {
+					if (device.getParameterIds().contains(parameter.getId())
 							&& parameter.getMeasurementTypeName().equals(
 									configuration.getPickedParameterMeasurementName())) {
-						for(Timeline timeline : timelines) {
-							if(timeline.getContextId().equals(context.getId())
-									&& parameter.getTimelineIds().contains(timeline.getId())) {
-								for(Measurement measurement : measurements) {
-									if(measurement.getTimelineId().equals(timeline.getId())) {
-										value = measurement.getValue();
+						for (Timeline timeline : timelineMeasurementMap.keySet()) {
+							if (parameter.getTimelineIds().contains(timeline.getId())) {
+								for (Measurement measurement : timelineMeasurementMap.get(timeline).get()) {
+									value = measurement.getValue();
 
-										break PARAMETER;
-									}
+									break PARAMETER;
 								}
 							}
 						}
 					}
 				}
 
-				if(device.getPlacement() != null
+				if (device.getPlacement() != null
 						&& device.getPlacement().getCoordinates() != null) {
 					List<List<Double>> coordinates = new ArrayList<>();
 					coordinates.add(device.getPlacement().getCoordinates());
@@ -311,7 +290,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 							coordinates);
 					rotate(projectedCoordinates);
 
-					for(List<Double> pointCoordinates : projectedCoordinates) {
+					for (List<Double> pointCoordinates : projectedCoordinates) {
 						pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
 						pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
 					}
@@ -333,7 +312,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 			Map<List<Double>, List<Double>> locationsWithReadings = new LinkedHashMap<>();
 
-			for(List<Double> key : keys) {
+			for (List<Double> key : keys) {
 				Double finalValue = temp.get(key);
 				Color color = gradientsUtil.getColor(gradientId, finalValue);
 				List<Double> valueWithColor = new ArrayList<>();
@@ -350,7 +329,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			List<List<Double>> projectedCorners = coordinatesUtil.projectCoordinates(corners);
 			rotate(projectedCorners);
 
-			for(List<Double> pointCoordinates : projectedCorners) {
+			for (List<Double> pointCoordinates : projectedCorners) {
 				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
 				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
 			}
@@ -366,12 +345,12 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				}
 			});
 
-			if(scaled.size() > 3) {
-				if(scaled.get(0).get(0) > scaled.get(1).get(0)) {
+			if (scaled.size() > 3) {
+				if (scaled.get(0).get(0) > scaled.get(1).get(0)) {
 					scaled.add(0, scaled.remove(1));
 				}
 
-				if(scaled.get(2).get(0) < scaled.get(3).get(0)) {
+				if (scaled.get(2).get(0) < scaled.get(3).get(0)) {
 					scaled.add(2, scaled.remove(3));
 				}
 			}
@@ -383,6 +362,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	}
 
 	private void drawMuteSections(Collection<Section> allSections, List<Section> muteSections) {
+		log.debug("Drawing {} mute sections of {} all sections", muteSections.size(),allSections.size());
+
 		List<List<List<Double>>> coordinates = new ArrayList<>();
 		double	maxX = Double.MIN_VALUE,
 				maxY = Double.MIN_VALUE;

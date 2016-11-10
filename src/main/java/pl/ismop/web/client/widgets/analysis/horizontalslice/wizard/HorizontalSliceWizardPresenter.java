@@ -78,7 +78,6 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		initializeConfigMode();
 	}
 
-
 	public void onSectionClicked(Section section) {
 		if (!configuration.getPickedSections().containsKey(section.getId())) {
 			view.addSection(section.getId());
