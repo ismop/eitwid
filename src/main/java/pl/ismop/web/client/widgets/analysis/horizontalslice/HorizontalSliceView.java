@@ -57,6 +57,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 			boundaryAndColor.push(legend.get(colorBoundary).get(3)); //value
 			nativeLegend.push(boundaryAndColor);
 		}
+
 		drawLegend(nativeLegend, parameterUnit);
 		drawDevices(locationsWithValues);
 

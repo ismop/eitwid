@@ -123,7 +123,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void addSection(String sectionId) {
+	public void addPickedSection(String sectionId) {
 		Heading heading = new Heading(H4);
 		heading.setText("Section " + sectionId);
 		heading.addStyleName("pull-left");

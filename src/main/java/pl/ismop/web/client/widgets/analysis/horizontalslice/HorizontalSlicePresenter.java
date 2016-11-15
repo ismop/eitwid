@@ -6,17 +6,14 @@ import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.Math.sin;
 import static java.util.Arrays.asList;
-import static java.util.Collections.sort;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -26,12 +23,9 @@ import org.slf4j.LoggerFactory;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
-import javaslang.Tuple;
 import javaslang.collection.Seq;
-import javaslang.concurrent.Future;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.FunctionalDapController;
-import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
@@ -40,7 +34,6 @@ import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorUtil;
 import pl.ismop.web.client.util.CoordinatesUtil;
 import pl.ismop.web.client.util.GradientsUtil;
-import pl.ismop.web.client.util.GradientsUtil.Color;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.IHorizontalSliceView.IHorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
@@ -132,9 +125,9 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	private void addSectionsToMinimap() {
 		selectionManager.clear();
 
-		for (Section section : configuration.getPickedSections().values()) {
-			selectionManager.add(section);
-		}
+//		for (Section section : configuration.getPickedSections().values()) {
+//			selectionManager.add(section);
+//		}
 	}
 
 	private void refreshView() {
@@ -149,102 +142,101 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		List<String> parameterIds = new ArrayList<>();
 		Parameter parameter = null;
 
-		for (String height : configuration.getPickedHeights().values()) {
-			for (Device device : configuration.getHeightDevicesmap().get(height)) {
-				for (String parameterId : device.getParameterIds()) {
-					if (configuration.getParameterMap().get(parameterId) != null
-							&& configuration.getParameterMap().get(parameterId)
-							.getMeasurementTypeName().equals(
-									configuration.getPickedParameterMeasurementName())) {
-						parameterIds.add(parameterId);
-						parameter = configuration.getParameterMap().get(parameterId);
-					}
-				}
-			}
-		}
+//		for (String height : configuration.getPickedHeights().values()) {
+//			for (Device device : configuration.getHeightDevicesmap().get(height)) {
+//				for (String parameterId : device.getParameterIds()) {
+//					if (configuration.getParameterMap().get(parameterId) != null
+//							&& configuration.getParameterMap().get(parameterId)
+//							.getMeasurementTypeName().equals(
+//									configuration.getPickedParameterMeasurementName())) {
+//						parameterIds.add(parameterId);
+//						parameter = configuration.getParameterMap().get(parameterId);
+//					}
+//				}
+//			}
+//		}
 
 		final String parameterUnit = parameter != null ? parameter.getMeasurementTypeUnit() : "";
-		String context = configuration.getDataSelector().equals("0") ? "measurements" : "scenarios";
-		dapController.getContexts(
-				context)
-			.flatMap(contexts -> {
-				if (contexts.size() > 0) {
-					return dapController.getTimelinesForParameterIds(contexts.get(0).getId(),
-						javaslang.collection.List.ofAll(parameterIds));
-				} else {
-					return Future.failed(new IllegalArgumentException("No context is present"));
-				}
-			})
-			.map(timelines -> {
-				if (!configuration.getDataSelector().equals("0")) {
-					return timelines.filter(timeline -> timeline.getScenarioId().equals(
-							configuration.getDataSelector()));
-				} else {
-					return timelines;
-				}
-			})
-			.flatMap(timelines -> {
-				Date queryDate = configuration.getDataSelector().equals("0")
-						? currentDate :
-						new Date(currentDate.getTime()
-								- configuration.getExperiment().getStart().getTime());
-				return dapController.getLastMeasurementsWith24HourMod(
-							timelines.map(Timeline::getId), queryDate)
-						.map(measurements -> {
-							javaslang.collection.Map<String, Timeline> timelineMap = timelines
-									.toMap(timeline -> Tuple.of(timeline.getId(), timeline));
-								javaslang.collection.Map<Timeline, ? extends Seq<Measurement>> result =
-										measurements.groupBy(measurement ->
-										timelineMap.get(measurement.getTimelineId()).get());
-
-							return result;
-						});
-			})
-			.onFailure(e -> {
-				view.showLoadingState(false);
-				eventBus.showError(errorUtil.processErrors(null, e));
-			})
-			.onSuccess(measurements -> {
-				view.showLoadingState(false);
-				view.clear();
-
-				if (measurements.size() > 0) {
-					Seq<Section> muteSections = javaslang.collection.List.ofAll(
-							configuration.getSections().values())
-							.filter(section -> !configuration.getPickedSections()
-									.containsKey(section.getId())
-									|| section.getShape().getCoordinates().size() >= 6);
-					gradientId = "analysis:" + parameterUnit;
-
-					if (gradientsUtil.contains(gradientId)) {
-						gradientMin = gradientsUtil.getMinValue(gradientId);
-						gradientMax = gradientsUtil.getMaxValue(gradientId);
-					}
-
-					for (Measurement measurement : measurements.values()
-							.flatMap(Function.identity())) {
-						gradientsUtil.updateValues(gradientId,
-								measurement.getValue());
-					}
-
-					view.init();
-					drawMuteSections(configuration.getSections().values(),
-							muteSections.toJavaList());
-					view.drawCrosssection(createLegend(gradientId),
-							parameterUnit,
-							createDeviceLocationsWithValuesAndColors(
-									measurements, gradientId));
-
-					if (gradientsUtil.isExtended(gradientId, gradientMin,
-							gradientMax)) {
-						gradientMin = gradientsUtil.getMinValue(gradientId);
-						gradientMax = gradientsUtil.getMaxValue(gradientId);
-						eventBus.gradientExtended(gradientId);
-					}
-				} else {
-					eventBus.showSimpleError(view.noMeasurementsMessage());
-				}
-			});
+		String context = "";//configuration.getDataSelector().equals("0") ? "measurements" : "scenarios";
+//		dapController.getContexts(context)
+//			.flatMap(contexts -> {
+//				if (contexts.size() > 0) {
+//					return dapController.getTimelinesForParameterIds(contexts.get(0).getId(),
+//						javaslang.collection.List.ofAll(parameterIds));
+//				} else {
+//					return Future.failed(new IllegalArgumentException("No context is present"));
+//				}
+//			})
+//			.map(timelines -> {
+//				if (!configuration.getDataSelector().equals("0")) {
+//					return timelines.filter(timeline -> timeline.getScenarioId().equals(
+//							configuration.getDataSelector()));
+//				} else {
+//					return timelines;
+//				}
+//			})
+//			.flatMap(timelines -> {
+//				Date queryDate = configuration.getDataSelector().equals("0")
+//						? currentDate :
+//						new Date(currentDate.getTime()
+//								- configuration.getExperiment().getStart().getTime());
+//				return dapController.getLastMeasurementsWith24HourMod(
+//							timelines.map(Timeline::getId), queryDate)
+//						.map(measurements -> {
+//							javaslang.collection.Map<String, Timeline> timelineMap = timelines
+//									.toMap(timeline -> Tuple.of(timeline.getId(), timeline));
+//								javaslang.collection.Map<Timeline, ? extends Seq<Measurement>> result =
+//										measurements.groupBy(measurement ->
+//										timelineMap.get(measurement.getTimelineId()).get());
+//
+//							return result;
+//						});
+//			})
+//			.onFailure(e -> {
+//				view.showLoadingState(false);
+//				eventBus.showError(errorUtil.processErrors(null, e));
+//			})
+//			.onSuccess(measurements -> {
+//				view.showLoadingState(false);
+//				view.clear();
+//
+//				if (measurements.size() > 0) {
+//					Seq<Section> muteSections = javaslang.collection.List.ofAll(
+//							configuration.getSections().values())
+//							.filter(section -> !configuration.getPickedSections()
+//									.containsKey(section.getId())
+//									|| section.getShape().getCoordinates().size() >= 6);
+//					gradientId = "analysis:" + parameterUnit;
+//
+//					if (gradientsUtil.contains(gradientId)) {
+//						gradientMin = gradientsUtil.getMinValue(gradientId);
+//						gradientMax = gradientsUtil.getMaxValue(gradientId);
+//					}
+//
+//					for (Measurement measurement : measurements.values()
+//							.flatMap(Function.identity())) {
+//						gradientsUtil.updateValues(gradientId,
+//								measurement.getValue());
+//					}
+//
+//					view.init();
+//					drawMuteSections(configuration.getSections().values(),
+//							muteSections.toJavaList());
+//					view.drawCrosssection(createLegend(gradientId),
+//							parameterUnit,
+//							createDeviceLocationsWithValuesAndColors(
+//									measurements, gradientId));
+//
+//					if (gradientsUtil.isExtended(gradientId, gradientMin,
+//							gradientMax)) {
+//						gradientMin = gradientsUtil.getMinValue(gradientId);
+//						gradientMax = gradientsUtil.getMaxValue(gradientId);
+//						eventBus.gradientExtended(gradientId);
+//					}
+//				} else {
+//					eventBus.showSimpleError(view.noMeasurementsMessage());
+//				}
+//			});
 	}
 
 	@Override
@@ -258,105 +250,105 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 					String gradientId) {
 		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = new HashMap<>();
 
-		for (Section section : configuration.getPickedSections().values()) {
-			Map<List<Double>, Double> temp = new LinkedHashMap<>();
-			List<List<Double>> keys = new ArrayList<>();
-			Double value = 0.0;
-
-			for (Device device : configuration.getSectionDevicesMap().get(section)) {
-				PARAMETER:
-				for (Parameter parameter : configuration.getParameterMap().values()) {
-					if (device.getParameterIds().contains(parameter.getId())
-							&& parameter.getMeasurementTypeName().equals(
-									configuration.getPickedParameterMeasurementName())) {
-						for (Timeline timeline : timelineMeasurementMap.keySet()) {
-							if (parameter.getTimelineIds().contains(timeline.getId())) {
-								for (Measurement measurement : timelineMeasurementMap.get(timeline).get()) {
-									value = measurement.getValue();
-
-									break PARAMETER;
-								}
-							}
-						}
-					}
-				}
-
-				if (device.getPlacement() != null
-						&& device.getPlacement().getCoordinates() != null) {
-					List<List<Double>> coordinates = new ArrayList<>();
-					coordinates.add(device.getPlacement().getCoordinates());
-
-					List<List<Double>> projectedCoordinates = coordinatesUtil.projectCoordinates(
-							coordinates);
-					rotate(projectedCoordinates);
-
-					for (List<Double> pointCoordinates : projectedCoordinates) {
-						pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
-						pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
-					}
-
-					List<List<List<Double>>> toBeScaledAndShiftedCoordinates = new ArrayList<>();
-					toBeScaledAndShiftedCoordinates.add(projectedCoordinates);
-					scaleAndShift(toBeScaledAndShiftedCoordinates, scale, panX);
-					temp.put(toBeScaledAndShiftedCoordinates.get(0).get(0), value);
-					keys.add(toBeScaledAndShiftedCoordinates.get(0).get(0));
-				}
-			}
-
-			sort(keys, new Comparator<List<Double>>() {
-				@Override
-				public int compare(List<Double> o1, List<Double> o2) {
-					return -o1.get(1).compareTo(o2.get(1));
-				}
-			});
-
-			Map<List<Double>, List<Double>> locationsWithReadings = new LinkedHashMap<>();
-
-			for (List<Double> key : keys) {
-				Double finalValue = temp.get(key);
-				Color color = gradientsUtil.getColor(gradientId, finalValue);
-				List<Double> valueWithColor = new ArrayList<>();
-				valueWithColor.add(finalValue);
-				valueWithColor.add(new Integer(color.getR()).doubleValue());
-				valueWithColor.add(new Integer(color.getG()).doubleValue());
-				valueWithColor.add(new Integer(color.getB()).doubleValue());
-				locationsWithReadings.put(key, valueWithColor);
-			}
-
-			//removing last element which is just there to close the loop
-			List<List<Double>> corners = section.getShape().getCoordinates()
-					.subList(0, section.getShape().getCoordinates().size() - 1);
-			List<List<Double>> projectedCorners = coordinatesUtil.projectCoordinates(corners);
-			rotate(projectedCorners);
-
-			for (List<Double> pointCoordinates : projectedCorners) {
-				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
-				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
-			}
-
-			List<List<List<Double>>> scaledAndShiftedCoordinates = new ArrayList<>();
-			scaledAndShiftedCoordinates.add(projectedCorners);
-			scaleAndShift(scaledAndShiftedCoordinates, scale, panX);
-			List<List<Double>> scaled = scaledAndShiftedCoordinates.get(0);
-			sort(scaled, new Comparator<List<Double>>() {
-				@Override
-				public int compare(List<Double> o1, List<Double> o2) {
-					return -o1.get(1).compareTo(o2.get(1));
-				}
-			});
-
-			if (scaled.size() > 3) {
-				if (scaled.get(0).get(0) > scaled.get(1).get(0)) {
-					scaled.add(0, scaled.remove(1));
-				}
-
-				if (scaled.get(2).get(0) < scaled.get(3).get(0)) {
-					scaled.add(2, scaled.remove(3));
-				}
-			}
-
-			result.put(scaled , locationsWithReadings);
-		}
+//		for (Section section : configuration.getPickedSections().values()) {
+//			Map<List<Double>, Double> temp = new LinkedHashMap<>();
+//			List<List<Double>> keys = new ArrayList<>();
+//			Double value = 0.0;
+//
+//			for (Device device : configuration.getSectionDevicesMap().get(section)) {
+//				PARAMETER:
+//				for (Parameter parameter : configuration.getParameterMap().values()) {
+//					if (device.getParameterIds().contains(parameter.getId())
+//							&& parameter.getMeasurementTypeName().equals(
+//									configuration.getPickedParameterMeasurementName())) {
+//						for (Timeline timeline : timelineMeasurementMap.keySet()) {
+//							if (parameter.getTimelineIds().contains(timeline.getId())) {
+//								for (Measurement measurement : timelineMeasurementMap.get(timeline).get()) {
+//									value = measurement.getValue();
+//
+//									break PARAMETER;
+//								}
+//							}
+//						}
+//					}
+//				}
+//
+//				if (device.getPlacement() != null
+//						&& device.getPlacement().getCoordinates() != null) {
+//					List<List<Double>> coordinates = new ArrayList<>();
+//					coordinates.add(device.getPlacement().getCoordinates());
+//
+//					List<List<Double>> projectedCoordinates = coordinatesUtil.projectCoordinates(
+//							coordinates);
+//					rotate(projectedCoordinates);
+//
+//					for (List<Double> pointCoordinates : projectedCoordinates) {
+//						pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
+//						pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
+//					}
+//
+//					List<List<List<Double>>> toBeScaledAndShiftedCoordinates = new ArrayList<>();
+//					toBeScaledAndShiftedCoordinates.add(projectedCoordinates);
+//					scaleAndShift(toBeScaledAndShiftedCoordinates, scale, panX);
+//					temp.put(toBeScaledAndShiftedCoordinates.get(0).get(0), value);
+//					keys.add(toBeScaledAndShiftedCoordinates.get(0).get(0));
+//				}
+//			}
+//
+//			sort(keys, new Comparator<List<Double>>() {
+//				@Override
+//				public int compare(List<Double> o1, List<Double> o2) {
+//					return -o1.get(1).compareTo(o2.get(1));
+//				}
+//			});
+//
+//			Map<List<Double>, List<Double>> locationsWithReadings = new LinkedHashMap<>();
+//
+//			for (List<Double> key : keys) {
+//				Double finalValue = temp.get(key);
+//				Color color = gradientsUtil.getColor(gradientId, finalValue);
+//				List<Double> valueWithColor = new ArrayList<>();
+//				valueWithColor.add(finalValue);
+//				valueWithColor.add(new Integer(color.getR()).doubleValue());
+//				valueWithColor.add(new Integer(color.getG()).doubleValue());
+//				valueWithColor.add(new Integer(color.getB()).doubleValue());
+//				locationsWithReadings.put(key, valueWithColor);
+//			}
+//
+//			//removing last element which is just there to close the loop
+//			List<List<Double>> corners = section.getShape().getCoordinates()
+//					.subList(0, section.getShape().getCoordinates().size() - 1);
+//			List<List<Double>> projectedCorners = coordinatesUtil.projectCoordinates(corners);
+//			rotate(projectedCorners);
+//
+//			for (List<Double> pointCoordinates : projectedCorners) {
+//				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
+//				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
+//			}
+//
+//			List<List<List<Double>>> scaledAndShiftedCoordinates = new ArrayList<>();
+//			scaledAndShiftedCoordinates.add(projectedCorners);
+//			scaleAndShift(scaledAndShiftedCoordinates, scale, panX);
+//			List<List<Double>> scaled = scaledAndShiftedCoordinates.get(0);
+//			sort(scaled, new Comparator<List<Double>>() {
+//				@Override
+//				public int compare(List<Double> o1, List<Double> o2) {
+//					return -o1.get(1).compareTo(o2.get(1));
+//				}
+//			});
+//
+//			if (scaled.size() > 3) {
+//				if (scaled.get(0).get(0) > scaled.get(1).get(0)) {
+//					scaled.add(0, scaled.remove(1));
+//				}
+//
+//				if (scaled.get(2).get(0) < scaled.get(3).get(0)) {
+//					scaled.add(2, scaled.remove(3));
+//				}
+//			}
+//
+//			result.put(scaled , locationsWithReadings);
+//		}
 
 		return result;
 	}

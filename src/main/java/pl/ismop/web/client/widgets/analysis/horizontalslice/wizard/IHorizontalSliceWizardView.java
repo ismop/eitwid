@@ -27,7 +27,7 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 
 	void setMap(IsWidget view);
 
-	void addSection(String sectionId);
+	void addPickedSection(String sectionId);
 
 	void clearSections();
 
