@@ -5,15 +5,8 @@ import static java.lang.Math.abs;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.Math.sin;
-import static java.util.Arrays.asList;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -23,7 +16,13 @@ import org.slf4j.LoggerFactory;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import javaslang.API;
+import javaslang.collection.HashMap;
+import javaslang.collection.HashSet;
+import javaslang.collection.List;
+import javaslang.collection.Map;
 import javaslang.collection.Seq;
+import javaslang.control.Option;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.FunctionalDapController;
 import pl.ismop.web.client.dap.experiment.Experiment;
@@ -124,10 +123,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 	private void addSectionsToMinimap() {
 		selectionManager.clear();
-
-//		for (Section section : configuration.getPickedSections().values()) {
-//			selectionManager.add(section);
-//		}
+		configuration.getPickedSectionIds()
+			.map(sectionId -> configuration.getSections().get(sectionId))
+			.filter(Option::isDefined)
+			.map(Option::get)
+			.forEach(selectionManager::add);
 	}
 
 	private void refreshView() {
@@ -138,8 +138,18 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		}
 
 		view.showLoadingState(true);
+		view.init();
+		drawMuteSections(configuration.getSections().values(),
+				configuration.getSections().values()
+				.filter(section -> !configuration.getPickedSectionIds().contains(section.getId())));
 
-		List<String> parameterIds = new ArrayList<>();
+
+
+
+
+
+
+		Seq<String> parameterIds = List.empty();
 		Parameter parameter = null;
 
 //		for (String height : configuration.getPickedHeights().values()) {
@@ -248,7 +258,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			createDeviceLocationsWithValuesAndColors(
 					javaslang.collection.Map<Timeline, ? extends Seq<Measurement>> timelineMeasurementMap,
 					String gradientId) {
-		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = new HashMap<>();
+		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = HashMap.empty();
 
 //		for (Section section : configuration.getPickedSections().values()) {
 //			Map<List<Double>, Double> temp = new LinkedHashMap<>();
@@ -353,10 +363,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		return result;
 	}
 
-	private void drawMuteSections(Collection<Section> allSections, List<Section> muteSections) {
-		log.debug("Drawing {} mute sections of {} all sections", muteSections.size(),allSections.size());
+	private void drawMuteSections(Seq<Section> allSections, Seq<Section> muteSections) {
+		log.debug("Drawing {} mute sections of {} all sections",
+				muteSections.size(), allSections.size());
 
-		List<List<List<Double>>> coordinates = new ArrayList<>();
+		Seq<Seq<Seq<Double>>> coordinates = List.empty();
 		double	maxX = Double.MIN_VALUE,
 				maxY = Double.MIN_VALUE;
 		shiftX = Double.MAX_VALUE;
@@ -364,12 +375,13 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 		for (Section section : muteSections) {
 			if (section.getShape() != null) {
-				List<List<Double>> projected = coordinatesUtil.projectCoordinates(
-						section.getShape().getCoordinates());
-				rotate(projected);
-				coordinates.add(projected);
+				Seq<Seq<Double>> projected = List.ofAll(coordinatesUtil.projectCoordinates(
+						section.getShape().getCoordinates()))
+						.map(list -> List.ofAll(list));
+				projected = rotate(projected);
+				coordinates = coordinates.append(projected);
 
-				for (List<Double> point : projected) {
+				for (Seq<Double> point : projected) {
 					if (point.get(0) > maxX) {
 						maxX = point.get(0);
 					}
@@ -389,29 +401,26 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			}
 		}
 
-		for (List<List<Double>> sectionCoordinates : coordinates) {
-			for (List<Double> pointCoordinates : sectionCoordinates) {
-				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
-				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
-			}
-		}
-
+		coordinates = coordinates.map(
+				points -> points.map(
+						point -> List.of(point.get(0) - shiftX, point.get(1) - shiftY)));
 		panX = 200;
 		scale = computeScale(coordinates, panX, view.getHeight(), view.getWidth());
 		scaleAndShift(coordinates, scale, panX);
 		view.drawScale(scale, panX);
-		view.drawMuteSections(coordinates);
+		view.drawMuteSections(coordinates.map(points -> points.map(
+				point -> point.toJavaList()).toJavaList()).toJavaList());
 	}
 
-	private double computeScale(List<List<List<Double>>> coordinates, double panX, double height,
+	private double computeScale(Seq<Seq<Seq<Double>>> coordinates, double panX, double height,
 			double width) {
 		double 	minY = Double.MAX_VALUE,
 				maxY = Double.MIN_VALUE,
 				minX = Double.MAX_VALUE,
 				maxX = Double.MIN_VALUE;
 
-		for(List<List<Double>> sectionCoordinates : coordinates) {
-			for(List<Double> point : sectionCoordinates) {
+		for(Seq<Seq<Double>> sectionCoordinates : coordinates) {
+			for(Seq<Double> point : sectionCoordinates) {
 				if(point.get(0) > maxX) {
 					maxX = point.get(0);
 				}
@@ -436,36 +445,28 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		return min(height / sectionsHeight, (width - panX) / sectionsWidth);
 	}
 
-	private void scaleAndShift(List<List<List<Double>>> coordinates, double scale, double panX) {
-		for(List<List<Double>> sectionCoordinates : coordinates) {
-			for(List<Double> point : sectionCoordinates) {
-				point.set(0, point.get(0) * scale + panX);
-				point.set(1, point.get(1) * scale);
-			}
-		}
+	private Seq<Seq<Seq<Double>>> scaleAndShift(Seq<Seq<Seq<Double>>> coordinates,
+			double scale, double panX) {
+
+		return coordinates.map(points -> points.map(
+				point -> List.of(point.get(0) * scale + panX, point.get(1) * scale)));
 	}
 
-	private void rotate(List<List<Double>> points) {
-		for(List<Double> point : points) {
-			double newX = point.get(0) * cos(PI / 2) - point.get(1) * sin(PI / 2);
-			double newY = point.get(0) * sin(PI / 2) + point.get(1) * cos(PI / 2);
-			point.set(0, newX);
-			point.set(1, newY);
-		}
+	private Seq<Seq<Double>> rotate(Seq<Seq<Double>> points) {
+		return points.map(point ->
+			List.of(point.get(0) * cos(PI / 2) - point.get(1) * sin(PI / 2),
+					point.get(0) * sin(PI / 2) + point.get(1) * cos(PI / 2))
+		);
 	}
 
 	private Map<Double, List<Double>> createLegend(String gradientId) {
-		Map<Double, List<Double>> result = new LinkedHashMap<>();
-
-		for (Double colorBoundary : gradientsUtil.getGradient().keySet()) {
-			result.put(colorBoundary, asList(new Double[] {
-					new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
-					new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
-					new Double(gradientsUtil.getGradient().get(colorBoundary).getB()),
-					gradientsUtil.getValue(gradientId, colorBoundary)
-			}));
-		}
-
-		return result;
+		return HashSet.ofAll(gradientsUtil.getGradient().keySet()).toMap(colorBoundary ->
+			API.Tuple(colorBoundary, List.of(
+				new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
+				new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
+				new Double(gradientsUtil.getGradient().get(colorBoundary).getB()),
+				gradientsUtil.getValue(gradientId, colorBoundary)
+			))
+		);
 	}
 }

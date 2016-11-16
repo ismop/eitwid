@@ -6,9 +6,9 @@ import java.util.Map;
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IHorizontalSliceView extends IsWidget {
-	
+
 	interface IHorizontalSlicePresenter {
-		
+
 	}
 
 	void showLoadingState(boolean show);

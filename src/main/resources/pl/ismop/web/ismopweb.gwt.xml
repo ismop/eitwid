@@ -26,10 +26,11 @@
 	<stylesheet src="/css/ismop.css"/>
 
 	<!-- Logging configuration -->
-	<set-property name="gwt.logging.logLevel" value="FINE"/>
+	<set-property name="gwt.logging.logLevel" value="INFO"/>
+	<set-property name="gwt.logging.simpleRemoteHandler" value="ENABLED"/>
 
 	<!-- locale setup -->
 	<extend-property name="locale" values="en,pl"/>
 	<set-property-fallback name="locale" value="pl"/>
-	<set-property name="locale" value="en,pl"/>>
+	<set-property name="locale" value="en,pl"/>
 </module>
