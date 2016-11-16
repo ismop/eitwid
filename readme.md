@@ -1,3 +1,5 @@
+[![build status](https://gitlab.dev.cyfronet.pl/ismop/eitwid/badges/master/build.svg)](https://gitlab.dev.cyfronet.pl/ismop/eitwid/commits/master)
+
 System requirements:
 - Java version 8 (use Oracle JDK)
 - maven version 3.3
