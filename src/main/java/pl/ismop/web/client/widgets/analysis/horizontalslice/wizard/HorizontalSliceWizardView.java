@@ -180,18 +180,19 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void addSectionHeight(final Double height, final String profileId, boolean check) {
-		Radio radio = new Radio(profileId, messages.heightLabel() + " " + String.valueOf(NumberFormat.getFormat("0.00").format(height)));
+	public void addSectionHeight(final Double height, final String sectionId, boolean check) {
+		Radio radio = new Radio(sectionId, messages.heightLabel() + " "
+				+ String.valueOf(NumberFormat.getFormat("0.00").format(height)));
 		radio.setValue(check);
 		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if(event.getValue()) {
-					getPresenter().onChangePickedHeight(profileId, String.valueOf(height));
+					getPresenter().onChangePickedHeight(sectionId, String.valueOf(height));
 				}
 			}
 		});
-		sectionHeightsContainers.get(profileId).add(radio);
+		sectionHeightsContainers.get(sectionId).add(radio);
 	}
 
 	@Override
@@ -278,7 +279,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		scenarioList.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				getPresenter().onDataSelectorChanged(scenarioList.getSelectedValue());
+				getPresenter().onScenarioIdChanged(scenarioList.getSelectedValue());
 			}
 		});
 
@@ -290,9 +291,9 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void selectScenario(String dataSelector) {
+	public void selectScenario(String scenarioId) {
 		for(int i = 0; i < scenarioList.getItemCount(); i++) {
-			if(scenarioList.getValue(i).equals(dataSelector)) {
+			if(scenarioList.getValue(i).equals(scenarioId)) {
 				scenarioList.setSelectedIndex(i);
 
 				break;

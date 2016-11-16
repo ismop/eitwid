@@ -18,7 +18,7 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 
 		void onParameterChanged(String parameterName);
 
-		void onDataSelectorChanged(String dataSelector);
+		void onScenarioIdChanged(String dataSelector);
 
 		void onProfileTypeChange(boolean budokopType);
 	}

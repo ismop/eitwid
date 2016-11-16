@@ -6,6 +6,8 @@ import javaslang.collection.Map;
 import javaslang.collection.Seq;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
+import pl.ismop.web.client.dap.parameter.Parameter;
+import pl.ismop.web.client.dap.scenario.Scenario;
 import pl.ismop.web.client.dap.section.Section;
 
 public class HorizontalCrosssectionConfiguration {
@@ -28,6 +30,12 @@ public class HorizontalCrosssectionConfiguration {
 
 	private String pickedParameterName;
 
+	private Map<String, Parameter> parametersById;
+
+	private Map<String, Scenario> scenariosById;
+
+	private String pickedScenarioId;
+
 	public HorizontalCrosssectionConfiguration() {
 		pickedSectionIds = List.empty();
 		sectionsById = HashMap.empty();
@@ -35,6 +43,8 @@ public class HorizontalCrosssectionConfiguration {
 		heightsBySectionId = HashMap.empty();
 		pickedHeightsBySectionId = HashMap.empty();
 		devicesBySectionIdAndHeight = HashMap.empty();
+		parametersById = HashMap.empty();
+		scenariosById = HashMap.empty();
 	}
 
 	public Map<String, Section> getSections() {
@@ -107,5 +117,29 @@ public class HorizontalCrosssectionConfiguration {
 
 	public void setPickedParameterName(String pickedParameterName) {
 		this.pickedParameterName = pickedParameterName;
+	}
+
+	public Map<String, Parameter> getParametersById() {
+		return parametersById;
+	}
+
+	public void setParametersById(Map<String, Parameter> parametersById) {
+		this.parametersById = parametersById;
+	}
+
+	public Map<String, Scenario> getScenariosById() {
+		return scenariosById;
+	}
+
+	public void setScenariosById(Map<String, Scenario> scenariosById) {
+		this.scenariosById = scenariosById;
+	}
+
+	public String getPickedScenarioId() {
+		return pickedScenarioId;
+	}
+
+	public void setPickedScenarioId(String pickedScenarioId) {
+		this.pickedScenarioId = pickedScenarioId;
 	}
 }
