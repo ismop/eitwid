@@ -1,7 +1,7 @@
 package pl.ismop.web.client.dap;
 
 import java.util.Date;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,7 +11,6 @@ import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
 
-import javaslang.Function1;
 import javaslang.collection.List;
 import javaslang.collection.Seq;
 import javaslang.concurrent.Future;
@@ -19,65 +18,25 @@ import javaslang.concurrent.Promise;
 import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.dap.context.Context;
 import pl.ismop.web.client.dap.context.ContextDirectService;
-import pl.ismop.web.client.dap.context.ContextsResponse;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.device.DeviceDirectService;
-import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateDirectService;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateResponse;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.measurement.MeasurementDirectService;
-import pl.ismop.web.client.dap.measurement.MeasurementsResponse;
 import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.parameter.ParameterDirectService;
-import pl.ismop.web.client.dap.parameter.ParametersResponse;
 import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.profile.ProfileDirectService;
-import pl.ismop.web.client.dap.profile.ProfilesResponse;
 import pl.ismop.web.client.dap.scenario.Scenario;
 import pl.ismop.web.client.dap.scenario.ScenarioDirectService;
-import pl.ismop.web.client.dap.scenario.ScenariosResponse;
 import pl.ismop.web.client.dap.section.Section;
 import pl.ismop.web.client.dap.section.SectionDirectService;
-import pl.ismop.web.client.dap.section.SectionsResponse;
 import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.dap.timeline.TimelineDirectService;
-import pl.ismop.web.client.dap.timeline.TimelinesResponse;
 
 @Singleton
 public class FunctionalDapController {
-
-	private static class ServiceCall<S extends DirectRestService, R> {
-
-		private Consumer<S> serviceCall;
-
-		private S service;
-
-		public ServiceCall(S service, Consumer<S> serviceCall) {
-			this.service = service;
-			this.serviceCall = serviceCall;
-		}
-
-		public <E> Future<Seq<E>> andThen(Function1<R, Seq<E>> transformResult) {
-			Promise<Seq<E>> promise = Promise.make();
-			S s = REST.withCallback(new MethodCallback<R>() {
-
-				@Override
-				public void onFailure(Method method, Throwable exception) {
-					promise.failure(exception);
-				}
-
-				@Override
-				public void onSuccess(Method method, R response) {
-					promise.success(transformResult.apply(response));
-				}
-			}).call(service);
-			serviceCall.accept(s);
-
-			return promise.future();
-		}
-	}
 
 	private DeviceDirectService deviceService;
 
@@ -120,54 +79,47 @@ public class FunctionalDapController {
 
 	public Future<Seq<Device>> getAllDevicesForProfile(String profileId) {
 		return collectDeviceAggregates(getDeviceAggregatesForProfile(profileId))
-				.flatMap(aggregates -> getDevicesForAggregates(
-						aggregates.map(DeviceAggregate::getId)));
+			.flatMap(aggregates -> getDevicesForAggregates(
+					aggregates.map(DeviceAggregate::getId)));
 	}
 
 	public Future<Seq<Device>> getAllDevicesForProfiles(Seq<String> profileIds) {
 		return collectDeviceAggregates(getDeviceAggregatesForProfiles(profileIds))
-				.flatMap(aggregates -> getDevicesForAggregates(
-						aggregates.map(DeviceAggregate::getId)));
+			.flatMap(aggregates -> getDevicesForAggregates(
+					aggregates.map(DeviceAggregate::getId)));
 	}
 
+
 	public Future<Seq<Parameter>> getParameters(Seq<String> deviceIds) {
-		return new ServiceCall<ParameterDirectService, ParametersResponse>(
-				parameterService, service -> service.getParameters(deviceIds.mkString(",")))
-			.andThen(response -> List.ofAll(response.getParameters()));
+		return callService(parameterService, s -> s.getParameters(deviceIds.mkString(",")))
+			.map(response -> List.ofAll(response.getParameters()));
 	}
 
 	public Future<Seq<Scenario>> getExperimentScenarios(String experimentId) {
-		return new ServiceCall<ScenarioDirectService, ScenariosResponse>(
-				scenarioService, service -> service.getExperimentScenarios(experimentId))
-			.andThen(response -> List.ofAll(response.getScenarios()));
+		return callService(scenarioService, s -> s.getExperimentScenarios(experimentId))
+			.map(response -> List.ofAll(response.getScenarios()));
 	}
 
 	public Future<Seq<Section>> getSections() {
-		return new ServiceCall<SectionDirectService, SectionsResponse>(
-				sectionService, service -> service.getSections())
-			.andThen(response -> List.ofAll(response.getSections()));
+		return callService(sectionService, s -> s.getSections())
+			.map(response -> List.ofAll(response.getSections()));
 	}
 
 	public Future<Seq<Profile>> getProfiles(Seq<String> sectionIds) {
-		return new ServiceCall<ProfileDirectService, ProfilesResponse>(
-				profileService,
-				service -> service.getProfilesForSection(sectionIds.mkString(",")))
-			.andThen(response -> List.ofAll(response.getProfiles()));
+		return callService(profileService, s -> s.getProfilesForSection(sectionIds.mkString(",")))
+			.map(response -> List.ofAll(response.getProfiles()));
 	}
 
 	public Future<Seq<Context>> getContexts(String contextType) {
-		return new ServiceCall<ContextDirectService, ContextsResponse>(
-				contextService,
-				service -> service.getContexts(contextType))
-			.andThen(response -> List.ofAll(response.getContexts()));
+		return callService(contextService, s -> s.getContexts(contextType))
+			.map(response -> List.ofAll(response.getContexts()));
 	}
 
 	public Future<Seq<Timeline>> getTimelinesForParameterIds(String contextId,
 			Seq<String> parameterIds) {
-		return new ServiceCall<TimelineDirectService, TimelinesResponse>(
-				timelineService,
-				service -> service.getTimelines(contextId, parameterIds.mkString(",")))
-			.andThen(response -> List.ofAll(response.getTimelines()));
+		return callService(timelineService, s -> s.getTimelines(contextId,
+				parameterIds.mkString(",")))
+			.map(response -> List.ofAll(response.getTimelines()));
 	}
 
 	public Future<Seq<Measurement>> getLastMeasurementsWith24HourMod(Seq<String> timelineIds,
@@ -175,35 +127,49 @@ public class FunctionalDapController {
 		String until = ismopConverter.formatForDto(untilDate);
 		String from = ismopConverter.formatForDto(new Date(untilDate.getTime() - 86_400_000L));
 
-		return new ServiceCall<MeasurementDirectService, MeasurementsResponse>(
-				measurementService,
-				service -> service.getMeasurements(timelineIds.mkString(","), from, until))
-			.andThen(response -> List.ofAll(response.getMeasurements()));
+		return callService(measurementService, s -> s.getMeasurements(timelineIds.mkString(","),
+				from, until))
+			.map(response -> List.ofAll(response.getMeasurements()));
+	}
+
+	private <S extends DirectRestService, R> Future<R> callService(S service, Function<S, R> call) {
+		Promise<R> promise = Promise.make();
+		S s = REST.withCallback(new MethodCallback<R>() {
+
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				promise.failure(exception);
+			}
+
+			@Override
+			public void onSuccess(Method method, R response) {
+				promise.success(response);
+			}
+		}).call(service);
+		call.apply(s);
+
+		return promise.future();
 	}
 
 	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfile(String profileId) {
-		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
-				deviceAggregateService, service -> service.getDeviceAggregates(profileId))
-			.andThen(response -> List.ofAll(response.getDeviceAggregations()));
+		return callService(deviceAggregateService, s -> s.getDeviceAggregates(profileId))
+			.map(response -> List.ofAll(response.getDeviceAggregations()));
 	}
 
 	private Future<Seq<DeviceAggregate>> getDeviceAggregatesForProfiles(Seq<String> profileIds) {
-		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
-				deviceAggregateService, service -> service.getDeviceAggregates(
-						profileIds.mkString(",")))
-			.andThen(response -> List.ofAll(response.getDeviceAggregations()));
+		return callService(deviceAggregateService, s -> s.getDeviceAggregates(
+				profileIds.mkString(",")))
+			.map(response -> List.ofAll(response.getDeviceAggregations()));
 	}
 
 	private Future<Seq<DeviceAggregate>> getDeviceAggregates(Seq<String> ids) {
-		return new ServiceCall<DeviceAggregateDirectService, DeviceAggregateResponse>(
-				deviceAggregateService, service -> service.getDeviceAggregates(ids.mkString(",")))
-			.andThen(response -> List.ofAll(response.getDeviceAggregations()));
+		return callService(deviceAggregateService, s -> s.getDeviceAggregates(ids.mkString(",")))
+			.map(response -> List.ofAll(response.getDeviceAggregations()));
 	}
 
 	private Future<Seq<Device>> getDevicesForAggregates(Seq<String> aggregateIds) {
-		return new ServiceCall<DeviceDirectService, DevicesResponse>(
-				deviceService, service -> service.getDevices(aggregateIds.mkString(",")))
-			.andThen(response -> List.ofAll(response.getDevices()));
+		return callService(deviceService, s -> s.getDevices(aggregateIds.mkString(",")))
+			.map(response -> List.ofAll(response.getDevices()));
 	}
 
 	private Future<Seq<DeviceAggregate>> collectDeviceAggregates(
