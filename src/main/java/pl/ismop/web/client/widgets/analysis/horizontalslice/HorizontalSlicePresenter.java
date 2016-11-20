@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gwt.core.client.Scheduler;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -96,7 +97,9 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	@Override
 	public void setSelectedDate(Date date) {
 		this.currentDate = date;
-		refreshView();
+		Scheduler.get().scheduleDeferred(() -> {
+			refreshView();
+		});
 	}
 
 	@Override
@@ -111,7 +114,9 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	@Override
 	public void setSelectionManager(ISelectionManager selectionManager) {
 		this.selectionManager = selectionManager;
-		addSectionsToMinimap();
+		Scheduler.get().scheduleDeferred(() -> {
+			addSectionsToMinimap();
+		});
 	}
 
 	public void onGradientExtended(String gradientId) {
@@ -137,12 +142,14 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			return;
 		}
 
-		view.showLoadingState(true);
-		view.init();
-		drawMuteSections(configuration.getSections().values(),
-				configuration.getSections().values()
-				.filter(section -> !configuration.getPickedSectionIds().contains(section.getId())));
-
+		Scheduler.get().scheduleDeferred(() -> {
+			view.showLoadingState(true);
+			view.init();
+			drawMuteSections(configuration.getSections().values(),
+					configuration.getSections().values()
+					.filter(section -> !configuration.getPickedSectionIds()
+							.contains(section.getId())));
+		});
 
 
 
@@ -364,7 +371,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	}
 
 	private void drawMuteSections(Seq<Section> allSections, Seq<Section> muteSections) {
-		log.debug("Drawing {} mute sections of {} all sections",
+		log.info("Drawing {} mute sections of {} all sections",
 				muteSections.size(), allSections.size());
 
 		Seq<Seq<Seq<Double>>> coordinates = List.empty();
@@ -406,7 +413,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 						point -> List.of(point.get(0) - shiftX, point.get(1) - shiftY)));
 		panX = 200;
 		scale = computeScale(coordinates, panX, view.getHeight(), view.getWidth());
-		scaleAndShift(coordinates, scale, panX);
+		coordinates = scaleAndShift(coordinates, scale, panX);
 		view.drawScale(scale, panX);
 		view.drawMuteSections(coordinates.map(points -> points.map(
 				point -> point.toJavaList()).toJavaList()).toJavaList());
@@ -419,8 +426,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				minX = Double.MAX_VALUE,
 				maxX = Double.MIN_VALUE;
 
-		for(Seq<Seq<Double>> sectionCoordinates : coordinates) {
-			for(Seq<Double> point : sectionCoordinates) {
+		for (Seq<Seq<Double>> sectionCoordinates : coordinates) {
+			for (Seq<Double> point : sectionCoordinates) {
 				if(point.get(0) > maxX) {
 					maxX = point.get(0);
 				}
@@ -439,8 +446,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			}
 		}
 
-		double sectionsHeight = abs(minY) + abs(maxY);
-		double sectionsWidth = abs(minX) + abs(maxX);
+		double sectionsHeight = abs(maxY - minY);
+		double sectionsWidth = abs(maxX - minX);
 
 		return min(height / sectionsHeight, (width - panX) / sectionsWidth);
 	}

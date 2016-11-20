@@ -29,6 +29,11 @@
 	<set-property name="gwt.logging.logLevel" value="INFO"/>
 	<set-property name="gwt.logging.simpleRemoteHandler" value="ENABLED"/>
 
+	<!-- Generating symbol maps to deobfuscate stack traces on the server side -->
+	<set-property name="compiler.stackMode" value="emulated"/>
+	<set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
+	<set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
+
 	<!-- locale setup -->
 	<extend-property name="locale" values="en,pl"/>
 	<set-property-fallback name="locale" value="pl"/>
