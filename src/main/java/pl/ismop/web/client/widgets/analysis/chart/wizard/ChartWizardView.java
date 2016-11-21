@@ -8,6 +8,7 @@ import java.util.List;
 import org.gwtbootstrap3.client.shared.event.ModalHiddenEvent;
 import org.gwtbootstrap3.client.shared.event.ModalShownEvent;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.extras.select.client.ui.MultipleSelect;
@@ -64,6 +65,9 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
 
     @UiField
     Button okButton;
+
+    @UiField
+    CheckBox changeTrends;
 
     private List<String> selected = new ArrayList<>();
 
@@ -122,6 +126,11 @@ public class ChartWizardView extends Composite implements IChartWizardView, Reve
     @UiHandler("modal")
     void onPopupReady(ModalShownEvent event) {
         getPresenter().onModalReady();
+    }
+
+    @UiHandler("changeTrends")
+    void onChangeTrendsClicked(ClickEvent click) {
+        getPresenter().setChangeTrends(changeTrends.getValue());
     }
 
     @UiHandler("okButton")

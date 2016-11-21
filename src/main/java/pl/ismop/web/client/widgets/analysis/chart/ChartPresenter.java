@@ -49,6 +49,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     private List<Timeline> timelines;
 
+    private boolean changeTrends;
+
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
@@ -70,7 +72,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     public void edit() {
         wizard.show(selectedExperiment, new ChartWizardPresenter.ShowResult() {
             @Override
-            public void ok(List<Timeline> selectedTimelines) {
+            public void ok(List<Timeline> selectedTimelines, boolean changeTrends) {
+                setChangeTrends(changeTrends);
                 setTimelines(selectedTimelines);
             }
         });
@@ -93,16 +96,32 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     class ChartPointMeasurementsCallback implements DapController.MeasurementsCallback {
         private final Map<String, Timeline> idToTimeline;
         private final ChartPointsCallback callback;
+        private boolean changeTrends;
 
-        public ChartPointMeasurementsCallback(Map<String, Timeline> idToTimeline,
+        public ChartPointMeasurementsCallback(Map<String, Timeline> idToTimeline, boolean changeTrends,
         		ChartPointsCallback callback) {
             this.idToTimeline = idToTimeline;
+            this.changeTrends = changeTrends;
             this.callback = callback;
         }
 
         @Override
         public void processMeasurements(List<Measurement> measurements) {
-            callback.processChartPoints(map(measurements));
+            List<ChartSeries> series = map(measurements);
+            callback.processChartPoints(changeTrends ? toChangeTrends(series) : series);
+        }
+
+        private List<ChartSeries> toChangeTrends(List<ChartSeries> series) {
+            GWT.log("to change trends");
+            for (ChartSeries chartSeries : series) {
+                if (chartSeries.getValues() != null && chartSeries.getValues().length > 0) {
+                    double first = chartSeries.getValues()[0][1].doubleValue();
+                    for (Number[] point : chartSeries.getValues()) {
+                        point[1] = point[1].doubleValue() - first;
+                    }
+                }
+            }
+            return series;
         }
 
         private List<ChartSeries> map(List<Measurement> measurements) {
@@ -214,7 +233,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
             GWT.log("Loading real measurements");
             dapController.getMeasurements(idToRealTimeline.keySet(), selectedExperiment.getStart(),
                     selectedExperiment.getEnd(), new ChartPointMeasurementsCallback(
-                    		idToRealTimeline, new ChartPointsCallback() {
+                    		idToRealTimeline, changeTrends, new ChartPointsCallback() {
                         @Override
                         public void processChartPoints(
                         		final List<ChartSeries> realTimelineToMeasurements) {
@@ -285,7 +304,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	    if (idToScenarioTimeline.size() > 0) {
 	        GWT.log("Loading scenarios measurements");
 	        dapController.getAllMeasurements(idToScenarioTimeline.keySet(),
-	                new ChartPointMeasurementsCallback(idToScenarioTimeline, new ChartPointsCallback() {
+	                new ChartPointMeasurementsCallback(idToScenarioTimeline, changeTrends, new ChartPointsCallback() {
 	                    @Override
 	                    public void processChartPoints(List<ChartSeries> scenarioTimelineToMeasurements) {
 	                        realTimelineToMeasurements.addAll(scenarioTimelineToMeasurements);
@@ -303,5 +322,9 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         for (ChartSeries s : series) {
             chartPresenter.addChartSeries(s);
         }
+    }
+
+    public void setChangeTrends(boolean changeTrends) {
+        this.changeTrends = changeTrends;
     }
 }
