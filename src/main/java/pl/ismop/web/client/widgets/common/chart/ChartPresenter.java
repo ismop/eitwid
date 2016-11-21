@@ -150,13 +150,12 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 				@Override
 				public String format(ToolTipData toolTipData) {
 					String msg = converter.formatForDisplay(new Date(toolTipData.getXAsLong())) + "<br/>";
-					for (Point point : toolTipData.getPoints()) {
-						JavaScriptObject nativePoint = point.getNativePoint();
-						msg += "<br/><span style=\"color:" + getPointColor(nativePoint) +
-								"\">\u25CF</span> " + getSeriesName(nativePoint) + ": <b>" +
-								NumberFormat.getFormat("0.00").format(point.getY()) + " " +
-								dataSeriesMap.get(getSeriesId(nativePoint)).getUnit() + "</b><br/>";
-					}
+					Point point = toolTipData.getPoint();
+					JavaScriptObject nativePoint = point.getNativePoint();
+					msg += "<br/><span style=\"color:" + getPointColor(nativePoint) +
+							"\">\u25CF</span> " + getSeriesName(nativePoint) + ": <b>" +
+							NumberFormat.getFormat("0.00").format(point.getY()) + " " +
+							dataSeriesMap.get(getSeriesId(nativePoint)).getUnit() + "</b><br/>";
 					return msg;
 				}
 
@@ -171,7 +170,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 				private native String getPointColor(JavaScriptObject nativePoint) /*-{
                     return nativePoint.color;
                 }-*/;
-			}).setShared(true));
+			}));
 
 			if (xAxisLabelsFormatter != null) {
 				chart.getXAxis().setLabels(new XAxisLabels().setFormatter(xAxisLabelsFormatter));
