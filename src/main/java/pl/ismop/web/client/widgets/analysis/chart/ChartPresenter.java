@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 
@@ -50,6 +51,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     private List<Timeline> timelines;
 
     private boolean changeTrends;
+
+    private Map<String, String> colors = new HashMap<>();
 
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
@@ -316,13 +319,23 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	    }
 	}
 
-    private void setSeries(List<ChartSeries> series) {
+    private void setSeries(List<ChartSeries> chartSeries) {
         getChart().setLoadingState(false);
         chartPresenter.reset();
-        for (ChartSeries s : series) {
-            chartPresenter.addChartSeries(s);
+        for (ChartSeries s : chartSeries) {
+            String color = colors .get(s.getTimelineId());
+            if (color != null) {
+                s.setOverrideColor(color);
+            }
+            Series series = chartPresenter.addChartSeries(s, false);
+            colors.put(s.getTimelineId(), getSeriesColor(series.getNativeSeries()));
         }
+        chartPresenter.redraw();
     }
+
+    private native String getSeriesColor(JavaScriptObject nativeSeries) /*-{
+        return nativeSeries.color;
+    }-*/;
 
     public void setChangeTrends(boolean changeTrends) {
         this.changeTrends = changeTrends;
