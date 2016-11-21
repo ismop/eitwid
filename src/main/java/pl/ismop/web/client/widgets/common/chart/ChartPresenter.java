@@ -105,7 +105,11 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			addChartSeries(chartSeries, false);
 		}
 
-		chart.redraw();
+		redraw();
+	}
+
+	public void redraw() {
+	    chart.redraw();
 	}
 
 	public void initChart() {
@@ -415,7 +419,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		return result;
 	}
 
-	private void addChartSeries(ChartSeries series, boolean redraw) {
+	public Series addChartSeries(ChartSeries series, boolean redraw) {
 		initChart();
 
 		Series chartSeries = null;
@@ -448,6 +452,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		if (!foundChartSeries.isPresent()) {
 			chart.addSeries(chartSeries, redraw, true);
 		}
+
+		return chartSeries;
 	}
 
 	private void yAxisClicked(String axisLabel) {
