@@ -32,9 +32,10 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
     private ChartWizardMessages messages;
     private Map<String, Parameter> nameToParameter;
     private Map<String, SensorPanelPresenter> panels = new HashMap<>();
+    private boolean changeTrends;
 
     public interface ShowResult {
-        void ok(List<Timeline> selectedTimelines);
+        void ok(List<Timeline> selectedTimelines, boolean changeTrends);
     }
 
     private final DapController dapController;
@@ -117,7 +118,7 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
 
     @Override
     public void modalOk() {
-        showResult.ok(getSelectedTimelines());
+        showResult.ok(getSelectedTimelines(), changeTrends);
         getView().close();
     }
 
@@ -169,5 +170,10 @@ public class ChartWizardPresenter extends BasePresenter<IChartWizardView, MainEv
             selectedTimelines.addAll(panel.getSelectedTimelines());
         }
         return selectedTimelines;
+    }
+
+    @Override
+    public void setChangeTrends(boolean changeTrends) {
+        this.changeTrends = changeTrends;
     }
 }

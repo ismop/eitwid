@@ -1,13 +1,10 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard;
 
-import com.google.gwt.user.client.ui.IsWidget;
-import pl.ismop.web.client.widgets.common.map.IMapView;
-import pl.ismop.web.client.widgets.common.map.MapPresenter;
-import pl.ismop.web.client.widgets.common.map.MapView;
-import pl.ismop.web.client.widgets.common.panel.IPanelView;
-
 import java.util.Collection;
-import java.util.List;
+
+import com.google.gwt.user.client.ui.IsWidget;
+
+import pl.ismop.web.client.widgets.common.map.IMapView;
 
 public interface IChartWizardView extends IsWidget {
     void show();
@@ -40,5 +37,7 @@ public interface IChartWizardView extends IsWidget {
         void addParameter(String parameterName);
 
         void removeParameter(String parameterName);
+
+        void setChangeTrends(boolean value);
     }
 }
