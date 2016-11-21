@@ -1,10 +1,5 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -16,6 +11,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+
+import javaslang.collection.List;
+import javaslang.collection.Map;
+import javaslang.collection.Seq;
 
 public class HorizontalSliceView extends Composite implements IHorizontalSliceView {
 	private static HorizontalSliceViewUiBinder uiBinder =
@@ -41,139 +40,136 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	@Override
-	public void drawCrosssection(Map<Double, List<Double>> legend, String parameterUnit,
-			Map<List<List<Double>>, Map<List<Double>, List<Double>>> locationsWithValues) {
+	public void drawCrosssection(Map<Double, Seq<Double>> legend, String parameterUnit,
+			Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>> locationsWithValues) {
 		parameterUnit = parameterUnit.replaceAll("\u2103", "\u00B0C");
 
 		@SuppressWarnings("unchecked")
 		JsArray<JsArrayNumber> nativeLegend = (JsArray<JsArrayNumber>) JsArray.createArray();
 
-		for (Double colorBoundary : legend.keySet()) {
+		legend.forEach((colorBoundary, colors) -> {
 			JsArrayNumber boundaryAndColor = (JsArrayNumber) JsArrayNumber.createArray();
 			boundaryAndColor.push(colorBoundary);
-			boundaryAndColor.push(legend.get(colorBoundary).get(0)); //R
-			boundaryAndColor.push(legend.get(colorBoundary).get(1)); //G
-			boundaryAndColor.push(legend.get(colorBoundary).get(2)); //B
-			boundaryAndColor.push(legend.get(colorBoundary).get(3)); //value
+			boundaryAndColor.push(colors.get(0)); //R
+			boundaryAndColor.push(colors.get(1)); //G
+			boundaryAndColor.push(colors.get(2)); //B
+			boundaryAndColor.push(colors.get(3)); //value
 			nativeLegend.push(boundaryAndColor);
-		}
+		});
 
 		drawLegend(nativeLegend, parameterUnit);
-		drawDevices(locationsWithValues);
-
-		for(List<List<Double>> sectionCorners : locationsWithValues.keySet()) {
-			@SuppressWarnings("unchecked")
-			JsArray<JsArrayNumber> coordinatesAndValues =
-					(JsArray<JsArrayNumber>) JsArray.createArray();
-			List<Double> topLeftCorner = sectionCorners.get(0);
-			List<Double> topRightCorner = sectionCorners.get(1);
-			Iterator<List<Double>> iterator = locationsWithValues.get(sectionCorners)
-					.keySet().iterator();
-			List<Double> previousValue = null;
-
-			while(iterator.hasNext()) {
-				List<Double> next = iterator.next();
-				List<Double> bottomLeftCorner = calculateCorner(sectionCorners.get(0),
-						sectionCorners.get(1), next, sectionCorners.get(0));
-				List<Double> bottomRightCorner = calculateCorner(sectionCorners.get(0),
-						sectionCorners.get(1), next, sectionCorners.get(1));
-				JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
-				topLeft.push(topLeftCorner.get(0));
-				topLeft.push(topLeftCorner.get(1));
-				coordinatesAndValues.push(topLeft);
-
-				JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
-				topRight.push(topRightCorner.get(0));
-				topRight.push(topRightCorner.get(1));
-				coordinatesAndValues.push(topRight);
-
-				JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
-				bottomRight.push(bottomRightCorner.get(0));
-				bottomRight.push(bottomRightCorner.get(1));
-				coordinatesAndValues.push(bottomRight);
-
-				JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
-				bottomLeft.push(bottomLeftCorner.get(0));
-				bottomLeft.push(bottomLeftCorner.get(1));
-				coordinatesAndValues.push(bottomLeft);
-
-				JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
-
-				if (previousValue != null) {
-					values.push(previousValue.get(0));
-					values.push(new Double(previousValue.get(1)).intValue());
-					values.push(new Double(previousValue.get(2)).intValue());
-					values.push(new Double(previousValue.get(3)).intValue());
-				} else {
-					values.push(locationsWithValues.get(sectionCorners).get(next).get(0));
-					values.push(new Double(
-							locationsWithValues.get(sectionCorners).get(next).get(1)).intValue());
-					values.push(new Double(
-							locationsWithValues.get(sectionCorners).get(next).get(2)).intValue());
-					values.push(new Double(
-							locationsWithValues.get(sectionCorners).get(next).get(3)).intValue());
-				}
-
-				values.push(locationsWithValues.get(sectionCorners).get(next).get(0));
-				values.push(new Double(
-						locationsWithValues.get(sectionCorners).get(next).get(1)).intValue());
-				values.push(new Double(
-						locationsWithValues.get(sectionCorners).get(next).get(2)).intValue());
-				values.push(new Double(
-						locationsWithValues.get(sectionCorners).get(next).get(3)).intValue());
-				coordinatesAndValues.push(values);
-
-				topLeftCorner = bottomLeftCorner;
-				topRightCorner = bottomRightCorner;
-				previousValue = locationsWithValues.get(sectionCorners).get(next);
-			}
-
-			JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
-			topLeft.push(topLeftCorner.get(0));
-			topLeft.push(topLeftCorner.get(1));
-			coordinatesAndValues.push(topLeft);
-
-			JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
-			topRight.push(topRightCorner.get(0));
-			topRight.push(topRightCorner.get(1));
-			coordinatesAndValues.push(topRight);
-
-			JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
-			bottomRight.push(sectionCorners.get(2).get(0));
-			bottomRight.push(sectionCorners.get(2).get(1));
-			coordinatesAndValues.push(bottomRight);
-
-			JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
-			bottomLeft.push(sectionCorners.get(3).get(0));
-			bottomLeft.push(sectionCorners.get(3).get(1));
-			coordinatesAndValues.push(bottomLeft);
-
-			JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
-			values.push(previousValue.get(0));
-			values.push(new Double(previousValue.get(1)).intValue());
-			values.push(new Double(previousValue.get(2)).intValue());
-			values.push(new Double(previousValue.get(3)).intValue());
-			values.push(previousValue.get(0));
-			values.push(new Double(previousValue.get(1)).intValue());
-			values.push(new Double(previousValue.get(2)).intValue());
-			values.push(new Double(previousValue.get(3)).intValue());
-			coordinatesAndValues.push(values);
-
-			drawHeatSection(coordinatesAndValues);
-		}
+//		drawDevices(locationsWithValues);
+//
+//		for (Seq<Seq<Double>> sectionCorners : locationsWithValues.keySet()) {
+//			@SuppressWarnings("unchecked")
+//			JsArray<JsArrayNumber> coordinatesAndValues =
+//					(JsArray<JsArrayNumber>) JsArray.createArray();
+//			Seq<Double> topLeftCorner = sectionCorners.get(0);
+//			Seq<Double> topRightCorner = sectionCorners.get(1);
+//			Seq<Double> previousValue = null;
+//
+//			for (Seq<Double> next : locationsWithValues.get(sectionCorners).get().keySet()) {
+//				Seq<Double> bottomLeftCorner = calculateCorner(sectionCorners.get(0),
+//						sectionCorners.get(1), next, sectionCorners.get(0));
+//				Seq<Double> bottomRightCorner = calculateCorner(sectionCorners.get(0),
+//						sectionCorners.get(1), next, sectionCorners.get(1));
+//				JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
+//				topLeft.push(topLeftCorner.get(0));
+//				topLeft.push(topLeftCorner.get(1));
+//				coordinatesAndValues.push(topLeft);
+//
+//				JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
+//				topRight.push(topRightCorner.get(0));
+//				topRight.push(topRightCorner.get(1));
+//				coordinatesAndValues.push(topRight);
+//
+//				JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
+//				bottomRight.push(bottomRightCorner.get(0));
+//				bottomRight.push(bottomRightCorner.get(1));
+//				coordinatesAndValues.push(bottomRight);
+//
+//				JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
+//				bottomLeft.push(bottomLeftCorner.get(0));
+//				bottomLeft.push(bottomLeftCorner.get(1));
+//				coordinatesAndValues.push(bottomLeft);
+//
+//				JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
+//
+//				if (previousValue != null) {
+//					values.push(previousValue.get(0));
+//					values.push(new Double(previousValue.get(1)).intValue());
+//					values.push(new Double(previousValue.get(2)).intValue());
+//					values.push(new Double(previousValue.get(3)).intValue());
+//				} else {
+//					values.push(locationsWithValues.get(sectionCorners).get().get(next).get().get(0));
+//					values.push(new Double(
+//							locationsWithValues.get(sectionCorners).get().get(next).get().get(1)).intValue());
+//					values.push(new Double(
+//							locationsWithValues.get(sectionCorners).get().get(next).get().get(2)).intValue());
+//					values.push(new Double(
+//							locationsWithValues.get(sectionCorners).get().get(next).get().get(3)).intValue());
+//				}
+//
+//				values.push(locationsWithValues.get(sectionCorners).get().get(next).get().get(0));
+//				values.push(new Double(
+//						locationsWithValues.get(sectionCorners).get().get(next).get().get(1)).intValue());
+//				values.push(new Double(
+//						locationsWithValues.get(sectionCorners).get().get(next).get().get(2)).intValue());
+//				values.push(new Double(
+//						locationsWithValues.get(sectionCorners).get().get(next).get().get(3)).intValue());
+//				coordinatesAndValues.push(values);
+//
+//				topLeftCorner = bottomLeftCorner;
+//				topRightCorner = bottomRightCorner;
+//				previousValue = locationsWithValues.get(sectionCorners).get().get(next).get();
+//			}
+//
+//			JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
+//			topLeft.push(topLeftCorner.get(0));
+//			topLeft.push(topLeftCorner.get(1));
+//			coordinatesAndValues.push(topLeft);
+//
+//			JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
+//			topRight.push(topRightCorner.get(0));
+//			topRight.push(topRightCorner.get(1));
+//			coordinatesAndValues.push(topRight);
+//
+//			JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
+//			bottomRight.push(sectionCorners.get(2).get(0));
+//			bottomRight.push(sectionCorners.get(2).get(1));
+//			coordinatesAndValues.push(bottomRight);
+//
+//			JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
+//			bottomLeft.push(sectionCorners.get(3).get(0));
+//			bottomLeft.push(sectionCorners.get(3).get(1));
+//			coordinatesAndValues.push(bottomLeft);
+//
+//			JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
+//			values.push(previousValue.get(0));
+//			values.push(new Double(previousValue.get(1)).intValue());
+//			values.push(new Double(previousValue.get(2)).intValue());
+//			values.push(new Double(previousValue.get(3)).intValue());
+//			values.push(previousValue.get(0));
+//			values.push(new Double(previousValue.get(1)).intValue());
+//			values.push(new Double(previousValue.get(2)).intValue());
+//			values.push(new Double(previousValue.get(3)).intValue());
+//			coordinatesAndValues.push(values);
+//
+//			drawHeatSection(coordinatesAndValues);
+//		}
 	};
 
 	@Override
-	public void drawMuteSections(List<List<List<Double>>> coordinates) {
-		for(List<List<Double>> sectionCoordinates : coordinates) {
+	public void drawMuteSections(Seq<Seq<Seq<Double>>> coordinates) {
+		for (Seq<Seq<Double>> sectionCoordinates : coordinates) {
 			@SuppressWarnings("unchecked")
 			JsArray<JsArrayNumber> nativeCoordinates =
 					(JsArray<JsArrayNumber>) JsArray.createArray();
 
-			for(List<Double> pointCoordinates : sectionCoordinates) {
+			for (Seq<Double> pointCoordinates : sectionCoordinates) {
 				JsArrayNumber nativePointCoordinates = (JsArrayNumber) JsArray.createArray();
 
-				for(Double coordinate : pointCoordinates) {
+				for (Double coordinate : pointCoordinates) {
 					nativePointCoordinates.push(coordinate);
 				}
 
@@ -257,8 +253,9 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		}
 	}-*/;
 
-	private List<Double> calculateCorner(List<Double> firstPoint, List<Double> secondPoint, List<Double> crossPoint, List<Double> referencePoint) {
-		List<Double> result = new ArrayList<>();
+	private Seq<Double> calculateCorner(Seq<Double> firstPoint, Seq<Double> secondPoint,
+			Seq<Double> crossPoint, Seq<Double> referencePoint) {
+		Seq<Double> result = List.empty();
 		//calculating the a coefficient of the first line (y = ax + b)
 		double a = (secondPoint.get(1) - firstPoint.get(1)) / (secondPoint.get(0) - firstPoint.get(0));
 		//calculating d coefficient of the second parallel line (y = ax + d)
@@ -266,15 +263,15 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		//calculating f coefficient of a perpendicular line to the first one crossing the reference point
 		double f = referencePoint.get(1) + referencePoint.get(0) / a;
 		//calculating the intersection point of the perpendicular and parallel lines
-		result.add((f - d) / (a + (1 / a)));
-		result.add(a * ((f - d) / (a + (1 / a))) + d);
+		result = result.append((f - d) / (a + (1 / a)));
+		result = result.append(a * ((f - d) / (a + (1 / a))) + d);
 
 		return result;
 	}
 
-	private void drawDevices(Map<List<List<Double>>, Map<List<Double>, List<Double>>> locationsWithValues) {
-		for(Map<List<Double>, List<Double>> locationWithValue : locationsWithValues.values()) {
-			for(List<Double> location : locationWithValue.keySet()) {
+	private void drawDevices(Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>> locationsWithValues) {
+		for (Map<Seq<Double>, Seq<Double>> locationWithValue : locationsWithValues.values()) {
+			for (Seq<Double> location : locationWithValue.keySet()) {
 				JsArrayNumber coordinates = (JsArrayNumber) JsArrayNumber.createArray();
 
 				for(Double coordinate : location) {
@@ -305,8 +302,6 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		for(var i = 1; i < nativeCoordinates.length; i++) {
 			shape.lineTo(nativeCoordinates[i][0], nativeCoordinates[i][1], 0);
 		}
-
-		shape.lineTo(nativeCoordinates[0][0], nativeCoordinates[0][1], 0);
 
 		var geometry = new $wnd.THREE.ShapeGeometry(shape);
 		var mesh = new $wnd.THREE.Mesh(geometry, new $wnd.THREE.MeshBasicMaterial({color: 0xbebebe}));

@@ -5,6 +5,7 @@ import static java.lang.Math.abs;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.Math.sin;
+import static javaslang.API.Tuple;
 
 import java.util.Date;
 
@@ -17,12 +18,11 @@ import com.google.gwt.core.client.Scheduler;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
-import javaslang.API;
 import javaslang.collection.HashMap;
-import javaslang.collection.HashSet;
 import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.Seq;
+import javaslang.concurrent.Future;
 import javaslang.control.Option;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.FunctionalDapController;
@@ -136,124 +136,80 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	}
 
 	private void refreshView() {
-		if (!view.canRender()) {
-			eventBus.showSimpleError(view.cannotRenderMessages());
+//		if (!view.canRender()) {
+//			eventBus.showSimpleError(view.cannotRenderMessages());
+//
+//			return;
+//		}
 
-			return;
-		}
+		view.showLoadingState(true);
 
-		Scheduler.get().scheduleDeferred(() -> {
-			view.showLoadingState(true);
+		Seq<Parameter> parameters = configuration.getParametersById().values()
+			.filter(parameter -> parameter.getMeasurementTypeName().equals(
+					configuration.getPickedParameterName()));
+		String contextType = configuration.getPickedScenarioId().equals("0")
+				? "measurements" : "scenarios";
+		String parameterUnit = parameters.get(0).getMeasurementTypeUnit();
+		dapController.getContexts(contextType).flatMap(contexts -> {
+			if (contexts.size() > 0) {
+				return dapController.getTimelinesForParameterIds(contexts.get(0).getId(),
+						parameters.map(Parameter::getId));
+			} else {
+				return Future.failed(new Exception("Context for type " + contextType
+						+ " could not be retirevied"));
+			}
+		}).map(timelines -> timelines.filter(timeline ->
+			configuration.getPickedScenarioId().equals("0")
+				|| configuration.getPickedScenarioId().equals(timeline.getScenarioId()))
+		).map(timelines -> timelines.toMap(timeline ->
+				Tuple(configuration.getParametersById().get(timeline.getParameterId())
+						.get().getDeviceId(), timeline))
+		).flatMap(timelinesByDeviceId -> {
+			Date queryDate = configuration.getPickedScenarioId().equals("0")
+				? currentDate
+				: new Date(currentDate.getTime() - configuration.getExperiment().getStart()
+						.getTime());
+			return dapController.getLastMeasurementsWith24HourMod(
+					timelinesByDeviceId.values().map(Timeline::getId), queryDate)
+				.map(measurements -> {
+					Map<String, String> deviceIdsByTimelineId = timelinesByDeviceId
+							.map((deviceId, timeline) -> Tuple(timeline.getId(), deviceId));
+
+					return measurements.<String, Measurement>toMap(measurement ->
+						Tuple(deviceIdsByTimelineId.get(measurement.getTimelineId()).get(),
+								measurement));
+				});
+		}).onSuccess(measurementsByDeviceId -> {
+			view.showLoadingState(false);
 			view.init();
 			drawMuteSections(configuration.getSections().values(),
 					configuration.getSections().values()
-					.filter(section -> !configuration.getPickedSectionIds()
-							.contains(section.getId())));
+						.filter(section -> !configuration.getPickedSectionIds()
+								.contains(section.getId())));
+			gradientId = "analysis:" + parameterUnit;
+			updateGradient(measurementsByDeviceId.values());
+			view.drawCrosssection(createLegend(gradientId), parameterUnit,
+					createDeviceLocationsWithValuesAndColors(measurementsByDeviceId, gradientId));
+		}).onFailure(e -> {
+			view.showLoadingState(false);
+			eventBus.showError(errorUtil.processErrors(null, e));
 		});
+	}
 
+	private void updateGradient(Seq<Measurement> measurements) {
+		if (gradientsUtil.contains(gradientId)) {
+			gradientMin = gradientsUtil.getMinValue(gradientId);
+			gradientMax = gradientsUtil.getMaxValue(gradientId);
+		}
 
+		measurements.map(Measurement::getValue).forEach(value ->
+			gradientsUtil.updateValues(gradientId, value));
 
-
-
-
-		Seq<String> parameterIds = List.empty();
-		Parameter parameter = null;
-
-//		for (String height : configuration.getPickedHeights().values()) {
-//			for (Device device : configuration.getHeightDevicesmap().get(height)) {
-//				for (String parameterId : device.getParameterIds()) {
-//					if (configuration.getParameterMap().get(parameterId) != null
-//							&& configuration.getParameterMap().get(parameterId)
-//							.getMeasurementTypeName().equals(
-//									configuration.getPickedParameterMeasurementName())) {
-//						parameterIds.add(parameterId);
-//						parameter = configuration.getParameterMap().get(parameterId);
-//					}
-//				}
-//			}
-//		}
-
-		final String parameterUnit = parameter != null ? parameter.getMeasurementTypeUnit() : "";
-		String context = "";//configuration.getDataSelector().equals("0") ? "measurements" : "scenarios";
-//		dapController.getContexts(context)
-//			.flatMap(contexts -> {
-//				if (contexts.size() > 0) {
-//					return dapController.getTimelinesForParameterIds(contexts.get(0).getId(),
-//						javaslang.collection.List.ofAll(parameterIds));
-//				} else {
-//					return Future.failed(new IllegalArgumentException("No context is present"));
-//				}
-//			})
-//			.map(timelines -> {
-//				if (!configuration.getDataSelector().equals("0")) {
-//					return timelines.filter(timeline -> timeline.getScenarioId().equals(
-//							configuration.getDataSelector()));
-//				} else {
-//					return timelines;
-//				}
-//			})
-//			.flatMap(timelines -> {
-//				Date queryDate = configuration.getDataSelector().equals("0")
-//						? currentDate :
-//						new Date(currentDate.getTime()
-//								- configuration.getExperiment().getStart().getTime());
-//				return dapController.getLastMeasurementsWith24HourMod(
-//							timelines.map(Timeline::getId), queryDate)
-//						.map(measurements -> {
-//							javaslang.collection.Map<String, Timeline> timelineMap = timelines
-//									.toMap(timeline -> Tuple.of(timeline.getId(), timeline));
-//								javaslang.collection.Map<Timeline, ? extends Seq<Measurement>> result =
-//										measurements.groupBy(measurement ->
-//										timelineMap.get(measurement.getTimelineId()).get());
-//
-//							return result;
-//						});
-//			})
-//			.onFailure(e -> {
-//				view.showLoadingState(false);
-//				eventBus.showError(errorUtil.processErrors(null, e));
-//			})
-//			.onSuccess(measurements -> {
-//				view.showLoadingState(false);
-//				view.clear();
-//
-//				if (measurements.size() > 0) {
-//					Seq<Section> muteSections = javaslang.collection.List.ofAll(
-//							configuration.getSections().values())
-//							.filter(section -> !configuration.getPickedSections()
-//									.containsKey(section.getId())
-//									|| section.getShape().getCoordinates().size() >= 6);
-//					gradientId = "analysis:" + parameterUnit;
-//
-//					if (gradientsUtil.contains(gradientId)) {
-//						gradientMin = gradientsUtil.getMinValue(gradientId);
-//						gradientMax = gradientsUtil.getMaxValue(gradientId);
-//					}
-//
-//					for (Measurement measurement : measurements.values()
-//							.flatMap(Function.identity())) {
-//						gradientsUtil.updateValues(gradientId,
-//								measurement.getValue());
-//					}
-//
-//					view.init();
-//					drawMuteSections(configuration.getSections().values(),
-//							muteSections.toJavaList());
-//					view.drawCrosssection(createLegend(gradientId),
-//							parameterUnit,
-//							createDeviceLocationsWithValuesAndColors(
-//									measurements, gradientId));
-//
-//					if (gradientsUtil.isExtended(gradientId, gradientMin,
-//							gradientMax)) {
-//						gradientMin = gradientsUtil.getMinValue(gradientId);
-//						gradientMax = gradientsUtil.getMaxValue(gradientId);
-//						eventBus.gradientExtended(gradientId);
-//					}
-//				} else {
-//					eventBus.showSimpleError(view.noMeasurementsMessage());
-//				}
-//			});
+		if (gradientsUtil.isExtended(gradientId, gradientMin, gradientMax)) {
+			gradientMin = gradientsUtil.getMinValue(gradientId);
+			gradientMax = gradientsUtil.getMaxValue(gradientId);
+			eventBus.gradientExtended(gradientId);
+		}
 	}
 
 	@Override
@@ -261,11 +217,10 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		//not used
 	}
 
-	private Map<List<List<Double>>, Map<List<Double>, List<Double>>>
+	private Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>>
 			createDeviceLocationsWithValuesAndColors(
-					javaslang.collection.Map<Timeline, ? extends Seq<Measurement>> timelineMeasurementMap,
-					String gradientId) {
-		Map<List<List<Double>>, Map<List<Double>, List<Double>>> result = HashMap.empty();
+					Map<String, Measurement> measurementsByDeviceId, String gradientId) {
+		Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>> result = HashMap.empty();
 
 //		for (Section section : configuration.getPickedSections().values()) {
 //			Map<List<Double>, Double> temp = new LinkedHashMap<>();
@@ -371,9 +326,6 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	}
 
 	private void drawMuteSections(Seq<Section> allSections, Seq<Section> muteSections) {
-		log.info("Drawing {} mute sections of {} all sections",
-				muteSections.size(), allSections.size());
-
 		Seq<Seq<Seq<Double>>> coordinates = List.empty();
 		double	maxX = Double.MIN_VALUE,
 				maxY = Double.MIN_VALUE;
@@ -415,8 +367,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		scale = computeScale(coordinates, panX, view.getHeight(), view.getWidth());
 		coordinates = scaleAndShift(coordinates, scale, panX);
 		view.drawScale(scale, panX);
-		view.drawMuteSections(coordinates.map(points -> points.map(
-				point -> point.toJavaList()).toJavaList()).toJavaList());
+		view.drawMuteSections(coordinates);
 	}
 
 	private double computeScale(Seq<Seq<Seq<Double>>> coordinates, double panX, double height,
@@ -466,14 +417,15 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		);
 	}
 
-	private Map<Double, List<Double>> createLegend(String gradientId) {
-		return HashSet.ofAll(gradientsUtil.getGradient().keySet()).toMap(colorBoundary ->
-			API.Tuple(colorBoundary, List.of(
-				new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
-				new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
-				new Double(gradientsUtil.getGradient().get(colorBoundary).getB()),
-				gradientsUtil.getValue(gradientId, colorBoundary)
-			))
-		);
+	private Map<Double, Seq<Double>> createLegend(String gradientId) {
+		return List.ofAll(gradientsUtil.getGradient().keySet())
+			.toLinkedMap(colorBoundary ->
+				Tuple(colorBoundary, List.of(
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getR()),
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getG()),
+					new Double(gradientsUtil.getGradient().get(colorBoundary).getB()),
+					new Double(gradientsUtil.getValue(gradientId, colorBoundary))
+				))
+			);
 	}
 }

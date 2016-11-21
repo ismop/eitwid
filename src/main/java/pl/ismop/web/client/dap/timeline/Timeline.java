@@ -10,6 +10,7 @@ import pl.ismop.web.client.dap.parameter.Parameter;
 import pl.ismop.web.client.dap.scenario.Scenario;
 
 public class Timeline {
+
 	private String id;
 
 	@Json(name = "parameter_id")

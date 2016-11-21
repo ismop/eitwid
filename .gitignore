@@ -2,7 +2,7 @@
 /.settings
 /.classpath
 /.project
-/ismop-web.log
+/ismop-web.log*
 /ismop-db*
 /.gwt/
 /web.iml

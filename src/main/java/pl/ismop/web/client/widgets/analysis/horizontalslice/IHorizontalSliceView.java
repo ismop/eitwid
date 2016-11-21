@@ -1,9 +1,9 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice;
 
-import java.util.List;
-import java.util.Map;
-
 import com.google.gwt.user.client.ui.IsWidget;
+
+import javaslang.collection.Map;
+import javaslang.collection.Seq;
 
 public interface IHorizontalSliceView extends IsWidget {
 
@@ -13,10 +13,10 @@ public interface IHorizontalSliceView extends IsWidget {
 
 	void showLoadingState(boolean show);
 
-	void drawCrosssection(Map<Double, List<Double>> legend, String parameterUnit,
-			Map<List<List<Double>>, Map<List<Double>, List<Double>>> locationsWithValues);
+	void drawCrosssection(Map<Double, Seq<Double>> legend, String parameterUnit,
+			Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>> locationsWithValues);
 
-	void drawMuteSections(List<List<List<Double>>> coordinates);
+	void drawMuteSections(Seq<Seq<Seq<Double>>> coordinates);
 
 	int getWidth();
 

@@ -240,7 +240,7 @@
 					<hostedWebapp>${project.build.outputDirectory}/static</hostedWebapp>
 					<noServer>true</noServer>
 					<runTarget>http://localhost:8080</runTarget>
-					<extraJvmArgs>-Xmx1024m</extraJvmArgs>
+					<extraJvmArgs>-Xmx2048m</extraJvmArgs>
 					<generateJsInteropExports>true</generateJsInteropExports>
 				</configuration>
 			</plugin>
