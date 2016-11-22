@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import javaslang.Tuple3;
 import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.Seq;
@@ -41,7 +42,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 	@Override
 	public void drawCrosssection(Map<Double, Seq<Double>> legend, String parameterUnit,
-			Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>> locationsWithValues) {
+			Map<String, Map<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>> locationsAndColors) {
 		parameterUnit = parameterUnit.replaceAll("\u2103", "\u00B0C");
 
 		@SuppressWarnings("unchecked")
@@ -58,6 +60,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		});
 
 		drawLegend(nativeLegend, parameterUnit);
+		GWT.log("Locations and colors: " + locationsAndColors);
 //		drawDevices(locationsWithValues);
 //
 //		for (Seq<Seq<Double>> sectionCorners : locationsWithValues.keySet()) {

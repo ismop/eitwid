@@ -5,6 +5,7 @@ import static java.lang.Math.abs;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.Math.sin;
+import static java.util.function.Function.identity;
 import static javaslang.API.Tuple;
 
 import java.util.Date;
@@ -18,14 +19,16 @@ import com.google.gwt.core.client.Scheduler;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
-import javaslang.collection.HashMap;
+import javaslang.Tuple3;
 import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.Seq;
+import javaslang.collection.Set;
 import javaslang.concurrent.Future;
 import javaslang.control.Option;
 import pl.ismop.web.client.MainEventBus;
 import pl.ismop.web.client.dap.FunctionalDapController;
+import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.measurement.Measurement;
 import pl.ismop.web.client.dap.parameter.Parameter;
@@ -34,6 +37,7 @@ import pl.ismop.web.client.dap.timeline.Timeline;
 import pl.ismop.web.client.error.ErrorUtil;
 import pl.ismop.web.client.util.CoordinatesUtil;
 import pl.ismop.web.client.util.GradientsUtil;
+import pl.ismop.web.client.util.GradientsUtil.Color;
 import pl.ismop.web.client.widgets.analysis.horizontalslice.IHorizontalSliceView.IHorizontalSlicePresenter;
 import pl.ismop.web.client.widgets.common.panel.IPanelContent;
 import pl.ismop.web.client.widgets.common.panel.ISelectionManager;
@@ -136,11 +140,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	}
 
 	private void refreshView() {
-//		if (!view.canRender()) {
-//			eventBus.showSimpleError(view.cannotRenderMessages());
-//
-//			return;
-//		}
+		if (!view.canRender()) {
+			eventBus.showSimpleError(view.cannotRenderMessages());
+
+			return;
+		}
 
 		view.showLoadingState(true);
 
@@ -182,6 +186,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		}).onSuccess(measurementsByDeviceId -> {
 			view.showLoadingState(false);
 			view.init();
+			view.clear();
 			drawMuteSections(configuration.getSections().values(),
 					configuration.getSections().values()
 						.filter(section -> !configuration.getPickedSectionIds()
@@ -189,7 +194,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			gradientId = "analysis:" + parameterUnit;
 			updateGradient(measurementsByDeviceId.values());
 			view.drawCrosssection(createLegend(gradientId), parameterUnit,
-					createDeviceLocationsWithValuesAndColors(measurementsByDeviceId, gradientId));
+					createLocationsWithColors(measurementsByDeviceId, gradientId));
 		}).onFailure(e -> {
 			view.showLoadingState(false);
 			eventBus.showError(errorUtil.processErrors(null, e));
@@ -217,10 +222,29 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		//not used
 	}
 
-	private Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>>
-			createDeviceLocationsWithValuesAndColors(
+	/**
+	 * @return Map<section_id, Map<Tuple3<x, y, virtual>, Tuple3<r, g, b>>> sequence for profiles
+	 * (including virtual ones representing section boundaries), map for each device in a profile
+	 * (including the virtual ones on section boundaries)
+	 */
+	private Map<String, Map<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>> createLocationsWithColors(
 					Map<String, Measurement> measurementsByDeviceId, String gradientId) {
-		Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>> result = HashMap.empty();
+
+		Map<String, Device> devicesById = configuration.getDevicesBySectionId().values()
+				.flatMap(identity())
+				.toMap(device -> Tuple(device.getId(), device));
+
+		return measurementsByDeviceId.keySet()
+				.map(deviceId -> devicesById.get(deviceId))
+				.filter(Option::isDefined)
+				.map(Option::get)
+				.groupBy(device -> device.getSectionId())
+				.map((sectionId, devices) -> Tuple(sectionId,
+						devicesToLocations(devices, measurementsByDeviceId)));
+
+
+
 
 //		for (Section section : configuration.getPickedSections().values()) {
 //			Map<List<Double>, Double> temp = new LinkedHashMap<>();
@@ -321,8 +345,41 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 //
 //			result.put(scaled , locationsWithReadings);
 //		}
+	}
 
-		return result;
+	private Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+			devicesToLocations(Set<Device> devices,
+					Map<String, Measurement> measurementsByDeviceId) {
+		return devices.toLinkedMap(device -> Tuple(
+					deviceToPosition(device),
+					measurementToColor(measurementsByDeviceId.get(device.getId()))));
+	}
+
+	private Tuple3<Integer, Integer, Integer> measurementToColor(Option<Measurement> measurement) {
+		return measurement
+				.map(m -> {
+					Color color = gradientsUtil.getColor(gradientId, m.getValue());
+
+					return Tuple(color.getR(), color.getG(), color.getB());
+				})
+				.getOrElse(Tuple(0, 0, 0));
+	}
+
+	private Tuple3<Double, Double, Boolean> deviceToPosition(Device device) {
+		Seq<Seq<Double>> projectedCoordinates = List.ofAll(
+				coordinatesUtil.projectCoordinates(List.of(
+						device.getPlacement().getCoordinates()).toJavaList()))
+				.map(point -> List.ofAll(point));
+		Seq<Seq<Double>> shiftedAndRotatedCoordinates = rotate(projectedCoordinates)
+				.map(point -> List.of(point.get(0) - shiftX, point.get(1) - shiftY));
+
+		Seq<Seq<Seq<Double>>> scaledAndShiftedCoordinates = scaleAndShift(List.of(
+				shiftedAndRotatedCoordinates), scale, panX);
+
+		return Tuple(
+				scaledAndShiftedCoordinates.get(0).get(0).get(0),
+				scaledAndShiftedCoordinates.get(0).get(0).get(1),
+				true);
 	}
 
 	private void drawMuteSections(Seq<Section> allSections, Seq<Section> muteSections) {
@@ -336,7 +393,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 			if (section.getShape() != null) {
 				Seq<Seq<Double>> projected = List.ofAll(coordinatesUtil.projectCoordinates(
 						section.getShape().getCoordinates()))
-						.map(list -> List.ofAll(list));
+							.map(list -> List.ofAll(list));
 				projected = rotate(projected);
 				coordinates = coordinates.append(projected);
 

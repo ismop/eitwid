@@ -127,7 +127,7 @@ public class FunctionalDapController {
 		String until = ismopConverter.formatForDto(untilDate);
 		String from = ismopConverter.formatForDto(new Date(untilDate.getTime() - 86_400_000L));
 
-		return callService(measurementService, s -> s.getMeasurements(timelineIds.mkString(","),
+		return callService(measurementService, s -> s.getLastMeasurements(timelineIds.mkString(","),
 				from, until))
 			.map(response -> List.ofAll(response.getMeasurements()));
 	}
