@@ -1,44 +1,46 @@
 package pl.ismop.web.client.dap.deviceaggregation;
 
-import org.fusesource.restygwt.client.Json;
-import pl.ismop.web.client.geojson.Geometry;
-import pl.ismop.web.client.geojson.MapFeature;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.fusesource.restygwt.client.Json;
+
+import pl.ismop.web.client.geojson.Geometry;
+import pl.ismop.web.client.geojson.MapFeature;
+
 public class DeviceAggregate extends MapFeature {
 	private String id;
-	
+
 	@Json(name = "parent_id")
 	private String parentId;
-	
+
 	@Json(name = "children_ids")
 	private List<String> childernIds;
-	
+
 	private String type;
-	
+
 	@Json(name = "profile_id")
 	private String profileId;
-	
+
 	@Json(name = "section_id")
 	private String sectionId;
-	
+
 	@Json(name = "levee_id")
 	private String leveeId;
-	
+
 	@Json(name = "device_ids")
 	private List<String> deviceIds;
 
 	@Json(name = "custom_id")
 	private String customId;
-	
+
 	private Geometry shape;
 
 	private List<String> vendors;
 
-	public String getId() {
+	@Override
+    public String getId() {
 		return id;
 	}
 
@@ -145,4 +147,9 @@ public class DeviceAggregate extends MapFeature {
 	public void setVendors(List<String> vendors) {
 		this.vendors = vendors;
 	}
+
+    @Override
+    public String getName() {
+        return customId;
+    }
 }

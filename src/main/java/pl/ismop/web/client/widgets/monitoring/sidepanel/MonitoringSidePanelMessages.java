@@ -19,7 +19,7 @@ public interface MonitoringSidePanelMessages extends Messages {
 
 	String nameLabel();
 
-	String internalIdLabel();
+	String profileName();
 
 	String chartHeading();
 

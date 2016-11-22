@@ -8,7 +8,7 @@ public class GeoJsonFeature {
 	private String id;
 	private Geometry geometry;
 	private Map<String, String> properties;
-	
+
 	public GeoJsonFeature() {
 		setType("Feature");
 	}
@@ -21,7 +21,7 @@ public class GeoJsonFeature {
 		this.properties = new HashMap<>();
 
 		properties.put("id", mapFeature.getId());
-		properties.put("name", mapFeature.getId());
+		properties.put("name", mapFeature.getName());
 		properties.put("type", mapFeature.getFeatureType());
 		properties.putAll(mapFeature.getAdditionalFeatureProperties());
 	}

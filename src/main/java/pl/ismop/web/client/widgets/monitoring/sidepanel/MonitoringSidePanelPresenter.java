@@ -54,7 +54,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 
 		if(show) {
 			view.addMetadata(view.getTypeLabel(), view.getProfileTypeLabel());
-			view.addMetadata(view.getInternalIdLabel(), profile.getId());
+			view.addMetadata(view.getProfileName(), profile.getName());
 		}
 	}
 
@@ -62,7 +62,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 		view.clearMetadata();
 
 		if(show) {
-			view.addMetadata(view.getSectionTypeLabel(), view.getInternalIdLabel() + ": " + section.getId());
+			view.addMetadata(view.getSectionTypeLabel(), view.getProfileName() + ": " + section.getId());
 			view.addMetadata(view.getMessages().soilType(), section.getSoilTypeLabel() + " (" + section.getSoilTypeName() + ")");
 			view.addMetadata(view.getMessages().granularDensity(), view.getMessages().maxMinAvg(
 					section.getGranularDensityMax(), section.getGranularDensityMin(), section.getGranularDensityAvg()));
@@ -78,7 +78,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 
 		if(show) {
 			view.addMetadata(view.getTypeLabel(), view.getDeviceTypeLabel());
-			view.addMetadata(view.getInternalIdLabel(), device.getId());
+			view.addMetadata(view.getProfileName(), device.getId());
 			view.addMetadata(view.getNameLabel(), device.getCustomId());
 			view.addMetadata(view.getMessages().coordinatesLabel(), formatCoordinates(device));
 		}
@@ -97,7 +97,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 
 		if(show) {
 			view.addMetadata(view.getTypeLabel(), view.getDeviceAggregateTypeLabel());
-			view.addMetadata(view.getInternalIdLabel(), deviceAggregate.getId());
+			view.addMetadata(view.getProfileName(), deviceAggregate.getId());
 			view.addMetadata(view.getAggregateContentsLabel(), deviceAggregate.getCustomId());
 		}
 	}

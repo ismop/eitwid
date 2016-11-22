@@ -16,12 +16,12 @@ public interface IVerticalSliceWizardView extends IsWidget {
 
 		void onDataSelectorChanged(String dataSelector);
 	}
-	
+
 	void showModal(boolean show);
 
 	void setMap(IsWidget view);
 
-	void setProfile(String profileId);
+	void setProfile(String profileId, String string);
 
 	void showLoadingState(boolean show);
 

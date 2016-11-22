@@ -7,6 +7,7 @@ public abstract class MapFeature {
     public abstract String getId();
     public abstract String getFeatureType();
     public abstract Geometry getFeatureGeometry();
+    public abstract String getName();
 
     public String getFeatureId() {
         return getFeatureType() + "-" + getId();

@@ -121,8 +121,8 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	}
 
 	@Override
-	public String getInternalIdLabel() {
-		return messages.internalIdLabel();
+	public String getProfileName() {
+		return messages.profileName();
 	}
 
 	@Override

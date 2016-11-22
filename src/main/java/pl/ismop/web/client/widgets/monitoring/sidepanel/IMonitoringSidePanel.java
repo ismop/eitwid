@@ -29,7 +29,7 @@ public interface IMonitoringSidePanel extends IsWidget {
 
 	String getNameLabel();
 
-	String getInternalIdLabel();
+	String getProfileName();
 
 	void addMetadata(String label, String value);
 
