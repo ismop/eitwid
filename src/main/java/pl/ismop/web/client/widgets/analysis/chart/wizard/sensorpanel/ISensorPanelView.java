@@ -1,9 +1,9 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel;
 
-import com.google.gwt.user.client.ui.IsWidget;
-
 import java.util.Collection;
 import java.util.List;
+
+import com.google.gwt.user.client.ui.IsWidget;
 
 public interface ISensorPanelView extends IsWidget {
     void setHeaderTitle(String title);
@@ -12,7 +12,7 @@ public interface ISensorPanelView extends IsWidget {
 
     void setLoading(String message);
 
-    void setTimelines(Collection<String> timelines);
+    void setTimelines(Collection<String> selected, Collection<String> notSelected);
 
     List<String> getSelected();
 

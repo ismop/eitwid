@@ -107,16 +107,22 @@ public class SensorPanelView extends Composite implements ISensorPanelView, Reve
     }
 
     @Override
-    public void setTimelines(Collection<String> timelines) {
-        for (String timeline : timelines) {
-            Option o = new Option();
-            o.setText(timeline);
-            timelinesSelect.add(o);
-        }
+    public void setTimelines(Collection<String> selected, Collection<String> notSelected) {
+        addTimelines(selected, true);
+        addTimelines(notSelected, false);
         timelinesSelect.refresh();
 
         loading.setVisible(false);
         this.timelines.setVisible(true);
+    }
+
+    private void addTimelines(Collection<String> timelines, boolean selected) {
+        for (String timeline : timelines) {
+            Option o = new Option();
+            o.setText(timeline);
+            o.setSelected(selected);
+            timelinesSelect.add(o);
+        }
     }
 
     @Override
