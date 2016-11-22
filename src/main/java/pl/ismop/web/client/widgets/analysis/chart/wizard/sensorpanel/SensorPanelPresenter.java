@@ -1,6 +1,7 @@
 package pl.ismop.web.client.widgets.analysis.chart.wizard.sensorpanel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +100,19 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
                                         timelineNamesToTimeline.put(name, timeline);
                                     }
                                 }
-                                getView().setTimelines(timelineNamesToTimeline.keySet());
+                                Collection<String> selected = new ArrayList<>();
+                                Collection<String> notSelected = new ArrayList<>();
+
+                                for (Timeline timeline : timelines) {
+                                    if (timeline.getContextId().equals("1")) {
+                                        selected.add(timeline.getLabel());
+                                    } else {
+                                        notSelected.add(timeline.getLabel());
+                                    }
+                                }
+
+                                getView().setTimelines(selected, notSelected);
+                                timelineSelectionChanged();
                             }
                         });
                     }
