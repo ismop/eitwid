@@ -84,7 +84,7 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 		}
 
 		if(!configuration.getPickedProfiles().containsKey(profile.getId())) {
-			view.addProfile(profile.getId());
+			view.addProfile(profile.getId(), profile.getName());
 			configuration.getPickedProfiles().put(profile.getId(), profile);
 			view.showLoadingState(true, profile.getId());
 			dapController.getDevicesRecursively(profile.getId(), new DevicesCallback() {
@@ -279,13 +279,11 @@ public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSli
 			}
 		}
 
-		for(String profileId : configuration.getPickedProfiles().keySet()) {
-			view.addProfile(profileId);
-
-			Profile profile = configuration.getPickedProfiles().get(profileId);
+		for(Profile profile : configuration.getPickedProfiles().values()) {
+			view.addProfile(profile.getId(), profile.getName());
 
 			for(String height : configuration.getProfileHeights().get(profile)) {
-				view.addProfileHeight(Double.parseDouble(height), profileId,
+				view.addProfileHeight(Double.parseDouble(height), profile.getId(),
 						configuration.getPickedHeights().get(profile).equals(height));
 			}
 		}

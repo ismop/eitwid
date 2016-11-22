@@ -25,7 +25,7 @@ public interface IHorizontalSliceWizardView extends IsWidget {
 
 	void setMap(IsWidget view);
 
-	void addProfile(String profileId);
+	void addProfile(String profileId, String profileName);
 
 	void clearProfiles();
 

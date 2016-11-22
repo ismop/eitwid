@@ -43,27 +43,27 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	private static HorizontalSliceWizardViewUiBinder uiBinder = GWT.create(HorizontalSliceWizardViewUiBinder.class);
 
 	interface HorizontalSliceWizardViewUiBinder extends UiBinder<Widget, HorizontalSliceWizardView> {}
-	
+
 	private IHorizontalSliceWizardPresenter presenter;
-	
+
 	private Map<String, HasWidgets> profileHeightsContainers;
-	
+
 	private Map<String, IsWidget> profileWidgets, parameterWidgets;
-	
+
 	private ListBox scenarioList;
-	
+
 	@UiField
 	HorizontalSliceWizardMessages messages;
-	
+
 	@UiField
 	Modal modal;
-	
+
 	@UiField
 	FlowPanel mapContainer, profiles, parameters;
-	
+
 	@UiField
 	Label noProfilesPicked, noParameters;
-	
+
 	@UiField
 	Button add;
 
@@ -73,17 +73,17 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		profileWidgets = new HashMap<>();
 		parameterWidgets = new HashMap<>();
 	}
-	
+
 	@UiHandler("modal")
 	void modalShown(ModalShownEvent event) {
 		getPresenter().onModalShown();
 	}
-	
+
 	@UiHandler("modal")
 	void modalHide(ModalHideEvent event) {
 		getPresenter().onModalHide();
 	}
-	
+
 	@UiHandler("add")
 	void addPanel(ClickEvent event) {
 		getPresenter().onAcceptConfig();
@@ -114,13 +114,13 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void addProfile(final String profileId) {
+	public void addProfile(final String profileId, final String profileName) {
 		noProfilesPicked.setVisible(false);
-		
+
 		Heading heading = new Heading(H4);
-		heading.setText("Profile " + profileId);
+		heading.setText(profileName);
 		heading.addStyleName("pull-left");
-		
+
 		Button removeButton = new Button("", REMOVE, new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -130,15 +130,15 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		removeButton.addStyleName("pull-right");
 		removeButton.setSize(EXTRA_SMALL);
 		removeButton.setType(DANGER);
-		
+
 		FlowPanel controls = new FlowPanel();
 		controls.addStyleName("clearfix");
 		controls.add(heading);
 		controls.add(removeButton);
-		
+
 		FlowPanel profileHeights = new FlowPanel();
 		profileHeightsContainers.put(profileId, profileHeights);
-		
+
 		FlowPanel container = new FlowPanel();
 		container.add(controls);
 		container.add(profileHeights);
@@ -196,15 +196,15 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@Override
 	public void addParameter(final String parameterName, boolean check, boolean enabled) {
 		noParameters.setVisible(false);
-		
+
 		Radio radio = new Radio("parameters", parameterName);
 		radio.setValue(check);
 		radio.setEnabled(enabled);
-		
+
 		if(!enabled) {
 			radio.setTitle(messages.parameterDisabledInfo());
 		}
-		
+
 		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -263,7 +263,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		if(scenarioList != null) {
 			scenarioList.removeFromParent();
 		}
-		
+
 		scenarioList = new ListBox();
 		scenarioList.addChangeHandler(new ChangeHandler() {
 			@Override
@@ -271,11 +271,11 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 				getPresenter().onDataSelectorChanged(scenarioList.getSelectedValue());
 			}
 		});
-		
+
 		for(String id : scenariosMap.keySet()) {
 			scenarioList.addItem(scenariosMap.get(id), id);
 		}
-		
+
 		parameters.add(scenarioList);
 	}
 
@@ -284,7 +284,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		for(int i = 0; i < scenarioList.getItemCount(); i++) {
 			if(scenarioList.getValue(i).equals(dataSelector)) {
 				scenarioList.setSelectedIndex(i);
-				
+
 				break;
 			}
 		}

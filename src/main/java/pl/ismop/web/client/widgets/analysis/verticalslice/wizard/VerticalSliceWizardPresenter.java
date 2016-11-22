@@ -66,7 +66,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 	public void onProfileClicked(final Profile profile) {
 		if(configuration.getPickedProfile() == null
 				|| !configuration.getPickedProfile().getId().equals(profile.getId())) {
-			view.setProfile(profile.getId());
+			view.setProfile(profile.getId(), profile.getName());
 			configuration.setPickedProfile(profile);
 			view.showLoadingState(true);
 			dapController.getDevicesRecursively(profile.getId(), new DevicesCallback() {
@@ -229,7 +229,7 @@ public class VerticalSliceWizardPresenter extends BasePresenter<IVerticalSliceWi
 			}
 		}
 
-		view.setProfile(configuration.getPickedProfile().getId());
+		view.setProfile(configuration.getPickedProfile().getId(), configuration.getPickedProfile().getName());
 		processScenarios(new ArrayList<>(configuration.getScenarioMap().values()));
 		view.selectScenario(configuration.getDataSelector());
 	}

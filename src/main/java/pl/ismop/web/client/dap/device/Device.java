@@ -1,47 +1,48 @@
 package pl.ismop.web.client.dap.device;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.fusesource.restygwt.client.Json;
+
 import pl.ismop.web.client.dap.deviceaggregation.PointShape;
 import pl.ismop.web.client.geojson.Geometry;
 import pl.ismop.web.client.geojson.MapFeature;
 import pl.ismop.web.client.geojson.PointGeometry;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class Device extends MapFeature {
 	private String id;
-	
+
 	@Json(name = "custom_id")
 	private String customId;
-	
+
 	private PointShape placement;
-	
+
 	@Json(name = "device_type")
 	private String deviceType;
-	
+
 	@Json(name = "device_aggregation_id")
 	private String deviceAggregationId;
-	
+
 	@Json(name = "profile_id")
 	private String profileId;
-	
+
 	@Json(name = "section_id")
 	private String sectionId;
-	
+
 	@Json(name = "levee_id")
 	private String leveeId;
-	
+
 	@Json(name = "neosentio_sensor_id")
 	private String neosentioSensorId;
-	
+
 	@Json(name = "budokop_sensor_id")
 	private String budokopSensorId;
-	
+
 	@Json(name = "pump_id")
 	private String pumpId;
-	
+
 	@Json(name = "parameter_ids")
 	private List<String> parameterIds;
 
@@ -50,7 +51,8 @@ public class Device extends MapFeature {
 
 	private String vendor;
 
-	public String getId() {
+	@Override
+    public String getId() {
 		return id;
 	}
 
@@ -201,4 +203,9 @@ public class Device extends MapFeature {
 			return defaultValue;
 		}
 	}
+
+    @Override
+    public String getName() {
+        return customId;
+    }
 }
