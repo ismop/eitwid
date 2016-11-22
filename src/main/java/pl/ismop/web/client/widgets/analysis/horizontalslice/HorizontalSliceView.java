@@ -61,8 +61,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 		drawLegend(nativeLegend, parameterUnit);
 		GWT.log("Locations and colors: " + locationsAndColors);
-//		drawDevices(locationsWithValues);
-//
+		drawDevices(locationsAndColors.values().flatMap(Map::keySet));
+
 //		for (Seq<Seq<Double>> sectionCorners : locationsWithValues.keySet()) {
 //			@SuppressWarnings("unchecked")
 //			JsArray<JsArrayNumber> coordinatesAndValues =
@@ -272,18 +272,15 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		return result;
 	}
 
-	private void drawDevices(Map<Seq<Seq<Double>>, Map<Seq<Double>, Seq<Double>>> locationsWithValues) {
-		for (Map<Seq<Double>, Seq<Double>> locationWithValue : locationsWithValues.values()) {
-			for (Seq<Double> location : locationWithValue.keySet()) {
-				JsArrayNumber coordinates = (JsArrayNumber) JsArrayNumber.createArray();
-
-				for(Double coordinate : location) {
-					coordinates.push(coordinate);
-				}
-
-				drawDevice(coordinates);
-			}
-		}
+	private void drawDevices(Seq<Tuple3<Double, Double, Boolean>> deviceLocations) {
+		deviceLocations
+				.filter(location -> location._3())
+				.forEach(location -> {
+					JsArrayNumber coordinates = (JsArrayNumber) JsArrayNumber.createArray();
+					coordinates.push(location._1());
+					coordinates.push(location._2());
+					drawDevice(coordinates);
+				});
 	}
 
 	private String format(double number) {
