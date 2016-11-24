@@ -19,7 +19,10 @@ import com.google.gwt.core.client.Scheduler;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import javaslang.Tuple2;
 import javaslang.Tuple3;
+import javaslang.Value;
+import javaslang.collection.Iterator;
 import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.Seq;
@@ -130,6 +133,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		}
 	}
 
+	@Override
+	public void destroy() {
+		//not used
+	}
+
 	private void addSectionsToMinimap() {
 		selectionManager.clear();
 		configuration.getPickedSectionIds()
@@ -217,142 +225,233 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		}
 	}
 
-	@Override
-	public void destroy() {
-		//not used
-	}
-
 	/**
-	 * @return Map<section_id, Map<Tuple3<x, y, virtual>, Tuple3<r, g, b>>> sequence for profiles
-	 * (including virtual ones representing section boundaries), map for each device in a profile
-	 * (including the virtual ones on section boundaries)
+	 * @return Map<section_id, Seq<Map<Tuple3<x, y, virtual>, Tuple3<r, g, b>>>> sequence for
+	 * profiles (including virtual ones representing section boundaries), map for each device in
+	 * a profile (including the virtual ones on section boundaries)
 	 */
-	private Map<String, Map<Tuple3<Double, Double, Boolean>,
-			Tuple3<Integer, Integer, Integer>>> createLocationsWithColors(
+	private Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>>> createLocationsWithColors(
 					Map<String, Measurement> measurementsByDeviceId, String gradientId) {
 
 		Map<String, Device> devicesById = configuration.getDevicesBySectionId().values()
 				.flatMap(identity())
 				.toMap(device -> Tuple(device.getId(), device));
 
-		return measurementsByDeviceId.keySet()
+		Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>>>> result =
+		measurementsByDeviceId.keySet()
 				.map(deviceId -> devicesById.get(deviceId))
 				.filter(Option::isDefined)
 				.map(Option::get)
-				.groupBy(device -> device.getSectionId())
-				.map((sectionId, devices) -> Tuple(sectionId,
+				.groupBy(Device::getSectionId)
+				.map((sectionId, devices) -> Tuple(
+						sectionId,
 						devicesToLocations(devices, measurementsByDeviceId)));
 
+		//adding virtual devices on section boundaries
+		result = result.map((sectionId, profiles) -> Tuple(
+				sectionId,
+				profiles.map(profile -> addProfileBoundaries(
+						configuration.getSections().get(sectionId), profile))));
 
+		//adding virtual profiles for section side boundaries
+		result = addVirtualProfiles(result);
 
+		return result;
+	}
 
-//		for (Section section : configuration.getPickedSections().values()) {
-//			Map<List<Double>, Double> temp = new LinkedHashMap<>();
-//			List<List<Double>> keys = new ArrayList<>();
-//			Double value = 0.0;
-//
-//			for (Device device : configuration.getSectionDevicesMap().get(section)) {
-//				PARAMETER:
-//				for (Parameter parameter : configuration.getParameterMap().values()) {
-//					if (device.getParameterIds().contains(parameter.getId())
-//							&& parameter.getMeasurementTypeName().equals(
-//									configuration.getPickedParameterMeasurementName())) {
-//						for (Timeline timeline : timelineMeasurementMap.keySet()) {
-//							if (parameter.getTimelineIds().contains(timeline.getId())) {
-//								for (Measurement measurement : timelineMeasurementMap.get(timeline).get()) {
-//									value = measurement.getValue();
-//
-//									break PARAMETER;
-//								}
-//							}
-//						}
-//					}
-//				}
-//
-//				if (device.getPlacement() != null
-//						&& device.getPlacement().getCoordinates() != null) {
-//					List<List<Double>> coordinates = new ArrayList<>();
-//					coordinates.add(device.getPlacement().getCoordinates());
-//
-//					List<List<Double>> projectedCoordinates = coordinatesUtil.projectCoordinates(
-//							coordinates);
-//					rotate(projectedCoordinates);
-//
-//					for (List<Double> pointCoordinates : projectedCoordinates) {
-//						pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
-//						pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
-//					}
-//
-//					List<List<List<Double>>> toBeScaledAndShiftedCoordinates = new ArrayList<>();
-//					toBeScaledAndShiftedCoordinates.add(projectedCoordinates);
-//					scaleAndShift(toBeScaledAndShiftedCoordinates, scale, panX);
-//					temp.put(toBeScaledAndShiftedCoordinates.get(0).get(0), value);
-//					keys.add(toBeScaledAndShiftedCoordinates.get(0).get(0));
-//				}
-//			}
-//
-//			sort(keys, new Comparator<List<Double>>() {
-//				@Override
-//				public int compare(List<Double> o1, List<Double> o2) {
-//					return -o1.get(1).compareTo(o2.get(1));
-//				}
-//			});
-//
-//			Map<List<Double>, List<Double>> locationsWithReadings = new LinkedHashMap<>();
-//
-//			for (List<Double> key : keys) {
-//				Double finalValue = temp.get(key);
-//				Color color = gradientsUtil.getColor(gradientId, finalValue);
-//				List<Double> valueWithColor = new ArrayList<>();
-//				valueWithColor.add(finalValue);
-//				valueWithColor.add(new Integer(color.getR()).doubleValue());
-//				valueWithColor.add(new Integer(color.getG()).doubleValue());
-//				valueWithColor.add(new Integer(color.getB()).doubleValue());
-//				locationsWithReadings.put(key, valueWithColor);
-//			}
-//
-//			//removing last element which is just there to close the loop
-//			List<List<Double>> corners = section.getShape().getCoordinates()
-//					.subList(0, section.getShape().getCoordinates().size() - 1);
-//			List<List<Double>> projectedCorners = coordinatesUtil.projectCoordinates(corners);
-//			rotate(projectedCorners);
-//
-//			for (List<Double> pointCoordinates : projectedCorners) {
-//				pointCoordinates.set(0, pointCoordinates.get(0) - shiftX);
-//				pointCoordinates.set(1, pointCoordinates.get(1) - shiftY);
-//			}
-//
-//			List<List<List<Double>>> scaledAndShiftedCoordinates = new ArrayList<>();
-//			scaledAndShiftedCoordinates.add(projectedCorners);
-//			scaleAndShift(scaledAndShiftedCoordinates, scale, panX);
-//			List<List<Double>> scaled = scaledAndShiftedCoordinates.get(0);
-//			sort(scaled, new Comparator<List<Double>>() {
-//				@Override
-//				public int compare(List<Double> o1, List<Double> o2) {
-//					return -o1.get(1).compareTo(o2.get(1));
-//				}
-//			});
-//
-//			if (scaled.size() > 3) {
-//				if (scaled.get(0).get(0) > scaled.get(1).get(0)) {
-//					scaled.add(0, scaled.remove(1));
-//				}
-//
-//				if (scaled.get(2).get(0) < scaled.get(3).get(0)) {
-//					scaled.add(2, scaled.remove(3));
-//				}
-//			}
-//
-//			result.put(scaled , locationsWithReadings);
-//		}
+	private Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>>> addVirtualProfiles(
+			Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+					Tuple3<Integer, Integer, Integer>>>> profilesBySectionId) {
+		return profilesBySectionId.map((sectionId, profiles) ->
+				Tuple(sectionId, addVirtualProfiles(sectionId, profiles)));
+	}
+
+	private Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>> addVirtualProfiles(String sectionId,
+			Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+					Tuple3<Integer, Integer, Integer>>> profiles) {
+		Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> firstProfile =
+				profiles.head();
+		Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> lastProfile =
+				profiles.last();
+		Section section = configuration.getSections().get(sectionId).get();
+		Seq<Map<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>>> result = profiles.map(identity());
+
+		return result
+				.prepend(createLeftProfile(section, firstProfile))
+				.append(createRightProfile(section, lastProfile));
 	}
 
 	private Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+		createLeftProfile(Section section,
+			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> profile) {
+
+		Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> topBoundary =
+				getSectionTopBoundary(section);
+
+		return profile.map((location, color) ->
+				Tuple(shiftLocation(location, topBoundary, topBoundary._1()), color));
+	}
+
+	private Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+		createRightProfile(Section section,
+			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> profile) {
+
+		Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> topBoundary =
+				getSectionTopBoundary(section);
+
+		return profile.map((location, color) ->
+				Tuple(shiftLocation(location, topBoundary, topBoundary._2()), color));
+	}
+
+	private Tuple3<Double, Double, Boolean> shiftLocation(Tuple3<Double, Double, Boolean> location,
+			Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> boundary,
+			Tuple2<Double, Double> referencePoint) {
+
+		Seq<Double> firstPoint = List.of(boundary._1()._1(), boundary._1()._2());
+		Seq<Double> secondPoint = List.of(boundary._2()._1(), boundary._2()._2());
+		//calculating the a coefficient of the section boundary (y = ax + b)
+		double a = (secondPoint.get(1) - firstPoint.get(1))
+				/ (secondPoint.get(0) - firstPoint.get(0));
+		//calculating d coefficient of of a line parallel to boundary (y = ax + d)
+		double d = location._2() - a * location._1();
+		//calculating f coefficient of a perpendicular line to the first one crossing
+		//the reference point
+		double f = referencePoint._2() + referencePoint._1() / a;
+		//calculating the intersection point of the perpendicular and parallel line
+		double x = (f - d) / (a + (1 / a));
+		double y = a * ((f - d) / (a + (1 / a))) + d;
+
+		return Tuple(x, y, false);
+	}
+
+	private Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+		addProfileBoundaries(Option<Section> section,
+			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> profile) {
+
+		if (section.isDefined()) {
+			List<Tuple3<Double, Double, Boolean>> locationList = profile.keySet().toList();
+			Tuple3<Double, Double, Boolean> topLocation = locationList.head();
+			Tuple3<Double, Double, Boolean> bottomLocation = locationList.last();
+			Tuple3<Integer, Integer, Integer> topValue = profile.get(topLocation).get();
+			Tuple3<Integer, Integer, Integer> bottomValue = profile.get(bottomLocation).get();
+			Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> sectionsTopBoundary =
+					getSectionTopBoundary(section.get());
+			Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> sectionsBottomBoundary =
+					getSectionBottomBoundary(section.get());
+
+			return profile
+					.toList()
+					.prepend(calculateVirtualLocation(topLocation, topValue, sectionsTopBoundary))
+					.append(calculateVirtualLocation(bottomLocation, bottomValue,
+							sectionsBottomBoundary))
+					.toLinkedMap(identity());
+		}
+
+		throw new IllegalArgumentException("Missing section while creating virtual devices");
+	}
+
+	private Tuple2<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+		calculateVirtualLocation(
+			Tuple3<Double, Double, Boolean> referenceLocation,
+			Tuple3<Integer, Integer, Integer> referenceValue,
+			Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> sectionsBoundary) {
+
+		Seq<Double> firstPoint = List.of(sectionsBoundary._1()._1(), sectionsBoundary._1()._2());
+		Seq<Double> secondPoint = List.of(sectionsBoundary._2()._1(), sectionsBoundary._2()._2());
+		//calculating the a coefficient of the section boundary (y = ax + b)
+		double a = (secondPoint.get(1) - firstPoint.get(1))
+				/ (secondPoint.get(0) - firstPoint.get(0));
+		//calculating b coefficient of the section boundary (y = ax + b)
+		double b = firstPoint.get(1) - a * firstPoint.get(0);
+		//calculating f coefficient of a perpendicular line to the first one crossing
+		//the reference point
+		double f = referenceLocation._2() + referenceLocation._1() / a;
+		//calculating the intersection point of the perpendicular and parallel line
+		double x = (f - b) / (a + (1 / a));
+		double y = a * ((f - b) / (a + (1 / a))) + b;
+
+		return Tuple(Tuple(x, y, false), referenceValue);
+	}
+
+	private Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> getSectionBottomBoundary(
+			Section section) {
+
+		List<List<Double>> points = List.ofAll(section.getShape().getCoordinates())
+				.map(point -> List.ofAll(point))
+				.removeAt(0);
+		assert points.size() == 4 : "Number of section corners has to be exactly 4";
+		Seq<Seq<Double>> convertedPoints = convertPoints(points);
+		Iterator<? extends Seq<? extends Seq<Double>>> sortedPoints = convertedPoints
+			.sorted((point1, point2) -> point1.get(0).compareTo(point2.get(0)))
+			.grouped(2);
+		Seq<? extends Seq<Double>> leftPoints = sortedPoints.next().sorted((point1, point2) ->
+				point1.get(1).compareTo(point2.get(1)));
+		Seq<? extends Seq<Double>> rightPoints = sortedPoints.next().sorted((point1, point2) ->
+		point1.get(1).compareTo(point2.get(1)));
+
+		return Tuple(Tuple(leftPoints.get(1).get(0), leftPoints.get(1).get(1)),
+				Tuple(rightPoints.get(1).get(0), rightPoints.get(1).get(1)));
+	}
+
+	private Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> getSectionTopBoundary(
+			Section section) {
+
+		List<List<Double>> points = List.ofAll(section.getShape().getCoordinates())
+				.map(point -> List.ofAll(point))
+				.removeAt(0);
+		assert points.size() == 4 : "Number of section corners has to be exactly 4";
+		Seq<Seq<Double>> convertedPoints = convertPoints(points);
+		Iterator<? extends Seq<? extends Seq<Double>>> sortedPoints = convertedPoints
+			.sorted((point1, point2) -> point1.get(0).compareTo(point2.get(0)))
+			.grouped(2);
+		Seq<? extends Seq<Double>> leftPoints = sortedPoints.next().sorted((point1, point2) ->
+				point1.get(1).compareTo(point2.get(1)));
+		Seq<? extends Seq<Double>> rightPoints = sortedPoints.next().sorted((point1, point2) ->
+		point1.get(1).compareTo(point2.get(1)));
+
+		return Tuple(Tuple(leftPoints.get(0).get(0), leftPoints.get(0).get(1)),
+				Tuple(rightPoints.get(0).get(0), rightPoints.get(0).get(1)));
+	}
+
+	private Seq<Seq<Double>> convertPoints(List<List<Double>> points) {
+		return rotate(List.ofAll(
+					coordinatesUtil.projectCoordinates(points.map(Value::toJavaList).toJavaList()))
+						.map(List::ofAll))
+				.map(point -> List.of(
+						(point.get(0) - shiftX) * scale + panX,
+						(point.get(1) - shiftY) * scale));
+	}
+
+	private Seq<? extends Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>>
 			devicesToLocations(Set<Device> devices,
 					Map<String, Measurement> measurementsByDeviceId) {
-		return devices.toLinkedMap(device -> Tuple(
-					deviceToPosition(device),
-					measurementToColor(measurementsByDeviceId.get(device.getId()))));
+		return devices.groupBy(Device::getProfileId)
+				.toList()
+				.map(profileDeviceTuple -> profileDeviceTuple._2())
+				.map(profileDevices -> profileDevices.toSortedMap(
+						this::compareLocationsVertically,
+						device -> Tuple(
+							deviceToPosition(device),
+							measurementToColor(measurementsByDeviceId.get(device.getId())))))
+				.sorted(this::compareLocationMaps);
+	}
+
+	private int compareLocationsVertically(Tuple3<Double, Double, Boolean> location1,
+			Tuple3<Double, Double, Boolean> location2) {
+
+		return location1._2().compareTo(location2._2());
+	}
+
+	private int compareLocationMaps(
+			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> locations1,
+			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> locations2) {
+
+		return locations1.keySet().get()._1().compareTo(locations2.keySet().get()._1());
 	}
 
 	private Tuple3<Integer, Integer, Integer> measurementToColor(Option<Measurement> measurement) {

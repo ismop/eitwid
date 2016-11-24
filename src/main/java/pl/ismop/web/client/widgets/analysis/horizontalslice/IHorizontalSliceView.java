@@ -15,8 +15,8 @@ public interface IHorizontalSliceView extends IsWidget {
 	void showLoadingState(boolean show);
 
 	void drawCrosssection(Map<Double, Seq<Double>> legend, String parameterUnit,
-			Map<String, Map<Tuple3<Double, Double, Boolean>,
-			Tuple3<Integer, Integer, Integer>>> map);
+			Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>>> locationsWithValues);
 
 	void drawMuteSections(Seq<Seq<Seq<Double>>> coordinates);
 

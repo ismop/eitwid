@@ -5,6 +5,9 @@ import static javaslang.API.Tuple;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
@@ -31,6 +34,8 @@ import pl.ismop.web.client.widgets.common.map.MapPresenter;
 @Presenter(view = HorizontalSliceWizardView.class)
 public class HorizontalSliceWizardPresenter extends BasePresenter<IHorizontalSliceWizardView,
 		MainEventBus> implements IHorizontalSliceWizardPresenter {
+
+	private static final Logger log = LoggerFactory.getLogger(HorizontalSliceWizardPresenter.class);
 
 	private static final String BUDOKOP = "budokop";
 

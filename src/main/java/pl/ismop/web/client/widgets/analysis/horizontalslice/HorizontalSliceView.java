@@ -1,5 +1,7 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice;
 
+import static java.util.function.Function.identity;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -42,8 +44,8 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 	@Override
 	public void drawCrosssection(Map<Double, Seq<Double>> legend, String parameterUnit,
-			Map<String, Map<Tuple3<Double, Double, Boolean>,
-			Tuple3<Integer, Integer, Integer>>> locationsAndColors) {
+			Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>>> locationsAndColors) {
 		parameterUnit = parameterUnit.replaceAll("\u2103", "\u00B0C");
 
 		@SuppressWarnings("unchecked")
@@ -61,7 +63,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 		drawLegend(nativeLegend, parameterUnit);
 		GWT.log("Locations and colors: " + locationsAndColors);
-		drawDevices(locationsAndColors.values().flatMap(Map::keySet));
+		drawDevices(locationsAndColors.values().flatMap(identity()).flatMap(Map::keySet));
 
 //		for (Seq<Seq<Double>> sectionCorners : locationsWithValues.keySet()) {
 //			@SuppressWarnings("unchecked")
@@ -274,13 +276,13 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 	private void drawDevices(Seq<Tuple3<Double, Double, Boolean>> deviceLocations) {
 		deviceLocations
-				.filter(location -> location._3())
-				.forEach(location -> {
-					JsArrayNumber coordinates = (JsArrayNumber) JsArrayNumber.createArray();
-					coordinates.push(location._1());
-					coordinates.push(location._2());
-					drawDevice(coordinates);
-				});
+			.filter(location -> location._3())
+			.forEach(location -> {
+				JsArrayNumber coordinates = (JsArrayNumber) JsArrayNumber.createArray();
+				coordinates.push(location._1());
+				coordinates.push(location._2());
+				drawDevice(coordinates);
+			});
 	}
 
 	private String format(double number) {
