@@ -4,9 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GeoJsonFeature {
+
 	private String type;
+
 	private String id;
+
 	private Geometry geometry;
+
 	private Map<String, String> properties;
 
 	public GeoJsonFeature() {
@@ -29,12 +33,15 @@ public class GeoJsonFeature {
 	public String getId() {
 		return id;
 	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
+
 	public Geometry getGeometry() {
 		return geometry;
 	}
+
 	public void setGeometry(Geometry geometry) {
 		this.geometry = geometry;
 	}
@@ -46,9 +53,11 @@ public class GeoJsonFeature {
 	public void setType(String type) {
 		this.type = type;
 	}
+
 	public Map<String, String> getProperties() {
 		return properties;
 	}
+
 	public void setProperties(Map<String, String> properties) {
 		this.properties = properties;
 	}

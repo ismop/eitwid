@@ -7,6 +7,8 @@ import org.fusesource.restygwt.client.Defaults;
 import org.fusesource.restygwt.client.ServiceRoots;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 import org.gwtbootstrap3.extras.bootbox.client.options.DialogOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -18,6 +20,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.Mvp4gModule;
 
 public class IsmopWebEntryPoint implements EntryPoint {
+
+	private static final Logger log = LoggerFactory.getLogger(IsmopWebEntryPoint.class);
+
 	private IsmopConverter ismopConverter;
 
 	public static Dictionary properties;
@@ -28,6 +33,9 @@ public class IsmopWebEntryPoint implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
+		//setting global error handler
+		GWT.setUncaughtExceptionHandler(t -> log.error(t.getMessage(), t));
+
 		properties = Dictionary.getDictionary("properties");
 		ServiceRoots.add("dap", properties.get("dapEndpoint"));
 		ServiceRoots.add("hypgen", properties.get("hypgenEndpoint"));
@@ -125,5 +133,5 @@ public class IsmopWebEntryPoint implements EntryPoint {
 
 	private native JavaScriptObject toStringArray(String values) /*-{
 		return values.split(",");
-	}-*/;;
+	}-*/;
 }

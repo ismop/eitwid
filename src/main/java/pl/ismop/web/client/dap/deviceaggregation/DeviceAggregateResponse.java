@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.fusesource.restygwt.client.Json;
 
-public class DeviceAggregationsResponse {
+public class DeviceAggregateResponse {
 	@Json(name = "device_aggregations")
 	private List<DeviceAggregate> deviceAggregations;
 

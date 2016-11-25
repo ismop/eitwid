@@ -24,8 +24,8 @@ import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.device.DeviceService;
 import pl.ismop.web.client.dap.device.DevicesResponse;
 import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregate;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationService;
-import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregationsResponse;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateResponse;
+import pl.ismop.web.client.dap.deviceaggregation.DeviceAggregateService;
 import pl.ismop.web.client.dap.experiment.ExperimentService;
 import pl.ismop.web.client.dap.experiment.ExperimentsResponse;
 import pl.ismop.web.client.dap.levee.Levee;
@@ -73,6 +73,7 @@ import pl.ismop.web.client.hypgen.Experiment;
 
 @Singleton
 public class DapController {
+
 	private final IsmopConverter converter;
 
 	private final ScenarioService scenarioService;
@@ -97,7 +98,7 @@ public class DapController {
 
 	private DeviceService deviceService;
 
-	private DeviceAggregationService deviceAggregationService;
+	private DeviceAggregateService deviceAggregationService;
 
 	private ParameterService parameterService;
 
@@ -207,7 +208,7 @@ public class DapController {
 			ResultService resultService,
 			ProfileService profileService,
 			DeviceService deviceService,
-			DeviceAggregationService deviceAggregationService,
+			DeviceAggregateService deviceAggregationService,
 			ParameterService parameterService,
 			ContextService contextService,
 			TimelineService timelineService,
@@ -575,14 +576,14 @@ public class DapController {
 	}
 
 	public void getDevicesRecursively(String profileId, final DevicesCallback callback) {
-		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregates(profileId, new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				SettableFuture<Void> futureCallback = SettableFuture.create();
 				List<Device> devices = new ArrayList<>();
 				collectDevices(response.getDeviceAggregations(), devices,
@@ -829,14 +830,14 @@ public class DapController {
 	}
 
 	public void getDeviceAggregations(String profileId, final DeviceAggregatesCallback callback) {
-		deviceAggregationService.getDeviceAggregations(profileId, new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregates(profileId, new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				callback.processDeviceAggregations(response.getDeviceAggregations());
 			}
 		});
@@ -844,15 +845,15 @@ public class DapController {
 
 	public ListenableFuture<List<DeviceAggregate>> getDeviceAggregations(String profileId) {
 		SettableFuture<List<DeviceAggregate>> result = SettableFuture.create();
-		deviceAggregationService.getDeviceAggregations(profileId,
-				new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregates(profileId,
+				new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				result.setException(errorUtil.processErrorsForException(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				result.set(response.getDeviceAggregations());
 			}
 		});
@@ -861,15 +862,15 @@ public class DapController {
 	}
 
 	public void getDeviceAggregations(List<String> profileIds, final DeviceAggregatesCallback callback) {
-		deviceAggregationService.getDeviceAggregations(converter.merge(profileIds),
-				new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregates(converter.merge(profileIds),
+				new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				callback.processDeviceAggregations(response.getDeviceAggregations());
 			}
 		});
@@ -877,15 +878,15 @@ public class DapController {
 
 	public ListenableFuture<List<DeviceAggregate>> getDeviceAggregations(List<String> profileIds) {
 		SettableFuture<List<DeviceAggregate>> result = SettableFuture.create();
-		deviceAggregationService.getDeviceAggregations(converter.merge(profileIds),
-				new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregates(converter.merge(profileIds),
+				new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				result.setException(errorUtil.processErrorsForException(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				result.set(response.getDeviceAggregations());
 			}
 		});
@@ -894,28 +895,28 @@ public class DapController {
 	}
 
 	public void getDeviceAggregationsForSectionId(String sectionIdFilter, final DeviceAggregatesCallback callback) {
-		deviceAggregationService.getDeviceAggregationsForSectionIds(sectionIdFilter, new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregatesForSectionIds(sectionIdFilter, new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				callback.processDeviceAggregations(response.getDeviceAggregations());
 			}
 		});
 	}
 
 	public void getDevicesRecursivelyForAggregate(String aggregateId, final DevicesCallback callback) {
-		deviceAggregationService.getDeviceAggregationsForIds(aggregateId, new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregatesForIds(aggregateId, new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				SettableFuture<Void> futureCallback = SettableFuture.create();
 				List<Device> devices = new ArrayList<>();
 				collectDevices(response.getDeviceAggregations(), devices,
@@ -936,15 +937,15 @@ public class DapController {
 	}
 
 	public void getDevicesRecursivelyForAggregates(List<String> deviceAggregationIds, final DevicesCallback callback) {
-		deviceAggregationService.getDeviceAggregationsForIds(converter.merge(deviceAggregationIds),
-				new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregatesForIds(converter.merge(deviceAggregationIds),
+				new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				SettableFuture<Void> futureCallback = SettableFuture.create();
 				List<Device> devices = new ArrayList<>();
 				collectDevices(response.getDeviceAggregations(), devices,
@@ -967,15 +968,15 @@ public class DapController {
 	public ListenableFuture<List<Device>> getDevicesRecursivelyForAggregates(
 			List<String> deviceAggregationIds) {
 		SettableFuture<List<Device>> result = SettableFuture.create();
-		deviceAggregationService.getDeviceAggregationsForIds(converter.merge(deviceAggregationIds),
-				new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregatesForIds(converter.merge(deviceAggregationIds),
+				new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				result.setException(errorUtil.processErrorsForException(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				SettableFuture<Void> futureCallback = SettableFuture.create();
 				List<Device> devices = new ArrayList<>();
 				collectDevices(response.getDeviceAggregations(), devices,
@@ -998,28 +999,28 @@ public class DapController {
 	}
 
 	public void getDeviceAggregationForType(String type, final DeviceAggregatesCallback callback) {
-		deviceAggregationService.getDeviceAggregationsForType(type, new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregatesForType(type, new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				callback.processDeviceAggregations(response.getDeviceAggregations());
 			}
 		});
 	}
 
 	public void getDeviceAggregationForType(String type, String leveeId, final DeviceAggregatesCallback callback) {
-		deviceAggregationService.getDeviceAggregationsForType(type, leveeId, new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregatesForType(type, leveeId, new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				callback.processDeviceAggregations(response.getDeviceAggregations());
 			}
 		});
@@ -1117,14 +1118,14 @@ public class DapController {
 	}
 
 	public void getDeviceAggregation(String deviceAggregationId, final DeviceAggregatesCallback callback) {
-		deviceAggregationService.getDeviceAggregationsForIds(deviceAggregationId, new MethodCallback<DeviceAggregationsResponse>() {
+		deviceAggregationService.getDeviceAggregatesForIds(deviceAggregationId, new MethodCallback<DeviceAggregateResponse>() {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				callback.onError(errorUtil.processErrors(method, exception));
 			}
 
 			@Override
-			public void onSuccess(Method method, DeviceAggregationsResponse response) {
+			public void onSuccess(Method method, DeviceAggregateResponse response) {
 				callback.processDeviceAggregations(response.getDeviceAggregations());
 			}
 		});
@@ -1240,10 +1241,10 @@ public class DapController {
 							}
 						});
 
-				if(deviceAggregation.getChildernIds() != null && deviceAggregation.getChildernIds().size() > 0) {
+				if(deviceAggregation.getChildrenIds() != null && deviceAggregation.getChildrenIds().size() > 0) {
 					requestCounter.increment();
-					deviceAggregationService.getDeviceAggregationsForIds(converter.merge(deviceAggregation.getChildernIds()),
-							new MethodCallback<DeviceAggregationsResponse>() {
+					deviceAggregationService.getDeviceAggregatesForIds(converter.merge(deviceAggregation.getChildrenIds()),
+							new MethodCallback<DeviceAggregateResponse>() {
 						@Override
 						public void onFailure(Method method, Throwable exception) {
 							requestCounter.decrement();
@@ -1255,7 +1256,7 @@ public class DapController {
 						}
 
 						@Override
-						public void onSuccess(Method method, DeviceAggregationsResponse response) {
+						public void onSuccess(Method method, DeviceAggregateResponse response) {
 							requestCounter.decrement();
 							collectDevices(response.getDeviceAggregations(), result, requestCounter,
 									futureCallback);

@@ -18,6 +18,7 @@ import org.gwtbootstrap3.client.ui.Label;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Radio;
+import org.gwtbootstrap3.extras.toggleswitch.client.ui.ToggleSwitch;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -46,9 +47,9 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 
 	private IHorizontalSliceWizardPresenter presenter;
 
-	private Map<String, HasWidgets> profileHeightsContainers;
+	private Map<String, HasWidgets> sectionHeightsContainers;
 
-	private Map<String, IsWidget> profileWidgets, parameterWidgets;
+	private Map<String, IsWidget> sectionWidgets, parameterWidgets;
 
 	private ListBox scenarioList;
 
@@ -59,18 +60,21 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	Modal modal;
 
 	@UiField
-	FlowPanel mapContainer, profiles, parameters;
+	FlowPanel mapContainer, sections, parameters;
 
 	@UiField
-	Label noProfilesPicked, noParameters;
+	Label noParameters;
 
 	@UiField
 	Button add;
 
+	@UiField
+	ToggleSwitch budokopToggle;
+
 	public HorizontalSliceWizardView() {
 		initWidget(uiBinder.createAndBindUi(this));
-		profileHeightsContainers = new HashMap<>();
-		profileWidgets = new HashMap<>();
+		sectionHeightsContainers = new HashMap<>();
+		sectionWidgets = new HashMap<>();
 		parameterWidgets = new HashMap<>();
 	}
 
@@ -87,6 +91,11 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@UiHandler("add")
 	void addPanel(ClickEvent event) {
 		getPresenter().onAcceptConfig();
+	}
+
+	@UiHandler("budokopToggle")
+	void budokopToggleSwitched(ValueChangeEvent<Boolean> event) {
+		getPresenter().onProfileTypeChange(!event.getValue());
 	}
 
 	@Override
@@ -114,17 +123,15 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void addProfile(final String profileId, final String profileName) {
-		noProfilesPicked.setVisible(false);
-
+	public void addPickedSection(String sectionId) {
 		Heading heading = new Heading(H4);
-		heading.setText(profileName);
+		heading.setText("Section " + sectionId);
 		heading.addStyleName("pull-left");
 
 		Button removeButton = new Button("", REMOVE, new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				getPresenter().onRemoveProfile(profileId);
+				getPresenter().onRemoveSection(sectionId);
 			}
 		});
 		removeButton.addStyleName("pull-right");
@@ -137,60 +144,55 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		controls.add(removeButton);
 
 		FlowPanel profileHeights = new FlowPanel();
-		profileHeightsContainers.put(profileId, profileHeights);
+		sectionHeightsContainers.put(sectionId, profileHeights);
 
 		FlowPanel container = new FlowPanel();
 		container.add(controls);
 		container.add(profileHeights);
-		profiles.add(container);
-		profileWidgets.put(profileId, container);
+		sections.add(container);
+		sectionWidgets.put(sectionId, container);
 	}
 
 	@Override
-	public void clearProfiles() {
-		profiles.clear();
-		profileHeightsContainers.clear();
-		profileWidgets.clear();
-		noProfilesPicked.setVisible(true);
+	public void clearSections() {
+		sections.clear();
+		sectionHeightsContainers.clear();
+		sectionWidgets.clear();
 	}
 
 	@Override
 	public void showLoadingState(boolean show, String profileId) {
-		if(profileHeightsContainers.get(profileId) != null) {
+		if(sectionHeightsContainers.get(profileId) != null) {
 			if(show) {
 				Icon icon = new Icon(CIRCLE_O_NOTCH);
 				icon.setSpin(true);
-				profileHeightsContainers.get(profileId).add(icon);
+				sectionHeightsContainers.get(profileId).add(icon);
 			} else {
-				profileHeightsContainers.get(profileId).clear();
+				sectionHeightsContainers.get(profileId).clear();
 			}
 		}
 	}
 
 	@Override
-	public void removeProfile(String profileId) {
-		profileHeightsContainers.remove(profileId);
-		profiles.remove(profileWidgets.remove(profileId));
+	public void removeSection(String sectionId) {
+		sectionHeightsContainers.remove(sectionId);
+		sections.remove(sectionWidgets.remove(sectionId));
 	}
 
 	@Override
-	public void addProfileHeight(final Double height, final String profileId, boolean check) {
-		Radio radio = new Radio(profileId, messages.heightLabel() + " " + String.valueOf(NumberFormat.getFormat("0.00").format(height)));
+	public void addSectionHeight(final Double height, final String sectionId, boolean check) {
+		Radio radio = new Radio(sectionId, messages.heightLabel() + " "
+				+ String.valueOf(NumberFormat.getFormat("0.00").format(height)));
 		radio.setValue(check);
 		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if(event.getValue()) {
-					getPresenter().onChangePickedHeight(profileId, String.valueOf(height));
+					getPresenter().onChangePickedHeight(sectionId, String.valueOf(height));
 				}
 			}
 		});
-		profileHeightsContainers.get(profileId).add(radio);
-	}
-
-	@Override
-	public void showNoProfileLabel() {
-		noProfilesPicked.setVisible(true);
+		sectionHeightsContainers.get(sectionId).add(radio);
 	}
 
 	@Override
@@ -220,6 +222,14 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@Override
 	public void removeParameter(String parameterName) {
 		parameters.remove(parameterWidgets.remove(parameterName));
+
+		if (parameters.getWidgetCount() == 1 && scenarioList != null) {
+			scenarioList.removeFromParent();
+		}
+
+		if (parameters.getWidgetCount() == 0) {
+			showNoParamtersLabel(true);
+		}
 	}
 
 	@Override
@@ -235,6 +245,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	@Override
 	public void clearParameters() {
 		parameters.clear();
+		scenarioList = null;
 		parameterWidgets.clear();
 		noParameters.setVisible(true);
 	}
@@ -260,7 +271,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 
 	@Override
 	public void addScenarios(Map<String, String> scenariosMap) {
-		if(scenarioList != null) {
+		if (scenarioList != null) {
 			scenarioList.removeFromParent();
 		}
 
@@ -268,7 +279,7 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 		scenarioList.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				getPresenter().onDataSelectorChanged(scenarioList.getSelectedValue());
+				getPresenter().onScenarioIdChanged(scenarioList.getSelectedValue());
 			}
 		});
 
@@ -280,9 +291,9 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public void selectScenario(String dataSelector) {
+	public void selectScenario(String scenarioId) {
 		for(int i = 0; i < scenarioList.getItemCount(); i++) {
-			if(scenarioList.getValue(i).equals(dataSelector)) {
+			if(scenarioList.getValue(i).equals(scenarioId)) {
 				scenarioList.setSelectedIndex(i);
 
 				break;
@@ -291,12 +302,17 @@ public class HorizontalSliceWizardView extends Composite implements IHorizontalS
 	}
 
 	@Override
-	public String noProfilePickedError() {
-		return messages.noProfilePickedError();
+	public String noSectionPickedError() {
+		return messages.noSectionPickedError();
 	}
 
 	@Override
 	public String singleProfilePerSection() {
 		return messages.singleProfilePerSection();
+	}
+
+	@Override
+	public void setBudokopProfilesToggle(boolean budokopProfiles) {
+		budokopToggle.setValue(!budokopProfiles);
 	}
 }

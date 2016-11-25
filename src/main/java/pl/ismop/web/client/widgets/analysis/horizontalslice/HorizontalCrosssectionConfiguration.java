@@ -1,133 +1,58 @@
 package pl.ismop.web.client.widgets.analysis.horizontalslice;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import javaslang.collection.HashMap;
+import javaslang.collection.List;
+import javaslang.collection.Map;
+import javaslang.collection.Seq;
 import pl.ismop.web.client.dap.device.Device;
 import pl.ismop.web.client.dap.experiment.Experiment;
 import pl.ismop.web.client.dap.parameter.Parameter;
-import pl.ismop.web.client.dap.profile.Profile;
 import pl.ismop.web.client.dap.scenario.Scenario;
 import pl.ismop.web.client.dap.section.Section;
 
 public class HorizontalCrosssectionConfiguration {
-	private Set<String> parameterNames;
-	
-	private String pickedParameterName;
-	
-	private Map<String, Profile> pickedProfiles;
-	
-	private Map<Profile, List<Device>> profileDevicesMap;
-	
-	private Map<String, Parameter> parameterMap;
-	
-	private Map<Profile, String> pickedHeights;
-	
-	private Map<String, List<Device>> heightDevicesmap;
-	
-	private Map<Profile, List<String>> profileHeights;
-	
-	private Map<String, Section> sections;
-	
+
 	private Experiment experiment;
-	
-	private Map<String, Scenario> scenarioMap;
-	
-	private String dataSelector;
-	
+
+	private String profileVendor;
+
+	private Seq<String> pickedSectionIds;
+
+	private Map<String, Section> sectionsById;
+
+	private Map<String, Seq<Device>> devicesBySectionId;
+
+	private Map<String, Seq<String>> heightsBySectionId;
+
+	private Map<String, String> pickedHeightsBySectionId;
+
+	private Map<String, Map<String, Seq<Device>>> devicesBySectionIdAndHeight;
+
+	private String pickedParameterName;
+
+	private Map<String, Parameter> parametersById;
+
+	private Map<String, Scenario> scenariosById;
+
+	private String pickedScenarioId;
+
 	public HorizontalCrosssectionConfiguration() {
-		parameterNames = new HashSet<>();
-		pickedProfiles = new HashMap<>();
-		profileDevicesMap = new HashMap<>();
-		parameterMap = new HashMap<>();
-		pickedHeights = new HashMap<>();
-		heightDevicesmap = new HashMap<>();
-		profileHeights = new HashMap<>();
-		sections = new HashMap<>();
-		scenarioMap = new HashMap<>();
-	}
-
-	public Set<String> getParameterNames() {
-		return parameterNames;
-	}
-
-	public void setParameterNames(Set<String> parameterNames) {
-		this.parameterNames = parameterNames;
-	}
-
-	public String getPickedParameterMeasurementName() {
-		return pickedParameterName;
-	}
-
-	public void setPickedParameterMeasurementName(String pickedParameterName) {
-		this.pickedParameterName = pickedParameterName;
-	}
-
-	public Map<String, Profile> getPickedProfiles() {
-		return pickedProfiles;
-	}
-
-	public void setPickedProfiles(Map<String, Profile> pickedProfiles) {
-		this.pickedProfiles = pickedProfiles;
-	}
-
-	public Map<Profile, List<Device>> getProfileDevicesMap() {
-		return profileDevicesMap;
-	}
-
-	public void setProfileDevicesMap(Map<Profile, List<Device>> profileDevicesMap) {
-		this.profileDevicesMap = profileDevicesMap;
-	}
-
-	public Map<String, Parameter> getParameterMap() {
-		return parameterMap;
-	}
-
-	public void setParameterMap(Map<String, Parameter> parameterMap) {
-		this.parameterMap = parameterMap;
-	}
-
-	public Map<Profile, String> getPickedHeights() {
-		return pickedHeights;
-	}
-
-	public void setPickedHeights(Map<Profile, String> pickedHeights) {
-		this.pickedHeights = pickedHeights;
-	}
-
-	public Map<String, List<Device>> getHeightDevicesmap() {
-		return heightDevicesmap;
-	}
-
-	public void setHeightDevicesmap(Map<String, List<Device>> heightDevicesmap) {
-		this.heightDevicesmap = heightDevicesmap;
-	}
-
-	public Map<Profile, List<String>> getProfileHeights() {
-		return profileHeights;
-	}
-
-	public void setProfileHeights(Map<Profile, List<String>> profileHeights) {
-		this.profileHeights = profileHeights;
+		pickedSectionIds = List.empty();
+		sectionsById = HashMap.empty();
+		devicesBySectionId = HashMap.empty();
+		heightsBySectionId = HashMap.empty();
+		pickedHeightsBySectionId = HashMap.empty();
+		devicesBySectionIdAndHeight = HashMap.empty();
+		parametersById = HashMap.empty();
+		scenariosById = HashMap.empty();
 	}
 
 	public Map<String, Section> getSections() {
-		return sections;
+		return sectionsById;
 	}
 
 	public void setSections(Map<String, Section> sections) {
-		this.sections = sections;
-	}
-
-	public Map<String, Scenario> getScenarioMap() {
-		return scenarioMap;
-	}
-
-	public void setScenarioMap(Map<String, Scenario> scenarioMap) {
-		this.scenarioMap = scenarioMap;
+		this.sectionsById = sections;
 	}
 
 	public Experiment getExperiment() {
@@ -138,11 +63,83 @@ public class HorizontalCrosssectionConfiguration {
 		this.experiment = experiment;
 	}
 
-	public String getDataSelector() {
-		return dataSelector;
+	public String getProfileVendor() {
+		return profileVendor;
 	}
 
-	public void setDataSelector(String dataSelector) {
-		this.dataSelector = dataSelector;
+	public void setProfileVendor(String profileVendor) {
+		this.profileVendor = profileVendor;
+	}
+
+	public Seq<String> getPickedSectionIds() {
+		return pickedSectionIds;
+	}
+
+	public void setPickedSectionIds(Seq<String> pickedSectionIds) {
+		this.pickedSectionIds = pickedSectionIds;
+	}
+
+	public Map<String, Seq<Device>> getDevicesBySectionId() {
+		return devicesBySectionId;
+	}
+
+	public void setDevicesBySectionId(Map<String, Seq<Device>> map) {
+		this.devicesBySectionId = map;
+	}
+
+	public Map<String, String> getPickedHeightsBySectionId() {
+		return pickedHeightsBySectionId;
+	}
+
+	public void setPickedHeightsBySectionId(Map<String, String> pickedHeightsBySectionId) {
+		this.pickedHeightsBySectionId = pickedHeightsBySectionId;
+	}
+
+	public Map<String, Seq<String>> getHeightsBySectionId() {
+		return heightsBySectionId;
+	}
+
+	public void setHeightsBySectionId(Map<String, Seq<String>> heightsBySectionId) {
+		this.heightsBySectionId = heightsBySectionId;
+	}
+
+	public Map<String, Map<String, Seq<Device>>> getDevicesBySectionIdAndHeight() {
+		return devicesBySectionIdAndHeight;
+	}
+
+	public void setDevicesBySectionIdAndHeight(Map<String, Map<String, Seq<Device>>> devicesBySectionIdAndHeight) {
+		this.devicesBySectionIdAndHeight = devicesBySectionIdAndHeight;
+	}
+
+	public String getPickedParameterName() {
+		return pickedParameterName;
+	}
+
+	public void setPickedParameterName(String pickedParameterName) {
+		this.pickedParameterName = pickedParameterName;
+	}
+
+	public Map<String, Parameter> getParametersById() {
+		return parametersById;
+	}
+
+	public void setParametersById(Map<String, Parameter> parametersById) {
+		this.parametersById = parametersById;
+	}
+
+	public Map<String, Scenario> getScenariosById() {
+		return scenariosById;
+	}
+
+	public void setScenariosById(Map<String, Scenario> scenariosById) {
+		this.scenariosById = scenariosById;
+	}
+
+	public String getPickedScenarioId() {
+		return pickedScenarioId;
+	}
+
+	public void setPickedScenarioId(String pickedScenarioId) {
+		this.pickedScenarioId = pickedScenarioId;
 	}
 }

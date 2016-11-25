@@ -2,8 +2,9 @@ package pl.ismop.web.client.dap.sensor;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.fusesource.restygwt.client.Json;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sensor {
@@ -18,7 +19,7 @@ public class Sensor {
 	@Json(name = "measurement_type_name")
 	@XmlElement(name = "measurement_type_name")
 	private String unitLabel;
-	
+
 	public String getId() {
 		return id;
 	}

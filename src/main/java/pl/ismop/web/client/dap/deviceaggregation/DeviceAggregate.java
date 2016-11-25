@@ -76,12 +76,12 @@ public class DeviceAggregate extends MapFeature {
 		this.parentId = parentId;
 	}
 
-	public List<String> getChildernIds() {
+	public List<String> getChildrenIds() {
 		return childernIds;
 	}
 
-	public void setChildernIds(List<String> childernIds) {
-		this.childernIds = childernIds;
+	public void setChildrenIds(List<String> childrenIds) {
+		this.childernIds = childrenIds;
 	}
 
 	public String getType() {

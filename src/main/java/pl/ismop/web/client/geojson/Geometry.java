@@ -1,7 +1,7 @@
 package pl.ismop.web.client.geojson;
 
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -11,7 +11,7 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 })
 public abstract class Geometry {
 	private String type;
-	
+
 	public Geometry(String type) {
 		this.type = type;
 	}

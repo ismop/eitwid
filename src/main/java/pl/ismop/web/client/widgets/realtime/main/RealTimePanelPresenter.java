@@ -19,7 +19,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimaps;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -97,8 +96,6 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	private HorizontalCrosssectionConfiguration currentHorizontalConfiguration;
 
 	private List<Section> horizontalSliceSections;
-
-	private ArrayList<Profile> horizontalSliceProfiles;
 
 	private List<Device> horizontalSliceDevices;
 
@@ -184,12 +181,12 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 			}
 		}
 
-		currentHorizontalConfiguration.setPickedParameterMeasurementName(
+		currentHorizontalConfiguration.setPickedParameterName(
 				currentHorizontalSliceParameterName);
 		horizontalSlicePresenter.setConfiguration(currentHorizontalConfiguration);
 		horizontalSlicePresenter.onDateChanged(new Date());
 		view.setHorizontalSliceHeading(
-				currentHorizontalConfiguration.getPickedParameterMeasurementName());
+				currentHorizontalConfiguration.getPickedParameterName());
 	}
 
 	public void cleanUp() {
@@ -625,22 +622,7 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 		ListenableFuture<List<Profile>> profilesFuture = Futures.transformAsync(sectionIdsFuture,
 				sectionIds -> dapController.getProfiles(sectionIds));
 		ListenableFuture<List<String>> profileIdsFuture = Futures.transform(profilesFuture,
-				profiles -> {
-					//picking only single profiles per section
-					horizontalSliceProfiles = new ArrayList<>();
-					List<String> sectionIds = new ArrayList<>();
-
-					for (Profile profile : profiles) {
-						if (profile.getDeviceAggregationIds().size() > 0
-								&& !sectionIds.contains(profile.getSectionId())) {
-							horizontalSliceProfiles.add(profile);
-							sectionIds.add(profile.getSectionId());
-						}
-					}
-
-					return Lists.newArrayList(Iterables.transform(horizontalSliceProfiles,
-							Profile::getId));
-				});
+				profiles -> Lists.newArrayList(Iterables.transform(profiles, Profile::getId)));
 		ListenableFuture<List<DeviceAggregate>> deviceAggregationsFuture = Futures.transformAsync(
 				profileIdsFuture, profileIds -> dapController.getDeviceAggregations(profileIds));
 		ListenableFuture<List<String>> deviceAggregateIdsFuture = Futures.transform(
@@ -677,37 +659,37 @@ public class RealTimePanelPresenter extends BasePresenter<IRealTimePanelView, Ma
 	}
 
 	private void renderHorizontalSliceData() {
-		currentHorizontalConfiguration = new HorizontalCrosssectionConfiguration();
-		currentHorizontalConfiguration.setDataSelector("0"); //0 means real values
-		currentHorizontalConfiguration.setSections(Maps.uniqueIndex(horizontalSliceSections,
-				Section::getId));
-		currentHorizontalSliceParameterName = getCurrentHorizontalSliceParameterName();
-		currentHorizontalConfiguration.setPickedParameterMeasurementName(
-				currentHorizontalSliceParameterName);
-		view.setHorizontalSliceHeading(currentHorizontalConfiguration
-				.getPickedParameterMeasurementName());
-		currentHorizontalConfiguration.setParameterMap(Maps.uniqueIndex(horizontalSliceParameters,
-				Parameter::getId));
-		currentHorizontalConfiguration.setPickedHeights(Maps.toMap(horizontalSliceProfiles,
-				profile -> "fakeHeight"));
-
-		Map<String, List<Device>> heightDeviceMap = new HashMap<>();
-		heightDeviceMap.put("fakeHeight", horizontalSliceDevices);
-		currentHorizontalConfiguration.setHeightDevicesmap(heightDeviceMap);
-		currentHorizontalConfiguration.setPickedProfiles(Maps.uniqueIndex(horizontalSliceProfiles,
-				Profile::getId));
-		currentHorizontalConfiguration.setProfileDevicesMap(Multimaps.asMap(Multimaps.index(
-				horizontalSliceDevices,
-				device -> currentHorizontalConfiguration.getPickedProfiles().get(
-						device.getProfileId()))));
-
-		if (horizontalSlicePresenter == null) {
-			horizontalSlicePresenter = eventBus.addHandler(HorizontalSlicePresenter.class);
-			view.setHorizontalSliceView(horizontalSlicePresenter.getView());
-		}
-
-		horizontalSlicePresenter.setConfiguration(currentHorizontalConfiguration);
-		horizontalSlicePresenter.onDateChanged(new Date());
+//		currentHorizontalConfiguration = new HorizontalCrosssectionConfiguration();
+//		currentHorizontalConfiguration.setDataSelector("0"); //0 means real values
+//		currentHorizontalConfiguration.setSections(Maps.uniqueIndex(horizontalSliceSections,
+//				Section::getId));
+//		currentHorizontalSliceParameterName = getCurrentHorizontalSliceParameterName();
+//		currentHorizontalConfiguration.setPickedParameterMeasurementName(
+//				currentHorizontalSliceParameterName);
+//		view.setHorizontalSliceHeading(currentHorizontalConfiguration
+//				.getPickedParameterMeasurementName());
+//		currentHorizontalConfiguration.setParameterMap(Maps.uniqueIndex(horizontalSliceParameters,
+//				Parameter::getId));
+//		currentHorizontalConfiguration.setPickedHeights(Maps.toMap(horizontalSliceSections,
+//				profile -> "fakeHeight"));
+//
+//		Map<String, List<Device>> heightDeviceMap = new HashMap<>();
+//		heightDeviceMap.put("fakeHeight", horizontalSliceDevices);
+//		currentHorizontalConfiguration.setHeightDevicesmap(heightDeviceMap);
+//		currentHorizontalConfiguration.setPickedSections(Maps.uniqueIndex(horizontalSliceSections,
+//				Section::getId));
+//		currentHorizontalConfiguration.setSectionDevicesMap(Multimaps.asMap(Multimaps.index(
+//				horizontalSliceDevices,
+//				device -> currentHorizontalConfiguration.getPickedSections().get(
+//						device.getProfileId()))));
+//
+//		if (horizontalSlicePresenter == null) {
+//			horizontalSlicePresenter = eventBus.addHandler(HorizontalSlicePresenter.class);
+//			view.setHorizontalSliceView(horizontalSlicePresenter.getView());
+//		}
+//
+//		horizontalSlicePresenter.setConfiguration(currentHorizontalConfiguration);
+//		horizontalSlicePresenter.onDateChanged(new Date());
 	}
 
 	private String getCurrentHorizontalSliceParameterName() {
