@@ -30,17 +30,17 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	private final IsmopConverter converter;
 
 	interface MapViewUiBinder extends UiBinder<Widget, MapView> {}
-	
+
 	private IMapPresenter presenter;
-	
+
 	private String elementId;
-	
+
 	private JavaScriptObject map, layer, infoWindow, strictBounds, minZoom;
-	
+
 	private boolean initialized;
 
 	private Set<String> selected = new HashSet<>();
-	
+
 	private Set<String> highlighted = new HashSet<>();
 
 	private boolean moveable = false;
@@ -51,12 +51,12 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	@Inject
 	public MapView(IsmopConverter converter) {
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 		elementId = "map-" + hashCode();
 		mapContainer.getElement().setAttribute("id", elementId);
 		this.converter = converter;
 	}
-	
+
 	@Override
 	public void setPresenter(IMapPresenter presenter) {
 		this.presenter = presenter;
@@ -66,20 +66,20 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	public IMapPresenter getPresenter() {
 		return presenter;
 	}
-	
+
 	@Override
 	protected void onLoad() {
 		if(!initialized) {
 			initMap();
-			
+
 			if(getPresenter().isHoverListeners()) {
 				addHoverHandlers();
 			}
-			
+
 			if(getPresenter().isClickListeners()) {
 				addClickListeners();
 			}
-			
+
 			initialized = true;
 		}
 	}
@@ -88,7 +88,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	public void adjustBounds(List<List<Double>> points) {
 		if(points.size() > 1) {
 			JavaScriptObject bounds = createLatLngBounds();
-			
+
 			for(List<Double> point : points) {
 				extendBounds(bounds, point.get(1), point.get(0));
 			}
@@ -159,7 +159,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	@Override
 	public native void removeFeature(String featureId) /*-{
 		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
-		
+
 		if(feature) {
 			this.@pl.ismop.web.client.widgets.common.map.MapView::layer.remove(feature);
 		}
@@ -168,7 +168,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	@Override
 	public native void highlight(String featureId, boolean highlight) /*-{
 		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
-		
+
 		if(feature) {
             if(highlight) {
                 this.@pl.ismop.web.client.widgets.common.map.MapView::addHighlighted(Ljava/lang/String;)(featureId);
@@ -197,14 +197,34 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}-*/;
 
 	@Override
-	public native void addGeoJson(String geoJsonValue) /*-{
+	public native void addGeoJson(String geoJsonValue, String featureId) /*-{
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addGeoJson(JSON.parse(geoJsonValue));
+		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
+		var thisObject = this;
+		if(feature) {
+		    this.@pl.ismop.web.client.widgets.common.map.MapView::layer.overrideStyle(feature, {
+		        zIndex: thisObject.@pl.ismop.web.client.widgets.common.map.MapView::getZIndex(*)(featureId)
+		    });
+		}
+
 	}-*/;
+
+	private int getZIndex(String featureId) {
+	    if (featureId.startsWith("profile")) {
+	        return 10001;
+	    } else if (featureId.startsWith("deviceAggregate")) {
+	        return 10002;
+	    } else if (featureId.startsWith("device")) {
+	        return 10003;
+	    } else {
+	        return 10000;
+	    }
+	}
 
 	@Override
 	public native void selectFeature(String featureId, boolean select) /*-{
 		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
-		
+
 		if(feature) {
 			if(select) {
                 this.@pl.ismop.web.client.widgets.common.map.MapView::addSelected(Ljava/lang/String;)(featureId);
@@ -243,7 +263,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		if(this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow != null) {
 			this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow.close();
 		}
-		
+
 		var feature = this.@pl.ismop.web.client.widgets.common.map.MapView::layer.getFeatureById(featureId);
 		this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow = new $wnd.google.maps.InfoWindow({
 			content: contents,
@@ -252,7 +272,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 		});
 		this.@pl.ismop.web.client.widgets.common.map.MapView::infoWindow.open(
 				this.@pl.ismop.web.client.widgets.common.map.MapView::map);
-		
+
 	}-*/;
 
 	@Override
@@ -266,15 +286,15 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	private void featureHoverIn(String type, String featureId) {
 		getPresenter().onFeatureHoverIn(type, featureId);
 	}
-	
+
 	private void featureHoverOut(String type, String featureId) {
 		getPresenter().onFeatureHoverOut(type, featureId);
 	}
-	
+
 	private void featureClick(String type, String featureId) {
 		getPresenter().onFeatureClick(type, featureId);
 	}
-	
+
 	private int getFeatureStrokeWidth(String featureId) {
 		if(featureId.startsWith("profile")) {
 			return 8;
@@ -282,7 +302,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			return 1;
 		}
 	}
-	
+
 	private String getFeatureFillColor(String featureId, String colourType) {
 		if(featureId.startsWith("profile")) {
 			return getProfileFillColor(colourType);
@@ -300,7 +320,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	}
 
 	private String getFeatureStrokeColor(String featureId, String colourType) {
-		return getPresenter().getFeatureStrokeColor(featureId, colourType);		
+		return getPresenter().getFeatureStrokeColor(featureId, colourType);
 	}
 
 	private String getFeatureIcon(String featureId, String colourType) {
@@ -349,7 +369,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 			zoom: 8,
 			scaleControl: moveable,
 			draggable: moveable,
-			zoomControl: false,
+			zoomControl: true,
 			streetViewControl: false,
 			scrollwheel: moveable,
 			disableDoubleClickZoom: true
@@ -405,7 +425,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 				icon: icon
 			};
 		});
-		
+
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer = layerData;
 		layerData.setMap(map);
 	}-*/;
@@ -421,7 +441,7 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 					(event.feature.getProperty('type'), event.feature.getId());
 		});
 	}-*/;
-	
+
 	private native void addClickListeners() /*-{
 		var thisObject = this;
 		this.@pl.ismop.web.client.widgets.common.map.MapView::layer.addListener('click', function(event) {
@@ -433,14 +453,14 @@ public class MapView extends Composite implements IMapView, ReverseViewInterface
 	private native JavaScriptObject createLatLngBounds() /*-{
 		return new $wnd.google.maps.LatLngBounds();
 	}-*/;
-	
+
 	private native void extendBounds(JavaScriptObject bounds, double lat, double lng) /*-{
 		bounds.extend(new $wnd.google.maps.LatLng(lat, lng));
 	}-*/;
 
 	private native void applyBounds(JavaScriptObject bounds) /*-{
 		this.@pl.ismop.web.client.widgets.common.map.MapView::map.fitBounds(bounds);
-		
+
 		if (!this.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds) {
             this.@pl.ismop.web.client.widgets.common.map.MapView::strictBounds = bounds;
         }

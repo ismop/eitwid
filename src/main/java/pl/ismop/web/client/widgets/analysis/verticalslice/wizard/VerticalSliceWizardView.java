@@ -35,43 +35,43 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 	private static VerticalSliceWizardViewUiBinder uiBinder = GWT.create(VerticalSliceWizardViewUiBinder.class);
 
 	interface VerticalSliceWizardViewUiBinder extends UiBinder<Widget, VerticalSliceWizardView> {}
-	
+
 	private IVerticalSliceWizardPresenter presenter;
-	
+
 	private Map<String, IsWidget> parameterWidgets;
 
 	private ListBox scenarioList;
-	
+
 	@UiField
 	VerticalSliceWizardMessages messages;
-	
+
 	@UiField
 	Modal modal;
-	
+
 	@UiField
 	FlowPanel mapContainer, profiles, loadingPanel, parameters;
-	
+
 	@UiField
 	Label noProfilesPicked, noParameters;
-	
+
 	@UiField
 	Button add;
-	
+
 	public VerticalSliceWizardView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		parameterWidgets = new HashMap<>();
 	}
-	
+
 	@UiHandler("modal")
 	void modalShown(ModalShownEvent event) {
 		getPresenter().onModalShown();
 	}
-	
+
 	@UiHandler("modal")
 	void modalHide(ModalHideEvent event) {
 		getPresenter().onModalHide();
 	}
-	
+
 	@UiHandler("add")
 	void addPanel(ClickEvent event) {
 		getPresenter().onAcceptConfig();
@@ -102,14 +102,14 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 	}
 
 	@Override
-	public void setProfile(String profileId) {
+	public void setProfile(String profileId, String profileName) {
 		noProfilesPicked.setVisible(false);
 		profiles.clear();
-		
+
 		Heading heading = new Heading(H4);
-		heading.setText("Profile " + profileId);
+		heading.setText(profileName);
 		heading.addStyleName("pull-left");
-		
+
 		FlowPanel container = new FlowPanel();
 		container.add(heading);
 		profiles.add(container);
@@ -128,15 +128,15 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 	@Override
 	public void addParameter(final String parameterName, boolean check, boolean enabled) {
 		noParameters.setVisible(false);
-		
+
 		Radio radio = new Radio("parameters", parameterName);
 		radio.setValue(check);
 		radio.setEnabled(enabled);
-		
+
 		if(!enabled) {
 			radio.setTitle(messages.parameterDisabledInfo());
 		}
-		
+
 		radio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -188,7 +188,7 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 		if(scenarioList != null) {
 			scenarioList.removeFromParent();
 		}
-		
+
 		scenarioList = new ListBox();
 		scenarioList.addChangeHandler(new ChangeHandler() {
 			@Override
@@ -196,11 +196,11 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 				getPresenter().onDataSelectorChanged(scenarioList.getSelectedValue());
 			}
 		});
-		
+
 		for(String id : scenariosMap.keySet()) {
 			scenarioList.addItem(scenariosMap.get(id), id);
 		}
-		
+
 		parameters.add(scenarioList);
 	}
 
@@ -214,7 +214,7 @@ public class VerticalSliceWizardView extends Composite implements IVerticalSlice
 		for(int i = 0; i < scenarioList.getItemCount(); i++) {
 			if(scenarioList.getValue(i).equals(dataSelector)) {
 				scenarioList.setSelectedIndex(i);
-				
+
 				break;
 			}
 		}

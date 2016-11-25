@@ -1,5 +1,13 @@
 package pl.ismop.web.client.widgets.monitoring.sidepanel;
 
+import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.ButtonGroup;
+import org.gwtbootstrap3.client.ui.Description;
+import org.gwtbootstrap3.client.ui.DescriptionData;
+import org.gwtbootstrap3.client.ui.DescriptionTitle;
+import org.gwtbootstrap3.client.ui.FormControlStatic;
+import org.gwtbootstrap3.client.ui.ListBox;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -10,63 +18,63 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.mvp4g.client.view.ReverseViewInterface;
-import org.gwtbootstrap3.client.ui.*;
+
 import pl.ismop.web.client.widgets.monitoring.sidepanel.IMonitoringSidePanel.IMonitoringSidePanelPresenter;
 
 public class MonitoringSidePanelView extends Composite implements IMonitoringSidePanel, ReverseViewInterface<IMonitoringSidePanelPresenter> {
 	private static MonitoringSidePanelViewUiBinder uiBinder = GWT.create(MonitoringSidePanelViewUiBinder.class);
 
 	interface MonitoringSidePanelViewUiBinder extends UiBinder<Widget, MonitoringSidePanelView> {}
-	
+
 	private IMonitoringSidePanelPresenter presenter;
 
 	@UiField
 	MonitoringSidePanelMessages messages;
-	
+
 	@UiField
 	FormControlStatic leveeName;
-	
+
 	@UiField
 	ListBox leveeList;
-	
+
 	@UiField
 	FlowPanel leveeProgress, metadataEntries, metadataPanel, chart;
-	
+
 	@UiField
 	Button expandChart, clearChart;
-	
+
 	@UiField
 	ButtonGroup chartButtons;
-	
+
 	public MonitoringSidePanelView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
-	
+
 	@UiHandler("showWeather")
 	void showWeather(ClickEvent event) {
 		getPresenter().handleShowWeatherClick();
 	}
-	
+
 	@UiHandler("showFibre")
 	void showFibre(ClickEvent event) {
 		getPresenter().handleShowFibreClick();
 	}
-	
+
 	@UiHandler("showWaterHight")
 	void showWaterHight(ClickEvent event) {
 		getPresenter().handleShowWaterHightClick();
 	}
-	
+
 	@UiHandler("expandChart")
 	void expandChart(ClickEvent event) {
 		getPresenter().onExpandChart();
 	}
-	
+
 	@UiHandler("clearChart")
 	void clearChart(ClickEvent event) {
 		getPresenter().onClearChart();
 	}
-	
+
 	@Override
 	public void setPresenter(IMonitoringSidePanelPresenter presenter) {
 		this.presenter = presenter;
@@ -113,18 +121,18 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	}
 
 	@Override
-	public String getInternalIdLabel() {
-		return messages.internalIdLabel();
+	public String getProfileName() {
+		return messages.profileName();
 	}
 
 	@Override
 	public void addMetadata(String label, String value) {
 		DescriptionTitle title = new DescriptionTitle();
 		title.setText(label);
-		
+
 		DescriptionData data = new DescriptionData();
 		data.setText(value);
-		
+
 		Description description = new Description();
 		description.add(title);
 		description.add(data);
@@ -183,8 +191,8 @@ public class MonitoringSidePanelView extends Composite implements IMonitoringSid
 	}
 
 	@Override
-	public String getNoMeasurementsForDeviceMessage() {
-		return messages.noMeasurementsForDevice();
+	public String getNoMeasurementsForDeviceMessage(String customId) {
+		return messages.noMeasurementsForDevice(customId);
 	}
 
 	@Override

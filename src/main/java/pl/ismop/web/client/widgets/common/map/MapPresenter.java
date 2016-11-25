@@ -50,7 +50,7 @@ public class MapPresenter extends BasePresenter<IMapView, MainEventBus> implemen
 
 			if (geometry != null) {
 				mapFeatures.put(mapFeature.getFeatureId(), mapFeature);
-				view.addGeoJson(geoJson(mapFeature, geometry));
+				view.addGeoJson(geoJson(mapFeature, geometry), mapFeature.getFeatureId());
 
 				if (mapFeature.isAdjustBounds()) {
 					view.adjustBounds(collectAllPoints());

@@ -263,7 +263,7 @@ public class ReadingsPresenter extends BasePresenter<IReadingsView, MainEventBus
 		additionalDevices.clear();
 		additionalParameters.clear();
 		chosenAdditionalReadings.clear();
-		dapController.getDevicesForType(Arrays.asList("weather_station", "pump"), new DevicesCallback() {
+		dapController.getDevicesForType(Arrays.asList("weather_station", "pump", "external_data_source"), new DevicesCallback() {
 			@Override
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);

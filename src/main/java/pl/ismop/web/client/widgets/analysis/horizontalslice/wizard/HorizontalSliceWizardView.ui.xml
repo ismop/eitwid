@@ -53,12 +53,7 @@
 		}
 
 		.parameterPanel {
-			position: absolute;
-			height: 50%;
-			left: 0px;
-			right: 0px;
-			bottom: 0px;
-			padding: 5px;
+
 		}
 
 		.sectionPanel {
@@ -77,5 +72,10 @@
 			right: 5px;
 			bottom: 0px;
 		}
+
+		.scroll-panel {
+            height: literal("calc(100% - 220px)");
+            width: 100%;
+        }
 	</ui:style>
 </ui:UiBinder>

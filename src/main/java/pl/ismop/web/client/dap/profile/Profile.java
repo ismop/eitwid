@@ -1,36 +1,40 @@
 package pl.ismop.web.client.dap.profile;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.fusesource.restygwt.client.Json;
+
 import pl.ismop.web.client.dap.levee.PolygonShape;
 import pl.ismop.web.client.geojson.Geometry;
 import pl.ismop.web.client.geojson.LineGeometry;
 import pl.ismop.web.client.geojson.MapFeature;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class Profile extends MapFeature {
 	private String id;
-	
+
 	@Json(name = "section_id")
 	private String sectionId;
-	
+
 	@Json(name = "profile_shape")
 	private PolygonShape shape;
-	
+
 	@Json(name = "device_ids")
 	private List<String> deviceIds;
-	
+
 	@Json(name = "device_aggregation_ids")
 	private List<String> deviceAggregationIds;
 
 	private List<String> vendors;
-	
+
 	@Json(name = "base_height")
 	private double baseHeight;
 
-	public String getId() {
+	private String name;
+
+    @Override
+    public String getId() {
 		return id;
 	}
 
@@ -50,7 +54,8 @@ public class Profile extends MapFeature {
 		}
 	}
 
-	public boolean isAdjustBounds() {
+	@Override
+    public boolean isAdjustBounds() {
 		return true;
 	}
 
@@ -108,12 +113,20 @@ public class Profile extends MapFeature {
 		this.vendors = vendors;
 	}
 
+	public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		
+
 		return result;
 	}
 

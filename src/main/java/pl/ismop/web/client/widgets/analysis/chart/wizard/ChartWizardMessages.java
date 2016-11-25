@@ -9,4 +9,5 @@ public interface ChartWizardMessages extends Messages {
     String addSensorButtonTitle();
     String loadingDevices();
     String loadingParameters();
+    String changeTrends();
 }

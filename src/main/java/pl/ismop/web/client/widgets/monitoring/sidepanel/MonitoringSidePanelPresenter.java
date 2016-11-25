@@ -42,27 +42,27 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 	public MonitoringSidePanelPresenter(DapController dapController) {
 		this.dapController = dapController;
 	}
-	
+
 	public void onLeveeNavigatorReady() {
 		if(selectedLevee != null) {
 			eventBus.leveeSelected(selectedLevee);
 		}
 	}
-	
+
 	public void onShowProfileMetadata(Profile profile, boolean show) {
 		view.clearMetadata();
-		
+
 		if(show) {
 			view.addMetadata(view.getTypeLabel(), view.getProfileTypeLabel());
-			view.addMetadata(view.getInternalIdLabel(), profile.getId());
+			view.addMetadata(view.getProfileName(), profile.getName());
 		}
 	}
-	
+
 	public void onShowSectionMetadata(Section section, boolean show) {
 		view.clearMetadata();
-		
+
 		if(show) {
-			view.addMetadata(view.getSectionTypeLabel(), view.getInternalIdLabel() + ": " + section.getId());
+			view.addMetadata(view.getSectionTypeLabel(), view.getProfileName() + ": " + section.getId());
 			view.addMetadata(view.getMessages().soilType(), section.getSoilTypeLabel() + " (" + section.getSoilTypeName() + ")");
 			view.addMetadata(view.getMessages().granularDensity(), view.getMessages().maxMinAvg(
 					section.getGranularDensityMax(), section.getGranularDensityMin(), section.getGranularDensityAvg()));
@@ -72,34 +72,43 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 					section.getFiltrationCoefficientMax(), section.getFiltrationCoefficientMin(), section.getFiltrationCoefficientAvg()));
 		}
 	}
-	
+
 	public void onShowDeviceMetadata(Device device, boolean show) {
 		view.clearMetadata();
-		
+
 		if(show) {
 			view.addMetadata(view.getTypeLabel(), view.getDeviceTypeLabel());
-			view.addMetadata(view.getInternalIdLabel(), device.getId());
+			view.addMetadata(view.getProfileName(), device.getId());
 			view.addMetadata(view.getNameLabel(), device.getCustomId());
+			view.addMetadata(view.getMessages().coordinatesLabel(), formatCoordinates(device));
 		}
 	}
-	
+
+	private String formatCoordinates(Device device) {
+		if (device.getPlacement() != null) {
+			List<Double> coordinates = device.getPlacement().getCoordinates();
+			return coordinates.get(1) + " N, " + coordinates.get(0) + " E, " + coordinates.get(2) + " H";
+		}
+		return "---";
+	}
+
 	public void onShowDeviceAggregateMetadata(DeviceAggregate deviceAggregate, boolean show) {
 		view.clearMetadata();
-		
+
 		if(show) {
 			view.addMetadata(view.getTypeLabel(), view.getDeviceAggregateTypeLabel());
-			view.addMetadata(view.getInternalIdLabel(), deviceAggregate.getId());
+			view.addMetadata(view.getProfileName(), deviceAggregate.getId());
 			view.addMetadata(view.getAggregateContentsLabel(), deviceAggregate.getCustomId());
 		}
 	}
-	
+
 	public void onDeviceSelected(Device device, boolean selected) {
 		if(selected) {
 			addChartSeries(device);
 		} else {
 			if (chartPresenter != null) {
 				chartPresenter.removeChartSeriesForDevice(device);
-				
+
 				if(chartPresenter.getSeriesCount() == 0) {
 					view.showChartButtons(false);
 					view.showChart(false);
@@ -136,7 +145,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 	}
 
 	@Override
-	public void handleShowWaterHightClick() {		
+	public void handleShowWaterHightClick() {
 		eventBus.showWaterHightPanel(selectedLevee);
 	}
 
@@ -148,7 +157,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 					eventBus, chartPresenter));
 			view.setChart(chartPresenter.getView());
 		}
-		
+
 		view.showChart(true);
 		chartPresenter.setLoadingState(true);
 		dapController.getParameters(device.getId(), new ParametersCallback() {
@@ -157,7 +166,7 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 				eventBus.showError(errorDetails);
 				chartPresenter.setLoadingState(false);
 			}
-			
+
 			@Override
 			public void processParameters(final List<Parameter> parameters) {
 				dapController.getContext("measurements", new ContextsCallback() {
@@ -166,63 +175,63 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 						eventBus.showError(errorDetails);
 						chartPresenter.setLoadingState(false);
 					}
-					
+
 					@Override
 					public void processContexts(List<Context> contexts) {
 						if(contexts.size() > 0) {
 							List<String> parameterIds = new ArrayList<>();
-							
+
 							for(Parameter parameter : parameters) {
 								parameterIds.add(parameter.getId());
 							}
-							
+
 							dapController.getTimelinesForParameterIds(contexts.get(0).getId(), parameterIds, new TimelinesCallback() {
 								@Override
 								public void onError(ErrorDetails errorDetails) {
 									eventBus.showError(errorDetails);
 									chartPresenter.setLoadingState(false);
 								}
-								
+
 								@Override
 								public void processTimelines(final List<Timeline> timelines) {
 									List<String> timelineIds = new ArrayList<>();
-									
+
 									for(Timeline timeline : timelines) {
 										timelineIds.add(timeline.getId());
 									}
-									
+
 									dapController.getMeasurementsForTimelineIdsWithQuantity(timelineIds, 1000, new MeasurementsCallback() {
 										@Override
 										public void onError(ErrorDetails errorDetails) {
 											eventBus.showError(errorDetails);
 											chartPresenter.setLoadingState(false);
 										}
-										
+
 										@Override
 										public void processMeasurements(List<Measurement> measurements) {
 											chartPresenter.setLoadingState(false);
-											
+
 											for(Parameter parameter : parameters) {
-												
+
 												String timelineId = null;
-												
+
 												for(Timeline timeline : timelines) {
 													if(parameter.getTimelineIds().contains(timeline.getId())) {
 														timelineId = timeline.getId();
-														
+
 														break;
 													}
 												}
-												
+
 												if(timelineId != null) {
 													List<Measurement> parameterMeasurements = new ArrayList<>();
-													
+
 													for(Measurement measurement : measurements) {
 														if(measurement.getTimelineId().equals(timelineId)) {
 															parameterMeasurements.add(measurement);
 														}
 													}
-													
+
 													if(parameterMeasurements.size() > 0) {
 														ChartSeries series = new ChartSeries();
 														series.setName(device.getCustomId() + " (" + parameter.getMeasurementTypeName() + ")");
@@ -231,21 +240,21 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 														series.setLabel(parameter.getMeasurementTypeName());
 														series.setUnit(parameter.getMeasurementTypeUnit());
 														series.setTimelineId(timelineId);
-														
+
 														Number[][] values = new Number[parameterMeasurements.size()][2];
 														int index = 0;
-														
+
 														for(Measurement measurement : parameterMeasurements) {
 															values[index][0] = measurement.getTimestamp().getTime();
 															values[index][1] = measurement.getValue();
 															index++;
 														}
-														
+
 														series.setValues(values);
 														chartPresenter.addChartSeries(series);
 														view.showChartButtons(true);
 													} else {
-														eventBus.showSimpleError(view.getNoMeasurementsForDeviceMessage());
+														eventBus.showSimpleError(view.getNoMeasurementsForDeviceMessage(parameter.getCustomId()));
 													}
 												}
 											}
@@ -267,11 +276,11 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 				view.showLeveeProgress(false);
 				eventBus.showError(errorDetails);
 			}
-			
+
 			@Override
 			public void processLevees(List<Levee> levees) {
 				view.showLeveeProgress(false);
-				
+
 				if(levees.size() > 0) {
 					if(levees.size() == 1) {
 						view.setLeveeName(levees.get(0).getName());
@@ -283,12 +292,12 @@ public class MonitoringSidePanelPresenter extends BasePresenter<IMonitoringSideP
 								return o1.getName().compareTo(o2.getName());
 							}
 						});
-						
+
 						for(Levee levee : levees) {
 							view.addLeveeOption(levee.getId(), levee.getName());
 						}
 					}
-					
+
 					selectedLevee = levees.get(0);
 					eventBus.leveeSelected(selectedLevee);
 				} else {

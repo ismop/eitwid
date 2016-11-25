@@ -1,3 +1,5 @@
+[![build status](https://gitlab.dev.cyfronet.pl/ismop/eitwid/badges/master/build.svg)](https://gitlab.dev.cyfronet.pl/ismop/eitwid/commits/master)
+
 System requirements:
 - Java version 8 (use Oracle JDK)
 - maven version 3.3
@@ -44,8 +46,4 @@ To build and deploy an instance do the following:
 
 To deploy the ISMOP production instance:
 
-- build the project with Jenkins (https://jenkins.dev.cyfronet.pl/view/ISMOP/job/UI%20Deployment/),
-- login to `ui.moc.ismop.edu.pl` with the servers account,
-- execute the following commands:
-  - `cd /home/servers/apps/ismop-web`,
-  - `./deploy.sh`
+- create a tag, and change the production branch to a desired tag and push to gitlab repository

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 
@@ -49,6 +50,10 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     private List<Timeline> timelines;
 
+    private boolean changeTrends;
+
+    private Map<String, String> colors = new HashMap<>();
+
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
@@ -70,7 +75,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     public void edit() {
         wizard.show(selectedExperiment, new ChartWizardPresenter.ShowResult() {
             @Override
-            public void ok(List<Timeline> selectedTimelines) {
+            public void ok(List<Timeline> selectedTimelines, boolean changeTrends) {
+                setChangeTrends(changeTrends);
                 setTimelines(selectedTimelines);
             }
         });
@@ -93,15 +99,32 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     class ChartPointMeasurementsCallback implements DapController.MeasurementsCallback {
         private final Map<String, Timeline> idToTimeline;
         private final ChartPointsCallback callback;
+        private boolean changeTrends;
 
-        public ChartPointMeasurementsCallback(Map<String, Timeline> idToTimeline, ChartPointsCallback callback) {
+        public ChartPointMeasurementsCallback(Map<String, Timeline> idToTimeline, boolean changeTrends,
+        		ChartPointsCallback callback) {
             this.idToTimeline = idToTimeline;
+            this.changeTrends = changeTrends;
             this.callback = callback;
         }
 
         @Override
         public void processMeasurements(List<Measurement> measurements) {
-            callback.processChartPoints(map(measurements));
+            List<ChartSeries> series = map(measurements);
+            callback.processChartPoints(changeTrends ? toChangeTrends(series) : series);
+        }
+
+        private List<ChartSeries> toChangeTrends(List<ChartSeries> series) {
+            GWT.log("to change trends");
+            for (ChartSeries chartSeries : series) {
+                if (chartSeries.getValues() != null && chartSeries.getValues().length > 0) {
+                    double first = chartSeries.getValues()[0][1].doubleValue();
+                    for (Number[] point : chartSeries.getValues()) {
+                        point[1] = point[1].doubleValue() - first;
+                    }
+                }
+            }
+            return series;
         }
 
         private List<ChartSeries> map(List<Measurement> measurements) {
@@ -167,11 +190,13 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
         private String getChartName(Timeline timeline) {
         	Parameter parameter = timeline.getParameter();
-        	String name = parameter.getDevice().getCustomId() + ": " + parameter.getParameterName() + " ("
+        	String name = parameter.getDevice().getCustomId() + ": "
+        			+ parameter.getParameterName() + " ("
         			+ parameter.getMeasurementTypeName() + ")";
 
         	if (timeline.getScenario() != null) {
-        		name = name + " - " + view.getMessages().scenario() + " " +  timeline.getScenario().getName();
+        		name = name + " - " + view.getMessages().scenario() + " "
+        				+  timeline.getScenario().getName();
         	}
 
 
@@ -210,9 +235,11 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
         if (idToRealTimeline.size() > 0) {
             GWT.log("Loading real measurements");
             dapController.getMeasurements(idToRealTimeline.keySet(), selectedExperiment.getStart(),
-                    selectedExperiment.getEnd(), new ChartPointMeasurementsCallback(idToRealTimeline, new ChartPointsCallback() {
+                    selectedExperiment.getEnd(), new ChartPointMeasurementsCallback(
+                    		idToRealTimeline, changeTrends, new ChartPointsCallback() {
                         @Override
-                        public void processChartPoints(final List<ChartSeries> realTimelineToMeasurements) {
+                        public void processChartPoints(
+                        		final List<ChartSeries> realTimelineToMeasurements) {
                             loadScenarioTimelines(realTimelineToMeasurements, idToScenarioTimeline);
                         }
                     }));
@@ -280,7 +307,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	    if (idToScenarioTimeline.size() > 0) {
 	        GWT.log("Loading scenarios measurements");
 	        dapController.getAllMeasurements(idToScenarioTimeline.keySet(),
-	                new ChartPointMeasurementsCallback(idToScenarioTimeline, new ChartPointsCallback() {
+	                new ChartPointMeasurementsCallback(idToScenarioTimeline, changeTrends, new ChartPointsCallback() {
 	                    @Override
 	                    public void processChartPoints(List<ChartSeries> scenarioTimelineToMeasurements) {
 	                        realTimelineToMeasurements.addAll(scenarioTimelineToMeasurements);
@@ -292,11 +319,25 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 	    }
 	}
 
-    private void setSeries(List<ChartSeries> series) {
+    private void setSeries(List<ChartSeries> chartSeries) {
         getChart().setLoadingState(false);
         chartPresenter.reset();
-        for (ChartSeries s : series) {
-            chartPresenter.addChartSeries(s);
+        for (ChartSeries s : chartSeries) {
+            String color = colors .get(s.getTimelineId());
+            if (color != null) {
+                s.setOverrideColor(color);
+            }
+            Series series = chartPresenter.addChartSeries(s, false);
+            colors.put(s.getTimelineId(), getSeriesColor(series.getNativeSeries()));
         }
+        chartPresenter.redraw();
+    }
+
+    private native String getSeriesColor(JavaScriptObject nativeSeries) /*-{
+        return nativeSeries.color;
+    }-*/;
+
+    public void setChangeTrends(boolean changeTrends) {
+        this.changeTrends = changeTrends;
     }
 }

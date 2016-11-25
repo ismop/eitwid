@@ -105,7 +105,11 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			addChartSeries(chartSeries, false);
 		}
 
-		chart.redraw();
+		redraw();
+	}
+
+	public void redraw() {
+	    chart.redraw();
 	}
 
 	public void initChart() {
@@ -146,13 +150,12 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 				@Override
 				public String format(ToolTipData toolTipData) {
 					String msg = converter.formatForDisplay(new Date(toolTipData.getXAsLong())) + "<br/>";
-					for (Point point : toolTipData.getPoints()) {
-						JavaScriptObject nativePoint = point.getNativePoint();
-						msg += "<br/><span style=\"color:" + getPointColor(nativePoint) +
-								"\">\u25CF</span> " + getSeriesName(nativePoint) + ": <b>" +
-								NumberFormat.getFormat("0.00").format(point.getY()) + " " +
-								dataSeriesMap.get(getSeriesId(nativePoint)).getUnit() + "</b><br/>";
-					}
+					Point point = toolTipData.getPoint();
+					JavaScriptObject nativePoint = point.getNativePoint();
+					msg += "<br/><span style=\"color:" + getPointColor(nativePoint) +
+							"\">\u25CF</span> " + getSeriesName(nativePoint) + ": <b>" +
+							NumberFormat.getFormat("0.00").format(point.getY()) + " " +
+							dataSeriesMap.get(getSeriesId(nativePoint)).getUnit() + "</b><br/>";
 					return msg;
 				}
 
@@ -167,7 +170,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 				private native String getPointColor(JavaScriptObject nativePoint) /*-{
                     return nativePoint.color;
                 }-*/;
-			}).setShared(true));
+			}));
 
 			if (xAxisLabelsFormatter != null) {
 				chart.getXAxis().setLabels(new XAxisLabels().setFormatter(xAxisLabelsFormatter));
@@ -415,7 +418,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		return result;
 	}
 
-	private void addChartSeries(ChartSeries series, boolean redraw) {
+	public Series addChartSeries(ChartSeries series, boolean redraw) {
 		initChart();
 
 		Series chartSeries = null;
@@ -448,6 +451,8 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		if (!foundChartSeries.isPresent()) {
 			chart.addSeries(chartSeries, redraw, true);
 		}
+
+		return chartSeries;
 	}
 
 	private void yAxisClicked(String axisLabel) {

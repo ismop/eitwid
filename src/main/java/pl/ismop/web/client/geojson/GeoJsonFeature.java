@@ -25,7 +25,7 @@ public class GeoJsonFeature {
 		this.properties = new HashMap<>();
 
 		properties.put("id", mapFeature.getId());
-		properties.put("name", mapFeature.getId());
+		properties.put("name", mapFeature.getName());
 		properties.put("type", mapFeature.getFeatureType());
 		properties.putAll(mapFeature.getAdditionalFeatureProperties());
 	}

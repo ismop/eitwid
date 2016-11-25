@@ -140,7 +140,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			if (selectedDevice != null) {
 				unselectDeviceAndSection(selectedDevice);
 			}
-			
+
 			selectedDevice = getDeviceForPoint(pointMouseOverEvent);
 			Section oldSection = selectedSection;
 
@@ -148,7 +148,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 				selectedSection = fetcher.getDeviceSection(selectedDevice);
 				selectDeviceAndSection(selectedDevice, selectedSection);
 			}
-			
+
 			unselectSection(oldSection);
 
 			return false;
@@ -157,7 +157,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		private void selectDeviceAndSection(Device device, Section section) {
 			if (device != null) {
 				map.add(device);
-				
+
 				if (section != null) {
 					map.highlight(section);
 				} else {
@@ -169,7 +169,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 		@Override
 		public boolean onMouseOut(PointMouseOutEvent pointMouseOutEvent) {
 			Device device = getDeviceForPoint(pointMouseOutEvent);
-			
+
 			if (device != null) {
 				unselectDeviceAndSection(device);
 			}
@@ -187,7 +187,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 			if (device != null && !selectedDevices.keySet().contains(device)) {
 				map.rm(device);
 			}
-			
+
 			if(selectedDevice == device && selectedSection != null) {
 				map.unhighlight(selectedSection);
 			}
@@ -226,7 +226,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 								@Override
 								public boolean onSelect(PointSelectEvent pointSelectEvent) {
 									selectDevice(getDeviceForPoint(pointSelectEvent));
-									
+
 									return true;
 								}
 							}).
@@ -234,18 +234,19 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 								@Override
 								public boolean onUnselect(PointUnselectEvent pointUnselectEvent) {
 									unselectDevice(getDeviceForPoint(pointUnselectEvent));
-									
+
 									return true;
 								}
 							})
-							
+
 			);
 			fibreChart.setOption("/chart/zoomType", "x");
 			fibreChart.setToolTip(new ToolTip()
 							.setFormatter(new ToolTipFormatter() {
 								private NumberFormat formatter = NumberFormat.getFormat("00.00");
 
-								public String format(ToolTipData toolTipData) {
+								@Override
+                                public String format(ToolTipData toolTipData) {
 									String msg = "";
 									for (Point point : toolTipData.getPoints()) {
 										String seriesName = getSeriesName(point.getNativePoint());
@@ -258,8 +259,7 @@ public class FibrePresenter extends BasePresenter<IFibreView, MainEventBus> impl
 										}
 									}
 									if (msg != "") {
-										return messages.devicesTooltip(toolTipData.getXAsString(),
-												msg);
+										return msg;
 									} else {
 										return null;
 									}

@@ -7,7 +7,7 @@
         @external .modal-dialog, .modal-content, .modal-body;
 
         .row, .column {
-            height: 100%;
+            height: 100%;            
         }
 
 
@@ -38,7 +38,7 @@
         }
 
         .map {
-            height: 100%;
+            height: literal("calc(100% - 30px)");
         }
 
         .actions {
@@ -71,6 +71,7 @@
                         </g:ScrollPanel>
                     </b:Column>
                     <b:Column size="MD_3" addStyleNames="{style.column}">
+                    	<b:CheckBox text="{messages.changeTrends}" ui:field="changeTrends"/>
                         <g:FlowPanel ui:field="mapPanel" addStyleNames="{style.map}"/>
                     </b:Column>
                 </b:Row>
