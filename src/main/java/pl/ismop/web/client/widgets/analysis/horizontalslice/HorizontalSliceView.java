@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import javaslang.Tuple2;
 import javaslang.Tuple3;
 import javaslang.collection.List;
 import javaslang.collection.Map;
@@ -65,103 +66,11 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		GWT.log("Locations and colors: " + locationsAndColors);
 		drawDevices(locationsAndColors.values().flatMap(identity()).flatMap(Map::keySet));
 
-//		for (Seq<Seq<Double>> sectionCorners : locationsWithValues.keySet()) {
-//			@SuppressWarnings("unchecked")
-//			JsArray<JsArrayNumber> coordinatesAndValues =
-//					(JsArray<JsArrayNumber>) JsArray.createArray();
-//			Seq<Double> topLeftCorner = sectionCorners.get(0);
-//			Seq<Double> topRightCorner = sectionCorners.get(1);
-//			Seq<Double> previousValue = null;
-//
-//			for (Seq<Double> next : locationsWithValues.get(sectionCorners).get().keySet()) {
-//				Seq<Double> bottomLeftCorner = calculateCorner(sectionCorners.get(0),
-//						sectionCorners.get(1), next, sectionCorners.get(0));
-//				Seq<Double> bottomRightCorner = calculateCorner(sectionCorners.get(0),
-//						sectionCorners.get(1), next, sectionCorners.get(1));
-//				JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
-//				topLeft.push(topLeftCorner.get(0));
-//				topLeft.push(topLeftCorner.get(1));
-//				coordinatesAndValues.push(topLeft);
-//
-//				JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
-//				topRight.push(topRightCorner.get(0));
-//				topRight.push(topRightCorner.get(1));
-//				coordinatesAndValues.push(topRight);
-//
-//				JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
-//				bottomRight.push(bottomRightCorner.get(0));
-//				bottomRight.push(bottomRightCorner.get(1));
-//				coordinatesAndValues.push(bottomRight);
-//
-//				JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
-//				bottomLeft.push(bottomLeftCorner.get(0));
-//				bottomLeft.push(bottomLeftCorner.get(1));
-//				coordinatesAndValues.push(bottomLeft);
-//
-//				JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
-//
-//				if (previousValue != null) {
-//					values.push(previousValue.get(0));
-//					values.push(new Double(previousValue.get(1)).intValue());
-//					values.push(new Double(previousValue.get(2)).intValue());
-//					values.push(new Double(previousValue.get(3)).intValue());
-//				} else {
-//					values.push(locationsWithValues.get(sectionCorners).get().get(next).get().get(0));
-//					values.push(new Double(
-//							locationsWithValues.get(sectionCorners).get().get(next).get().get(1)).intValue());
-//					values.push(new Double(
-//							locationsWithValues.get(sectionCorners).get().get(next).get().get(2)).intValue());
-//					values.push(new Double(
-//							locationsWithValues.get(sectionCorners).get().get(next).get().get(3)).intValue());
-//				}
-//
-//				values.push(locationsWithValues.get(sectionCorners).get().get(next).get().get(0));
-//				values.push(new Double(
-//						locationsWithValues.get(sectionCorners).get().get(next).get().get(1)).intValue());
-//				values.push(new Double(
-//						locationsWithValues.get(sectionCorners).get().get(next).get().get(2)).intValue());
-//				values.push(new Double(
-//						locationsWithValues.get(sectionCorners).get().get(next).get().get(3)).intValue());
-//				coordinatesAndValues.push(values);
-//
-//				topLeftCorner = bottomLeftCorner;
-//				topRightCorner = bottomRightCorner;
-//				previousValue = locationsWithValues.get(sectionCorners).get().get(next).get();
-//			}
-//
-//			JsArrayNumber topLeft = (JsArrayNumber) JsArrayNumber.createArray();
-//			topLeft.push(topLeftCorner.get(0));
-//			topLeft.push(topLeftCorner.get(1));
-//			coordinatesAndValues.push(topLeft);
-//
-//			JsArrayNumber topRight = (JsArrayNumber) JsArrayNumber.createArray();
-//			topRight.push(topRightCorner.get(0));
-//			topRight.push(topRightCorner.get(1));
-//			coordinatesAndValues.push(topRight);
-//
-//			JsArrayNumber bottomRight = (JsArrayNumber) JsArrayNumber.createArray();
-//			bottomRight.push(sectionCorners.get(2).get(0));
-//			bottomRight.push(sectionCorners.get(2).get(1));
-//			coordinatesAndValues.push(bottomRight);
-//
-//			JsArrayNumber bottomLeft = (JsArrayNumber) JsArrayNumber.createArray();
-//			bottomLeft.push(sectionCorners.get(3).get(0));
-//			bottomLeft.push(sectionCorners.get(3).get(1));
-//			coordinatesAndValues.push(bottomLeft);
-//
-//			JsArrayNumber values = (JsArrayNumber) JsArrayNumber.createArray();
-//			values.push(previousValue.get(0));
-//			values.push(new Double(previousValue.get(1)).intValue());
-//			values.push(new Double(previousValue.get(2)).intValue());
-//			values.push(new Double(previousValue.get(3)).intValue());
-//			values.push(previousValue.get(0));
-//			values.push(new Double(previousValue.get(1)).intValue());
-//			values.push(new Double(previousValue.get(2)).intValue());
-//			values.push(new Double(previousValue.get(3)).intValue());
-//			coordinatesAndValues.push(values);
-//
-//			drawHeatSection(coordinatesAndValues);
-//		}
+		for (Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>>> sectionLocations
+				: locationsAndColors.values()) {
+			drawSection(sectionLocations);
+		}
 	};
 
 	@Override
@@ -258,22 +167,6 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		}
 	}-*/;
 
-	private Seq<Double> calculateCorner(Seq<Double> firstPoint, Seq<Double> secondPoint,
-			Seq<Double> crossPoint, Seq<Double> referencePoint) {
-		Seq<Double> result = List.empty();
-		//calculating the a coefficient of the first line (y = ax + b)
-		double a = (secondPoint.get(1) - firstPoint.get(1)) / (secondPoint.get(0) - firstPoint.get(0));
-		//calculating d coefficient of the second parallel line (y = ax + d)
-		double d = crossPoint.get(1) - a * crossPoint.get(0);
-		//calculating f coefficient of a perpendicular line to the first one crossing the reference point
-		double f = referencePoint.get(1) + referencePoint.get(0) / a;
-		//calculating the intersection point of the perpendicular and parallel lines
-		result = result.append((f - d) / (a + (1 / a)));
-		result = result.append(a * ((f - d) / (a + (1 / a))) + d);
-
-		return result;
-	}
-
 	private void drawDevices(Seq<Tuple3<Double, Double, Boolean>> deviceLocations) {
 		deviceLocations
 			.filter(location -> location._3())
@@ -288,6 +181,198 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	private String format(double number) {
 		return NumberFormat.getFormat("0.00").format(number);
 	}
+
+	private void drawSection(Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>> sectionLocations) {
+
+		sectionLocations.sliding(2).forEach(twoProfiles -> drawSectionSegment(
+				twoProfiles.get(0), twoProfiles.get(1)));
+	}
+
+	private void drawSectionSegment(
+			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> leftProfile,
+			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> rightProfile) {
+
+		List<Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>> leftProfileList = leftProfile.toList();
+		List<Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple3<Integer, Integer, Integer>>> rightProfileList = rightProfile.toList();
+
+		if (leftProfileList.size() == rightProfileList.size()) {
+			List.range(0, leftProfileList.size()).sliding(2).forEach(indexes ->
+				drawFourPointFace(
+						leftProfileList.get(indexes.get(0)),
+						leftProfileList.get(indexes.get(1)),
+						rightProfileList.get(indexes.get(0)),
+						rightProfileList.get(indexes.get(1))));
+		} else if (leftProfileList.size() < rightProfileList.size()) {
+			int difference = rightProfileList.size() - leftProfileList.size();
+			int breakIndex = leftProfileList.size() / 2;
+			List.rangeClosed(0, breakIndex).sliding(2).forEach(indexes ->
+				drawFourPointFace(
+						leftProfileList.get(indexes.get(0)),
+						leftProfileList.get(indexes.get(1)),
+						rightProfileList.get(indexes.get(0)),
+						rightProfileList.get(indexes.get(1))));
+			List.rangeClosed(breakIndex, breakIndex + difference).sliding(2).forEach(indexes ->
+				drawThreePointFace(
+						leftProfileList.get(breakIndex),
+						rightProfileList.get(indexes.get(0)),
+						rightProfileList.get(indexes.get(1))));
+			List.range(breakIndex, leftProfileList.size()).sliding(2).forEach(indexes ->
+				drawFourPointFace(
+						leftProfileList.get(indexes.get(0)),
+						leftProfileList.get(indexes.get(1)),
+						rightProfileList.get(indexes.get(0) + difference),
+						rightProfileList.get(indexes.get(1) + difference)));
+		} else {
+			int difference = leftProfileList.size() - rightProfileList.size();
+			int breakIndex = rightProfileList.size() / 2;
+			List.rangeClosed(0, breakIndex).sliding(2).forEach(indexes ->
+				drawFourPointFace(
+						leftProfileList.get(indexes.get(0)),
+						leftProfileList.get(indexes.get(1)),
+						rightProfileList.get(indexes.get(0)),
+						rightProfileList.get(indexes.get(1))));
+			List.rangeClosed(breakIndex, breakIndex + difference).sliding(2).forEach(indexes ->
+				drawThreePointFace(
+						leftProfileList.get(indexes.get(0)),
+						leftProfileList.get(indexes.get(1)),
+						rightProfileList.get(breakIndex)));
+			List.range(breakIndex, rightProfileList.size()).sliding(2).forEach(indexes ->
+				drawFourPointFace(
+						leftProfileList.get(indexes.get(0) + difference),
+						leftProfileList.get(indexes.get(1) + difference),
+						rightProfileList.get(indexes.get(0)),
+						rightProfileList.get(indexes.get(1))));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void drawThreePointFace(
+			Tuple2<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>> first,
+			Tuple2<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>> second,
+			Tuple2<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>> third) {
+
+		JsArray<JsArrayNumber> coordinatesWithColors =
+				(JsArray<JsArrayNumber>) JsArray.createArray();
+		JsArrayNumber firstCoordinateWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+		firstCoordinateWithColor.push(first._1()._1());
+		firstCoordinateWithColor.push(first._1()._2());
+		firstCoordinateWithColor.push(first._2()._1());
+		firstCoordinateWithColor.push(first._2()._2());
+		firstCoordinateWithColor.push(first._2()._3());
+		coordinatesWithColors.push(firstCoordinateWithColor);
+
+		JsArrayNumber secondCoordinateWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+		secondCoordinateWithColor.push(second._1()._1());
+		secondCoordinateWithColor.push(second._1()._2());
+		secondCoordinateWithColor.push(second._2()._1());
+		secondCoordinateWithColor.push(second._2()._2());
+		secondCoordinateWithColor.push(second._2()._3());
+		coordinatesWithColors.push(secondCoordinateWithColor);
+
+		JsArrayNumber thirdCoordinateWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+		thirdCoordinateWithColor.push(third._1()._1());
+		thirdCoordinateWithColor.push(third._1()._2());
+		thirdCoordinateWithColor.push(third._2()._1());
+		thirdCoordinateWithColor.push(third._2()._2());
+		thirdCoordinateWithColor.push(third._2()._3());
+		coordinatesWithColors.push(thirdCoordinateWithColor);
+
+		drawFace(coordinatesWithColors);
+	}
+
+	private void drawFourPointFace(
+			Tuple2<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>> first,
+			Tuple2<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>> second,
+			Tuple2<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>> third,
+			Tuple2<Tuple3<Double, Double, Boolean>,
+				Tuple3<Integer, Integer, Integer>> fourth) {
+
+		JsArray<JsArrayNumber> coordinatesWithColors =
+				(JsArray<JsArrayNumber>) JsArray.createArray();
+		JsArrayNumber firstCoordinateWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+		firstCoordinateWithColor.push(first._1()._1());
+		firstCoordinateWithColor.push(first._1()._2());
+		firstCoordinateWithColor.push(first._2()._1());
+		firstCoordinateWithColor.push(first._2()._2());
+		firstCoordinateWithColor.push(first._2()._3());
+		coordinatesWithColors.push(firstCoordinateWithColor);
+
+		JsArrayNumber secondCoordinateWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+		secondCoordinateWithColor.push(second._1()._1());
+		secondCoordinateWithColor.push(second._1()._2());
+		secondCoordinateWithColor.push(second._2()._1());
+		secondCoordinateWithColor.push(second._2()._2());
+		secondCoordinateWithColor.push(second._2()._3());
+		coordinatesWithColors.push(secondCoordinateWithColor);
+
+		JsArrayNumber thirdCoordinateWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+		thirdCoordinateWithColor.push(third._1()._1());
+		thirdCoordinateWithColor.push(third._1()._2());
+		thirdCoordinateWithColor.push(third._2()._1());
+		thirdCoordinateWithColor.push(third._2()._2());
+		thirdCoordinateWithColor.push(third._2()._3());
+		coordinatesWithColors.push(thirdCoordinateWithColor);
+
+		JsArrayNumber fourthCoordinateWithColor = (JsArrayNumber) JsArrayNumber.createArray();
+		fourthCoordinateWithColor.push(fourth._1()._1());
+		fourthCoordinateWithColor.push(fourth._1()._2());
+		fourthCoordinateWithColor.push(fourth._2()._1());
+		fourthCoordinateWithColor.push(fourth._2()._2());
+		fourthCoordinateWithColor.push(fourth._2()._3());
+		coordinatesWithColors.push(fourthCoordinateWithColor);
+
+		drawFace(coordinatesWithColors);
+	}
+
+	private native void drawFace(JsArray<JsArrayNumber> coordinatesWithColors) /*-{
+		var geometry = new $wnd.THREE.Geometry();
+
+		for(var i = 0; i < coordinatesWithColors.length; i = i + 1) {
+			geometry.vertices.push(
+				new $wnd.THREE.Vector3(coordinatesWithColors[i][0], coordinatesWithColors[i][1], 0)
+			);
+		}
+
+		var face = new $wnd.THREE.Face3(0, 1, 2);
+		face.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+			coordinatesWithColors[0][2], coordinatesWithColors[0][3], coordinatesWithColors[0][4]
+		);
+		face.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+			coordinatesWithColors[1][2], coordinatesWithColors[1][3], coordinatesWithColors[1][4]
+		);
+		face.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+			coordinatesWithColors[2][2], coordinatesWithColors[2][3], coordinatesWithColors[2][4]
+		);
+		geometry.faces.push(face);
+
+		if (coordinatesWithColors.length == 4) {
+			var face2 = new $wnd.THREE.Face3(1, 2, 3);
+			face2.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinatesWithColors[1][2], coordinatesWithColors[1][3], coordinatesWithColors[1][4]
+			);
+			face2.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinatesWithColors[2][2], coordinatesWithColors[2][3], coordinatesWithColors[2][4]
+			);
+			face2.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
+				coordinatesWithColors[3][2], coordinatesWithColors[3][3], coordinatesWithColors[3][4]
+			);
+			geometry.faces.push(face2);
+		}
+
+		var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors,
+				side: $wnd.THREE.DoubleSide});
+		var mesh = new $wnd.THREE.Mesh(geometry, material);
+		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
+	}-*/;
 
 	private native void drawDevice(JsArrayNumber coordinates) /*-{
 		var deviceMaterial = new $wnd.THREE.MeshLambertMaterial({color: 0xf44f4f});
@@ -423,46 +508,6 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		render();
 	}-*/;
 
-	private native void drawHeatSection(JsArray<JsArrayNumber> coordinates) /*-{
-		for(var i = 0; i < coordinates.length; i = i + 5) {
-			var geometry = new $wnd.THREE.Geometry();
-			geometry.vertices.push(
-				new $wnd.THREE.Vector3(coordinates[i][0], coordinates[i][1], 0),
-				new $wnd.THREE.Vector3(coordinates[i + 1][0], coordinates[i + 1][1], 0),
-				new $wnd.THREE.Vector3(coordinates[i + 2][0], coordinates[i + 2][1], 0),
-				new $wnd.THREE.Vector3(coordinates[i + 3][0], coordinates[i + 3][1], 0)
-			);
-
-			var face1 = new $wnd.THREE.Face3(0, 3, 2);
-			face1.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
-				coordinates[i + 4][1], coordinates[i + 4][2], coordinates[i + 4][3]
-			);
-			face1.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
-				coordinates[i + 4][5], coordinates[i + 4][6], coordinates[i + 4][7]
-			);
-			face1.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
-				coordinates[i + 4][5], coordinates[i + 4][6], coordinates[i + 4][7]
-			);
-
-			var face2 = new $wnd.THREE.Face3(2, 1, 0);
-			face2.vertexColors[0] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
-				coordinates[i + 4][5], coordinates[i + 4][6], coordinates[i + 4][7]
-			);
-			face2.vertexColors[1] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
-				coordinates[i + 4][1], coordinates[i + 4][2], coordinates[i + 4][3]
-			);
-			face2.vertexColors[2] = this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::buildColor(DDD)(
-				coordinates[i + 4][1], coordinates[i + 4][2], coordinates[i + 4][3]
-			);
-
-			geometry.faces.push(face1);
-			geometry.faces.push(face2);
-
-			var material = new $wnd.THREE.MeshBasicMaterial({vertexColors: $wnd.THREE.VertexColors});
-			var mesh = new $wnd.THREE.Mesh(geometry, material);
-			this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
-		}
-	}-*/;
 
 	private native void addMesh(JavaScriptObject mesh) /*-{
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::scene.add(mesh);
