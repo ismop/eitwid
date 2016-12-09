@@ -39,6 +39,21 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
                 public void onDateChanged(Date selectedDate) {
                     eventBus.dateChanged(selectedDate);
                 }
+
+            	@Override
+				public void onStartDateChanged(Date startDate) {
+            		if (isVirtualExperiment()) {
+            			selectedExperiment.setStart(startDate);
+            			eventBus.refresh();
+            		}
+            	}
+                @Override
+				public void onEndDateChanged(Date endDate) {
+            		if (isVirtualExperiment()) {
+            			selectedExperiment.setEnd(endDate);
+            			eventBus.refresh();
+            		}
+                }
             });
             getView().setSlider(sliderPresenter.getView());
         }
@@ -147,9 +162,14 @@ public class ComparisonPresenter extends BasePresenter<IComparisonView, MainEven
         boolean enabled = selectedExperiment != null;
         getView().setActionsEnabled(enabled);
         sliderPresenter.setEnabled(enabled);
+        sliderPresenter.setAllowEditDateIntervals(enabled && isVirtualExperiment());
     }
 
     public void onThreatLevelsChanged(List<ThreatLevel> threatLevels) {
     	this.threatLevels = threatLevels;
+    }
+
+    private boolean isVirtualExperiment() {
+    	return selectedExperiment.getId() == null;
     }
 }

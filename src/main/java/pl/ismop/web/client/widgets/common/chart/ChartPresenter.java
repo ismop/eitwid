@@ -302,8 +302,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
 	public void setInterval(Date startDate, Date endDate) {
 		initChart();
-		chart.getXAxis().setMin(startDate.getTime());
-        chart.getXAxis().setMax(endDate.getTime());
+		chart.getXAxis().setExtremes(startDate.getTime(), endDate.getTime());
 	}
 
 	public void setDeviceSelectHandler(DeviceSelectHandler deviceSelectHandler) {

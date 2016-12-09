@@ -54,6 +54,9 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     private Map<String, String> colors = new HashMap<>();
 
+    private Date start;
+    private Date end;
+
     @Inject
     public ChartPresenter(DapController dapController, IsmopProperties properties) {
         this.dapController = dapController;
@@ -63,7 +66,14 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     @Override
     public void setSelectedExperiment(Experiment experiment) {
         selectedExperiment = experiment;
-        getChart().setInterval(experiment.getStart(), experiment.getEnd());
+        updateChartInterval();
+    }
+
+    private void updateChartInterval() {
+    	if (start == null || end == null || !start.equals(selectedExperiment.getStart()) || !end.equals(selectedExperiment.getEnd())) {
+    		GWT.log("Updating chart intervals: " + selectedExperiment.getStart() + " - " + selectedExperiment.getEnd());
+			getChart().setInterval(selectedExperiment.getStart(), selectedExperiment.getEnd());
+    	}
     }
 
     @Override
@@ -295,6 +305,7 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     public void onRefresh() {
     	GWT.log("Refresh chart all chosen series");
+    	updateChartInterval();
     	setTimelines(timelines);
     }
 
