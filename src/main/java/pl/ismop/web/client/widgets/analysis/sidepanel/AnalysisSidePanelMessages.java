@@ -14,4 +14,5 @@ public interface AnalysisSidePanelMessages extends Messages {
     String confirmExperimentChange();
     String noWaterWave();
     String export();
+    String virtualExperiment();
 }

@@ -40,6 +40,8 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
 
     private boolean allowEditTimeIntervals = true;
 
+	private boolean enabled;
+
     public SliderView() {
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -98,6 +100,7 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     @Override
     public void setNumberOfPoints(long numberOfPoints) {
         slider.setMax(numberOfPoints);
+        slider.setEnabled(enabled);
     }
 
     @Override
@@ -119,6 +122,7 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
 
     @Override
     public void setEnabled(boolean enabled) {
+    	this.enabled = enabled;
         slider.setEnabled(enabled);
         setAllowEditDateIntervals(allowEditTimeIntervals && enabled);
     }

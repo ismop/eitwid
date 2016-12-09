@@ -41,6 +41,8 @@ import pl.ismop.web.client.widgets.delegator.ParametersCallback;
 
 @Presenter(view = AnalysisSidePanelView.class, multiple = true)
 public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanelView, MainEventBus> implements IAnalysisSidePanelPresenter {
+	public static final long DAY_IN_MS = 1000 * 60 * 60 * 24;
+
     private final DapController dapController;
     private final IsmopProperties properties;
 
@@ -66,6 +68,7 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         dapController.getExperiments(new DapController.ExperimentsCallback() {
             @Override
             public void processExperiments(List<Experiment> loadedExperiments) {
+            	loadedExperiments.add(getVirtualExperiment());
                 getView().setExperiments(loadedExperiments);
                 for (Experiment loadedExperiment : loadedExperiments) {
                     if (isActiveExperiment(loadedExperiment)) {
@@ -73,6 +76,16 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                         break;
                     }
                 }
+            }
+
+            private Experiment getVirtualExperiment() {
+            	Experiment virtual = new Experiment();
+            	virtual.setEnd(new Date());
+            	virtual.setStart(new Date(virtual.getEnd().getTime() - 7 * DAY_IN_MS));
+            	virtual.setName(messages.virtualExperiment());
+            	virtual.setLeveeId(1);
+
+            	return virtual;
             }
 
             @Override
