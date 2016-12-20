@@ -1193,7 +1193,11 @@ public class DapController {
 
 	public ListenableFuture<List<ThreatLevel>> getThreatLevels(int limit, Date from, Date to, String status) {
 		SettableFuture<List<ThreatLevel>> result = SettableFuture.create();
-		threatLevelService.getThreatLevels(limit, from, to, status, new MethodCallback<ThreatLevelResponse>() {
+
+		String fromStr = converter.formatForDto(from);
+        String toStr = converter.formatForDto(to);
+
+        threatLevelService.getThreatLevels(limit, fromStr, toStr, status, new MethodCallback<ThreatLevelResponse>() {
 
 			@Override
 			public void onSuccess(Method method, ThreatLevelResponse response) {
