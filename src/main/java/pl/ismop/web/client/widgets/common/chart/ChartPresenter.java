@@ -334,6 +334,47 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		chart.getXAxis().addPlotLines(currentTimePlotLine);
 	}
 
+	public Series addChartSeries(ChartSeries series, boolean redraw) {
+		initChart();
+
+		Series chartSeries = null;
+		Optional<ChartSeries> foundChartSeries = Iterables.tryFind(dataSeriesMap.values(),
+				s -> s.getTimelineId().equals(series.getTimelineId()));
+
+		if (foundChartSeries.isPresent()) {
+			chartSeries = chartSeriesMap.get(dataSeriesMap.inverse().get(foundChartSeries.get()));
+		} else {
+			chartSeries = chart.createSeries();
+			chartSeriesMap.put(chartSeries.getId(), chartSeries);
+			dataSeriesMap.put(chartSeries.getId(), series);
+		}
+
+		chartSeries
+			.setName(series.getName())
+			.setPoints(series.getValues())
+			.setYAxis(getYAxisIndex(series));
+
+		if (series.getOverrideColor() != null) {
+			chartSeries.setPlotOptions(new LinePlotOptions().setColor(
+					new Color(series.getOverrideColor())));
+		}
+
+		if (series.getOverrideLineWidth() > 0) {
+			chartSeries.setPlotOptions(new LinePlotOptions().setLineWidth(
+					series.getOverrideLineWidth()));
+		}
+
+		if (!foundChartSeries.isPresent()) {
+			chart.addSeries(chartSeries, redraw, true);
+		}
+
+		return chartSeries;
+	}
+
+	public boolean isZoomed() {
+		return isZoomed(chart.getNativeChart());
+	};
+
 	private void exportCSV() {
 		TimeIntervalPresenter timeInterval = eventBus.addHandler(TimeIntervalPresenter.class);
 		timeInterval.show(getChartFrom(), getChartTo(),
@@ -415,43 +456,6 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		}
 
 		return result;
-	}
-
-	public Series addChartSeries(ChartSeries series, boolean redraw) {
-		initChart();
-
-		Series chartSeries = null;
-		Optional<ChartSeries> foundChartSeries = Iterables.tryFind(dataSeriesMap.values(),
-				s -> s.getTimelineId().equals(series.getTimelineId()));
-
-		if (foundChartSeries.isPresent()) {
-			chartSeries = chartSeriesMap.get(dataSeriesMap.inverse().get(foundChartSeries.get()));
-		} else {
-			chartSeries = chart.createSeries();
-			chartSeriesMap.put(chartSeries.getId(), chartSeries);
-			dataSeriesMap.put(chartSeries.getId(), series);
-		}
-
-		chartSeries
-			.setName(series.getName())
-			.setPoints(series.getValues())
-			.setYAxis(getYAxisIndex(series));
-
-		if (series.getOverrideColor() != null) {
-			chartSeries.setPlotOptions(new LinePlotOptions().setColor(
-					new Color(series.getOverrideColor())));
-		}
-
-		if (series.getOverrideLineWidth() > 0) {
-			chartSeries.setPlotOptions(new LinePlotOptions().setLineWidth(
-					series.getOverrideLineWidth()));
-		}
-
-		if (!foundChartSeries.isPresent()) {
-			chart.addSeries(chartSeries, redraw, true);
-		}
-
-		return chartSeries;
 	}
 
 	private void yAxisClicked(String axisLabel) {
@@ -551,5 +555,9 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 		if (nativeChart.yAxis.length > 0) {
 			nativeChart.yAxis[0].remove();
 		}
+	}-*/;
+
+	private native boolean isZoomed(JavaScriptObject nativeChart) /*-{
+		return nativeChart != null && nativeChart.resetZoomButton != null;
 	}-*/;
 }

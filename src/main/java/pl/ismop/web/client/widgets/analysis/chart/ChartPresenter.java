@@ -70,8 +70,13 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
     }
 
     private void updateChartInterval() {
-    	if (start == null || end == null || !start.equals(selectedExperiment.getStart()) || !end.equals(selectedExperiment.getEnd())) {
-    		GWT.log("Updating chart intervals: " + selectedExperiment.getStart() + " - " + selectedExperiment.getEnd());
+    	if ((start == null
+    			|| end == null
+    			|| !start.equals(selectedExperiment.getStart())
+    			|| !end.equals(selectedExperiment.getEnd()))
+    			&& !getChart().isZoomed()) {
+    		GWT.log("Updating chart intervals: " + selectedExperiment.getStart()
+    				+ " - " + selectedExperiment.getEnd());
 			getChart().setInterval(selectedExperiment.getStart(), selectedExperiment.getEnd());
     	}
     }
