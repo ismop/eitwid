@@ -5,7 +5,7 @@
 
 	<groupId>pl.ismop</groupId>
 	<artifactId>web</artifactId>
-	<version>0.12.0</version>
+	<version>0.12.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>ismop-web</name>
