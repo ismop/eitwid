@@ -7,7 +7,7 @@
         @external .modal-dialog, .modal-content, .modal-body;
 
         .row, .column {
-            height: 100%;            
+            height: 100%;
         }
 
 
@@ -62,7 +62,8 @@
                             <b:Row addStyleNames="{style.row}" ui:field="devices" visible="false">
                                 <b:Column size="MD_12">
                                     <select:MultipleSelect ui:field="devicesSelect"
-                                    	liveSearch="true" selectedTextFormat="COUNT"/>
+                                    	liveSearch="true" selectedTextFormat="COUNT"
+                                    	showActionsBox="true"/>
                                 </b:Column>
                             </b:Row>
                         </g:FlowPanel>
