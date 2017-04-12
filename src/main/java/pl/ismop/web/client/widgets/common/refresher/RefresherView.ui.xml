@@ -11,11 +11,20 @@
 		}
 	</ui:style>
 	<g:HTMLPanel>
-		<g:FocusPanel ui:field="progressFocus">
-			<b:Progress ui:field="progress" type="STRIPED"
-				addStyleNames="{style.progress}" title="{messages.progressTitle}">
-				<b:ProgressBar ui:field="progressBar" type="WARNING" />
-			</b:Progress>
-		</g:FocusPanel>
+		<b:Container fluid="true">
+			<b:Row>
+				<b:Column size="MD_11">
+					<g:FocusPanel ui:field="progressFocus">
+						<b:Progress ui:field="progress" type="STRIPED"
+							addStyleNames="{style.progress}" title="{messages.progressTitle}">
+							<b:ProgressBar ui:field="progressBar" type="WARNING" />
+						</b:Progress>
+					</g:FocusPanel>
+				</b:Column>
+				<b:Column size="MD_1">
+					<b:Button ui:field="pause" type="WARNING" size="EXTRA_SMALL" icon="PAUSE"></b:Button>
+				</b:Column>
+			</b:Row>
+		</b:Container>
 	</g:HTMLPanel>
 </ui:UiBinder>
