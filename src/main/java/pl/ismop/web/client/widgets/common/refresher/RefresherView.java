@@ -1,6 +1,9 @@
 package pl.ismop.web.client.widgets.common.refresher;
 
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.ProgressBar;
+import org.gwtbootstrap3.client.ui.constants.ButtonType;
+import org.gwtbootstrap3.client.ui.constants.IconType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,32 +26,56 @@ public class RefresherView extends Composite
 
 	private Timer timer;
 
+    private int tickMillis;
+
+	@UiField
+	Button pause;
+
 	@UiField
 	ProgressBar progressBar;
-	
+
+
 	public RefresherView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
-	
+
 	@UiHandler("progressFocus")
 	void onProgressClicked(ClickEvent event) {
 		getPresenter().onRefreshRequested();
 	}
-	
+
+	@UiHandler("pause")
+	void onPauseClicked(ClickEvent event) {
+	    if (pause.getIcon() == IconType.PAUSE) {
+	        pause.setIcon(IconType.PLAY);
+	        pause.setType(ButtonType.SUCCESS);
+	        timer.cancel();
+	    } else {
+	        pause.setIcon(IconType.PAUSE);
+	        pause.setType(ButtonType.WARNING);
+            timer.scheduleRepeating(tickMillis);
+	    }
+	}
+
 	@Override
 	public void startTimer(int tickMillis) {
+		this.tickMillis = tickMillis;
 		stopTimer();
-		
+
 		timer = new Timer() {
 			@Override
 			public void run() {
-				getPresenter().onTimeTick();
+                getPresenter().onTimeTick();
 			}
 		};
 		timer.scheduleRepeating(tickMillis);
 	}
 
-	@Override
+	private boolean isPaused() {
+        return pause.getIcon() == IconType.PLAY;
+    }
+
+    @Override
 	public void setProgress(int progress) {
 		progressBar.setPercent(progress);
 	}
@@ -58,7 +85,7 @@ public class RefresherView extends Composite
 		if (timer != null) {
 			timer.cancel();
 		}
-		
+
 		setProgress(0);
 	}
 
