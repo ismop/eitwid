@@ -39,6 +39,8 @@ public class RefresherView extends Composite
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
+
+
 	@UiHandler("progressFocus")
 	void onProgressClicked(ClickEvent event) {
 		getPresenter().onRefreshRequested();
@@ -46,14 +48,10 @@ public class RefresherView extends Composite
 
 	@UiHandler("pause")
 	void onPauseClicked(ClickEvent event) {
-	    if (pause.getIcon() == IconType.PAUSE) {
-	        pause.setIcon(IconType.PLAY);
-	        pause.setType(ButtonType.SUCCESS);
-	        timer.cancel();
+	    if (isPaused()) {
+	        pause();
 	    } else {
-	        pause.setIcon(IconType.PAUSE);
-	        pause.setType(ButtonType.WARNING);
-            timer.scheduleRepeating(tickMillis);
+	        play();
 	    }
 	}
 
@@ -68,11 +66,23 @@ public class RefresherView extends Composite
                 getPresenter().onTimeTick();
 			}
 		};
-		timer.scheduleRepeating(tickMillis);
+		play();
+	}
+
+	private void play() {
+        pause.setIcon(IconType.PAUSE);
+        pause.setType(ButtonType.WARNING);
+        timer.scheduleRepeating(tickMillis);
+	}
+
+	private void pause() {
+        pause.setIcon(IconType.PLAY);
+        pause.setType(ButtonType.SUCCESS);
+        timer.cancel();
 	}
 
 	private boolean isPaused() {
-        return pause.getIcon() == IconType.PLAY;
+        return pause.getIcon() == IconType.PAUSE;
     }
 
     @Override
