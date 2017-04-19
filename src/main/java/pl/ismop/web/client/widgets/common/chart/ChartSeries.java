@@ -19,7 +19,9 @@ public class ChartSeries {
 
 	private int overrideLineWidth;
 
-	public String getDeviceId() {
+	private boolean visible = true;
+
+    public String getDeviceId() {
 		return deviceId;
 	}
 
@@ -90,4 +92,12 @@ public class ChartSeries {
 	public void setOverrideLineWidth(int overrideLineWidth) {
 		this.overrideLineWidth = overrideLineWidth;
 	}
+
+	public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
 }

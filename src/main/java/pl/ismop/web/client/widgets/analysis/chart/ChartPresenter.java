@@ -337,12 +337,16 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 
     private void setSeries(List<ChartSeries> chartSeries) {
         getChart().setLoadingState(false);
+        Set<String> visibleSeriesNames = chartPresenter.getVisibleChartSeriesNames();
+        boolean hasSeries = chartPresenter.getSeries().size() > 0;
+
         chartPresenter.reset();
         for (ChartSeries s : chartSeries) {
-            String color = colors .get(s.getTimelineId());
+            String color = colors.get(s.getTimelineId());
             if (color != null) {
                 s.setOverrideColor(color);
             }
+            s.setVisible(!hasSeries || visibleSeriesNames.contains(s.getName()));
             Series series = chartPresenter.addChartSeries(s, false);
             colors.put(s.getTimelineId(), getSeriesColor(series.getNativeSeries()));
         }

@@ -1,10 +1,13 @@
 package pl.ismop.web.client.widgets.common.chart;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.BaseChart.ZoomType;
@@ -368,12 +371,23 @@ public class ChartPresenter extends BasePresenter<IChartView, MainEventBus>
 			chart.addSeries(chartSeries, redraw, true);
 		}
 
+		if (!series.isVisible()) {
+            chartSeries.hide();
+        }
+
 		return chartSeries;
 	}
 
 	public boolean isZoomed() {
 		return isZoomed(chart.getNativeChart());
 	};
+
+	public Set<String> getVisibleChartSeriesNames() {
+	    return Arrays.asList(chart.getSeries()).stream()
+	            .filter(s -> s.isVisible())
+	            .map(s -> s.getName())
+	            .collect(Collectors.toSet());
+	}
 
 	private void exportCSV() {
 		TimeIntervalPresenter timeInterval = eventBus.addHandler(TimeIntervalPresenter.class);
