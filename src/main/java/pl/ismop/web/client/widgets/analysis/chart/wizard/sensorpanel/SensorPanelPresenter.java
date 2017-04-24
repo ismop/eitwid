@@ -94,7 +94,7 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
                                         name = idToContext.get(timeline.getContextId()).getName();
                                     }
 
-                                    if (name != null) {
+                                    if (name != null && !name.equals("")) {
                                         timeline.setLabel(name);
                                         timeline.setParameter(parameter);
                                         timelineNamesToTimeline.put(name, timeline);
@@ -103,7 +103,7 @@ public class SensorPanelPresenter extends BasePresenter<ISensorPanelView, MainEv
                                 Collection<String> selected = new ArrayList<>();
                                 Collection<String> notSelected = new ArrayList<>();
 
-                                for (Timeline timeline : timelines) {
+                                for (Timeline timeline : timelineNamesToTimeline.values()) {
                                     if (timeline.getContextId().equals("1")) {
                                         selected.add(timeline.getLabel());
                                     } else {
