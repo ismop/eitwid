@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 import javaslang.Tuple2;
 import javaslang.Tuple3;
+import javaslang.Tuple4;
 import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.Seq;
@@ -45,7 +46,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 	@Override
 	public void drawCrosssection(Map<Double, Seq<Double>> legend, String parameterUnit,
-			Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Map<String, Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 			Tuple3<Integer, Integer, Integer>>>> locationsAndColors) {
 		parameterUnit = parameterUnit.replaceAll("\u2103", "\u00B0C");
 
@@ -63,10 +64,9 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		});
 
 		drawLegend(nativeLegend, parameterUnit);
-		GWT.log("Locations and colors: " + locationsAndColors);
 		drawDevices(locationsAndColors.values().flatMap(identity()).flatMap(Map::keySet));
 
-		for (Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+		for (Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>>> sectionLocations
 				: locationsAndColors.values()) {
 			drawSection(sectionLocations);
@@ -167,14 +167,14 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		}
 	}-*/;
 
-	private void drawDevices(Seq<Tuple3<Double, Double, Boolean>> deviceLocations) {
+	private void drawDevices(Seq<Tuple4<Double, Double, Boolean, Boolean>> deviceLocations) {
 		deviceLocations
 			.filter(location -> location._3())
 			.forEach(location -> {
 				JsArrayNumber coordinates = (JsArrayNumber) JsArrayNumber.createArray();
 				coordinates.push(location._1());
 				coordinates.push(location._2());
-				drawDevice(coordinates);
+				drawDevice(coordinates, location._4());
 			});
 	}
 
@@ -182,7 +182,7 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		return NumberFormat.getFormat("0.00").format(number);
 	}
 
-	private void drawSection(Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+	private void drawSection(Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 			Tuple3<Integer, Integer, Integer>>> sectionLocations) {
 
 		sectionLocations.sliding(2).forEach(twoProfiles -> drawSectionSegment(
@@ -190,12 +190,14 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	private void drawSectionSegment(
-			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> leftProfile,
-			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> rightProfile) {
+			Map<Tuple4<Double, Double, Boolean, Boolean>,
+				Tuple3<Integer, Integer, Integer>> leftProfile,
+			Map<Tuple4<Double, Double, Boolean, Boolean>,
+				Tuple3<Integer, Integer, Integer>> rightProfile) {
 
-		List<Tuple2<Tuple3<Double, Double, Boolean>,
+		List<Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 			Tuple3<Integer, Integer, Integer>>> leftProfileList = leftProfile.toList();
-		List<Tuple2<Tuple3<Double, Double, Boolean>,
+		List<Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 			Tuple3<Integer, Integer, Integer>>> rightProfileList = rightProfile.toList();
 
 		if (leftProfileList.size() == rightProfileList.size()) {
@@ -250,11 +252,11 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 
 	@SuppressWarnings("unchecked")
 	private void drawThreePointFace(
-			Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>> first,
-			Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>> second,
-			Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>> third) {
 
 		JsArray<JsArrayNumber> coordinatesWithColors =
@@ -287,13 +289,13 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 	}
 
 	private void drawFourPointFace(
-			Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>> first,
-			Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>> second,
-			Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>> third,
-			Tuple2<Tuple3<Double, Double, Boolean>,
+			Tuple2<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>> fourth) {
 
 		JsArray<JsArrayNumber> coordinatesWithColors =
@@ -374,8 +376,9 @@ public class HorizontalSliceView extends Composite implements IHorizontalSliceVi
 		this.@pl.ismop.web.client.widgets.analysis.horizontalslice.HorizontalSliceView::addMesh(Lcom/google/gwt/core/client/JavaScriptObject;)(mesh);
 	}-*/;
 
-	private native void drawDevice(JsArrayNumber coordinates) /*-{
-		var deviceMaterial = new $wnd.THREE.MeshLambertMaterial({color: 0xf44f4f});
+	private native void drawDevice(JsArrayNumber coordinates, boolean fake) /*-{
+		var color = fake ? 0x000000 : 0xf44f4f
+		var deviceMaterial = new $wnd.THREE.MeshLambertMaterial({color: color});
 		var device = new $wnd.THREE.SphereGeometry(3, 12, 12);
 		var deviceMesh = new $wnd.THREE.Mesh(device, deviceMaterial);
 		deviceMesh.position.set(coordinates[0], coordinates[1], 0);

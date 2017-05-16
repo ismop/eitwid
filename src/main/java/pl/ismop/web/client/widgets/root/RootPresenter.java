@@ -23,23 +23,25 @@ import pl.ismop.web.client.widgets.realtime.side.RealTimeSidePanelPresenter;
 import pl.ismop.web.client.widgets.root.IRootPanelView.IRootPresenter;
 
 @Presenter(view = RootPanel.class)
-public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> implements IRootPresenter{
+public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus>
+		implements IRootPresenter{
+
 	private MonitoringSidePanelPresenter monitoringSidePanelPresenter;
-	
+
 	private LeveeNavigatorPresenter monitoringLeveeNavigator;
 
 	private AnalysisSidePanelPresenter analysisPanelPresenter;
-	
+
 	private ComparisonPresenter comparisonPresenter;
-	
+
 	private RealTimePanelPresenter realTimePanelPresenter;
-	
+
 	private RealTimeSidePanelPresenter realTimeSidePanelPresenter;
-	
+
 	private DapController dapController;
-	
+
 	private List<Parameter> malfunctioningParameters;
-	
+
 	@Inject
 	public RootPresenter(DapController dapController) {
 		this.dapController = dapController;
@@ -51,73 +53,73 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 		view.markMonitoringOption(true);
 		view.markRealTimeOption(false);
 		view.clearPanels();
-		
+
 		if (monitoringSidePanelPresenter == null) {
 			monitoringSidePanelPresenter = eventBus.addHandler(MonitoringSidePanelPresenter.class);
 		}
-		
+
 		monitoringSidePanelPresenter.reset();
 		view.setSidePanelWidget(monitoringSidePanelPresenter.getView());
-		
+
 		if (monitoringLeveeNavigator == null) {
 			monitoringLeveeNavigator = eventBus.addHandler(LeveeNavigatorPresenter.class);
 		}
-		
+
 		view.setMainPanelWidget(monitoringLeveeNavigator.getView());
-		
+
 		if (realTimeSidePanelPresenter != null) {
 			realTimeSidePanelPresenter.disableTimers();
 		}
-		
+
 		if (realTimePanelPresenter != null) {
 			realTimePanelPresenter.cleanUp();
 		}
 	}
-	
+
 	public void onAnalysisPanel() {
 		refreshBrokenDevicesLink();
 		view.markAnalysisOption(true);
 		view.markMonitoringOption(false);
 		view.markRealTimeOption(false);
 		view.clearPanels();
-		
+
 		if (analysisPanelPresenter == null) {
 			analysisPanelPresenter = eventBus.addHandler(AnalysisSidePanelPresenter.class);
 		}
-		
+
 		view.setSidePanelWidget(analysisPanelPresenter.getView());
 		analysisPanelPresenter.init();
-		
+
 		if (comparisonPresenter == null) {
 			comparisonPresenter = eventBus.addHandler(ComparisonPresenter.class);
 		}
 
 		view.setMainPanelWidget(comparisonPresenter.getView());
 		comparisonPresenter.init();
-		
+
 		if (realTimeSidePanelPresenter != null) {
 			realTimeSidePanelPresenter.disableTimers();
 		}
-		
+
 		if (realTimePanelPresenter != null) {
 			realTimePanelPresenter.cleanUp();
 		}
 	}
-	
+
 	public void onRealTimePanel() {
 		refreshBrokenDevicesLink();
 		view.markAnalysisOption(false);
 		view.markMonitoringOption(false);
 		view.markRealTimeOption(true);
 		view.clearPanels();
-		
+
 		if (realTimeSidePanelPresenter == null) {
 			realTimeSidePanelPresenter = eventBus.addHandler(RealTimeSidePanelPresenter.class);
 		}
-		
+
 		view.setSidePanelWidget(realTimeSidePanelPresenter.getView());
 		realTimeSidePanelPresenter.init();
-		
+
 		if (realTimePanelPresenter == null) {
 			realTimePanelPresenter = eventBus.addHandler(RealTimePanelPresenter.class);
 		}
@@ -143,12 +145,12 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 
 	@Override
 	public void onBrokenDevicesClicked() {
-		List<String> brokenParameters = new ArrayList<String>();
-		
+		List<String> brokenParameters = new ArrayList<>();
+
 		for(Parameter parameter : malfunctioningParameters) {
 			brokenParameters.add(parameter.getCustomId() + " (" + parameter.getMeasurementTypeName() + ")");
 		}
-		
+
 		Collections.sort(brokenParameters);
 		view.showDetails(brokenParameters);
 	}
@@ -159,7 +161,7 @@ public class RootPresenter extends BasePresenter<IRootPanelView, MainEventBus> i
 			public void onError(ErrorDetails errorDetails) {
 				eventBus.showError(errorDetails);
 			}
-			
+
 			@Override
 			public void processMalfunctioningParameters(List<Parameter> malfunctioningParameters) {
 				RootPresenter.this.malfunctioningParameters = malfunctioningParameters;

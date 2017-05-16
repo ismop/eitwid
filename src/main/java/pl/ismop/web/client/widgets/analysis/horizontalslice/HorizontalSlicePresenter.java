@@ -21,6 +21,7 @@ import com.mvp4g.client.presenter.BasePresenter;
 
 import javaslang.Tuple2;
 import javaslang.Tuple3;
+import javaslang.Tuple4;
 import javaslang.Value;
 import javaslang.collection.Iterator;
 import javaslang.collection.List;
@@ -156,9 +157,21 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 		view.showLoadingState(true);
 
+		Seq<String> pickedDeviceIds = configuration.getDevicesBySectionIdAndHeight()
+			.flatMap(entry -> {
+				if (configuration.getPickedHeightsBySectionId().keySet().contains(entry._1())) {
+					return entry._2().get(
+							configuration.getPickedHeightsBySectionId().get(entry._1()).get())
+							.get();
+				} else {
+					return List.<Device>empty();
+				}
+			})
+			.map(Device::getId);
 		Seq<Parameter> parameters = configuration.getParametersById().values()
 			.filter(parameter -> parameter.getMeasurementTypeName().equals(
-					configuration.getPickedParameterName()));
+					configuration.getPickedParameterName()))
+			.filter(parameter -> pickedDeviceIds.contains(parameter.getDeviceId()));
 		String contextType = configuration.getPickedScenarioId().equals("0")
 				? "measurements" : "scenarios";
 		String parameterUnit = parameters.get(0).getMeasurementTypeUnit();
@@ -170,9 +183,10 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				return Future.failed(new Exception("Context for type " + contextType
 						+ " could not be retirevied"));
 			}
-		}).map(timelines -> timelines.filter(timeline ->
-			configuration.getPickedScenarioId().equals("0")
-				|| configuration.getPickedScenarioId().equals(timeline.getScenarioId()))
+		}).map(timelines -> timelines
+				.filter(timeline ->
+					configuration.getPickedScenarioId().equals("0")
+						|| configuration.getPickedScenarioId().equals(timeline.getScenarioId()))
 		).map(timelines -> timelines.toMap(timeline ->
 				Tuple(configuration.getParametersById().get(timeline.getParameterId())
 						.get().getDeviceId(), timeline))
@@ -226,11 +240,11 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 	}
 
 	/**
-	 * @return Map<section_id, Seq<Map<Tuple3<x, y, virtual>, Tuple3<r, g, b>>>> sequence for
+	 * @return Map<section_id, Seq<Map<Tuple3<x, y, virtual, fake>, Tuple3<r, g, b>>>> sequence for
 	 * profiles (including virtual ones representing section boundaries), map for each device in
 	 * a profile (including the virtual ones on section boundaries)
 	 */
-	private Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+	private Map<String, Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 			Tuple3<Integer, Integer, Integer>>>> createLocationsWithColors(
 					Map<String, Measurement> measurementsByDeviceId, String gradientId) {
 
@@ -238,7 +252,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				.flatMap(identity())
 				.toMap(device -> Tuple(device.getId(), device));
 
-		Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+		Map<String, Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>>>> result =
 		measurementsByDeviceId.keySet()
 				.map(deviceId -> devicesById.get(deviceId))
@@ -261,24 +275,26 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		return result;
 	}
 
-	private Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+	private Map<String, Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 			Tuple3<Integer, Integer, Integer>>>> addVirtualProfiles(
-			Map<String, Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Map<String, Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 					Tuple3<Integer, Integer, Integer>>>> profilesBySectionId) {
 		return profilesBySectionId.map((sectionId, profiles) ->
 				Tuple(sectionId, addVirtualProfiles(sectionId, profiles)));
 	}
 
-	private Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+	private Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 			Tuple3<Integer, Integer, Integer>>> addVirtualProfiles(String sectionId,
-			Seq<? extends Map<Tuple3<Double, Double, Boolean>,
+			Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
 					Tuple3<Integer, Integer, Integer>>> profiles) {
-		Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> firstProfile =
+		Map<Tuple4<Double, Double, Boolean, Boolean>,
+			Tuple3<Integer, Integer, Integer>> firstProfile =
 				profiles.head();
-		Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> lastProfile =
+		Map<Tuple4<Double, Double, Boolean, Boolean>,
+			Tuple3<Integer, Integer, Integer>> lastProfile =
 				profiles.last();
 		Section section = configuration.getSections().get(sectionId).get();
-		Seq<Map<Tuple3<Double, Double, Boolean>,
+		Seq<Map<Tuple4<Double, Double, Boolean, Boolean>,
 				Tuple3<Integer, Integer, Integer>>> result = profiles.map(identity());
 
 		return result
@@ -286,9 +302,10 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				.append(createRightProfile(section, lastProfile));
 	}
 
-	private Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+	private Map<Tuple4<Double, Double, Boolean, Boolean>, Tuple3<Integer, Integer, Integer>>
 		createLeftProfile(Section section,
-			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> profile) {
+			Map<Tuple4<Double, Double, Boolean, Boolean>,
+				Tuple3<Integer, Integer, Integer>> profile) {
 
 		Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> topBoundary =
 				getSectionTopBoundary(section);
@@ -297,9 +314,10 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				Tuple(shiftLocation(location, topBoundary, topBoundary._1()), color));
 	}
 
-	private Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+	private Map<Tuple4<Double, Double, Boolean, Boolean>, Tuple3<Integer, Integer, Integer>>
 		createRightProfile(Section section,
-			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> profile) {
+			Map<Tuple4<Double, Double, Boolean, Boolean>,
+				Tuple3<Integer, Integer, Integer>> profile) {
 
 		Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> topBoundary =
 				getSectionTopBoundary(section);
@@ -308,7 +326,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				Tuple(shiftLocation(location, topBoundary, topBoundary._2()), color));
 	}
 
-	private Tuple3<Double, Double, Boolean> shiftLocation(Tuple3<Double, Double, Boolean> location,
+	private Tuple4<Double, Double, Boolean, Boolean> shiftLocation(
+			Tuple4<Double, Double, Boolean, Boolean> location,
 			Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> boundary,
 			Tuple2<Double, Double> referencePoint) {
 
@@ -326,17 +345,18 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		double x = (f - d) / (a + (1 / a));
 		double y = a * ((f - d) / (a + (1 / a))) + d;
 
-		return Tuple(x, y, false);
+		return Tuple(x, y, false, false);
 	}
 
-	private Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+	private Map<Tuple4<Double, Double, Boolean, Boolean>, Tuple3<Integer, Integer, Integer>>
 		addProfileBoundaries(Option<Section> section,
-			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> profile) {
+			Map<Tuple4<Double, Double, Boolean, Boolean>,
+			Tuple3<Integer, Integer, Integer>> profile) {
 
 		if (section.isDefined()) {
-			List<Tuple3<Double, Double, Boolean>> locationList = profile.keySet().toList();
-			Tuple3<Double, Double, Boolean> topLocation = locationList.head();
-			Tuple3<Double, Double, Boolean> bottomLocation = locationList.last();
+			List<Tuple4<Double, Double, Boolean, Boolean>> locationList = profile.keySet().toList();
+			Tuple4<Double, Double, Boolean, Boolean> topLocation = locationList.head();
+			Tuple4<Double, Double, Boolean, Boolean> bottomLocation = locationList.last();
 			Tuple3<Integer, Integer, Integer> topValue = profile.get(topLocation).get();
 			Tuple3<Integer, Integer, Integer> bottomValue = profile.get(bottomLocation).get();
 			Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> sectionsTopBoundary =
@@ -346,7 +366,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 
 			return profile
 					.toList()
-					.prepend(calculateVirtualLocation(topLocation, topValue, sectionsTopBoundary))
+					.prepend(calculateVirtualLocation(topLocation, topValue,
+							sectionsTopBoundary))
 					.append(calculateVirtualLocation(bottomLocation, bottomValue,
 							sectionsBottomBoundary))
 					.toLinkedMap(identity());
@@ -355,9 +376,9 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		throw new IllegalArgumentException("Missing section while creating virtual devices");
 	}
 
-	private Tuple2<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>
+	private Tuple2<Tuple4<Double, Double, Boolean, Boolean>, Tuple3<Integer, Integer, Integer>>
 		calculateVirtualLocation(
-			Tuple3<Double, Double, Boolean> referenceLocation,
+			Tuple4<Double, Double, Boolean, Boolean> referenceLocation,
 			Tuple3<Integer, Integer, Integer> referenceValue,
 			Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> sectionsBoundary) {
 
@@ -375,7 +396,7 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		double x = (f - b) / (a + (1 / a));
 		double y = a * ((f - b) / (a + (1 / a))) + b;
 
-		return Tuple(Tuple(x, y, false), referenceValue);
+		return Tuple(Tuple(x, y, false, false), referenceValue);
 	}
 
 	private Tuple2<Tuple2<Double, Double>, Tuple2<Double, Double>> getSectionBottomBoundary(
@@ -427,7 +448,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 						(point.get(1) - shiftY) * scale));
 	}
 
-	private Seq<? extends Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>>>
+	private Seq<? extends Map<Tuple4<Double, Double, Boolean, Boolean>,
+			Tuple3<Integer, Integer, Integer>>>
 			devicesToLocations(Set<Device> devices,
 					Map<String, Measurement> measurementsByDeviceId) {
 		return devices.groupBy(Device::getProfileId)
@@ -436,20 +458,22 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				.map(profileDevices -> profileDevices.toSortedMap(
 						this::compareLocationsVertically,
 						device -> Tuple(
-							deviceToPosition(device),
+							deviceToPosition(device, measurementsByDeviceId.get(device.getId())),
 							measurementToColor(measurementsByDeviceId.get(device.getId())))))
 				.sorted(this::compareLocationMaps);
 	}
 
-	private int compareLocationsVertically(Tuple3<Double, Double, Boolean> location1,
-			Tuple3<Double, Double, Boolean> location2) {
+	private int compareLocationsVertically(Tuple4<Double, Double, Boolean, Boolean> location1,
+			Tuple4<Double, Double, Boolean, Boolean> location2) {
 
 		return location1._2().compareTo(location2._2());
 	}
 
 	private int compareLocationMaps(
-			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> locations1,
-			Map<Tuple3<Double, Double, Boolean>, Tuple3<Integer, Integer, Integer>> locations2) {
+			Map<Tuple4<Double, Double, Boolean, Boolean>,
+				Tuple3<Integer, Integer, Integer>> locations1,
+			Map<Tuple4<Double, Double, Boolean, Boolean>,
+				Tuple3<Integer, Integer, Integer>> locations2) {
 
 		return locations1.keySet().get()._1().compareTo(locations2.keySet().get()._1());
 	}
@@ -464,7 +488,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 				.getOrElse(Tuple(0, 0, 0));
 	}
 
-	private Tuple3<Double, Double, Boolean> deviceToPosition(Device device) {
+	private Tuple4<Double, Double, Boolean, Boolean> deviceToPosition(Device device,
+			Option<Measurement> measurement) {
 		Seq<Seq<Double>> projectedCoordinates = List.ofAll(
 				coordinatesUtil.projectCoordinates(List.of(
 						device.getPlacement().getCoordinates()).toJavaList()))
@@ -478,7 +503,8 @@ public class HorizontalSlicePresenter extends BasePresenter<IHorizontalSliceView
 		return Tuple(
 				scaledAndShiftedCoordinates.get(0).get(0).get(0),
 				scaledAndShiftedCoordinates.get(0).get(0).get(1),
-				true);
+				true,
+				measurement.isEmpty());
 	}
 
 	private void drawMuteSections(Seq<Section> allSections, Seq<Section> muteSections) {

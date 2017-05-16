@@ -198,7 +198,8 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		boreholes.stream().flatMap(borehole -> borehole.points.stream())
 				.filter(point -> !point.virtual)
 				.forEach(norVirtualPoint -> {
-					drawDevice(norVirtualPoint.x, norVirtualPoint.y, scale, shiftX, shiftY);
+					drawDevice(norVirtualPoint.x, norVirtualPoint.y, scale, shiftX, shiftY,
+							norVirtualPoint.fakeValue);
 				});
 	}
 
@@ -369,8 +370,10 @@ public class VerticalSliceView extends Composite implements IVerticalSliceView {
 		this.@pl.ismop.web.client.widgets.analysis.verticalslice.VerticalSliceView::meshes.push(mesh);
 	}-*/;
 
-	private native void drawDevice(double x, double y, double scale, double shiftX, double shiftY) /*-{
-		var deviceMaterial = new $wnd.THREE.MeshLambertMaterial({color: 0xf44f4f});
+	private native void drawDevice(double x, double y, double scale, double shiftX, double shiftY,
+			boolean fakeValue) /*-{
+		var color = fakeValue ? 0x000000 : 0xf44f4f;
+		var deviceMaterial = new $wnd.THREE.MeshLambertMaterial({color: color});
 		var device = new $wnd.THREE.SphereGeometry(3, 12, 12);
 		var deviceMesh = new $wnd.THREE.Mesh(device, deviceMaterial);
 		deviceMesh.position.set(x * scale + shiftX, y * scale + shiftY, 0);
