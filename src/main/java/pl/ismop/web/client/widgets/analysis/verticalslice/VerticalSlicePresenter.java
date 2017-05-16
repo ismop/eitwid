@@ -58,6 +58,8 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 
 		boolean virtual;
 
+		boolean fakeValue;
+
 		Point(double x, double y, boolean virtual) {
 			this.x = x;
 			this.y = y;
@@ -575,17 +577,26 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 			if (borehole.points.size() > 2) {
 				Measurement bottomMeasurement = deviceMeasurementMap.get(
 						borehole.points.get(1).device);
-				double bottomValue = bottomMeasurement == null ? 0.0 : bottomMeasurement.getValue();
-				borehole.points.get(0).value = bottomValue;
+				borehole.points.get(0).value = bottomMeasurement == null ? 0.0
+						: bottomMeasurement.getValue();
+
+				if (bottomMeasurement == null) {
+					borehole.points.get(0).fakeValue = true;
+				}
 
 				if (externalOverride.isPresent()) {
 					borehole.points.get(borehole.points.size() - 1).value =
 							externalOverride.get().getValue();
+					borehole.points.get(borehole.points.size() - 1).fakeValue = false;
 				} else {
 					Measurement topMeasurement = deviceMeasurementMap.get(
 							borehole.points.get(borehole.points.size() - 2).device);
 					double topValue = topMeasurement == null ? 0.0 : topMeasurement.getValue();
 					borehole.points.get(borehole.points.size() - 1).value = topValue;
+
+					if (topMeasurement == null) {
+						borehole.points.get(borehole.points.size() - 1).fakeValue = true;
+					}
 				}
 
 				IntStream.range(1, borehole.points.size() - 1).forEach(nextIndex -> {
@@ -593,6 +604,10 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 							borehole.points.get(nextIndex).device);
 					borehole.points.get(nextIndex).value = measurement == null ? 0.0
 							: measurement.getValue();
+
+					if (measurement == null) {
+						borehole.points.get(nextIndex).fakeValue = true;
+					}
 				});
 
 				setRgbValues(borehole, gradientId);
@@ -608,6 +623,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 					//first virtual borehole with one point
 					if (externalOverride.isPresent()) {
 						borehole.points.get(0).value = externalOverride.get().getValue();
+						borehole.points.get(0).fakeValue = false;
 					} else {
 						Optional<Borehole> nextNonVirtual = boreholes.subList(1, boreholes.size())
 								.stream()
@@ -624,6 +640,7 @@ public class VerticalSlicePresenter extends BasePresenter<IVerticalSliceView, Ma
 					//last virtual borehole with one point
 					if (externalOverride.isPresent()) {
 						borehole.points.get(0).value = externalOverride.get().getValue();
+						borehole.points.get(0).fakeValue = false;
 					} else {
 						Optional<Borehole> previousNonVirtual = Lists.reverse(
 								boreholes.subList(0, boreholes.size() - 1))
