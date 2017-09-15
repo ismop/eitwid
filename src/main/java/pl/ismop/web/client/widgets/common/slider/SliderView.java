@@ -60,7 +60,10 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     			+ new Date().getTimezoneOffset() * 60 * 1000);
         presenter.onStartDateChanged(date);
         presenter.onSliderChanged(slider.getValue());
-    	Scheduler.get().scheduleDeferred(() -> startDate.setValue(date, false));
+    	Scheduler.get().scheduleDeferred(() -> {
+    	    startDate.setValue(date, false);
+            endDate.setStartDate(date);
+    	});
     }
 
     @UiHandler("endDate")
@@ -70,7 +73,10 @@ public class SliderView extends Composite implements ISliderView, ReverseViewInt
     			+ new Date().getTimezoneOffset() * 60 * 1000);
 		presenter.onEndDateChanged(date);
         presenter.onSliderChanged(slider.getValue());
-        Scheduler.get().scheduleDeferred(() -> endDate.setValue(date, false));
+        Scheduler.get().scheduleDeferred(() -> {
+            endDate.setValue(date, false);
+            startDate.setEndDate(date);
+        });
     }
 
     @UiHandler("slider")
