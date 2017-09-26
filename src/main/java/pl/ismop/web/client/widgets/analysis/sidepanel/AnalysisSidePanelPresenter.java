@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.mvp4g.client.annotation.Presenter;
 import com.mvp4g.client.presenter.BasePresenter;
 
+import pl.ismop.web.client.IsmopConverter;
 import pl.ismop.web.client.IsmopProperties;
 import pl.ismop.web.client.IsmopWebEntryPoint;
 import pl.ismop.web.client.MainEventBus;
@@ -53,10 +54,13 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
     private AnalysisSidePanelMessages messages;
 	private RefresherPresenter refresher;
 
+    private IsmopConverter converter;
+
     @Inject
-    public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties) {
+    public AnalysisSidePanelPresenter(DapController dapController, IsmopProperties properties, IsmopConverter converter) {
         this.dapController = dapController;
         this.properties = properties;
+        this.converter = converter;
     }
 
     public void init() {
@@ -68,7 +72,9 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
         dapController.getExperiments(new DapController.ExperimentsCallback() {
             @Override
             public void processExperiments(List<Experiment> loadedExperiments) {
-            	loadedExperiments.add(getVirtualExperiment());
+                if (loadedExperiments.size() > 0) {
+                    loadedExperiments.add(getVirtualExperiment(loadedExperiments.get(0)));
+                }
                 getView().setExperiments(loadedExperiments);
                 for (Experiment loadedExperiment : loadedExperiments) {
                     if (isActiveExperiment(loadedExperiment)) {
@@ -78,12 +84,12 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
                 }
             }
 
-            private Experiment getVirtualExperiment() {
+            private Experiment getVirtualExperiment(Experiment realExperiment) {
             	Experiment virtual = new Experiment();
             	virtual.setEnd(new Date());
             	virtual.setStart(new Date(virtual.getEnd().getTime() - 7 * DAY_IN_MS));
             	virtual.setName(messages.virtualExperiment());
-            	virtual.setLeveeId(1);
+                virtual.setLeveeId(realExperiment.getLeveeId());
 
             	return virtual;
             }
@@ -156,9 +162,18 @@ public class AnalysisSidePanelPresenter extends BasePresenter<IAnalysisSidePanel
 
 	@Override
     public void export() {
-        Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint")
-                + "/experiment_exporter/" + selectedExperiment.getId() +
-                "?private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
+	    if (selectedExperiment.getId() != null) {
+            Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint")
+                    + "/experiment_exporter/" + selectedExperiment.getId() +
+                    "?private_token=" + IsmopWebEntryPoint.properties.get("dapToken"), "_self", null);
+	    } else {
+            Window.open(IsmopWebEntryPoint.properties.get("dapEndpoint")
+                    + "/experiment_exporter" +
+                    "?private_token=" + IsmopWebEntryPoint.properties.get("dapToken") +
+                    "&start_date=" + converter.formatForDto(selectedExperiment.getStart()) +
+                    "&end_date=" + converter.formatForDto(selectedExperiment.getEnd()) +
+                    "&levee_id=" + selectedExperiment.getLeveeId(), "_self", null);
+	    }
 
     }
 
